@@ -4041,7 +4041,7 @@
                         } else {
                             sbtn.innerHTML = `${ch.icon || ''} ${ch.label}`;
                         }
-                        sbtn.addEventListener('click', () => { hideContextMenu(); ch.fn(); });
+                        sbtn.addEventListener('click', (e) => { e.stopPropagation(); hideContextMenu(); ch.fn(); });
                         sub.appendChild(sbtn);
                     });
                     btn.appendChild(sub);
@@ -4051,7 +4051,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'ctx-item' + (item.danger ? ' danger' : '');
                 btn.innerHTML = `${item.icon || ''} ${item.label}`;
-                btn.addEventListener('click', () => { hideContextMenu(); item.fn(); });
+                btn.addEventListener('click', (e) => { e.stopPropagation(); hideContextMenu(); if (typeof item.fn === 'function') item.fn(); });
                 ctxMenu.appendChild(btn);
             });
             ctxMenu.style.left = x + 'px';
@@ -4174,7 +4174,7 @@
             colorTarget = { sheetId, cardId };
             colorPalette.style.left = Math.min(x, window.innerWidth - 220) + 'px';
             colorPalette.style.top = Math.min(y, window.innerHeight - 160) + 'px';
-            colorPalette.classList.toggle('show');
+            colorPalette.classList.add('show');
 
             if (!colorPalette.children.length) {
                 PALETTE_COLORS.forEach(c => {
