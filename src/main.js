@@ -184,10 +184,8 @@ function setAlwaysOnTopPreference(value) {
       alertaWin.setAlwaysOnTop(value);
     }
 
-    // Botón flotante Fast
-    if (fastBtnWin && !fastBtnWin.isDestroyed()) {
-      fastBtnWin.setAlwaysOnTop(value);
-    }
+    // Botón flotante Fast: visible solo con la app activa (fade in/out)
+    refreshFastBtnVisibility();
     
     // Herramientas
     for (const [id, win] of toolWins) {
@@ -283,8 +281,11 @@ let fastClosing = false;
 
 function getFastWin() {
   if (fastWin && !fastWin.isDestroyed()) return fastWin;
+  const saved = loadPos().fast || {};
+  const w = (saved.width && saved.width > 0) ? saved.width : FAST_WIN_W;
+  const h = (saved.height && saved.height > 0) ? saved.height : FAST_WIN_H;
   fastWin = new BrowserWindow({
-    width: FAST_WIN_W, height: FAST_WIN_H,
+    width: w, height: h,
     frame: false, resizable: true, movable: true,
     alwaysOnTop: getAlwaysOnTopPreference(),
     show: false,
@@ -303,8 +304,20 @@ function getFastWin() {
   });
   fastWin.on('move', () => {
     if (fastWin && !fastWin.isDestroyed()) {
-      const [x, y] = fastWin.getPosition();
-      savePos({ fast: { x, y } });
+      const b = fastWin.getBounds();
+      savePos({ fast: { x: b.x, y: b.y, width: b.width, height: b.height } });
+    }
+  });
+  fastWin.on('resize', () => {
+    if (fastWin && !fastWin.isDestroyed()) {
+      const b = fastWin.getBounds();
+      savePos({ fast: { x: b.x, y: b.y, width: b.width, height: b.height } });
+    }
+  });
+  fastWin.on('close', () => {
+    if (fastWin && !fastWin.isDestroyed()) {
+      const b = fastWin.getBounds();
+      savePos({ fast: { x: b.x, y: b.y, width: b.width, height: b.height } });
     }
   });
   toolWins.set('fast', fastWin);
@@ -319,8 +332,11 @@ function openFast() {
   const doOpen = () => {
     fastBusy = false;
     if (win.isDestroyed()) return;
+    const saved = loadPos().fast || {};
     const pos = toolPos('fast', FAST_WIN_W);
-    win.setBounds({ x: pos.x, y: pos.y, width: FAST_WIN_W, height: FAST_WIN_H });
+    const w = (saved.width && saved.width > 0) ? saved.width : FAST_WIN_W;
+    const h = (saved.height && saved.height > 0) ? saved.height : FAST_WIN_H;
+    win.setBounds({ x: pos.x, y: pos.y, width: w, height: h });
     win.setAlwaysOnTop(getAlwaysOnTopPreference());
     win.show();
     win.focus();
@@ -368,10 +384,11 @@ function createFastBtn() {
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   });
   fastBtnWin.loadFile(HTML.fastBtn);
+  refreshFastBtnVisibility();
   fastBtnWin.on('ready-to-show', () => {
     if (fastBtnWin && !fastBtnWin.isDestroyed()) {
       positionFastBtn();
-      fastBtnWin.showInactive();
+      refreshFastBtnVisibility();
     }
   });
   fastBtnWin.on('closed', () => { fastBtnWin = null; });
@@ -422,15 +439,93 @@ function notifyFastState() {
   }
 }
 
+// Botón flotante Fast: se muestra (fade-in) cuando la app está activa y se oculta
+// (fade-out) cuando el usuario hace clic fuera del programa, aunque "always on top" esté activado.
+let appActive = false;
+let fastBtnFadeId = 0;
+
+function refreshFastBtnVisibility() {
+  if (!fastBtnWin || fastBtnWin.isDestroyed()) return;
+  if (appActive) showFastBtn();
+  else hideFastBtn();
+}
+
+function showFastBtn() {
+  if (!fastBtnWin || fastBtnWin.isDestroyed()) return;
+  fastBtnFadeId++;
+  try {
+    fastBtnWin.setAlwaysOnTop(true);
+    if (!fastBtnWin.isVisible()) fastBtnWin.setOpacity(0);
+    fastBtnWin.showInactive();
+    fadeFastBtn(1);
+  } catch (err) {
+    console.warn('Error al mostrar el botón Fast:', err);
+  }
+}
+
+function hideFastBtn() {
+  if (!fastBtnWin || fastBtnWin.isDestroyed()) return;
+  fastBtnFadeId++;
+  try {
+    if (fastBtnWin.isVisible()) fadeFastBtn(0);
+  } catch (err) {
+    console.warn('Error al ocultar el botón Fast:', err);
+  }
+}
+
+function fadeFastBtn(target) {
+  const id = ++fastBtnFadeId;
+  const from = fastBtnWin.getOpacity();
+  const steps = 4;
+  const tick = (i) => {
+    if (!fastBtnWin || fastBtnWin.isDestroyed()) return;
+    if (id !== fastBtnFadeId) return;
+    const t = i / steps;
+    fastBtnWin.setOpacity(from + (target - from) * t);
+    if (i < steps) setTimeout(() => tick(i + 1), 35);
+    else if (target === 0) fastBtnWin.hide();
+  };
+  tick(0);
+}
+
+app.on('browser-window-focus', () => {
+  appActive = true;
+  refreshFastBtnVisibility();
+});
+
+app.on('browser-window-blur', () => {
+  const focused = BrowserWindow.getFocusedWindow();
+  appActive = !!(focused && !focused.isDestroyed());
+  refreshFastBtnVisibility();
+});
+
 // IPC de Fast
 ipcMain.on('fast-toggle', () => toggleFast());
 ipcMain.on('fast-request-state', () => notifyFastState());
 
 // ── INICIALIZACIÓN DE LA VENTANA PRINCIPAL ──
+let mainBoundsSaveTimer = null;
+function saveMainBounds() {
+  if (mainBoundsSaveTimer) clearTimeout(mainBoundsSaveTimer);
+  mainBoundsSaveTimer = setTimeout(() => {
+    mainBoundsSaveTimer = null;
+    if (!mainWin || mainWin.isDestroyed()) return;
+    const b = mainWin.getBounds();
+    savePos({ main: { x: b.x, y: b.y, width: b.width, height: b.height } });
+  }, 250);
+}
+
 app.whenReady().then(() => {
   const pos = getPos('main', {});
+  // Solo restaurar si la posición guardada sigue visible en algún monitor (evita ventana fuera de pantalla)
+  const posOk = !!(pos && typeof pos.x === 'number' && typeof pos.y === 'number' &&
+    screen.getAllDisplays().some(d =>
+      pos.x >= d.bounds.x - 60 && pos.x < d.bounds.x + d.bounds.width - 60 &&
+      pos.y >= d.bounds.y - 30 && pos.y < d.bounds.y + d.bounds.height - 30));
+  const sizeOk = posOk && pos.width > 0 && pos.height > 0;
   mainWin = new BrowserWindow({ 
-    width: 330, height: 720, x: pos.x, y: pos.y, 
+    width: sizeOk ? pos.width : 330, height: sizeOk ? pos.height : 720,
+    x: posOk ? pos.x : undefined, y: posOk ? pos.y : undefined,
     frame: false, resizable: true, movable: true, 
     alwaysOnTop: getAlwaysOnTopPreference(),
     webPreferences: { nodeIntegration: true, contextIsolation: false } 
@@ -454,12 +549,11 @@ app.whenReady().then(() => {
   
   mainWin.on('move', () => { 
     if (!mainWin || mainWin.isDestroyed()) return; 
-    const [x, y] = mainWin.getPosition(); 
-    savePos({ main: { x, y } }); 
+    saveMainBounds(); 
     repositionAlerta(); 
     repositionFastBtn();
   });
-  mainWin.on('resize', () => repositionFastBtn());
+  mainWin.on('resize', () => { repositionFastBtn(); saveMainBounds(); });
   
   mainWin.on('close', e => { 
     if (isQuitting) return; 

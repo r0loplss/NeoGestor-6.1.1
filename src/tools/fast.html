@@ -274,26 +274,33 @@
             display: flex;
             gap: 4px;
             flex-shrink: 0;
+            justify-content: flex-end;
         }
         .copy-main {
-            flex: 1;
+            flex: none;
+            width: 26px;
+            height: 24px;
+            padding: 0;
             background: var(--primary);
             border: none;
-            border-radius: var(--radius);
+            border-radius: 6px;
             color: #fff;
             font-weight: 700;
-            font-size: 11px;
-            padding: 6px 4px;
+            font-size: 13px;
             cursor: pointer;
             font-family: var(--font);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.15s, transform 0.1s;
         }
+        .copy-label { display: none; }
         .copy-main:hover { background: #2563eb; }
         .copy-main:active { transform: scale(0.97); }
         .copy-more {
             background: var(--surface3);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border-radius: 6px;
             color: var(--muted);
             font-size: 11px;
             padding: 0 7px;
@@ -340,85 +347,291 @@
         #content.list-view .card-top { flex: 0 0 30%; margin: 0; }
         #content.list-view .card-body-preview { flex: 1; margin: 0; -webkit-line-clamp: 2; }
         #content.list-view .card-meta { margin: 0; flex-shrink: 0; }
-        #content.list-view .card-copy-row { flex: 0 0 auto; }
-        #content.list-view .copy-main { flex: none; padding: 6px 16px; }
+        #content.list-view .card-copy-row { flex: 0 0 auto; justify-content: flex-start; }
+        #content.list-view .copy-main { flex: none; width: auto; height: auto; padding: 6px 16px; font-size: 11px; border-radius: var(--radius); }
+        #content.list-view .copy-label { display: inline; }
 
         /* ============================================================
-               MODO IMÁGENES: tarjetas alargadas full-width
+               MODO IMÁGENES: tarjeta horizontal a todo el ancho
+               Título (izq.) | preview (centro, mín. 500x350) | texto (der.)
                ============================================================ */
         .card-item.img-card {
             grid-column: 1 / -1;
-            grid-template-rows: auto 1fr auto auto;
-            gap: 8px;
-            cursor: default;
-            padding: 12px 16px;
-        }
-        .img-card-top {
-            display: flex;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 220px minmax(500px, 1fr) minmax(240px, 30%);
+            gap: 18px;
             align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
+            justify-content: center;
+            margin: 0 auto;
+            cursor: default;
+            padding: 12px 18px;
+            box-sizing: border-box;
+            flex: 1;
+        }
+        .img-card-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 0;
+            height: 100%;
+            text-align: center;
         }
         .img-card-title {
             font-size: 15px;
             font-weight: 800;
-            flex: 1;
-            min-width: 0;
+            word-break: break-word;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
         .img-card-media {
-            flex: 1;
-            min-height: 0;
-            border-radius: 6px;
+            width: 100%;
+            min-width: 500px;
+            min-height: 350px;
+            height: calc(var(--img-h, 420px) - 24px);
+            border-radius: 8px;
             overflow: hidden;
-            background: rgba(0,0,0,0.25);
+            background: rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: border-color 0.15s, transform 0.1s;
+            position: relative;
         }
+        .img-card-media:hover { border-color: var(--primary); transform: scale(1.01); }
         .img-card-media img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            pointer-events: none;
         }
         .img-card-noimg {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--faint);
             display: flex;
             align-items: center;
             gap: 6px;
         }
-        .img-card-text {
-            font-size: 11px;
-            opacity: 0.85;
-            flex-shrink: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+        .img-card-media .img-copy-hint {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 10px;
+            text-align: center;
+            padding: 3px 0;
+            opacity: 0;
+            transition: opacity 0.15s;
+            pointer-events: none;
         }
-        #content.list-view .card-item.img-card { grid-template-rows: auto; }
-        #content.list-view .img-card-media { display: none; }
+        .img-card-media:hover .img-copy-hint { opacity: 1; }
+        .img-card-right {
+            min-width: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .img-card-text {
+            width: 100%;
+            max-height: calc(var(--img-h, 420px) - 24px);
+            overflow: auto;
+            font-size: 12px;
+            opacity: 0.9;
+            white-space: pre-wrap;
+            word-break: break-word;
+            text-align: center;
+        }
+        .img-card-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .img-card-btns button {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: 0.15s;
+            white-space: nowrap;
+        }
+        .img-card-btns button:hover { border-color: var(--primary); }
+        .img-card-btns button.copy-img-btn { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.4); }
+        .img-card-btns button.copy-img-btn:hover { background: rgba(59,130,246,0.3); }
+        .img-card-btns button.copy-text-btn { background: var(--primary); border-color: transparent; color: #fff; }
+        .img-card-btns button.copy-text-btn:hover { background: #2563eb; }
+        #content.list-view .card-item.img-card { flex-direction: row; }
+        #content.list-view .img-card-media { display: flex; }
 
         /* ============================================================
-               MODO PROCESOS: tabla de 6 columnas
+               MODO PROCESOS: cuadrícula tipo Excel (A-Z x 100 filas)
                ============================================================ */
-        .proc-wrap {
+        .ex-wrap {
             grid-column: 1 / -1;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
             width: 100%;
         }
-        .proc-toolbar {
+        .ex-status {
             display: flex;
-            gap: 8px;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: var(--muted);
             flex-shrink: 0;
         }
-        .proc-toolbar .tb-btn {
+        .ex-addr {
+            font-weight: 700;
+            color: var(--text);
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 3px 8px;
+            min-width: 70px;
+            text-align: center;
+            font-family: Consolas, monospace;
+        }
+        .ex-scroll {
+            max-height: calc(100vh - 220px);
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface2);
+            outline: none;
+        }
+        .ex-scroll:focus { border-color: var(--primary); }
+        .ex-grid {
+            display: grid;
+            grid-template-columns: 46px;
+            grid-auto-rows: minmax(26px, auto);
+            width: max-content;
+            min-width: 100%;
+        }
+        .ex-cell {
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 2px 6px;
+            font-size: 12px;
+            color: var(--text);
+            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            user-select: none;
+        }
+        .ex-corner {
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 6;
+            background: var(--surface3);
+            cursor: default;
+        }
+        .ex-hcol {
+            position: sticky;
+            top: 0;
+            z-index: 4;
+            background: var(--surface3);
+            font-weight: 700;
+            font-size: 11px;
+            color: var(--muted);
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+        .ex-hcol:hover { color: var(--text); background: var(--surface); }
+        .ex-hrow:hover { color: var(--text); background: var(--surface); }
+        .ex-hcol.sel, .ex-hrow.sel { background: rgba(59,130,246,0.35); color: var(--primary); }
+        .ex-hrow {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background: var(--surface3);
+            font-size: 11px;
+            color: var(--muted);
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+        .ex-hrow:hover { color: var(--text); background: var(--surface); }
+        .ex-c { cursor: cell; white-space: normal; overflow-wrap: anywhere; line-height: 1.35; }
+        .ex-c:hover { background: rgba(59,130,246,0.08); }
+        .ex-c.sel { background: rgba(59,130,246,0.22); }
+        .ex-c.active { outline: 2px solid var(--primary); outline-offset: -2px; z-index: 2; }
+        .ex-c.editing { padding: 0; overflow: visible; }
+        .ex-c input {
+            width: 100%;
+            height: 100%;
+            background: var(--surface);
+            border: none;
+            outline: 2px solid var(--primary);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 2px 4px;
+            box-sizing: border-box;
+        }
+        .ex-c mark.ex-mark { background: #fbbf24; color: #191919; border-radius: 2px; padding: 0 1px; }
+        .ex-resize {
+            position: absolute;
+            background: transparent;
+            z-index: 8;
+        }
+        .ex-hcol .ex-resize { top: 0; right: -4px; width: 8px; height: 100%; cursor: col-resize; }
+        .ex-hrow .ex-resize { left: 0; bottom: -4px; height: 8px; width: 100%; cursor: row-resize; }
+        .ex-hcol .ex-resize:hover, .ex-hcol .ex-resize:active,
+        .ex-hrow .ex-resize:hover, .ex-hrow .ex-resize:active { background: rgba(59,130,246,0.55); }
+        .ex-status button.ex-addbtn {
+            background: var(--surface3);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-family: var(--font);
+            cursor: pointer;
+            line-height: 1.5;
+        }
+        .ex-status button.ex-addbtn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ============================================================
+               MODO PROCESOS v2: varias tablas por hoja
+               ============================================================ */
+        .proc2-wrap {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+        }
+        .proc2-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .proc2-toolbar .tb-btn {
             background: var(--surface3);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -429,92 +642,282 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .proc-toolbar .tb-btn:hover { border-color: var(--primary); }
-        .proc-table {
+        .proc2-toolbar .tb-btn:hover { border-color: var(--primary); }
+        .proc2-toolbar .tb-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Buscador interno tipo Ctrl+F */
+        .proc2-find {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 3px 6px;
+        }
+        .proc2-find input {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            outline: none;
+            width: 140px;
+        }
+        .proc2-find-count {
+            font-size: 11px;
+            color: var(--muted);
+            min-width: 34px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .proc2-find-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 12px;
+            font-family: var(--font);
+            padding: 2px 6px;
+            border-radius: 4px;
+            line-height: 1;
+        }
+        .proc2-find-btn:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+
+        /* Cada tabla */
+        .proc2-table {
             display: flex;
             flex-direction: column;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-            background: var(--surface2);
+            gap: 6px;
             width: 100%;
         }
-        .proc-row {
-            display: grid;
-            grid-template-columns: 1.4fr 0.9fr 1.1fr 1fr 1fr 1.4fr;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.12s;
-        }
-        .proc-row:last-child { border-bottom: none; }
-        .proc-row:hover { background: rgba(255,255,255,0.03); }
-        .proc-row.proc-pinned { background: rgba(251,191,36,0.07); }
-        .proc-row.proc-pinned:hover { background: rgba(251,191,36,0.12); }
-        .proc-header {
-            background: var(--surface3);
-            font-weight: 700;
-            font-size: 11px;
-            letter-spacing: 0.3px;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        .proc-header:hover { background: var(--surface3); }
-        .proc-cell {
+        .proc2-thead {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             padding: 8px 10px;
-            font-size: 12px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        .proc2-tname {
+            flex: 1;
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--text);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            border-right: 1px solid var(--border);
-            min-width: 0;
-            cursor: default;
-            display: flex;
-            align-items: center;
+            cursor: text;
         }
-        .proc-cell:last-child { border-right: none; }
-        .proc-hcell {
-            justify-content: space-between;
-            gap: 6px;
-            cursor: pointer;
-            user-select: none;
-            white-space: normal;
-            flex-wrap: wrap;
-        }
-        .proc-hlabel { overflow: hidden; text-overflow: ellipsis; }
-        .proc-hfilter {
-            font-size: 11px;
-            opacity: 0.55;
-            padding: 1px 4px;
+        .proc2-tname input {
+            background: var(--surface2);
+            border: 1px solid var(--primary);
             border-radius: 4px;
-            flex-shrink: 0;
-        }
-        .proc-hfilter:hover { opacity: 1; background: rgba(255,255,255,0.1); }
-        .proc-col2 {
-            background: rgba(0,0,0,0.12);
-            padding: 4px;
-            display: flex;
-            align-items: center;
-        }
-        .proc-pill {
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 800;
+            padding: 2px 6px;
+            outline: none;
             width: 100%;
-            background: var(--surface3);
+        }
+        .proc2-thead .tb-btn {
+            background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 999px;
+            border-radius: var(--radius);
             color: var(--text);
             font-family: var(--font);
             font-size: 11px;
-            padding: 5px 10px;
+            padding: 4px 9px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
             transition: 0.15s;
+            flex-shrink: 0;
+        }
+        .proc2-thead .tb-btn:hover { border-color: var(--primary); }
+        .proc2-thead .tb-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Cabecera de columnas */
+        .proc2-colshead {
+            display: flex;
+            gap: 6px;
+            padding: 0 6px;
+        }
+        .proc2-chead {
+            flex: 1;
+            min-width: 0;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
             white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .proc-pill:hover { border-color: var(--primary); }
-        .proc-pill-arrow { font-size: 9px; opacity: 0.6; flex-shrink: 0; }
+        .proc2-chead:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+        /* Filas como paneles */
+        .proc2-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .proc2-row {
+            display: flex;
+            gap: 6px;
+            align-items: stretch;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 5px 6px;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        .proc2-row:hover { border-color: rgba(255,255,255,0.12); }
+        .proc2-row.proc2-pinned { background: rgba(251,191,36,0.08); }
+        .proc2-cell {
+            flex: 1;
+            min-width: 0;
+            font-size: 12px;
+            color: var(--text);
+            background: var(--surface3);
+            border: 1px solid transparent;
+            border-radius: 5px;
+            padding: 6px 8px;
+            display: flex;
+            align-items: center;
+            cursor: text;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            transition: border-color 0.12s, background 0.12s;
+        }
+        .proc2-cell:hover { border-color: var(--primary); }
+        .proc2-cell.copycol { cursor: pointer; }
+        .proc2-cell.copycol:hover { background: rgba(59,130,246,0.14); }
+        .proc2-cell input,
+        .proc2-cell select {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 3px 5px;
+            outline: none;
+        }
+        .proc2-cell.editing { padding: 2px; }
+        .proc2-rowact {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1px;
+            opacity: 0;
+            transition: opacity 0.12s;
+            flex-shrink: 0;
+        }
+        .proc2-row:hover .proc2-rowact { opacity: 1; }
+        .proc2-rowact button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 10px;
+            color: var(--muted);
+            font-family: var(--font);
+            padding: 1px 2px;
+            border-radius: 3px;
+        }
+        .proc2-rowact button:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+        .proc2-rowact button.danger:hover { color: var(--danger); }
+        .proc2-empty {
+            color: var(--faint);
+            font-size: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        /* Resaltado del buscador interno */
+        mark.proc2-mark {
+            background: #fbbf24;
+            color: #191919;
+            padding: 0 1px;
+            border-radius: 2px;
+        }
+        mark.proc2-mark.current {
+            background: #f97316;
+            color: #fff;
+            outline: 2px solid rgba(249,115,22,0.5);
+        }
+
+        /* Editor de configuración de tabla por columnas */
+        .pt-col {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            margin-top: 8px;
+            background: var(--surface2);
+        }
+        .pt-col-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pt-col-num {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--muted);
+            flex-shrink: 0;
+            min-width: 62px;
+        }
+        .pt-col-title {
+            flex: 1;
+            min-width: 120px;
+        }
+        .pt-col-opts-lbl {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--muted);
+            cursor: pointer;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .pt-col-opts-lbl input {
+            accent-color: var(--primary);
+        }
+        .modal-body .pt-col textarea.pt-col-opts {
+            margin-top: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .modal-body .pt-col textarea.pt-col-opts:disabled {
+            opacity: 0.4;
+        }
+        .modal-body .pt-col input[type="text"],
+        .modal-body .pt-col select,
+        .modal-body .pt-col textarea,
+        .modal-body input[data-act="tname"] {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 5px 7px;
+            box-sizing: border-box;
+        }
+        .modal-body .pt-col textarea { resize: vertical; }
+        .modal-body .pt-col .btn-secondary { font-size: 11px; padding: 4px 8px; }
 
         .filter-opt {
             display: block;
@@ -883,6 +1286,71 @@
         .da-btn.primary:hover { background: #2563eb; }
         .da-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
 
+        /* Nota personal de la tarjeta (solo visible en el drawer) */
+        .d-note-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 14px 0 6px;
+        }
+        .d-note-row .d-section-label { margin: 0; }
+        .d-note-btns { display: flex; gap: 6px; }
+        .d-note-btn {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            font-size: 11px;
+            padding: 3px 9px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: 0.15s;
+        }
+        .d-note-btn:hover { border-color: var(--primary); color: var(--text); }
+        .d-note-btn.save { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .d-note-btn.save:hover { background: #2563eb; }
+        .d-note {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+        }
+        .d-note.empty {
+            border-left-color: var(--faint);
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .d-note-content {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: 1.5;
+            font-size: 12px;
+            user-select: text;
+            -webkit-user-select: text;
+            cursor: text;
+        }
+        .d-note-input {
+            width: 100%;
+            min-height: 90px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 6px 8px;
+            box-sizing: border-box;
+            resize: vertical;
+            outline: none;
+        }
+        .d-note-input:focus { border-color: var(--primary); }
+        .d-note-editbtns { display: flex; gap: 6px; margin-top: 8px; }
+
         /* ============================================================
                GUÍA DE ARRASTRE
                ============================================================ */
@@ -1042,6 +1510,26 @@
         }
         .px-val { color: var(--primary); font-weight: 700; }
         #settings-overlay input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+        .settings-color-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+        .settings-color-row .cs {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-sizing: border-box;
+        }
+        .settings-color-row .cs.sel { border-color: var(--text); box-shadow: 0 0 0 2px var(--primary); }
+        .settings-color-row input[type="color"] {
+            width: 40px;
+            height: 26px;
+            padding: 2px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .settings-btns { display: flex; gap: 8px; margin-top: 10px; }
         .settings-numrow {
             display: flex;
             align-items: center;
@@ -1444,7 +1932,7 @@
     <div id="hdr">
         <span id="hdr-title">⚡ Fast 2.0</span>
         <div id="hdr-side">
-            <button class="hbtn" id="hdr-settings" onclick="abrirAjustesHoja()" title="Ajustes de esta hoja (tamaño de tarjetas)">⚙️</button>
+            <button class="hbtn" id="hdr-settings" onclick="abrirAjustesHoja()" title="Ajustes de esta hoja (modo, tamaño, color)">⚙️</button>
             <button class="hbtn danger" onclick="cerrarFast()" title="Cerrar (Ctrl+Shift+F)">✕</button>
         </div>
     </div>
@@ -1523,6 +2011,10 @@
                     <label>Modo de la pestaña</label>
                     <div id="settings-mode" class="settings-mode-label"></div>
                 </div>
+                <div class="modal-field">
+                    <label>Color de la hoja</label>
+                    <div class="settings-color-row" id="settings-color-row"></div>
+                </div>
                 <div id="settings-size-fields">
                     <div class="modal-field">
                         <label>Ancho de tarjeta: <span id="settings-w-val" class="px-val"></span> px</label>
@@ -1537,6 +2029,26 @@
                         <div class="settings-numrow">
                             <input type="number" id="settings-h-num" min="120" max="620" step="5" /> <span>px</span>
                         </div>
+                    </div>
+                </div>
+                <div id="settings-grid-fields" style="display:none">
+                    <div class="modal-field">
+                        <label>Ancho de columna: <span id="settings-cw-val" class="px-val"></span> px</label>
+                        <input type="range" id="settings-cw-slider" min="60" max="300" step="5" />
+                        <div class="settings-numrow">
+                            <input type="number" id="settings-cw-num" min="60" max="300" step="5" /> <span>px</span>
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>Alto de fila: <span id="settings-rh-val" class="px-val"></span> px</label>
+                        <input type="range" id="settings-rh-slider" min="20" max="120" step="2" />
+                        <div class="settings-numrow">
+                            <input type="number" id="settings-rh-num" min="20" max="120" step="2" /> <span>px</span>
+                        </div>
+                    </div>
+                    <div class="settings-btns">
+                        <button class="btn-cancel" id="settings-cw-reset">Restablecer anchos</button>
+                        <button class="btn-cancel" id="settings-rh-reset">Restablecer altos</button>
                     </div>
                 </div>
                 <div class="modal-field">
@@ -1655,7 +2167,7 @@
         const SHEET_MODES = {
             cards:   { icon: '📇', label: 'Tarjetas',            desc: 'Tarjetas copy-first con formato WhatsApp' },
             images:  { icon: '🖼️', label: 'Buscador de imágenes', desc: 'Tarjetas alargadas: título + imagen + texto' },
-            process: { icon: '⚙️', label: 'Procesos',             desc: 'Tabla de datos de 6 columnas' }
+            process: { icon: '⚙️', label: 'Procesos',             desc: 'Múltiples tablas con edición en línea' }
         };
         const DEFAULT_HEADERS = ['Título', 'Tipo', 'Descripción', 'Área', 'Prioridad', 'Detalles'];
         const DEFAULT_COL2_OPTIONS = ['Opción A', 'Opción B', 'Opción C'];
@@ -1668,8 +2180,10 @@
             favOnly: false,
             view: 'grid',
             drawer: null,
+            drawerNoteEdit: false,
             dataPath: null,
-            dataPathReady: false
+            dataPathReady: false,
+            tableFind: ''
         };
 
         // Cola de guardado
@@ -1854,15 +2368,27 @@
             if (!s.mode) s.mode = 'cards';
             if (!SHEET_MODES[s.mode]) s.mode = 'cards';
             if (!s.cardSize) s.cardSize = {};
-            const defaultH = s.mode === 'images' ? 200 : 190;
+            const defaultH = s.mode === 'images' ? 420 : 190;
             if (!s.cardSize.w) s.cardSize.w = 150;
             if (!s.cardSize.h) s.cardSize.h = defaultH;
             if (!Array.isArray(s.headers) || s.headers.length !== 6) s.headers = DEFAULT_HEADERS.slice();
             if (!Array.isArray(s.col2Options) || !s.col2Options.length) s.col2Options = DEFAULT_COL2_OPTIONS.slice();
-            if (s.mode === 'process') {
-                // Las filas de proceso se guardan como objetos con cells[]
-                (s.cards || []).forEach(r => { if (r && !Array.isArray(r.cells)) r.cells = Array(6).fill(''); });
-            }
+                if (s.mode === 'process') {
+                    // Migración a la cuadrícula tipo Excel (100 filas x A-Z)
+                    if (!s.grid || !Array.isArray(s.grid.cells)) {
+                        const cells = Array.from({ length: 100 }, () => Array(26).fill(''));
+                        const oldRows = (s.tables && s.tables.length && s.tables[0].rows) || s.cards || [];
+                        oldRows.forEach((r, i) => {
+                            if (i >= 100) return;
+                            (r.cells || []).forEach((v, j) => { if (j < 26) cells[i][j] = v || ''; });
+                        });
+                        s.grid = { cells, colWidths: [], rowHeights: {} };
+                    }
+                    if (!Array.isArray(s.grid.colWidths)) s.grid.colWidths = [];
+                    if (!s.grid.rowHeights || typeof s.grid.rowHeights !== 'object' || Array.isArray(s.grid.rowHeights)) s.grid.rowHeights = {};
+                    while (s.grid.cells.length < 100) s.grid.cells.push(Array(26).fill(''));
+                    s.grid.cells.forEach(row => { while (row.length < 26) row.push(''); });
+                }
             return s;
         }
 
@@ -2024,7 +2550,7 @@
                 el.innerHTML = `
                     <span class="sheet-color-dot" style="background:${sheet.color || '#3b82f6'}"></span>
                     <span class="sheet-name">${esc(sheet.name)}</span>
-                    <span class="sheet-count">${sheet.cards.length}</span>
+                    <span class="sheet-count">${sheet.mode === 'process' ? (sheet.grid ? sheet.grid.cells.filter(row => row.some(v => v)).length : 0) : sheet.cards.length}</span>
                 `;
 
                 // Clic: activar
@@ -2087,11 +2613,14 @@
                 name: name || ('Hoja ' + (idx + 1)),
                 color: SHEET_COLORS[idx % SHEET_COLORS.length],
                 mode: mode || 'cards',
-                cardSize: { w: 150, h: 190 },
+                cardSize: { w: 150, h: mode === 'images' ? 420 : 190 },
                 headers: DEFAULT_HEADERS.slice(),
                 col2Options: DEFAULT_COL2_OPTIONS.slice(),
                 cards: []
             };
+            if (mode === 'process') {
+                sheet.grid = { cells: Array.from({ length: 100 }, () => Array(26).fill('')), colWidths: [], rowHeights: {} };
+            }
             state.sheets.push(sheet);
             state.activeSheetId = sheet.id;
             state.drawer = null;
@@ -2164,6 +2693,9 @@
 
         // ---------- MODO TARJETAS (actual, sin cambios) ----------
         function renderCardsMode(sheet) {
+            btnNewCard.style.display = '';
+            btnFavFilter.style.display = '';
+            btnView.style.display = '';
             // Grid adaptado al tamaño configurado por hoja
             const cs = sheet.cardSize || { w: 150, h: 190 };
             cardsContainer.style.gridTemplateColumns = 'repeat(auto-fill, ' + cs.w + 'px)';
@@ -2233,7 +2765,7 @@
                     <div class="card-body-preview">${esc(bodyPlain)}</div>
                     <div class="card-meta">${metaBits.join(' ')}${badge}</div>
                     <div class="card-copy-row">
-                        <button class="copy-main" data-act="copy" title="Copiar texto para WhatsApp">📋 COPIAR</button>
+                        <button class="copy-main" data-act="copy" title="Copiar texto para WhatsApp">📋<span class="copy-label"> COPIAR</span></button>
                         <button class="copy-more" data-act="copymore" title="Más opciones de copiado">▾</button>
                     </div>
                     <div class="card-actions">
@@ -2282,7 +2814,7 @@
                 // Interacción clic vs arrastre (umbral 4px)
                 el.addEventListener('mousedown', (e) => {
                     if (e.button !== 0) return;
-                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
                     pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
                     document.addEventListener('mousemove', onGlobalMove);
                     document.addEventListener('mouseup', onGlobalUp);
@@ -2291,7 +2823,7 @@
 
                 // Doble clic: editar
                 el.addEventListener('dblclick', (e) => {
-                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
                     openCardEditor(sheetId, card.id);
                 });
 
@@ -2310,8 +2842,11 @@
 
         // ---------- MODO BUSCADOR DE IMÁGENES ----------
         function renderImagesMode(sheet) {
+            btnNewCard.style.display = '';
+            btnFavFilter.style.display = '';
+            btnView.style.display = '';
             cardsContainer.classList.add('images-mode');
-            const h = (sheet.cardSize && sheet.cardSize.h) || 200;
+            const h = (sheet.cardSize && sheet.cardSize.h) || 420;
 
             const query = state.searchQuery.toLowerCase().trim();
             let cards = [];
@@ -2346,34 +2881,37 @@
                 el.dataset.cardId = card.id;
                 el.dataset.sheetId = sheetId;
                 el.style.height = h + 'px';
+                el.style.setProperty('--img-h', h + 'px');
                 el.style.backgroundColor = card.color || 'var(--surface2)';
                 el.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
                 const badge = (query && state.searchAll && sheetId !== sheet.id) ? `<span class="card-tab-badge">${esc(getSheetById(sheetId)?.name || '')}</span>` : '';
                 const firstImg = (card.images && card.images.length) ? card.images[0].data : '';
 
                 el.innerHTML = `
-                    <div class="img-card-top">
-                        <span class="card-star">⭐</span>
+                    <div class="img-card-left">
                         <div class="img-card-title">${esc(card.title) || 'Sin título'}</div>
+                        <span class="card-star" title="${card.pinned ? 'Favorita' : 'No favorita'}">${card.pinned ? '⭐' : '☆'}</span>
                         ${badge}
+                        <div class="img-card-btns">
+                            <button class="copy-img-btn" data-act="copyimg" title="Copiar imagen al portapapeles">🖼 Copiar imagen</button>
+                            <button class="copy-text-btn" data-act="copy" title="Copiar texto para WhatsApp">📋 Copiar texto</button>
+                        </div>
+                        <div class="card-actions">
+                            <button data-act="edit" title="Editar">✏️</button>
+                            <button data-act="pin" title="Fijar favorita">⭐</button>
+                            <button data-act="color" title="Color">🎨</button>
+                            <button data-act="duplicate" title="Duplicar">⧉</button>
+                            <button data-act="delete" class="danger" title="Eliminar">🗑</button>
+                        </div>
                     </div>
-                    <div class="img-card-media">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" />` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
-                    <div class="img-card-text">${esc(waToPlain(card.body).slice(0, 160))}</div>
-                    <div class="card-copy-row">
-                        <button class="copy-main" data-act="copy" title="Copiar texto">📋 COPIAR</button>
-                        <button class="copy-more" data-act="copymore" title="Más opciones">▾</button>
-                    </div>
-                    <div class="card-actions">
-                        <button data-act="edit" title="Editar">✏️</button>
-                        <button data-act="pin" title="Fijar favorita">⭐</button>
-                        <button data-act="color" title="Color">🎨</button>
-                        <button data-act="duplicate" title="Duplicar">⧉</button>
-                        <button data-act="delete" class="danger" title="Eliminar">🗑</button>
+                    <div class="img-card-media" data-act="copyimg" title="Copiar imagen (clic)">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" /><span class="img-copy-hint">🖼 Copiar imagen</span>` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
+                    <div class="img-card-right">
+                        <div class="img-card-text">${esc(waToPlain(card.body)) || '<span class="img-card-noimg">Sin texto complementario</span>'}</div>
                     </div>
                 `;
 
                 el.querySelector('[data-act="copy"]').addEventListener('click', (e) => { e.stopPropagation(); copyCardBody(card); });
-                el.querySelector('[data-act="copymore"]').addEventListener('click', (e) => { e.stopPropagation(); showCopyMenu(e, card, sheetId); });
+                el.querySelectorAll('[data-act="copyimg"]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); copyCardFirstImage(card); }));
                 el.querySelector('[data-act="edit"]').addEventListener('click', (e) => { e.stopPropagation(); openCardEditor(sheetId, card.id); });
                 el.querySelector('[data-act="pin"]').addEventListener('click', (e) => {
                     e.stopPropagation(); card.pinned = !card.pinned; saveData(); render();
@@ -2410,338 +2948,690 @@
             if (query) highlightMatches(query);
         }
 
-        // ---------- MODO PROCESOS (tabla de 6 columnas) ----------
+        // ---------- MODO PROCESOS (cuadrícula Excel) ----------
+        // ============================================================
+        // MODO PROCESOS: cuadrícula tipo Excel (A-Z, 100 filas)
+        // ============================================================
+        const EX_ROWS = 100;
+        const EX_COLS = 26;
+        const EX_DEF_W = 110;
+        const EX_DEF_H = 26;
+        let exGridEl = null;
+        let exCellEls = [];
+        let exRowNumEls = [];
+        let exScrollEl = null;
+        let exEditing = null;
+
+        function exColName(i) {
+            let s = '';
+            i++;
+            while (i > 0) {
+                s = String.fromCharCode(65 + ((i - 1) % 26)) + s;
+                i = Math.floor((i - 1) / 26);
+            }
+            return s;
+        }
+
+        function exRange() {
+            const s = state.procSel;
+            return {
+                r0: Math.min(s.a.r, s.f.r), r1: Math.max(s.a.r, s.f.r),
+                c0: Math.min(s.a.c, s.f.c), c1: Math.max(s.a.c, s.f.c)
+            };
+        }
+
+        function exSelAddr() {
+            const { r0, r1, c0, c1 } = exRange();
+            if (r0 === r1 && c0 === c1) return exColName(c0) + (r0 + 1);
+            const n = (r1 - r0 + 1) * (c1 - c0 + 1);
+            return `${exColName(c0)}${r0 + 1}:${exColName(c1)}${r1 + 1} · ${n} celda${n === 1 ? '' : 's'}`;
+        }
+
+        function exGridDims(grid) {
+            return { rows: grid.cells.length, cols: grid.cells[0] ? grid.cells[0].length : 0 };
+        }
+
+        function exWidths(grid) {
+            const n = exGridDims(grid).cols;
+            if (!Array.isArray(grid.colWidths) || grid.colWidths.length < n) {
+                const old = Array.isArray(grid.colWidths) ? grid.colWidths : [];
+                grid.colWidths = Array.from({ length: n }, (_, i) => old[i] || EX_DEF_W);
+            }
+            return grid.colWidths;
+        }
+
+        function exRowH(grid, r) {
+            if (!grid.rowHeights || typeof grid.rowHeights !== 'object') grid.rowHeights = {};
+            return grid.rowHeights[r] || EX_DEF_H;
+        }
+
+        function exApplyCols(grid) {
+            if (!exGridEl) return;
+            exGridEl.style.gridTemplateColumns = '46px ' + exWidths(grid).map(w => w + 'px').join(' ');
+        }
+
+        function exResizeStart(e, type, idx) {
+            e.preventDefault();
+            e.stopPropagation();
+            const grid = getActiveSheet().grid;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const startW = exWidths(grid)[idx] || EX_DEF_W;
+            const startH = exRowH(grid, idx);
+            const onMove = (ev) => {
+                if (type === 'col') {
+                    const w = Math.max(40, Math.min(500, startW + ev.clientX - startX));
+                    grid.colWidths[idx] = w;
+                    exApplyCols(grid);
+                } else {
+                    const h = Math.max(20, Math.min(200, startH + ev.clientY - startY));
+                    grid.rowHeights[idx] = h;
+                    const numEl = exRowNumEls[idx];
+                    if (numEl) numEl.style.height = h + 'px';
+                    (exCellEls[idx] || []).forEach(el => { if (el) el.style.height = h + 'px'; });
+                }
+            };
+            const onUp = () => {
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+                document.body.style.userSelect = '';
+                document.body.style.cursor = '';
+                saveData();
+            };
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = type === 'col' ? 'col-resize' : 'row-resize';
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('mouseup', onUp);
+        }
+
+        function exResetCol(c) {
+            const grid = getActiveSheet().grid;
+            grid.colWidths[c] = EX_DEF_W;
+            exApplyCols(grid);
+            saveData();
+            showToast('↩ Ancho de columna restablecido.', 'success', 900);
+        }
+
+        function exResetRow(r) {
+            const grid = getActiveSheet().grid;
+            if (!grid.rowHeights) grid.rowHeights = {};
+            delete grid.rowHeights[r];
+            const numEl = exRowNumEls[r];
+            if (numEl) numEl.style.height = '';
+            saveData();
+            showToast('↩ Alto de fila restablecido.', 'success', 900);
+        }
+
+        function exMeasureCtx() {
+            if (!exMeasureCtx.ctx) {
+                const c = document.createElement('canvas');
+                const font = getComputedStyle(document.body).getPropertyValue('--font').trim();
+                exMeasureCtx.ctx = c.getContext('2d');
+                exMeasureCtx.ctx.font = '12px ' + (font || 'sans-serif');
+            }
+            return exMeasureCtx.ctx;
+        }
+
+        function exAutoFitCol(c) {
+            const grid = getActiveSheet().grid;
+            const ctx = exMeasureCtx();
+            let maxW = Math.ceil(ctx.measureText(exColName(c)).width) + 6;
+            grid.cells.forEach(row => {
+                const v = (row[c] || '').toString();
+                const words = v.split(/\s+/).filter(Boolean);
+                const w = Math.ceil(Math.max.apply(null, words.map(wd => ctx.measureText(wd).width))) + 14;
+                if (w > maxW) maxW = w;
+                if (maxW > 500) return;
+            });
+            grid.colWidths[c] = Math.max(40, Math.min(500, maxW));
+            exApplyCols(grid);
+            saveData();
+            showToast('↔ Columna ajustada al contenido.', 'success', 900);
+        }
+
+        function exAutoFitRow(r) {
+            const grid = getActiveSheet().grid;
+            if (!grid.rowHeights) grid.rowHeights = {};
+            delete grid.rowHeights[r];
+            const numEl = exRowNumEls[r];
+            if (numEl) numEl.style.height = '';
+            (exCellEls[r] || []).forEach(el => { if (el) el.style.height = ''; });
+            saveData();
+            showToast('⤢ Fila ajustada al contenido.', 'success', 900);
+        }
+
+        function exRerender() {
+            const st = exScrollEl ? exScrollEl.scrollTop : 0;
+            const sl = exScrollEl ? exScrollEl.scrollLeft : 0;
+            render();
+            if (exScrollEl) { exScrollEl.scrollTop = st; exScrollEl.scrollLeft = sl; }
+        }
+
+        function exAddRow() {
+            const grid = getActiveSheet().grid;
+            grid.cells.push(Array(exGridDims(grid).cols).fill(''));
+            saveData();
+            exRerender();
+            const els = exCellEls[grid.cells.length - 1];
+            if (els && els[0] && els[0].scrollIntoView) els[0].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+
+        function exAddCol() {
+            const grid = getActiveSheet().grid;
+            grid.cells.forEach(row => row.push(''));
+            exWidths(grid).push(EX_DEF_W);
+            saveData();
+            exRerender();
+            exApplyCols(grid);
+            const last = exCellEls[state.procSel ? state.procSel.f.r : 0];
+            const el = last && last[last.length - 1];
+            if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+
+        function exInsertRow(r) {
+            const grid = getActiveSheet().grid;
+            const cols = exGridDims(grid).cols;
+            grid.cells.splice(r + 1, 0, Array(cols).fill(''));
+            const rh = {};
+            Object.keys(grid.rowHeights || {}).forEach(k => {
+                const kk = +k;
+                rh[kk > r ? kk + 1 : kk] = grid.rowHeights[kk];
+            });
+            grid.rowHeights = rh;
+            saveData();
+            exRerender();
+        }
+
+        function exDeleteRow(r) {
+            const grid = getActiveSheet().grid;
+            if (grid.cells.length <= 1) { showToast('⚠️ No se puede eliminar la última fila.', 'warning'); return; }
+            const rh = {};
+            Object.keys(grid.rowHeights || {}).forEach(k => {
+                const kk = +k;
+                if (kk === r) return;
+                rh[kk > r ? kk - 1 : kk] = grid.rowHeights[kk];
+            });
+            grid.rowHeights = rh;
+            grid.cells.splice(r, 1);
+            saveData();
+            exRerender();
+            showToast('🗑️ Fila eliminada.', 'success', 1200);
+        }
+
+        function exInsertCol(c) {
+            const grid = getActiveSheet().grid;
+            const widths = exWidths(grid);
+            grid.cells.forEach(row => row.splice(c + 1, 0, ''));
+            widths.splice(c + 1, 0, EX_DEF_W);
+            saveData();
+            exRerender();
+            exApplyCols(grid);
+        }
+
+        function exDeleteCol(c) {
+            const grid = getActiveSheet().grid;
+            if (exGridDims(grid).cols <= 1) { showToast('⚠️ No se puede eliminar la última columna.', 'warning'); return; }
+            grid.cells.forEach(row => row.splice(c, 1));
+            exWidths(grid).splice(c, 1);
+            saveData();
+            exRerender();
+            exApplyCols(grid);
+            showToast('🗑️ Columna eliminada.', 'success', 1200);
+        }
+
+        function exConfirmDelRow(r) {
+            showConfirm('🗑️ ¿Eliminar la fila ' + (r + 1) + '? Se perderán sus datos.', () => exDeleteRow(r), 'Eliminar');
+        }
+
+        function exConfirmDelCol(c) {
+            showConfirm('🗑️ ¿Eliminar la columna ' + exColName(c) + '? Se perderán sus datos.', () => exDeleteCol(c), 'Eliminar');
+        }
+
+        function exUpdateSel() {
+            if (!exGridEl) return;
+            const { r0, r1, c0, c1 } = exRange();
+            exGridEl.querySelectorAll('.ex-c').forEach(el => {
+                const r = +el.dataset.r, c = +el.dataset.c;
+                el.classList.toggle('sel', r >= r0 && r <= r1 && c >= c0 && c <= c1);
+                el.classList.toggle('active', r === state.procSel.f.r && c === state.procSel.f.c);
+            });
+            exGridEl.querySelectorAll('.ex-hcol').forEach((el, c) => {
+                el.classList.toggle('sel', c >= c0 && c <= c1);
+            });
+            exGridEl.querySelectorAll('.ex-hrow').forEach((el, r) => {
+                el.classList.toggle('sel', r >= r0 && r <= r1);
+            });
+            const wrap = exGridEl.closest('.ex-wrap');
+            const addr = wrap && wrap.querySelector('.ex-addr');
+            if (addr) addr.textContent = exSelAddr();
+        }
+
+        function exCommitEdit(save) {
+            if (!exEditing) return;
+            const { r, c, inp } = exEditing;
+            exEditing = null;
+            const v = inp.value;
+            const grid = getActiveSheet().grid;
+            if (save && grid.cells[r][c] !== v) {
+                grid.cells[r][c] = v;
+                saveData();
+            }
+            const el = exCellEls[r][c];
+            if (el) { el.classList.remove('editing'); el.textContent = v; }
+        }
+
+        function exStartEdit(r, c, replaceText) {
+            exCommitEdit(true);
+            const grid = getActiveSheet().grid;
+            const el = exCellEls[r][c];
+            if (!el) return;
+            el.textContent = '';
+            el.classList.add('editing');
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.value = (replaceText !== undefined) ? replaceText : (grid.cells[r][c] || '');
+            el.appendChild(inp);
+            inp.focus();
+            if (replaceText === undefined) {
+                const len = inp.value.length;
+                inp.setSelectionRange(len, len);
+            }
+            exEditing = { r, c, inp };
+            inp.addEventListener('keydown', (e) => {
+                e.stopPropagation();
+                if (e.key === 'Enter') { exCommitEdit(true); exMove(1, 0); }
+                else if (e.key === 'Escape') { exCommitEdit(false); }
+                else if (e.key === 'Tab') { e.preventDefault(); exCommitEdit(true); exMove(0, e.shiftKey ? -1 : 1); }
+            });
+            inp.addEventListener('blur', () => exCommitEdit(true));
+            inp.addEventListener('mousedown', (e) => e.stopPropagation());
+        }
+
+        function exMove(dr, dc) {
+            const s = state.procSel;
+            const grid = getActiveSheet().grid;
+            const { rows, cols } = exGridDims(grid);
+            const nr = Math.max(0, Math.min(rows - 1, s.f.r + dr));
+            const nc = Math.max(0, Math.min(cols - 1, s.f.c + dc));
+            s.a = { r: nr, c: nc };
+            s.f = { r: nr, c: nc };
+            exUpdateSel();
+            const el = exCellEls[nr][nc];
+            if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+
+        function exClearSelection() {
+            const grid = getActiveSheet().grid;
+            const { r0, r1, c0, c1 } = exRange();
+            let changed = false;
+            for (let r = r0; r <= r1; r++) {
+                for (let c = c0; c <= c1; c++) {
+                    if (grid.cells[r][c] !== '') {
+                        grid.cells[r][c] = '';
+                        changed = true;
+                    }
+                    const el = exCellEls[r][c];
+                    if (el) el.textContent = '';
+                }
+            }
+            if (changed) saveData();
+            showToast('🧹 Selección limpiada.', 'success', 1000);
+        }
+
+        function exCopySelection() {
+            const grid = getActiveSheet().grid;
+            const { r0, r1, c0, c1 } = exRange();
+            const lines = [];
+            for (let r = r0; r <= r1; r++) {
+                const parts = [];
+                for (let c = c0; c <= c1; c++) parts.push(grid.cells[r][c] || '');
+                lines.push(parts.join('\t'));
+            }
+            const text = lines.join('\n');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => {});
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+            }
+            showToast('⧉ Selección copiada.', 'success', 1000);
+        }
+
+        function exPasteSelection() {
+            const grid = getActiveSheet().grid;
+            const read = (navigator.clipboard && navigator.clipboard.readText)
+                ? navigator.clipboard.readText()
+                : Promise.reject(new Error('sin portapapeles'));
+            read.then(text => {
+                const lines = text.replace(/\r\n?/g, '\n').split('\n');
+                const { r0, c0 } = exRange();
+                let partsMax = 1;
+                lines.forEach(l => { partsMax = Math.max(partsMax, l.split('\t').length); });
+                let { rows, cols } = exGridDims(grid);
+                const needR = r0 + lines.length;
+                const needC = c0 + partsMax;
+                let extended = false;
+                if (needC > cols) {
+                    grid.cells.forEach(row => { while (row.length < needC) row.push(''); });
+                    cols = needC;
+                    extended = true;
+                }
+                if (needR > rows) {
+                    while (grid.cells.length < needR) grid.cells.push(Array(cols).fill(''));
+                    rows = needR;
+                    extended = true;
+                }
+                let changed = false;
+                for (let i = 0; i < lines.length && r0 + i < rows; i++) {
+                    const parts = lines[i].split('\t');
+                    for (let j = 0; j < parts.length && c0 + j < cols; j++) {
+                        if (grid.cells[r0 + i][c0 + j] !== parts[j]) {
+                            grid.cells[r0 + i][c0 + j] = parts[j];
+                            changed = true;
+                        }
+                        const el = exCellEls[r0 + i] && exCellEls[r0 + i][c0 + j];
+                        if (el) el.textContent = parts[j];
+                    }
+                }
+                if (changed) saveData();
+                if (extended) {
+                    exRerender();
+                    exApplyCols(grid);
+                    showToast('📥 Pegado (la tabla se amplió automáticamente).', 'success', 1500);
+                } else {
+                    showToast('📥 Pegado desde el portapapeles.', 'success', 1000);
+                }
+            }).catch(() => showToast('⚠️ No se pudo leer el portapapeles.', 'error'));
+        }
+
         function renderProcessMode(sheet) {
             cardsContainer.classList.remove('images-mode');
             cardsContainer.style.gridTemplateColumns = '1fr';
             cardsContainer.style.gridAutoRows = 'auto';
+            btnNewCard.style.display = 'none';
+            btnFavFilter.style.display = 'none';
+            btnView.style.display = 'none';
+
             const query = state.searchQuery.toLowerCase().trim();
-            let rows = sheet.cards.slice();
-            if (query) {
-                rows = rows.filter(r => {
-                    const hay = r.cells && r.cells.some(cell => String(cell).toLowerCase().includes(query));
-                    return hay || String(r.cells[0]).toLowerCase().includes(query);
-                });
+            const grid = sheet.grid || { cells: Array.from({ length: EX_ROWS }, () => Array(EX_COLS).fill('')), colWidths: [], rowHeights: {} };
+            const { rows, cols } = exGridDims(grid);
+
+            if (!state.procSel || state.procSel.sheetId !== sheet.id) {
+                state.procSel = { sheetId: sheet.id, a: { r: 0, c: 0 }, f: { r: 0, c: 0 } };
             }
-            if (state.favOnly) rows = rows.filter(r => r.pinned);
 
             const wrap = document.createElement('div');
-            wrap.className = 'proc-wrap';
+            wrap.className = 'ex-wrap';
 
-            const toolbar = document.createElement('div');
-            toolbar.className = 'proc-toolbar';
-            const addBtn = document.createElement('button');
-            addBtn.className = 'tb-btn';
-            addBtn.textContent = '➕ Añadir fila';
-            addBtn.addEventListener('click', () => {
-                const row = { id: generateId(), cells: Array(sheet.headers.length).fill(''), pinned: false, created: Date.now(), updated: Date.now() };
-                openRowEditor(sheet, row);
+            const status = document.createElement('div');
+            status.className = 'ex-status';
+            const addr = document.createElement('span');
+            addr.className = 'ex-addr';
+            const hint = document.createElement('span');
+            hint.textContent = 'Clic selecciona · arrastra rango · escribe edita · Ctrl+C/V · doble clic en borde autoajusta';
+            hint.style.opacity = '0.55';
+            const sep = document.createElement('span');
+            sep.style.opacity = '0.4';
+            sep.textContent = '·';
+            const btnRow = document.createElement('button');
+            btnRow.className = 'ex-addbtn';
+            btnRow.textContent = '＋ Fila';
+            btnRow.title = 'Añadir una fila al final de la tabla';
+            btnRow.addEventListener('click', () => exAddRow());
+            const btnCol = document.createElement('button');
+            btnCol.className = 'ex-addbtn';
+            btnCol.textContent = '＋ Columna';
+            btnCol.title = 'Añadir una columna al final de la tabla';
+            btnCol.addEventListener('click', () => exAddCol());
+            const dims = document.createElement('span');
+            dims.className = 'ex-dims';
+            dims.textContent = cols + ' columnas · ' + rows + ' filas';
+            dims.style.opacity = '0.55';
+            status.appendChild(addr);
+            status.appendChild(hint);
+            status.appendChild(sep);
+            status.appendChild(btnRow);
+            status.appendChild(btnCol);
+            status.appendChild(dims);
+            wrap.appendChild(status);
+
+            exScrollEl = document.createElement('div');
+            exScrollEl.className = 'ex-scroll';
+            exScrollEl.tabIndex = 0;
+            exGridEl = document.createElement('div');
+            exGridEl.className = 'ex-grid';
+            exCellEls = [];
+            exRowNumEls = [];
+
+            const corner = document.createElement('div');
+            corner.className = 'ex-cell ex-corner';
+            corner.title = 'Seleccionar todo (Ctrl+A)';
+            corner.addEventListener('click', () => {
+                state.procSel.a = { r: 0, c: 0 };
+                state.procSel.f = { r: rows - 1, c: cols - 1 };
+                exUpdateSel();
             });
-            const headerBtn = document.createElement('button');
-            headerBtn.className = 'tb-btn';
-            headerBtn.textContent = '⚙️ Cabeceras';
-            headerBtn.addEventListener('click', () => openProcessHeadersEditor(sheet));
-            toolbar.appendChild(addBtn);
-            toolbar.appendChild(headerBtn);
-            wrap.appendChild(toolbar);
+            exGridEl.appendChild(corner);
 
-            if (!rows.length) {
-                const empty = document.createElement('div');
-                empty.className = 'empty-cards';
-                empty.innerHTML = 'No hay filas en esta tabla.<div class="hint">Pulsa "➕ Añadir fila" para comenzar</div>';
-                wrap.appendChild(empty);
-            } else {
-                const table = document.createElement('div');
-                table.className = 'proc-table';
-
-                // Cabecera
-                const hdrRow = document.createElement('div');
-                hdrRow.className = 'proc-row proc-header';
-                sheet.headers.forEach((title, i) => {
-                    const cell = document.createElement('div');
-                    cell.className = 'proc-cell proc-hcell';
-                    cell.dataset.col = i;
-                    cell.innerHTML = `<span class="proc-hlabel">${esc(title)}</span><span class="proc-hfilter" title="Filtrar columna ${i + 1}">☰</span>`;
-                    cell.addEventListener('click', () => openProcessFilter(sheet, i));
-                    hdrRow.appendChild(cell);
+            for (let c = 0; c < cols; c++) {
+                const h = document.createElement('div');
+                h.className = 'ex-cell ex-hcol';
+                h.textContent = exColName(c);
+                h.title = 'Seleccionar columna ' + exColName(c) + ' · arrastra el borde para ancho · doble clic autoajusta';
+                h.addEventListener('click', () => {
+                    state.procSel.a = { r: 0, c };
+                    state.procSel.f = { r: rows - 1, c };
+                    exUpdateSel();
                 });
-                table.appendChild(hdrRow);
-
-                // Filas de datos
-                rows.forEach(row => {
-                    const r = document.createElement('div');
-                    r.className = 'proc-row' + (row.pinned ? ' proc-pinned' : '');
-                    r.dataset.rowId = row.id;
-                    const cells = (row.cells && row.cells.length === sheet.headers.length) ? row.cells : Array(sheet.headers.length).fill('');
-                    cells.forEach((cell, i) => {
-                        const c = document.createElement('div');
-                        c.className = 'proc-cell' + (i === 1 ? ' proc-col2' : '');
-                        c.dataset.col = i;
-                        if (i === 1) {
-                            // Columna 2: botón píldora con menú desplegable
-                            c.innerHTML = `<button class="proc-pill">${esc(String(cell)) || 'Seleccionar'}<span class="proc-pill-arrow">▾</span></button>`;
-                            c.querySelector('.proc-pill').addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                showPillMenu(e, sheet, row, i);
-                            });
-                        } else {
-                            c.textContent = cell || '';
-                            c.title = cell || '';
-                        }
-                        c.addEventListener('dblclick', (e) => {
-                            e.stopPropagation();
-                            openRowEditor(sheet, row, i);
-                        });
-                        r.appendChild(c);
-                    });
-                    r.addEventListener('contextmenu', (e) => {
-                        e.preventDefault(); e.stopPropagation();
-                        showProcessRowMenu(e.clientX, e.clientY, sheet, row);
-                    });
-                    table.appendChild(r);
+                const rs = document.createElement('div');
+                rs.className = 'ex-resize';
+                rs.addEventListener('mousedown', (e) => exResizeStart(e, 'col', c));
+                rs.addEventListener('dblclick', (e) => { e.stopPropagation(); exAutoFitCol(c); });
+                h.appendChild(rs);
+                h.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    state.procSel.a = { r: 0, c };
+                    state.procSel.f = { r: rows - 1, c };
+                    exUpdateSel();
+                    showContextMenu(e.clientX, e.clientY, [
+                        { icon: '➕', label: 'Insertar columna a la derecha', fn: () => exInsertCol(c) },
+                        { icon: '🗑️', label: 'Eliminar columna ' + exColName(c), fn: () => exConfirmDelCol(c) },
+                        null,
+                        { icon: '↔', label: 'Autoajustar ancho', fn: () => exAutoFitCol(c) },
+                        { icon: '↩', label: 'Restablecer ancho', fn: () => exResetCol(c) }
+                    ]);
                 });
-
-                wrap.appendChild(table);
+                exGridEl.appendChild(h);
             }
+
+            const re = query ? new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi') : null;
+            for (let r = 0; r < rows; r++) {
+                const num = document.createElement('div');
+                num.className = 'ex-cell ex-hrow';
+                num.textContent = r + 1;
+                num.title = 'Seleccionar fila ' + (r + 1) + ' · arrastra el borde para alto · doble clic autoajusta';
+                num.addEventListener('click', () => {
+                    state.procSel.a = { r, c: 0 };
+                    state.procSel.f = { r, c: cols - 1 };
+                    exUpdateSel();
+                });
+                const rh = exRowH(grid, r);
+                if (rh !== EX_DEF_H) num.style.height = rh + 'px';
+                const rrs = document.createElement('div');
+                rrs.className = 'ex-resize';
+                rrs.addEventListener('mousedown', (e) => exResizeStart(e, 'row', r));
+                rrs.addEventListener('dblclick', (e) => { e.stopPropagation(); exAutoFitRow(r); });
+                num.appendChild(rrs);
+                num.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    state.procSel.a = { r, c: 0 };
+                    state.procSel.f = { r, c: cols - 1 };
+                    exUpdateSel();
+                    showContextMenu(e.clientX, e.clientY, [
+                        { icon: '➕', label: 'Insertar fila debajo', fn: () => exInsertRow(r) },
+                        { icon: '🗑️', label: 'Eliminar fila ' + (r + 1), fn: () => exConfirmDelRow(r) },
+                        null,
+                        { icon: '⤢', label: 'Autoajustar alto', fn: () => exAutoFitRow(r) },
+                        { icon: '↩', label: 'Restablecer alto', fn: () => exResetRow(r) }
+                    ]);
+                });
+                exGridEl.appendChild(num);
+                exRowNumEls[r] = num;
+                exCellEls[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'ex-cell ex-c';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    const v = grid.cells[r][c] || '';
+                    if (re && v && v.toLowerCase().includes(query)) {
+                        cell.innerHTML = esc(v).replace(re, '<mark class="ex-mark">$1</mark>');
+                    } else {
+                        cell.textContent = v;
+                    }
+                    exCellEls[r][c] = cell;
+                    exGridEl.appendChild(cell);
+                }
+            }
+
+            exScrollEl.appendChild(exGridEl);
+            exApplyCols(grid);
+            wrap.appendChild(exScrollEl);
             cardsContainer.appendChild(wrap);
 
-            if (query) highlightProcessRows(query);
-        }
-
-        function showProcessRowMenu(x, y, sheet, row) {
-            const items = [
-                { icon: '✏️', label: 'Editar fila', fn: () => openRowEditor(sheet, row) },
-                { icon: '⭐', label: row.pinned ? 'Quitar de favoritas' : 'Fijar fila', fn: () => {
-                    row.pinned = !row.pinned; saveData(); render();
-                }},
-                { icon: '⧉', label: 'Duplicar fila', fn: () => {
-                    const copy = JSON.parse(JSON.stringify(row)); copy.id = generateId();
-                    const idx = sheet.cards.indexOf(row);
-                    sheet.cards.splice(idx + 1, 0, copy); saveData(); render();
-                }},
-                null,
-                { icon: '🗑', label: 'Eliminar fila', danger: true, fn: () => {
-                    showConfirm(`¿Eliminar esta fila?`, () => {
-                        const idx = sheet.cards.indexOf(row);
-                        if (idx !== -1) { sheet.cards.splice(idx, 1); saveData(); render(); showToast('🗑 Fila eliminada.', 'success'); }
-                    });
-                }}
-            ];
-            showContextMenu(x, y, items);
-        }
-
-        function highlightProcessRows(query) {
-            const cells = cardsContainer.querySelectorAll('.proc-cell');
-            cells.forEach(c => {
-                if (c.classList.contains('proc-col2')) return;
-                const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-                const t = c.textContent;
-                if (t && t.toLowerCase().includes(query.toLowerCase())) {
-                    c.innerHTML = t.replace(re, '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">$1</mark>');
-                }
-            });
-        }
-
-        function showPillMenu(e, sheet, row, colIndex) {
-            const options = (sheet.col2Options && sheet.col2Options.length) ? sheet.col2Options : DEFAULT_COL2_OPTIONS;
-            const items = options.map(opt => ({
-                icon: '', label: opt,
-                fn: () => {
-                    row.cells[colIndex] = opt;
-                    saveData(); render();
-                }
-            }));
-            items.push(null, {
-                icon: '⚙️', label: 'Editar opciones de esta columna',
-                fn: () => openPillOptionsEditor(sheet)
-            });
-            showContextMenu(e.clientX, e.clientY, items);
-        }
-
-        function openRowEditor(sheet, row, colIndex) {
-            if (!sheet || !row) return;
-            const isNew = !sheet.cards.includes(row);
-            const headers = (sheet.headers && sheet.headers.length === 6) ? sheet.headers : DEFAULT_HEADERS;
-            const cells = (row.cells && row.cells.length === 6) ? row.cells.slice() : Array(6).fill('');
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            overlay.innerHTML = `
-                <div class="modal">
-                    <div class="modal-head">
-                        <h3>${isNew ? '➕ Nueva fila' : '✏️ Editar fila'}</h3>
-                        <button class="modal-close" data-act="close">✕</button>
-                    </div>
-                    <div class="modal-body" style="max-height:70vh;overflow:auto;">
-                        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px;">
-                            ${headers.map((h, i) => `
-                                <div class="form-field">
-                                    <label>${esc(h)}</label>
-                                    ${i === 1 ? `
-                                        <select data-idx="${i}">
-                                            ${(sheet.col2Options && sheet.col2Options.length ? sheet.col2Options : DEFAULT_COL2_OPTIONS).map(o =>
-                                                `<option value="${esc(o)}" ${cells[i] === o ? 'selected' : ''}>${esc(o)}</option>`
-                                            ).join('')}
-                                        </select>
-                                    ` : `<input type="text" data-idx="${i}" value="${esc(cells[i] || '')}" ${i === 0 ? 'autofocus' : ''} />`}
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="form-field">
-                            <label><input type="checkbox" data-act="pinned" ${row.pinned ? 'checked' : ''} /> ⭐ Fijar como favorita</label>
-                        </div>
-                    </div>
-                    <div class="modal-foot">
-                        <button class="btn-secondary" data-act="close">Cancelar</button>
-                        <button class="btn-primary" data-act="save">Guardar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            overlay.classList.add('show');
-
-            const doClose = () => { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); };
-            overlay.querySelectorAll('[data-act="close"]').forEach(b => b.addEventListener('click', doClose));
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose(); });
-            overlay.querySelectorAll('input[type="text"]').forEach(inp => {
-                inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
-            });
-            overlay.querySelector('[data-act="save"]').addEventListener('click', save);
-
-            function save() {
-                const vals = [];
-                overlay.querySelectorAll('[data-idx]').forEach(el => {
-                    const i = parseInt(el.dataset.idx, 10);
-                    vals[i] = el.value;
-                });
-                if (isNew) {
-                    // Nueva fila
-                    row.cells = vals;
-                    row.pinned = overlay.querySelector('[data-act="pinned"]').checked;
-                    row.created = row.created || Date.now();
-                    row.updated = Date.now();
-                    sheet.cards.push(row);
+            exGridEl.addEventListener('mousedown', (e) => {
+                const cell = e.target.closest('.ex-c');
+                if (!cell) return;
+                if (exEditing) exCommitEdit(true);
+                e.preventDefault();
+                exScrollEl.focus();
+                const r = +cell.dataset.r, c = +cell.dataset.c;
+                if (e.shiftKey) {
+                    state.procSel.f = { r, c };
                 } else {
-                    row.cells = vals;
-                    row.pinned = overlay.querySelector('[data-act="pinned"]').checked;
-                    row.updated = Date.now();
+                    state.procSel.a = { r, c };
+                    state.procSel.f = { r, c };
                 }
-                saveData();
-                render();
-                doClose();
-                showToast(isNew ? '✅ Fila añadida.' : '✅ Fila guardada.', 'success', 1200);
-            }
-        }
-
-        function openProcessHeadersEditor(sheet) {
-            if (!sheet) return;
-            const headers = (sheet.headers && sheet.headers.length === 6) ? sheet.headers : DEFAULT_HEADERS.slice();
-            const opts = (sheet.col2Options && sheet.col2Options.length) ? sheet.col2Options : DEFAULT_COL2_OPTIONS.slice();
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            overlay.innerHTML = `
-                <div class="modal">
-                    <div class="modal-head">
-                        <h3>⚙️ Cabeceras de la tabla</h3>
-                        <button class="modal-close" data-act="close">✕</button>
-                    </div>
-                    <div class="modal-body">
-                        <label>Nombres de las 6 columnas:</label>
-                        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px;">
-                            ${headers.map((h, i) => `
-                                <div class="form-field">
-                                    <label>Columna ${i + 1}</label>
-                                    <input type="text" data-idx="${i}" value="${esc(h)}" />
-                                </div>
-                            `).join('')}
-                        </div>
-                        <label style="margin-top:10px;display:block;">Opciones de la columna 2 (una por línea):</label>
-                        <textarea data-act="opts" rows="6">${esc(opts.join('\n'))}</textarea>
-                    </div>
-                    <div class="modal-foot">
-                        <button class="btn-secondary" data-act="close">Cancelar</button>
-                        <button class="btn-primary" data-act="save">Guardar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            overlay.classList.add('show');
-            const doClose = () => { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); };
-            overlay.querySelectorAll('[data-act="close"]').forEach(b => b.addEventListener('click', doClose));
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose(); });
-            overlay.querySelector('[data-act="save"]').addEventListener('click', () => {
-                const newHeaders = [];
-                overlay.querySelectorAll('[data-idx]').forEach(el => newHeaders[parseInt(el.dataset.idx, 10)] = el.value.trim() || '');
-                const newOpts = overlay.querySelector('[data-act="opts"]').value.split('\n').map(s => s.trim()).filter(Boolean);
-                sheet.headers = newHeaders;
-                sheet.col2Options = newOpts;
-                sheet.cards.forEach(r => {
-                    if (!r.cells) r.cells = [];
-                    while (r.cells.length < 6) r.cells.push('');
-                });
-                saveData();
-                render();
-                doClose();
-                showToast('✅ Cabeceras guardadas.', 'success', 1200);
-            });
-        }
-
-        function openProcessFilter(sheet, colIndex) {
-            if (!sheet) return;
-            const headers = (sheet.headers && sheet.headers.length === 6) ? sheet.headers : DEFAULT_HEADERS;
-            const values = [];
-            sheet.cards.forEach(r => {
-                const v = r.cells && r.cells[colIndex];
-                if (v && !values.includes(v)) values.push(v);
-            });
-            const overlay = document.createElement('div');
-            overlay.className = 'modal-overlay';
-            overlay.innerHTML = `
-                <div class="modal">
-                    <div class="modal-head">
-                        <h3>☰ Filtrar: ${esc(headers[colIndex] || 'Columna ' + (colIndex + 1))}</h3>
-                        <button class="modal-close" data-act="close">✕</button>
-                    </div>
-                    <div class="modal-body">
-                        ${values.length ? values.map(v => `
-                            <button class="filter-opt" data-v="${esc(v)}">${esc(v)}</button>
-                        `).join('') : '<div class="empty-cards">Sin valores para filtrar.</div>'}
-                        <button class="filter-opt filter-clear" data-act="clear">✕ Quitar filtro</button>
-                    </div>
-                    <div class="modal-foot">
-                        <button class="btn-secondary" data-act="close">Cerrar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            overlay.classList.add('show');
-            const doClose = () => { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); };
-            overlay.querySelectorAll('[data-act="close"]').forEach(b => b.addEventListener('click', doClose));
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose(); });
-            overlay.querySelectorAll('.filter-opt').forEach(b => {
-                b.addEventListener('click', () => {
-                    if (b.dataset.act === 'clear') {
-                        state.searchQuery = '';
-                        searchInput.value = '';
-                    } else {
-                        state.searchQuery = b.textContent.trim();
-                        searchInput.value = state.searchQuery;
+                exUpdateSel();
+                const onMove = (ev) => {
+                    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+                    const t = el && el.closest('.ex-c');
+                    if (t) {
+                        state.procSel.f = { r: +t.dataset.r, c: +t.dataset.c };
+                        exUpdateSel();
                     }
-                    doClose();
-                    render();
-                });
+                };
+                const onUp = () => {
+                    window.removeEventListener('mousemove', onMove);
+                    window.removeEventListener('mouseup', onUp);
+                };
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
             });
-            overlay.querySelector('[data-act="clear"]')?.addEventListener('click', () => {
-                state.searchQuery = '';
-                searchInput.value = '';
-                doClose();
-                render();
+
+            exGridEl.addEventListener('dblclick', (e) => {
+                const cell = e.target.closest('.ex-c');
+                if (!cell) return;
+                e.preventDefault();
+                exStartEdit(+cell.dataset.r, +cell.dataset.c);
             });
-        }
 
-        function openPillOptionsEditor(sheet) {
-            openProcessHeadersEditor(sheet);
-        }
+            exGridEl.addEventListener('contextmenu', (e) => {
+                const cell = e.target.closest('.ex-c');
+                e.preventDefault();
+                e.stopPropagation();
+                if (cell) {
+                    state.procSel.a = { r: +cell.dataset.r, c: +cell.dataset.c };
+                    state.procSel.f = { r: +cell.dataset.r, c: +cell.dataset.c };
+                    exUpdateSel();
+                }
+                showContextMenu(e.clientX, e.clientY, [
+                    { icon: '⧉', label: 'Copiar (Ctrl+C)', fn: exCopySelection },
+                    { icon: '📥', label: 'Pegar (Ctrl+V)', fn: exPasteSelection },
+                    { icon: '🧹', label: 'Limpiar selección', fn: exClearSelection },
+                    null,
+                    { icon: '➕', label: 'Insertar fila debajo', fn: () => exInsertRow(state.procSel.a.r) },
+                    { icon: '➕', label: 'Insertar columna a la derecha', fn: () => exInsertCol(state.procSel.a.c) },
+                    null,
+                    { icon: '▦', label: 'Seleccionar todo (Ctrl+A)', fn: () => {
+                        state.procSel.a = { r: 0, c: 0 };
+                        state.procSel.f = { r: rows - 1, c: cols - 1 };
+                        exUpdateSel();
+                    }}
+                ]);
+            });
 
+            exScrollEl.addEventListener('keydown', (e) => {
+                if (exEditing) return;
+                const s = state.procSel;
+                if (!s) return;
+                const grid = getActiveSheet().grid;
+                const { rows: R, cols: C } = exGridDims(grid);
+                if (e.ctrlKey || e.metaKey) {
+                    const k = e.key.toLowerCase();
+                    if (k === 'c') { e.preventDefault(); exCopySelection(); }
+                    else if (k === 'v') { e.preventDefault(); exPasteSelection(); }
+                    else if (k === 'a') { e.preventDefault(); s.a = { r: 0, c: 0 }; s.f = { r: R - 1, c: C - 1 }; exUpdateSel(); }
+                    return;
+                }
+                const nav = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+                if (nav) {
+                    e.preventDefault();
+                    const nr = Math.max(0, Math.min(R - 1, s.f.r + nav[0]));
+                    const nc = Math.max(0, Math.min(C - 1, s.f.c + nav[1]));
+                    if (e.shiftKey) s.f = { r: nr, c: nc };
+                    else { s.a = { r: nr, c: nc }; s.f = { r: nr, c: nc }; }
+                    exUpdateSel();
+                    const el = exCellEls[nr][nc];
+                    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                    return;
+                }
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nr = Math.min(R - 1, s.f.r + 1);
+                    s.a = { r: nr, c: s.f.c }; s.f = { r: nr, c: s.f.c };
+                    exUpdateSel();
+                    const el = exCellEls[nr][s.f.c];
+                    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                    return;
+                }
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const nc = Math.max(0, Math.min(C - 1, s.f.c + (e.shiftKey ? -1 : 1)));
+                    s.a = { r: s.f.r, c: nc }; s.f = { r: s.f.r, c: nc };
+                    exUpdateSel();
+                    return;
+                }
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                    e.preventDefault();
+                    exClearSelection();
+                    return;
+                }
+                if (e.key === 'F2') {
+                    e.preventDefault();
+                    exStartEdit(s.f.r, s.f.c);
+                    return;
+                }
+                if (e.key.length === 1 && !e.altKey) {
+                    e.preventDefault();
+                    exStartEdit(s.f.r, s.f.c, e.key);
+                }
+            });
+
+            exUpdateSel();
+            const s = state.procSel;
+            s.a.r = Math.max(0, Math.min(rows - 1, s.a.r));
+            s.f.r = Math.max(0, Math.min(rows - 1, s.f.r));
+            s.a.c = Math.max(0, Math.min(cols - 1, s.a.c));
+            s.f.c = Math.max(0, Math.min(cols - 1, s.f.c));
+            exUpdateSel();
+        }
         function highlightMatches(query) {
             const cards = cardsContainer.querySelectorAll('.card-item');
             cards.forEach(el => {
@@ -2766,9 +3656,13 @@
             if (!sheet) { searchResultCount.textContent = ''; return; }
             let count;
             if (sheet.mode === 'process') {
-                count = sheet.cards.filter(r =>
-                    (r.cells || []).some(c => String(c || '').toLowerCase().includes(query.toLowerCase()))
-                ).length;
+                const g = sheet.grid || { cells: [] };
+                count = 0;
+                g.cells.forEach(row => {
+                    row.forEach(v => {
+                        if (String(v || '').toLowerCase().includes(query.toLowerCase())) count++;
+                    });
+                });
             } else {
                 count = sheet.cards.filter(c =>
                     (c.title || '').toLowerCase().includes(query.toLowerCase()) || waToPlain(c.body).toLowerCase().includes(query.toLowerCase())
@@ -2855,10 +3749,12 @@
         // ============================================================
         function openDrawer(sheetId, cardId) {
             state.drawer = { sheetId, cardId };
+            state.drawerNoteEdit = false;
             render();
         }
         function closeDrawer() {
             state.drawer = null;
+            state.drawerNoteEdit = false;
             render();
         }
 
@@ -2915,6 +3811,92 @@
                     drawerScroll.appendChild(box);
                 });
             }
+
+            // ── Nota personal (visible solo aquí, se guarda en la tarjeta) ──
+            const noteRow = document.createElement('div');
+            noteRow.className = 'd-note-row';
+            const noteTitle = document.createElement('span');
+            noteTitle.className = 'd-section-label';
+            noteTitle.textContent = '📝 Nota';
+            const noteBtns = document.createElement('div');
+            noteBtns.className = 'd-note-btns';
+            noteRow.appendChild(noteTitle);
+            noteRow.appendChild(noteBtns);
+
+            const noteBox = document.createElement('div');
+            noteBox.className = 'd-note';
+
+            if (state.drawerNoteEdit) {
+                // Editor inline en el mismo bloque (sin popup)
+                const ta = document.createElement('textarea');
+                ta.className = 'd-note-input';
+                ta.value = card.notes || '';
+                ta.placeholder = 'Escribe aquí tu nota... (Ctrl+Enter para guardar)';
+                noteBox.appendChild(ta);
+                const ebtns = document.createElement('div');
+                ebtns.className = 'd-note-editbtns';
+                const btnSave = document.createElement('button');
+                btnSave.className = 'd-note-btn save';
+                btnSave.textContent = '💾 Guardar nota';
+                btnSave.addEventListener('click', () => {
+                    card.notes = ta.value;
+                    state.drawerNoteEdit = false;
+                    saveData();
+                    render();
+                    showToast('✅ Nota guardada.', 'success', 1200);
+                });
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'd-note-btn';
+                btnCancel.textContent = 'Cancelar';
+                btnCancel.addEventListener('click', () => {
+                    state.drawerNoteEdit = false;
+                    render();
+                });
+                ebtns.appendChild(btnSave);
+                ebtns.appendChild(btnCancel);
+                noteBox.appendChild(ebtns);
+                ta.addEventListener('keydown', (e) => {
+                    e.stopPropagation();
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        btnSave.click();
+                    }
+                });
+                setTimeout(() => { try { ta.focus(); } catch (err) {} }, 0);
+            } else if (card.notes && card.notes.trim()) {
+                const content = document.createElement('div');
+                content.className = 'd-note-content';
+                content.textContent = card.notes;
+                noteBox.appendChild(content);
+                const btnCopy = document.createElement('button');
+                btnCopy.className = 'd-note-btn';
+                btnCopy.textContent = '📋';
+                btnCopy.title = 'Copiar nota';
+                btnCopy.addEventListener('click', () => copyText(card.notes));
+                const btnEdit = document.createElement('button');
+                btnEdit.className = 'd-note-btn';
+                btnEdit.textContent = '✏️ Editar';
+                btnEdit.addEventListener('click', () => {
+                    state.drawerNoteEdit = true;
+                    render();
+                });
+                noteBtns.appendChild(btnCopy);
+                noteBtns.appendChild(btnEdit);
+            } else {
+                noteBox.classList.add('empty');
+                noteBox.textContent = 'Sin nota todavía.';
+                const btnAdd = document.createElement('button');
+                btnAdd.className = 'd-note-btn';
+                btnAdd.textContent = '➕ Agregar nota';
+                btnAdd.addEventListener('click', () => {
+                    state.drawerNoteEdit = true;
+                    render();
+                });
+                noteBox.appendChild(btnAdd);
+            }
+
+            drawerScroll.appendChild(noteRow);
+            drawerScroll.appendChild(noteBox);
 
             drawerActions.innerHTML = `
                 <button class="da-btn primary" data-a="copy">📋 Copiar</button>
@@ -3072,15 +4054,47 @@
                 btn.addEventListener('click', () => { hideContextMenu(); item.fn(); });
                 ctxMenu.appendChild(btn);
             });
-            ctxMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
-            ctxMenu.style.top = Math.min(y, window.innerHeight - 120) + 'px';
+            ctxMenu.style.left = x + 'px';
+            ctxMenu.style.top = y + 'px';
             ctxMenu.classList.add('show');
+            // Reposicionar para que el menú completo quede dentro de la ventana
+            const r = ctxMenu.getBoundingClientRect();
+            let left = x, top = y;
+            if (r.bottom > window.innerHeight - 8) top = Math.max(8, window.innerHeight - r.height - 8);
+            if (r.right > window.innerWidth - 8) left = Math.max(8, window.innerWidth - r.width - 8);
+            ctxMenu.style.left = left + 'px';
+            ctxMenu.style.top = top + 'px';
         }
 
         function hideContextMenu() {
             ctxMenu.classList.remove('show');
             ctxMenu.innerHTML = '';
         }
+
+        // Los submenús abren hacia abajo/derecha; si se salen de la ventana, se voltean
+        function flipSubmenuIfNeeded(item) {
+            const sub = item.querySelector('.ctx-sub');
+            if (!sub) return;
+            requestAnimationFrame(() => {
+                sub.style.top = '';
+                sub.style.bottom = '';
+                sub.style.left = '';
+                sub.style.right = '';
+                const sr = sub.getBoundingClientRect();
+                if (sr.bottom > window.innerHeight - 8) {
+                    sub.style.top = 'auto';
+                    sub.style.bottom = '0';
+                }
+                if (sr.right > window.innerWidth - 8) {
+                    sub.style.left = 'auto';
+                    sub.style.right = '0';
+                }
+            });
+        }
+        ctxMenu.addEventListener('mouseover', (e) => {
+            const item = e.target.closest('.has-sub');
+            if (item) flipSubmenuIfNeeded(item);
+        });
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#ctx-menu')) hideContextMenu();
@@ -3355,7 +4369,7 @@
             let isNew = false;
             if (cardId) card = sheet.cards.find(c => c.id === cardId);
             if (!card) {
-                card = { id: generateId(), title: '', body: '', color: '#fef3c7', images: [], links: [], pinned: false, created: Date.now(), updated: Date.now() };
+                card = { id: generateId(), title: '', body: '', color: '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
                 isNew = true;
                 sheet.cards.push(card);
                 saveData();
@@ -3680,14 +4694,31 @@
             const sizeFields = document.getElementById('settings-size-fields');
             if (sheet.mode === 'cards') {
                 sizeFields.style.display = '';
+                settingsHSlider.min = 120; settingsHSlider.max = 620;
+                settingsHNum.min = 120; settingsHNum.max = 620;
                 settingsWSlider.value = sheet.cardSize.w;
                 settingsHSlider.value = sheet.cardSize.h;
                 settingsWNum.value = sheet.cardSize.w;
                 settingsHNum.value = sheet.cardSize.h;
-            } else {
+            } else if (sheet.mode === 'images') {
                 sizeFields.style.display = 'none';
+                settingsHSlider.min = 380; settingsHSlider.max = 800;
+                settingsHNum.min = 380; settingsHNum.max = 800;
                 settingsHSlider.value = sheet.cardSize.h;
                 settingsHNum.value = sheet.cardSize.h;
+            } else {
+                sizeFields.style.display = 'none';
+            }
+            renderSettingsColors(sheet);
+            const gridFields = document.getElementById('settings-grid-fields');
+            if (sheet.mode === 'process') {
+                gridFields.style.display = '';
+                settingsCwSlider.value = (sheet.grid && sheet.grid.colWidths && sheet.grid.colWidths[0]) || EX_DEF_W;
+                settingsRhSlider.value = EX_DEF_H;
+                settingsGridDirty = false;
+                syncSettingsGrid();
+            } else {
+                gridFields.style.display = 'none';
             }
             syncSettingsSliders();
             settingsOverlay.classList.add('show');
@@ -3711,7 +4742,7 @@
             } else if (sheet.mode === 'images') {
                 settingsPreview.style.display = '';
                 settingsPreview.style.width = '100%';
-                settingsPreview.style.height = (h + 40) + 'px';
+                settingsPreview.style.height = h + 'px';
             } else {
                 settingsPreview.style.display = 'none';
             }
@@ -3729,7 +4760,9 @@
         settingsHNum.addEventListener('input', () => {
             let v = parseInt(settingsHNum.value, 10);
             if (isNaN(v)) v = 190;
-            v = Math.max(120, Math.min(620, v));
+            const min = parseInt(settingsHSlider.min, 10);
+            const max = parseInt(settingsHSlider.max, 10);
+            v = Math.max(min, Math.min(max, v));
             settingsHSlider.value = v;
             syncSettingsSliders();
         });
@@ -3737,11 +4770,12 @@
         document.getElementById('settings-reset').addEventListener('click', () => {
             const sheet = getSheetById(settingsSheetId);
             if (!sheet) return;
-            sheet.cardSize = { w: 150, h: 190 };
+            const dh = sheet.mode === 'images' ? 420 : 190;
+            sheet.cardSize = { w: 150, h: dh };
             settingsWSlider.value = 150;
-            settingsHSlider.value = 190;
+            settingsHSlider.value = dh;
             settingsWNum.value = 150;
-            settingsHNum.value = 190;
+            settingsHNum.value = dh;
             syncSettingsSliders();
             saveData();
             render();
@@ -3754,6 +4788,16 @@
             const w = parseInt(settingsWSlider.value, 10);
             const h = parseInt(settingsHSlider.value, 10);
             sheet.cardSize = { w: w || 150, h: h || 190 };
+            if (sheet.mode === 'process' && sheet.grid && settingsGridDirty) {
+                const cw = parseInt(settingsCwSlider.value, 10) || EX_DEF_W;
+                const rh = parseInt(settingsRhSlider.value, 10) || EX_DEF_H;
+                const nCols = sheet.grid.cells[0] ? sheet.grid.cells[0].length : 0;
+                sheet.grid.colWidths = Array(nCols).fill(cw);
+                const rowh = {};
+                for (let i = 0; i < sheet.grid.cells.length; i++) rowh[i] = rh;
+                sheet.grid.rowHeights = rowh;
+            }
+            settingsGridDirty = false;
             saveData();
             render();
             settingsOverlay.classList.remove('show');
@@ -3763,6 +4807,97 @@
         document.getElementById('settings-close').addEventListener('click', () => settingsOverlay.classList.remove('show'));
         settingsOverlay.addEventListener('click', (e) => {
             if (e.target === settingsOverlay) settingsOverlay.classList.remove('show');
+        });
+
+        // ============================================================
+        // AJUSTES: COLOR DE HOJA Y OPCIONES DE CUADRÍCULA (procesos)
+        // ============================================================
+        const settingsColorRow = document.getElementById('settings-color-row');
+        const settingsCwSlider = document.getElementById('settings-cw-slider');
+        const settingsRhSlider = document.getElementById('settings-rh-slider');
+        const settingsCwNum = document.getElementById('settings-cw-num');
+        const settingsRhNum = document.getElementById('settings-rh-num');
+        const settingsCwVal = document.getElementById('settings-cw-val');
+        const settingsRhVal = document.getElementById('settings-rh-val');
+        let settingsGridDirty = false;
+
+        function renderSettingsColors(sheet) {
+            settingsColorRow.innerHTML = '';
+            PALETTE_COLORS.forEach(c => {
+                const sw = document.createElement('div');
+                sw.className = 'cs' + ((sheet.color || '') === c ? ' sel' : '');
+                sw.style.backgroundColor = c;
+                sw.title = c;
+                sw.addEventListener('click', () => {
+                    sheet.color = c;
+                    saveData();
+                    render();
+                    renderSettingsColors(sheet);
+                    showToast('🎨 Color de hoja actualizado.', 'success', 1000);
+                });
+                settingsColorRow.appendChild(sw);
+            });
+            const picker = document.createElement('input');
+            picker.type = 'color';
+            picker.value = sheet.color || '#3b82f6';
+            picker.addEventListener('input', (e) => {
+                sheet.color = e.target.value;
+                saveData();
+                render();
+                showToast('🎨 Color de hoja actualizado.', 'success', 1000);
+            });
+            settingsColorRow.appendChild(picker);
+        }
+
+        function syncSettingsGrid() {
+            const cw = parseInt(settingsCwSlider.value, 10) || EX_DEF_W;
+            const rh = parseInt(settingsRhSlider.value, 10) || EX_DEF_H;
+            settingsCwVal.textContent = cw;
+            settingsRhVal.textContent = rh;
+            settingsCwNum.value = cw;
+            settingsRhNum.value = rh;
+        }
+
+        settingsCwSlider.addEventListener('input', () => { settingsGridDirty = true; syncSettingsGrid(); });
+        settingsRhSlider.addEventListener('input', () => { settingsGridDirty = true; syncSettingsGrid(); });
+        settingsCwNum.addEventListener('input', () => {
+            let v = parseInt(settingsCwNum.value, 10);
+            if (isNaN(v)) v = EX_DEF_W;
+            v = Math.max(60, Math.min(300, v));
+            settingsCwSlider.value = v;
+            settingsGridDirty = true;
+            syncSettingsGrid();
+        });
+        settingsRhNum.addEventListener('input', () => {
+            let v = parseInt(settingsRhNum.value, 10);
+            if (isNaN(v)) v = EX_DEF_H;
+            v = Math.max(20, Math.min(120, v));
+            settingsRhSlider.value = v;
+            settingsGridDirty = true;
+            syncSettingsGrid();
+        });
+
+        document.getElementById('settings-cw-reset').addEventListener('click', () => {
+            const sheet = getSheetById(settingsSheetId);
+            if (!sheet || !sheet.grid) return;
+            sheet.grid.colWidths = [];
+            settingsCwSlider.value = EX_DEF_W;
+            settingsGridDirty = false;
+            syncSettingsGrid();
+            saveData();
+            render();
+            showToast('🔄 Anchos de columna restablecidos.', 'success', 1200);
+        });
+        document.getElementById('settings-rh-reset').addEventListener('click', () => {
+            const sheet = getSheetById(settingsSheetId);
+            if (!sheet || !sheet.grid) return;
+            sheet.grid.rowHeights = {};
+            settingsRhSlider.value = EX_DEF_H;
+            settingsGridDirty = false;
+            syncSettingsGrid();
+            saveData();
+            render();
+            showToast('🔄 Altos de fila restablecidos.', 'success', 1200);
         });
 
         // ============================================================
@@ -3840,24 +4975,14 @@
         // ============================================================
         btnNewCard.addEventListener('click', () => {
             const sheet = getActiveSheet();
-            if (!sheet) return;
-            if (sheet.mode === 'process') {
-                const row = { id: generateId(), cells: Array(6).fill(''), pinned: false, created: Date.now(), updated: Date.now() };
-                openRowEditor(sheet, row);
-            } else {
-                openCardEditor(sheet.id, null);
-            }
+            if (!sheet || sheet.mode === 'process') return;
+            openCardEditor(sheet.id, null);
         });
         cardsContainer.addEventListener('dblclick', (e) => {
             if (e.target.closest('.card-item') || e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
             const sheet = getActiveSheet();
-            if (!sheet) return;
-            if (sheet.mode === 'process') {
-                const row = { id: generateId(), cells: Array(6).fill(''), pinned: false, created: Date.now(), updated: Date.now() };
-                openRowEditor(sheet, row);
-            } else {
-                openCardEditor(sheet.id, null);
-            }
+            if (!sheet || sheet.mode === 'process') return;
+            openCardEditor(sheet.id, null);
         });
 
         // ============================================================
@@ -3917,7 +5042,7 @@
                         if (!modalOverlay.classList.contains('show')) {
                             e.preventDefault();
                             const sheet = getActiveSheet();
-                            if (sheet) openCardEditor(sheet.id, null);
+                            if (sheet && sheet.mode !== 'process') openCardEditor(sheet.id, null);
                         }
                         break;
                     case 't':
@@ -3995,7 +5120,10 @@
                 if (confirmOverlay.classList.contains('show')) { closeConfirm(); return; }
                 if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
                 if (colorPalette.classList.contains('show')) { colorPalette.classList.remove('show'); return; }
-                if (state.drawer) { closeDrawer(); }
+                if (state.drawer) {
+                    if (state.drawerNoteEdit) { state.drawerNoteEdit = false; render(); }
+                    else closeDrawer();
+                }
             }
         });
 
@@ -4028,7 +5156,7 @@
             loadData();
             // Asegurar que exista al menos una tarjeta de bienvenida si todo está vacío
             const sheet = getActiveSheet();
-            if (sheet && sheet.cards.length === 0 && state.sheets.length === 1 && sheet.name === 'Hoja 1') {
+            if (sheet && sheet.mode !== 'process' && sheet.cards.length === 0 && state.sheets.length === 1 && sheet.name === 'Hoja 1') {
                 sheet.cards.push({
                     id: generateId(),
                     title: '¡Bienvenido a Fast 2.0!',
@@ -4037,6 +5165,7 @@
                     images: [],
                     links: [],
                     pinned: true,
+                    notes: '',
                     created: Date.now(),
                     updated: Date.now()
                 });
