@@ -1,0 +1,4056 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Fast 2.0</title>
+    <style>
+        /* ============================================================
+               ROOT – Tema oscuro
+               ============================================================ */
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+               HEADER
+               ============================================================ */
+        #hdr {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+        #hdr-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+        .hbtn:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+        .hbtn.danger:hover { color: var(--danger); }
+        .hbtn.active { color: var(--primary); }
+        #hdr-side {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: auto;
+        }
+
+        /* ============================================================
+               TOOLBAR
+               ============================================================ */
+        #toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        #search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 140px;
+        }
+        #search-wrap input[type="search"] {
+            flex: 1;
+            padding: 5px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            font-family: var(--font);
+        }
+        #search-wrap input[type="search"]:focus { border-color: var(--primary); }
+        #search-wrap label {
+            font-size: 11px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        #search-wrap label input[type="checkbox"] { accent-color: var(--primary); cursor: pointer; }
+        #search-result-count {
+            font-size: 10px;
+            color: var(--faint);
+            white-space: nowrap;
+        }
+        .tb-btn {
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            color: var(--text);
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-family: var(--font);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .tb-btn:hover { border-color: var(--primary); background: var(--surface2); }
+        .tb-btn.active { border-color: var(--primary); color: var(--primary); }
+        .tb-btn.fav-on { border-color: var(--warning); color: var(--warning); }
+        .tb-spacer { flex: 1; }
+
+        /* ============================================================
+               CONTENIDO (grilla / lista de tarjetas)
+               ============================================================ */
+        #content {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 14px 16px;
+            position: relative;
+        }
+        #cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-auto-rows: 190px;
+            gap: 12px;
+            align-content: start;
+            min-height: 100%;
+        }
+        #content.list-view #cards-container {
+            grid-template-columns: 1fr;
+            grid-auto-rows: auto;
+        }
+        #cards-container::-webkit-scrollbar { width: 4px; }
+        #cards-container::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+
+        .empty-cards {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--faint);
+            font-size: 13px;
+            padding: 60px 0;
+            pointer-events: none;
+        }
+        .empty-cards .hint { font-size: 11px; margin-top: 8px; opacity: 0.7; }
+
+        /* ============================================================
+               TARJETAS (copy-first)
+               ============================================================ */
+        .card-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 10px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: cardIn 0.2s ease-out;
+        }
+        .card-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+        }
+        .card-item.dragging { opacity: 0.3; transform: scale(0.95); transition: none; }
+        .card-item.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59,130,246,0.35); }
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+        }
+        .card-star {
+            font-size: 12px;
+            line-height: 1.2;
+            flex-shrink: 0;
+            opacity: 0;
+        }
+        .card-item.pinned .card-star { opacity: 1; }
+        .card-title {
+            flex: 1;
+            font-size: 12px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-height: 1.3;
+        }
+        .card-body-preview {
+            font-size: 10px;
+            opacity: 0.85;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            line-height: 1.4;
+            flex: 1;
+            word-break: break-word;
+            margin-bottom: 6px;
+        }
+        .card-meta {
+            display: flex;
+            gap: 6px;
+            font-size: 10px;
+            color: var(--faint);
+            margin-bottom: 6px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .card-tab-badge {
+            font-size: 9px;
+            color: var(--primary);
+            background: rgba(0,0,0,0.35);
+            padding: 1px 5px;
+            border-radius: 8px;
+            max-width: 110px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .card-copy-row {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .copy-main {
+            flex: 1;
+            background: var(--primary);
+            border: none;
+            border-radius: var(--radius);
+            color: #fff;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 6px 4px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background 0.15s, transform 0.1s;
+        }
+        .copy-main:hover { background: #2563eb; }
+        .copy-main:active { transform: scale(0.97); }
+        .copy-more {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--muted);
+            font-size: 11px;
+            padding: 0 7px;
+            cursor: pointer;
+            font-family: var(--font);
+            flex-shrink: 0;
+        }
+        .copy-more:hover { border-color: var(--primary); color: var(--text); }
+        .card-actions {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 2px;
+            padding: 3px;
+            background: rgba(0,0,0,0.55);
+            border-radius: 0 8px 0 8px;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 5;
+        }
+        .card-item:hover .card-actions { opacity: 1; }
+        .card-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--muted);
+            padding: 1px 3px;
+            border-radius: 3px;
+            transition: 0.15s;
+            font-family: var(--font);
+        }
+        .card-actions button:hover { color: var(--text); transform: scale(1.15); }
+        .card-actions button.danger:hover { color: var(--danger); }
+
+        /* Vista lista */
+        #content.list-view .card-item {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+        }
+        #content.list-view .card-top { flex: 0 0 30%; margin: 0; }
+        #content.list-view .card-body-preview { flex: 1; margin: 0; -webkit-line-clamp: 2; }
+        #content.list-view .card-meta { margin: 0; flex-shrink: 0; }
+        #content.list-view .card-copy-row { flex: 0 0 auto; }
+        #content.list-view .copy-main { flex: none; padding: 6px 16px; }
+
+        /* ============================================================
+               MODO IMÁGENES: tarjetas alargadas full-width
+               ============================================================ */
+        .card-item.img-card {
+            grid-column: 1 / -1;
+            grid-template-rows: auto 1fr auto auto;
+            gap: 8px;
+            cursor: default;
+            padding: 12px 16px;
+        }
+        .img-card-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .img-card-title {
+            font-size: 15px;
+            font-weight: 800;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .img-card-media {
+            flex: 1;
+            min-height: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            background: rgba(0,0,0,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img-card-media img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .img-card-noimg {
+            font-size: 12px;
+            color: var(--faint);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .img-card-text {
+            font-size: 11px;
+            opacity: 0.85;
+            flex-shrink: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        #content.list-view .card-item.img-card { grid-template-rows: auto; }
+        #content.list-view .img-card-media { display: none; }
+
+        /* ============================================================
+               MODO PROCESOS: tabla de 6 columnas
+               ============================================================ */
+        .proc-wrap {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .proc-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .proc-toolbar .tb-btn {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .proc-toolbar .tb-btn:hover { border-color: var(--primary); }
+        .proc-table {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface2);
+            width: 100%;
+        }
+        .proc-row {
+            display: grid;
+            grid-template-columns: 1.4fr 0.9fr 1.1fr 1fr 1fr 1.4fr;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s;
+        }
+        .proc-row:last-child { border-bottom: none; }
+        .proc-row:hover { background: rgba(255,255,255,0.03); }
+        .proc-row.proc-pinned { background: rgba(251,191,36,0.07); }
+        .proc-row.proc-pinned:hover { background: rgba(251,191,36,0.12); }
+        .proc-header {
+            background: var(--surface3);
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.3px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .proc-header:hover { background: var(--surface3); }
+        .proc-cell {
+            padding: 8px 10px;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            border-right: 1px solid var(--border);
+            min-width: 0;
+            cursor: default;
+            display: flex;
+            align-items: center;
+        }
+        .proc-cell:last-child { border-right: none; }
+        .proc-hcell {
+            justify-content: space-between;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            white-space: normal;
+            flex-wrap: wrap;
+        }
+        .proc-hlabel { overflow: hidden; text-overflow: ellipsis; }
+        .proc-hfilter {
+            font-size: 11px;
+            opacity: 0.55;
+            padding: 1px 4px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .proc-hfilter:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+        .proc-col2 {
+            background: rgba(0,0,0,0.12);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .proc-pill {
+            width: 100%;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 11px;
+            padding: 5px 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            transition: 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .proc-pill:hover { border-color: var(--primary); }
+        .proc-pill-arrow { font-size: 9px; opacity: 0.6; flex-shrink: 0; }
+
+        .filter-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 7px 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .filter-opt:hover { border-color: var(--primary); }
+        .filter-clear { color: var(--danger); }
+
+        /* ============================================================
+               MODALES GENÉRICOS (editores de procesos)
+               ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 560px;
+            max-width: 92vw;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: cardIn 0.18s ease-out;
+        }
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .modal-head h3 { margin: 0; font-size: 14px; }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 16px;
+            cursor: pointer;
+            font-family: var(--font);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .modal-close:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+        .modal-body {
+            padding: 14px 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-body label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+        .modal-body textarea {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 8px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .modal-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .form-grid { display: grid; gap: 8px; }
+        .form-field { margin-bottom: 10px; min-width: 0; }
+        .form-field label { margin-bottom: 4px; }
+        .form-field input[type="text"], .form-field select {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 7px 9px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .form-field input[type="text"]:focus, .form-field select:focus { border-color: var(--primary); }
+        .form-field input[type="checkbox"] { accent-color: var(--primary); }
+        .btn-primary, .btn-secondary {
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 7px 16px;
+            border-radius: var(--radius);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-secondary { background: var(--surface3); color: var(--text); border-color: var(--border); }
+        .btn-secondary:hover { border-color: var(--primary); }
+
+        /* ============================================================
+               SHEETBAR (pestañas estilo Excel)
+               ============================================================ */
+        #sheetbar {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            height: 34px;
+            overflow: hidden;
+        }
+        #sheet-tabs {
+            display: flex;
+            align-items: stretch;
+            overflow-x: auto;
+            overflow-y: hidden;
+            flex: 1;
+            min-width: 0;
+            scrollbar-width: none;
+        }
+        #sheet-tabs::-webkit-scrollbar { display: none; }
+        .sheet-tab {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 12px;
+            min-width: 90px;
+            max-width: 170px;
+            border-right: 1px solid var(--border);
+            border-top: 3px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 11.5px;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+        .sheet-tab:hover { background: var(--surface2); color: var(--text); }
+        .sheet-tab.active {
+            background: var(--surface3);
+            color: var(--text);
+            font-weight: 700;
+        }
+        .sheet-tab .sheet-color-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .sheet-tab .sheet-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: var(--font);
+            font-size: 11.5px;
+        }
+        .sheet-tab .sheet-name.editing {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--primary);
+            border-radius: 3px;
+            padding: 1px 4px;
+            outline: none;
+            color: var(--text);
+            font-size: 11.5px;
+            font-family: var(--font);
+            min-width: 40px;
+        }
+        .sheet-tab .sheet-count {
+            font-size: 9px;
+            color: var(--faint);
+            flex-shrink: 0;
+        }
+        #sheet-add-btn {
+            flex-shrink: 0;
+            width: 34px;
+            border: none;
+            border-left: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--faint);
+            font-size: 16px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: 0.15s;
+        }
+        #sheet-add-btn:hover { color: var(--primary); background: var(--surface2); }
+
+        /* ============================================================
+               DRAWER (detalle)
+               ============================================================ */
+        #drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 300px;
+            background: var(--surface);
+            border-left: 1px solid var(--border2);
+            display: none;
+            flex-direction: column;
+            z-index: 200;
+            animation: drawerIn 0.2s ease-out;
+            box-shadow: -8px 0 30px rgba(0,0,0,0.5);
+        }
+        #drawer.open { display: flex; }
+        @keyframes drawerIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        #drawer-hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        #drawer-hdr-title {
+            flex: 1;
+            font-size: 12px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #drawer-hdr .dbtn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 13px;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        #drawer-hdr .dbtn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+        #drawer-scroll { flex: 1; overflow-y: auto; padding: 10px 12px; }
+        #drawer-scroll::-webkit-scrollbar { width: 4px; }
+        #drawer-scroll::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+        .d-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--faint);
+            margin: 12px 0 6px;
+        }
+        #drawer-body {
+            font-size: 12px;
+            line-height: 1.6;
+            word-break: break-word;
+            color: var(--text);
+            user-select: text;
+            cursor: text;
+        }
+        #drawer-body p { margin: 0 0 8px; }
+        #drawer-body b { color: #fff; }
+        #drawer-body code {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 1px 4px;
+            font-size: 11px;
+            font-family: Consolas, monospace;
+        }
+        #drawer-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .d-img {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            aspect-ratio: 1 / 1;
+            background: var(--bg);
+        }
+        .d-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .d-img:hover { border-color: var(--primary); }
+        .d-img .d-img-actions {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.6);
+            opacity: 0;
+            transition: 0.15s;
+        }
+        .d-img:hover .d-img-actions { opacity: 1; }
+        .d-img-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+            font-size: 14px;
+        }
+        .d-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            margin-bottom: 4px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--text);
+            overflow: hidden;
+        }
+        .d-link:hover { border-color: var(--primary); }
+        .d-link .link-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--primary); }
+        #drawer-actions {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 10px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .da-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 5px 8px;
+            font-family: var(--font);
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .da-btn:hover { border-color: var(--primary); background: var(--surface3); }
+        .da-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .da-btn.primary:hover { background: #2563eb; }
+        .da-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* ============================================================
+               GUÍA DE ARRASTRE
+               ============================================================ */
+        .drag-guide {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+            z-index: 150;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(59,130,246,0.4);
+        }
+        .drag-guide.show { display: block; }
+
+        /* ============================================================
+               MODAL DE EDITOR
+               ============================================================ */
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 0;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .modal-title .close-modal {
+            background: none;
+            border: none;
+            color: var(--faint);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .modal-title .close-modal:hover { color: var(--danger); }
+
+        /* ============================================================
+               SELECTOR DE MODO (crear hoja)
+               ============================================================ */
+        #mode-picker-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 320;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #mode-picker-overlay.show { display: flex; }
+        .mode-picker-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 440px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        #mode-picker-list {
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+        .mode-pick-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            cursor: pointer;
+            font-family: var(--font);
+            text-align: left;
+            transition: all 0.15s;
+        }
+        .mode-pick-btn:hover { border-color: var(--primary); background: var(--surface3); transform: translateY(-1px); }
+        .mode-pick-btn .mp-icon { font-size: 22px; flex-shrink: 0; }
+        .mode-pick-btn .mp-info { display: flex; flex-direction: column; gap: 2px; }
+        .mode-pick-btn .mp-info b { font-size: 13px; }
+        .mode-pick-btn .mp-info i { font-size: 11px; color: var(--muted); font-style: normal; }
+
+        /* ============================================================
+               AJUSTES DE HOJA (tamaño de tarjetas)
+               ============================================================ */
+        #settings-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 320;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #settings-overlay.show { display: flex; }
+        .settings-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .settings-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 14px 18px;
+            overflow-y: auto;
+        }
+        .settings-mode-label {
+            font-size: 13px;
+            padding: 6px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        .px-val { color: var(--primary); font-weight: 700; }
+        #settings-overlay input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+        .settings-numrow {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+        .settings-numrow input[type="number"] {
+            width: 90px;
+            padding: 4px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+        }
+        .settings-numrow input[type="number"]:focus { border-color: var(--primary); }
+        .settings-preview-wrap {
+            display: flex;
+            justify-content: center;
+            padding: 14px;
+            background: rgba(0,0,0,0.25);
+            border: 1px dashed var(--border2);
+            border-radius: var(--radius);
+            min-height: 90px;
+            overflow: auto;
+        }
+        #settings-preview {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: width 0.08s, height 0.08s;
+            overflow: hidden;
+            user-select: none;
+        }
+        #settings-preview .sp-title {
+            font-size: 12px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #settings-preview .sp-body {
+            font-size: 10px;
+            opacity: 0.85;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            line-height: 1.4;
+            flex: 1;
+        }
+        #settings-preview .sp-copy {
+            background: var(--primary);
+            color: #fff;
+            border-radius: var(--radius);
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            padding: 5px 0;
+            flex-shrink: 0;
+        }
+        #settings-overlay .modal-actions { padding: 10px 18px; border-top: 1px solid var(--border); }
+        .settings-mode-label .sm-badge {
+            display: inline-block;
+            margin-right: 6px;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            background: rgba(59,130,246,0.2);
+            color: var(--primary);
+        }
+
+        .editor-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 18px;
+            overflow-y: auto;
+        }
+        .editor-panel::-webkit-scrollbar { width: 4px; }
+        .editor-panel::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+        .modal-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .modal-row .modal-field { flex: 1; }
+        .modal-field { display: flex; flex-direction: column; gap: 3px; }
+        .modal-field label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+        }
+        .modal-field input[type="text"],
+        .modal-field select,
+        .modal-field textarea {
+            padding: 6px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s;
+            width: 100%;
+            resize: vertical;
+        }
+        .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--primary); }
+        .field-hint { font-size: 10px; color: var(--faint); margin-top: 2px; }
+        .wa-toolbar {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            padding-bottom: 2px;
+        }
+        .wa-toolbar button {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 12px;
+            font-family: var(--font);
+            padding: 3px 9px;
+            transition: 0.15s;
+        }
+        .wa-toolbar button:hover { border-color: var(--primary); background: var(--surface2); }
+        .wa-preview {
+            border: 1px dashed var(--border2);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text);
+            background: rgba(0,0,0,0.15);
+            min-height: 40px;
+            user-select: text;
+        }
+        .wa-preview b { color: #fff; }
+        .wa-preview code {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 1px 4px;
+            font-family: Consolas, monospace;
+            font-size: 11px;
+        }
+        .wa-preview:empty::before { content: 'La vista previa aparecerá aquí...'; color: var(--faint); }
+        .img-item, .link-item {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: var(--surface3);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .img-item input, .link-item input {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text);
+            font-size: 11px;
+            padding: 4px 6px;
+            font-family: var(--font);
+            outline: none;
+        }
+        .img-item .img-preview-small {
+            width: 34px;
+            height: 34px;
+            object-fit: cover;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .btn-remove {
+            background: none;
+            border: none;
+            color: var(--faint);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 2px;
+        }
+        .btn-remove:hover { color: var(--danger); }
+        .add-btn {
+            padding: 6px 0;
+            background: none;
+            border: 1px dashed var(--border2);
+            border-radius: var(--radius);
+            color: var(--faint);
+            cursor: pointer;
+            font-size: 11px;
+            font-family: var(--font);
+            transition: 0.15s;
+            margin-top: 4px;
+        }
+        .add-btn:hover { border-color: var(--primary); color: var(--text); }
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            padding: 12px 18px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .modal-actions button {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+        .modal-actions .btn-cancel { background: var(--surface3); color: var(--muted); border: 1px solid var(--border); }
+        .modal-actions .btn-cancel:hover { background: var(--surface2); }
+        .modal-actions .btn-save { background: var(--primary); color: #fff; }
+        .modal-actions .btn-save:hover { background: #2563eb; }
+
+        /* ============================================================
+               PALETA DE COLORES
+               ============================================================ */
+        .color-palette {
+            position: fixed;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 400;
+            display: none;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-width: 210px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        }
+        .color-palette.show { display: flex; }
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .color-swatch:hover { transform: scale(1.15); border-color: var(--text); }
+        .color-picker-input { width: 24px; height: 24px; border: none; padding: 0; cursor: pointer; background: none; }
+        .color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-picker-input::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 4px; }
+
+        /* ============================================================
+               MENÚ CONTEXTUAL
+               ============================================================ */
+        #ctx-menu {
+            position: fixed;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 4px;
+            z-index: 500;
+            display: none;
+            min-width: 180px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+        #ctx-menu.show { display: block; }
+        .ctx-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text);
+            white-space: nowrap;
+            font-family: var(--font);
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        .ctx-item:hover { background: var(--surface3); }
+        .ctx-item.danger { color: var(--danger); }
+        .ctx-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 6px;
+        }
+        .ctx-sub {
+            position: absolute;
+            left: calc(100% - 4px);
+            top: 0;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 4px;
+            display: none;
+            min-width: 160px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+        .ctx-item.has-sub { position: relative; }
+        .ctx-item.has-sub:hover .ctx-sub { display: block; }
+        .ctx-sub .ctx-item { color: var(--text); }
+        .ctx-sub .ctx-item:hover { background: var(--surface3); }
+
+        /* ============================================================
+               DIÁLOGO DE CONFIRMACIÓN TEMÁTICO
+               ============================================================ */
+        #confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        #confirm-overlay.show { display: flex; }
+        #confirm-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 20px;
+            width: 320px;
+            max-width: 90%;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+        }
+        #confirm-msg { font-size: 13px; line-height: 1.5; margin-bottom: 16px; word-break: break-word; }
+        #confirm-btns { display: flex; gap: 8px; justify-content: flex-end; }
+        #confirm-btns button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--font);
+            transition: 0.15s;
+        }
+        #confirm-ok { background: var(--danger); color: #fff; }
+        #confirm-ok:hover { background: #dc2626; }
+        #confirm-cancel { background: var(--surface3); color: var(--muted); border: 1px solid var(--border); }
+        #confirm-cancel:hover { background: var(--surface2); }
+
+        /* ============================================================
+               TOAST
+               ============================================================ */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 90%;
+        }
+        .toast.success { background: var(--success); }
+        .toast.warning { background: var(--warning); color: #000; }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--primary); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div id="hdr">
+        <span id="hdr-title">⚡ Fast 2.0</span>
+        <div id="hdr-side">
+            <button class="hbtn" id="hdr-settings" onclick="abrirAjustesHoja()" title="Ajustes de esta hoja (tamaño de tarjetas)">⚙️</button>
+            <button class="hbtn danger" onclick="cerrarFast()" title="Cerrar (Ctrl+Shift+F)">✕</button>
+        </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div id="toolbar">
+        <div id="search-wrap">
+            <input type="search" id="search-input" placeholder="🔍 Buscar tarjetas... (Ctrl+F)" />
+            <label>
+                <input type="checkbox" id="search-all" />
+                En todas
+            </label>
+            <span id="search-result-count"></span>
+        </div>
+        <button class="tb-btn" id="btn-new-card" title="Nueva tarjeta (Ctrl+N)">➕ Tarjeta</button>
+        <button class="tb-btn" id="btn-fav-filter" title="Mostrar solo favoritos">⭐</button>
+        <button class="tb-btn" id="btn-view" title="Alternar vista grilla/lista (Ctrl+Shift+V)">▦</button>
+    </div>
+
+    <!-- CONTENIDO -->
+    <section id="content">
+        <div id="cards-container">
+            <div class="empty-cards">
+                No hay tarjetas en esta hoja.
+                <div class="hint">Doble clic aquí o pulsa "➕ Tarjeta" para crear una</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHEETBAR (Excel) -->
+    <div id="sheetbar">
+        <div id="sheet-tabs"></div>
+        <button id="sheet-add-btn" title="Nueva hoja (Ctrl+T)">＋</button>
+    </div>
+
+    <!-- GUÍA DE ARRASTRE -->
+    <div class="drag-guide" id="drag-guide"></div>
+
+    <!-- DRAWER (detalle) -->
+    <aside id="drawer">
+        <div id="drawer-hdr">
+            <span id="drawer-hdr-title">Detalle</span>
+            <button class="dbtn" id="drawer-copy" title="Copiar texto">📋</button>
+            <button class="dbtn" id="drawer-close" title="Cerrar (Esc)">✕</button>
+        </div>
+        <div id="drawer-scroll"></div>
+        <div id="drawer-actions"></div>
+    </aside>
+
+    <!-- PALETA DE COLORES -->
+    <div class="color-palette" id="color-palette"></div>
+
+    <!-- MENÚ CONTEXTUAL -->
+    <div id="ctx-menu"></div>
+
+    <!-- SELECTOR DE MODO AL CREAR HOJA -->
+    <div id="mode-picker-overlay">
+        <div class="mode-picker-box">
+            <div class="modal-title">
+                <span id="mode-picker-title">¿Qué modo de pestaña quieres?</span>
+                <button class="close-modal" id="mode-picker-close">✕</button>
+            </div>
+            <div id="mode-picker-list"></div>
+        </div>
+    </div>
+
+    <!-- AJUSTES DE HOJA (tamaño de tarjetas con vista previa en vivo) -->
+    <div id="settings-overlay">
+        <div class="settings-box">
+            <div class="modal-title">
+                <span id="settings-title">⚙️ Ajustes de hoja</span>
+                <button class="close-modal" id="settings-close">✕</button>
+            </div>
+            <div class="settings-body">
+                <div class="modal-field">
+                    <label>Modo de la pestaña</label>
+                    <div id="settings-mode" class="settings-mode-label"></div>
+                </div>
+                <div id="settings-size-fields">
+                    <div class="modal-field">
+                        <label>Ancho de tarjeta: <span id="settings-w-val" class="px-val"></span> px</label>
+                        <input type="range" id="settings-w-slider" min="110" max="420" step="5" />
+                        <div class="settings-numrow">
+                            <input type="number" id="settings-w-num" min="110" max="420" step="5" /> <span>px</span>
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label>Alto de tarjeta: <span id="settings-h-val" class="px-val"></span> px</label>
+                        <input type="range" id="settings-h-slider" min="120" max="620" step="5" />
+                        <div class="settings-numrow">
+                            <input type="number" id="settings-h-num" min="120" max="620" step="5" /> <span>px</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label>Vista previa en tiempo real</label>
+                    <div class="settings-preview-wrap">
+                        <div class="settings-preview" id="settings-preview">
+                            <div class="sp-title">Título de la tarjeta</div>
+                            <div class="sp-body">Este es el texto de vista previa para mostrar cómo se verá la tarjeta con este tamaño.</div>
+                            <div class="sp-copy">📋 COPIAR</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="settings-reset">Restablecer</button>
+                <button class="btn-save" id="settings-save">💾 Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITOR -->
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span id="modal-title-text">✏️ Editar tarjeta</span>
+                <button class="close-modal" id="modal-close">✕</button>
+            </div>
+            <div class="editor-panel">
+                <div class="modal-row">
+                    <div class="modal-field">
+                        <label>Hoja</label>
+                        <select id="edit-sheet"></select>
+                    </div>
+                    <div class="modal-field" style="flex:0 0 auto;">
+                        <label>Color</label>
+                        <input type="color" id="edit-color" value="#fef3c7" style="width:44px;height:30px;padding:2px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;" />
+                    </div>
+                    <div class="modal-field" style="flex:0 0 auto;">
+                        <label>⭐ Favorita</label>
+                        <input type="checkbox" id="edit-pinned" style="width:18px;height:18px;accent-color:var(--warning);cursor:pointer;" />
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label>Título</label>
+                    <input type="text" id="edit-title" maxlength="120" />
+                </div>
+                <div class="modal-field">
+                    <label>Cuerpo (formato WhatsApp)</label>
+                    <div class="wa-toolbar">
+                        <button data-m="bold" title="*negrita*">B</button>
+                        <button data-m="italic" title="_cursiva_">I</button>
+                        <button data-m="strike" title="~tachado~">S</button>
+                        <button data-m="code" title="`código`">&lt;/&gt;</button>
+                        <button data-m="list" title="Nueva línea con •">• Lista</button>
+                        <button data-m="num" title="Nueva línea con 1.">1. Lista</button>
+                    </div>
+                    <textarea id="edit-body" rows="8" placeholder="Escribe aquí el proceso a copiar..."></textarea>
+                    <div class="field-hint">WhatsApp usa: *negrita* · _cursiva_ · ~tachado~ · `código`</div>
+                </div>
+                <div class="modal-field">
+                    <label>Vista previa (cómo lo verá el agente)</label>
+                    <div class="wa-preview" id="edit-body-preview"></div>
+                </div>
+                <div class="modal-field">
+                    <label>Imágenes (máx. 10)</label>
+                    <div id="edit-images-container"></div>
+                    <button class="add-btn" id="btn-add-image">🖼️ Añadir imagen</button>
+                    <button class="add-btn" id="btn-paste-image">📋 Pegar imagen del portapapeles (Ctrl+V)</button>
+                    <input type="file" id="file-input" accept="image/*" style="display:none" />
+                </div>
+                <div class="modal-field">
+                    <label>Enlaces (máx. 10)</label>
+                    <div id="edit-links-container"></div>
+                    <button class="add-btn" id="btn-add-link">🔗 Añadir enlace</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="modal-cancel">Cancelar</button>
+                <button class="btn-save" id="modal-save">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMACIÓN TEMÁTICA -->
+    <div id="confirm-overlay">
+        <div id="confirm-box">
+            <div id="confirm-msg"></div>
+            <div id="confirm-btns">
+                <button id="confirm-ok">Eliminar</button>
+                <button id="confirm-cancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-container"></div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const fs = require('fs');
+        const path = require('path');
+        const os = require('os');
+
+        // ============================================================
+        // CONSTANTES Y ESTADO
+        // ============================================================
+        const PALETTE_COLORS = [
+            '#fef3c7', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706',
+            '#dbeafe', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb',
+            '#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#10b981', '#059669',
+            '#fce4ec', '#f8bbd0', '#f48fb1', '#f06292', '#ec407a', '#d81b60'
+        ];
+        const SHEET_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#06b6d4', '#f97316', '#14b8a6'];
+
+        // Modos de hoja
+        const SHEET_MODES = {
+            cards:   { icon: '📇', label: 'Tarjetas',            desc: 'Tarjetas copy-first con formato WhatsApp' },
+            images:  { icon: '🖼️', label: 'Buscador de imágenes', desc: 'Tarjetas alargadas: título + imagen + texto' },
+            process: { icon: '⚙️', label: 'Procesos',             desc: 'Tabla de datos de 6 columnas' }
+        };
+        const DEFAULT_HEADERS = ['Título', 'Tipo', 'Descripción', 'Área', 'Prioridad', 'Detalles'];
+        const DEFAULT_COL2_OPTIONS = ['Opción A', 'Opción B', 'Opción C'];
+
+        let state = {
+            sheets: [],
+            activeSheetId: null,
+            searchQuery: '',
+            searchAll: false,
+            favOnly: false,
+            view: 'grid',
+            drawer: null,
+            dataPath: null,
+            dataPathReady: false
+        };
+
+        // Cola de guardado
+        let saveQueue = [];
+        let isSaving = false;
+
+        // Estado de arrastre
+        let dragState = null;
+        let pressInfo = null;
+        let scrollInterval = null;
+        const SCROLL_SPEED = 15;
+
+        // ============================================================
+        // REFERENCIAS DOM
+        // ============================================================
+        const contentEl = document.getElementById('content');
+        const cardsContainer = document.getElementById('cards-container');
+        const sheetTabs = document.getElementById('sheet-tabs');
+        const searchInput = document.getElementById('search-input');
+        const searchAllCheck = document.getElementById('search-all');
+        const searchResultCount = document.getElementById('search-result-count');
+        const btnNewCard = document.getElementById('btn-new-card');
+        const btnFavFilter = document.getElementById('btn-fav-filter');
+        const btnView = document.getElementById('btn-view');
+        const btnSheetAdd = document.getElementById('sheet-add-btn');
+        const dragGuide = document.getElementById('drag-guide');
+
+        // Drawer
+        const drawer = document.getElementById('drawer');
+        const drawerHdrTitle = document.getElementById('drawer-hdr-title');
+        const drawerScroll = document.getElementById('drawer-scroll');
+        const drawerActions = document.getElementById('drawer-actions');
+        const drawerClose = document.getElementById('drawer-close');
+        const drawerCopy = document.getElementById('drawer-copy');
+
+        // Modal
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalClose = document.getElementById('modal-close');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalSave = document.getElementById('modal-save');
+        const modalTitleText = document.getElementById('modal-title-text');
+        const editSheet = document.getElementById('edit-sheet');
+        const editColor = document.getElementById('edit-color');
+        const editPinned = document.getElementById('edit-pinned');
+        const editTitle = document.getElementById('edit-title');
+        const editBody = document.getElementById('edit-body');
+        const editBodyPreview = document.getElementById('edit-body-preview');
+        const editImagesContainer = document.getElementById('edit-images-container');
+        const editLinksContainer = document.getElementById('edit-links-container');
+        const btnAddImage = document.getElementById('btn-add-image');
+        const btnPasteImage = document.getElementById('btn-paste-image');
+        const btnAddLink = document.getElementById('btn-add-link');
+        const fileInput = document.getElementById('file-input');
+
+        // Paleta, menú contextual y confirmación
+        const colorPalette = document.getElementById('color-palette');
+        const ctxMenu = document.getElementById('ctx-menu');
+        const confirmOverlay = document.getElementById('confirm-overlay');
+        const confirmMsg = document.getElementById('confirm-msg');
+        const confirmOk = document.getElementById('confirm-ok');
+        const confirmCancel = document.getElementById('confirm-cancel');
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        // ============================================================
+        // CONFIRMACIÓN TEMÁTICA
+        // ============================================================
+        let confirmCb = null;
+        function showConfirm(msg, cb, okText = 'Eliminar') {
+            confirmCb = cb;
+            confirmMsg.textContent = msg;
+            confirmOk.textContent = okText;
+            confirmOverlay.classList.add('show');
+            confirmOk.focus();
+        }
+        function closeConfirm() {
+            confirmOverlay.classList.remove('show');
+            confirmCb = null;
+        }
+        confirmOk.addEventListener('click', () => {
+            const cb = confirmCb;
+            closeConfirm();
+            if (cb) cb();
+        });
+        confirmCancel.addEventListener('click', closeConfirm);
+        confirmOverlay.addEventListener('click', (e) => {
+            if (e.target === confirmOverlay) closeConfirm();
+        });
+
+        // ============================================================
+        // PERSISTENCIA CON COLA DE GUARDADO
+        // ============================================================
+        function obtenerRuta() {
+            return new Promise((resolve) => {
+                ipcRenderer.invoke('get-user-data-path').then((ruta) => {
+                    state.dataPath = path.join(ruta, 'gestor-fast.json');
+                    state.dataPathReady = true;
+                    resolve();
+                }).catch(() => {
+                    state.dataPath = path.join(os.homedir(), 'AppData', 'Roaming', 'gestor-casos', 'gestor-fast.json');
+                    state.dataPathReady = true;
+                    resolve();
+                });
+            });
+        }
+
+        function processSaveQueue() {
+            if (isSaving || saveQueue.length === 0 || !state.dataPathReady) return;
+            isSaving = true;
+            const dataToSave = saveQueue.shift();
+            try {
+                const dir = path.dirname(state.dataPath);
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                fs.writeFileSync(state.dataPath, JSON.stringify(dataToSave, null, 2), 'utf8');
+            } catch (e) {
+                showToast('❌ Error al guardar datos: ' + e.message, 'error');
+            } finally {
+                isSaving = false;
+                processSaveQueue();
+            }
+        }
+
+        function saveData() {
+            saveQueue.push({
+                sheets: state.sheets,
+                activeSheetId: state.activeSheetId,
+                settings: { searchAll: state.searchAll, view: state.view }
+            });
+            processSaveQueue();
+        }
+
+        // ============================================================
+        // MIGRACIÓN tabs (v1) → sheets (v2)
+        // ============================================================
+        function migrateV1(data) {
+            if (!data.tabs || !Array.isArray(data.tabs)) return null;
+            const sheets = data.tabs.map((tab, i) => ({
+                id: tab.id || ('sheet_' + Date.now() + '_' + i),
+                name: tab.name || ('Hoja ' + (i + 1)),
+                color: SHEET_COLORS[i % SHEET_COLORS.length],
+                cards: (tab.cards || []).map(c => migrateCardV1(c))
+            }));
+            return {
+                sheets,
+                activeSheetId: data.activeTabId && sheets.some(s => s.id === data.activeTabId) ? data.activeTabId : sheets[0].id
+            };
+        }
+
+        function migrateCardV1(c) {
+            return {
+                id: c.id || ('card_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6)),
+                title: c.title || '',
+                body: htmlToWa(c.body || ''),
+                color: c.color || '#fef3c7',
+                images: Array.isArray(c.images) ? c.images.map(i => ({ data: i.data || '', label: i.label || '' })) : [],
+                links: Array.isArray(c.links) ? c.links.map(l => ({ text: l.text || '', url: l.url || '' })) : [],
+                pinned: !!c.pinned,
+                created: c.created || Date.now(),
+                updated: c.updated || Date.now()
+            };
+        }
+
+        // Normaliza una hoja: completa campos según modo
+        function normalizeSheet(s) {
+            if (!s) return s;
+            if (!s.mode) s.mode = 'cards';
+            if (!SHEET_MODES[s.mode]) s.mode = 'cards';
+            if (!s.cardSize) s.cardSize = {};
+            const defaultH = s.mode === 'images' ? 200 : 190;
+            if (!s.cardSize.w) s.cardSize.w = 150;
+            if (!s.cardSize.h) s.cardSize.h = defaultH;
+            if (!Array.isArray(s.headers) || s.headers.length !== 6) s.headers = DEFAULT_HEADERS.slice();
+            if (!Array.isArray(s.col2Options) || !s.col2Options.length) s.col2Options = DEFAULT_COL2_OPTIONS.slice();
+            if (s.mode === 'process') {
+                // Las filas de proceso se guardan como objetos con cells[]
+                (s.cards || []).forEach(r => { if (r && !Array.isArray(r.cells)) r.cells = Array(6).fill(''); });
+            }
+            return s;
+        }
+
+        function loadData() {
+            if (!state.dataPathReady || !fs.existsSync(state.dataPath)) {
+                const defaultSheet = normalizeSheet({
+                    id: 'sheet_' + Date.now(),
+                    name: 'Hoja 1',
+                    color: '#3b82f6',
+                    cards: []
+                });
+                state.sheets = [defaultSheet];
+                state.activeSheetId = defaultSheet.id;
+                saveData();
+                return;
+            }
+            try {
+                const raw = fs.readFileSync(state.dataPath, 'utf8');
+                const data = JSON.parse(raw);
+
+                if (data.sheets && Array.isArray(data.sheets) && data.sheets.length) {
+                    state.sheets = data.sheets.map(normalizeSheet);
+                    state.activeSheetId = data.activeSheetId || data.sheets[0].id;
+                    if (data.settings) {
+                        state.searchAll = !!data.settings.searchAll;
+                        state.view = data.settings.view === 'list' ? 'list' : 'grid';
+                    }
+                } else {
+                    const migrated = migrateV1(data);
+                    if (migrated && migrated.sheets.length) {
+                        state.sheets = migrated.sheets.map(normalizeSheet);
+                        state.activeSheetId = migrated.activeSheetId;
+                        saveData();
+                        showToast('🔄 Datos migrados al nuevo formato (hojas).', 'info', 3500);
+                    } else {
+                        throw new Error('Datos corruptos');
+                    }
+                }
+            } catch (e) {
+                showToast('⚠️ Error al cargar datos. Se crearán datos por defecto.', 'warning');
+                const defaultSheet = normalizeSheet({
+                    id: 'sheet_' + Date.now(),
+                    name: 'Hoja 1',
+                    color: '#3b82f6',
+                    cards: []
+                });
+                state.sheets = [defaultSheet];
+                state.activeSheetId = defaultSheet.id;
+                saveData();
+            }
+        }
+
+        // ============================================================
+        // UTILIDADES
+        // ============================================================
+        function getActiveSheet() {
+            return state.sheets.find(s => s.id === state.activeSheetId) || state.sheets[0];
+        }
+        function getSheetById(id) {
+            return state.sheets.find(s => s.id === id);
+        }
+        function getCardById(sheetId, cardId) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return null;
+            return sheet.cards.find(c => c.id === cardId);
+        }
+        function generateId() {
+            return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        }
+        function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+        function getContrastColor(hexColor) {
+            if (!hexColor) return 'var(--text)';
+            const hex = hexColor.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.5 ? '#191919' : '#e2e8f0';
+        }
+
+        // ============================================================
+        // FORMATO WHATSAPP
+        // ============================================================
+        // Convierte texto con marcadores de WhatsApp a HTML para vista previa
+        function waToHtml(text) {
+            let s = esc(text || '');
+            s = s.replace(/```([\s\S]*?)```/g, '<pre style="margin:4px 0;padding:6px 8px;background:var(--bg);border:1px solid var(--border);border-radius:4px;font-family:Consolas,monospace;font-size:11px;white-space:pre-wrap;"><code>$1</code></pre>');
+            s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+            s = s.replace(/\*([^*\n]+)\*/g, '<b>$1</b>');
+            s = s.replace(/_([^_\n]+)_/g, '<i>$1</i>');
+            s = s.replace(/~([^~\n]+)~/g, '<s>$1</s>');
+            return s.replace(/\n/g, '<br>');
+        }
+
+        // Convierte texto con marcadores de WhatsApp a texto plano (sin códigos)
+        function waToPlain(text) {
+            return String(text || '')
+                .replace(/```([\s\S]*?)```/g, '$1')
+                .replace(/`([^`\n]+)`/g, '$1')
+                .replace(/\*([^*\n]+)\*/g, '$1')
+                .replace(/_([^_\n]+)_/g, '$1')
+                .replace(/~([^~\n]+)~/g, '$1');
+        }
+
+        // Convierte HTML (v1) a texto con marcadores de WhatsApp
+        function htmlToWa(html) {
+            if (!html) return '';
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            const walk = (node) => {
+                const out = [];
+                node.childNodes.forEach((child) => {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        out.push(child.textContent);
+                    } else if (child.nodeType === Node.ELEMENT_NODE) {
+                        const tag = child.tagName.toLowerCase();
+                        const inner = walk(child);
+                        if (tag === 'b' || tag === 'strong') out.push('*' + inner + '*');
+                        else if (tag === 'i' || tag === 'em') out.push('_' + inner + '_');
+                        else if (tag === 's' || tag === 'strike' || tag === 'del') out.push('~' + inner + '~');
+                        else if (tag === 'code' || tag === 'pre') out.push('`' + inner + '`');
+                        else if (tag === 'br') out.push('\n');
+                        else if (tag === 'p' || tag === 'div' || tag === 'li') out.push(inner + '\n');
+                        else out.push(inner);
+                    }
+                });
+                return out.join('');
+            };
+            return walk(temp)
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        }
+
+        function stripHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html || '';
+            return div.textContent || '';
+        }
+
+        // ============================================================
+        // RENDERIZADO PRINCIPAL
+        // ============================================================
+        function render() {
+            renderSheets();
+            renderCards();
+            renderDrawer();
+            updateResultCount();
+            updateViewClass();
+            collectVisibleCards();
+        }
+        // ---------- SHEETBAR (pestañas estilo Excel) ----------
+        function renderSheets() {
+            sheetTabs.innerHTML = '';
+            state.sheets.forEach((sheet, idx) => {
+                const el = document.createElement('div');
+                el.className = 'sheet-tab' + (sheet.id === state.activeSheetId ? ' active' : '');
+                el.dataset.sheetId = sheet.id;
+                el.style.borderTopColor = sheet.color || 'transparent';
+                el.innerHTML = `
+                    <span class="sheet-color-dot" style="background:${sheet.color || '#3b82f6'}"></span>
+                    <span class="sheet-name">${esc(sheet.name)}</span>
+                    <span class="sheet-count">${sheet.cards.length}</span>
+                `;
+
+                // Clic: activar
+                el.addEventListener('click', (e) => {
+                    if (e.target.closest('.sheet-name.editing')) return;
+                    state.activeSheetId = sheet.id;
+                    state.drawer = null;
+                    saveData();
+                    render();
+                });
+
+                // Doble clic en nombre: renombrar
+                el.querySelector('.sheet-name').addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    startRenameSheet(sheet.id, el);
+                });
+
+                // Clic derecho: menú contextual de hoja
+                el.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showSheetContextMenu(e.clientX, e.clientY, sheet.id);
+                });
+
+                sheetTabs.appendChild(el);
+            });
+        }
+
+        function startRenameSheet(sheetId, el) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const nameSpan = el.querySelector('.sheet-name');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'sheet-name editing';
+            input.value = sheet.name;
+            input.maxLength = 30;
+            nameSpan.replaceWith(input);
+            input.focus();
+            input.select();
+
+            const finishRename = () => {
+                const newName = input.value.trim() || sheet.name;
+                sheet.name = newName;
+                saveData();
+                render();
+            };
+
+            input.addEventListener('blur', finishRename);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') input.blur();
+                else if (e.key === 'Escape') { input.value = sheet.name; input.blur(); }
+            });
+        }
+
+        function newSheet(name, mode) {
+            const idx = state.sheets.length;
+            const sheet = {
+                id: generateId(),
+                name: name || ('Hoja ' + (idx + 1)),
+                color: SHEET_COLORS[idx % SHEET_COLORS.length],
+                mode: mode || 'cards',
+                cardSize: { w: 150, h: 190 },
+                headers: DEFAULT_HEADERS.slice(),
+                col2Options: DEFAULT_COL2_OPTIONS.slice(),
+                cards: []
+            };
+            state.sheets.push(sheet);
+            state.activeSheetId = sheet.id;
+            state.drawer = null;
+            saveData();
+            render();
+            return sheet;
+        }
+
+        function duplicateSheet(sheetId) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const copy = JSON.parse(JSON.stringify(sheet));
+            copy.id = generateId();
+            copy.name = sheet.name + ' (copia)';
+            const idx = state.sheets.indexOf(sheet);
+            state.sheets.splice(idx + 1, 0, copy);
+            saveData();
+            render();
+            showToast('⧉ Hoja duplicada.', 'success');
+        }
+
+        function moveSheet(sheetId, dir) {
+            const idx = state.sheets.findIndex(s => s.id === sheetId);
+            if (idx === -1) return;
+            const to = idx + dir;
+            if (to < 0 || to >= state.sheets.length) return;
+            const [moved] = state.sheets.splice(idx, 1);
+            state.sheets.splice(to, 0, moved);
+            saveData();
+            render();
+        }
+
+        function confirmDeleteSheet(sheetId) {
+            if (state.sheets.length <= 1) {
+                showToast('⚠️ No puedes eliminar la última hoja.', 'warning');
+                return;
+            }
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const msg = sheet.cards.length > 0
+                ? `¿Eliminar la hoja "${sheet.name}"? Contiene ${sheet.cards.length} tarjeta(s).`
+                : `¿Eliminar la hoja "${sheet.name}"?`;
+            showConfirm(msg, () => {
+                const idx = state.sheets.indexOf(sheet);
+                if (idx !== -1) state.sheets.splice(idx, 1);
+                if (state.activeSheetId === sheet.id) state.activeSheetId = state.sheets[0].id;
+                if (state.drawer && state.drawer.sheetId === sheet.id) state.drawer = null;
+                saveData();
+                render();
+                showToast('🗑 Hoja eliminada.', 'success');
+            });
+        }
+
+        // ---------- GRILLA DE TARJETAS ----------
+        function renderCards() {
+            const sheet = getActiveSheet();
+            cardsContainer.innerHTML = '';
+
+            if (!sheet) {
+                cardsContainer.innerHTML = '<div class="empty-cards">No hay hojas activas.</div>';
+                return;
+            }
+
+            // Despacho por modo de hoja
+            contentEl.dataset.mode = sheet.mode || 'cards';
+            if (sheet.mode === 'images') { renderImagesMode(sheet); return; }
+            if (sheet.mode === 'process') { renderProcessMode(sheet); return; }
+            renderCardsMode(sheet);
+        }
+
+        // ---------- MODO TARJETAS (actual, sin cambios) ----------
+        function renderCardsMode(sheet) {
+            // Grid adaptado al tamaño configurado por hoja
+            const cs = sheet.cardSize || { w: 150, h: 190 };
+            cardsContainer.style.gridTemplateColumns = 'repeat(auto-fill, ' + cs.w + 'px)';
+            cardsContainer.style.gridAutoRows = cs.h + 'px';
+            cardsContainer.classList.remove('images-mode');
+
+            const query = state.searchQuery.toLowerCase().trim();
+            let cards = [];
+
+            if (query && state.searchAll) {
+                state.sheets.forEach(s => {
+                    s.cards.forEach(c => {
+                        const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
+                        if (hay) cards.push({ card: c, sheetId: s.id });
+                    });
+                });
+            } else if (query) {
+                sheet.cards.forEach(c => {
+                    const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
+                    if (hay) cards.push({ card: c, sheetId: sheet.id });
+                });
+            } else {
+                cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id }));
+            }
+
+            if (state.favOnly) {
+                cards = cards.filter(({ card }) => card.pinned);
+            }
+
+            // Favoritas primero, luego orden original
+            cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
+
+            if (!cards.length) {
+                if (query) {
+                    cardsContainer.innerHTML = '<div class="empty-cards">Sin resultados.<div class="hint">Prueba con otra búsqueda</div></div>';
+                } else if (state.favOnly) {
+                    cardsContainer.innerHTML = '<div class="empty-cards">Sin favoritas.<div class="hint">Marca una tarjeta con ⭐ en su editor</div></div>';
+                } else {
+                    cardsContainer.innerHTML = '<div class="empty-cards">No hay tarjetas en esta hoja.<div class="hint">Doble clic aquí o pulsa "➕ Tarjeta" para crear una</div></div>';
+                }
+                return;
+            }
+
+            cards.forEach(({ card, sheetId }) => {
+                const el = document.createElement('div');
+                el.className = 'card-item' + (card.pinned ? ' pinned' : '');
+                el.dataset.cardId = card.id;
+                el.dataset.sheetId = sheetId;
+                el.style.backgroundColor = card.color || 'var(--surface2)';
+                el.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
+                // Tamaño personalizado por hoja
+                if (sheet.cardSize && sheet.cardSize.w) el.style.minWidth = sheet.cardSize.w + 'px';
+                if (sheet.cardSize && sheet.cardSize.h) el.style.height = sheet.cardSize.h + 'px';
+                el.style.gridRow = 'auto';
+
+                const bodyPlain = waToPlain(card.body).slice(0, 60);
+                const metaBits = [];
+                if (card.images && card.images.length) metaBits.push('🖼' + card.images.length);
+                if (card.links && card.links.length) metaBits.push('🔗' + card.links.length);
+                const badge = (query && state.searchAll && sheetId !== sheet.id) ? `<span class="card-tab-badge">${esc(getSheetById(sheetId)?.name || '')}</span>` : '';
+
+                el.innerHTML = `
+                    <div class="card-top">
+                        <span class="card-star">⭐</span>
+                        <div class="card-title">${esc(card.title) || 'Sin título'}</div>
+                    </div>
+                    <div class="card-body-preview">${esc(bodyPlain)}</div>
+                    <div class="card-meta">${metaBits.join(' ')}${badge}</div>
+                    <div class="card-copy-row">
+                        <button class="copy-main" data-act="copy" title="Copiar texto para WhatsApp">📋 COPIAR</button>
+                        <button class="copy-more" data-act="copymore" title="Más opciones de copiado">▾</button>
+                    </div>
+                    <div class="card-actions">
+                        <button data-act="edit" title="Editar">✏️</button>
+                        <button data-act="pin" title="Fijar/desfijar favorita">⭐</button>
+                        <button data-act="color" title="Color">🎨</button>
+                        <button data-act="duplicate" title="Duplicar">⧉</button>
+                        <button data-act="delete" class="danger" title="Eliminar">🗑</button>
+                    </div>
+                `;
+
+                // Acciones rápidas
+                el.querySelector('[data-act="copy"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    copyCardBody(card);
+                });
+                el.querySelector('[data-act="copymore"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showCopyMenu(e, card, sheetId);
+                });
+                el.querySelector('[data-act="edit"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openCardEditor(sheetId, card.id);
+                });
+                el.querySelector('[data-act="pin"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    card.pinned = !card.pinned;
+                    saveData();
+                    render();
+                    showToast(card.pinned ? '⭐ Tarjeta fijada.' : '☆ Tarjeta desfijada.', 'success', 1200);
+                });
+                el.querySelector('[data-act="color"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const rect = el.getBoundingClientRect();
+                    showColorPalette(rect.right - 210, rect.top + 10, sheetId, card.id);
+                });
+                el.querySelector('[data-act="duplicate"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    duplicateCard(sheetId, card.id);
+                });
+                el.querySelector('[data-act="delete"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    confirmDeleteCard(sheetId, card.id);
+                });
+
+                // Interacción clic vs arrastre (umbral 4px)
+                el.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+                    pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
+                    document.addEventListener('mousemove', onGlobalMove);
+                    document.addEventListener('mouseup', onGlobalUp);
+                    document.addEventListener('mouseleave', onGlobalLeave);
+                });
+
+                // Doble clic: editar
+                el.addEventListener('dblclick', (e) => {
+                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+                    openCardEditor(sheetId, card.id);
+                });
+
+                // Clic derecho: menú contextual
+                el.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showCardContextMenu(e.clientX, e.clientY, sheetId, card.id);
+                });
+
+                cardsContainer.appendChild(el);
+            });
+
+            if (query) highlightMatches(query);
+        }
+
+        // ---------- MODO BUSCADOR DE IMÁGENES ----------
+        function renderImagesMode(sheet) {
+            cardsContainer.classList.add('images-mode');
+            const h = (sheet.cardSize && sheet.cardSize.h) || 200;
+
+            const query = state.searchQuery.toLowerCase().trim();
+            let cards = [];
+            if (query && state.searchAll) {
+                state.sheets.forEach(s => {
+                    s.cards.forEach(c => {
+                        const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
+                        if (hay) cards.push({ card: c, sheetId: s.id });
+                    });
+                });
+            } else if (query) {
+                sheet.cards.forEach(c => {
+                    const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
+                    if (hay) cards.push({ card: c, sheetId: sheet.id });
+                });
+            } else {
+                cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id }));
+            }
+            if (state.favOnly) cards = cards.filter(({ card }) => card.pinned);
+            cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
+
+            if (!cards.length) {
+                cardsContainer.innerHTML = query
+                    ? '<div class="empty-cards">Sin resultados.</div>'
+                    : '<div class="empty-cards">No hay tarjetas de imagen.<div class="hint">Pulsa "➕ Tarjeta" para crear una</div></div>';
+                return;
+            }
+
+            cards.forEach(({ card, sheetId }) => {
+                const el = document.createElement('div');
+                el.className = 'card-item img-card' + (card.pinned ? ' pinned' : '');
+                el.dataset.cardId = card.id;
+                el.dataset.sheetId = sheetId;
+                el.style.height = h + 'px';
+                el.style.backgroundColor = card.color || 'var(--surface2)';
+                el.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
+                const badge = (query && state.searchAll && sheetId !== sheet.id) ? `<span class="card-tab-badge">${esc(getSheetById(sheetId)?.name || '')}</span>` : '';
+                const firstImg = (card.images && card.images.length) ? card.images[0].data : '';
+
+                el.innerHTML = `
+                    <div class="img-card-top">
+                        <span class="card-star">⭐</span>
+                        <div class="img-card-title">${esc(card.title) || 'Sin título'}</div>
+                        ${badge}
+                    </div>
+                    <div class="img-card-media">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" />` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
+                    <div class="img-card-text">${esc(waToPlain(card.body).slice(0, 160))}</div>
+                    <div class="card-copy-row">
+                        <button class="copy-main" data-act="copy" title="Copiar texto">📋 COPIAR</button>
+                        <button class="copy-more" data-act="copymore" title="Más opciones">▾</button>
+                    </div>
+                    <div class="card-actions">
+                        <button data-act="edit" title="Editar">✏️</button>
+                        <button data-act="pin" title="Fijar favorita">⭐</button>
+                        <button data-act="color" title="Color">🎨</button>
+                        <button data-act="duplicate" title="Duplicar">⧉</button>
+                        <button data-act="delete" class="danger" title="Eliminar">🗑</button>
+                    </div>
+                `;
+
+                el.querySelector('[data-act="copy"]').addEventListener('click', (e) => { e.stopPropagation(); copyCardBody(card); });
+                el.querySelector('[data-act="copymore"]').addEventListener('click', (e) => { e.stopPropagation(); showCopyMenu(e, card, sheetId); });
+                el.querySelector('[data-act="edit"]').addEventListener('click', (e) => { e.stopPropagation(); openCardEditor(sheetId, card.id); });
+                el.querySelector('[data-act="pin"]').addEventListener('click', (e) => {
+                    e.stopPropagation(); card.pinned = !card.pinned; saveData(); render();
+                    showToast(card.pinned ? '⭐ Fijada.' : '☆ Desfijada.', 'success', 1200);
+                });
+                el.querySelector('[data-act="color"]').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const rect = el.getBoundingClientRect();
+                    showColorPalette(rect.right - 210, rect.top + 10, sheetId, card.id);
+                });
+                el.querySelector('[data-act="duplicate"]').addEventListener('click', (e) => { e.stopPropagation(); duplicateCard(sheetId, card.id); });
+                el.querySelector('[data-act="delete"]').addEventListener('click', (e) => { e.stopPropagation(); confirmDeleteCard(sheetId, card.id); });
+
+                el.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+                    pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
+                    document.addEventListener('mousemove', onGlobalMove);
+                    document.addEventListener('mouseup', onGlobalUp);
+                    document.addEventListener('mouseleave', onGlobalLeave);
+                });
+                el.addEventListener('dblclick', (e) => {
+                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+                    openCardEditor(sheetId, card.id);
+                });
+                el.addEventListener('contextmenu', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    showCardContextMenu(e.clientX, e.clientY, sheetId, card.id);
+                });
+
+                cardsContainer.appendChild(el);
+            });
+
+            if (query) highlightMatches(query);
+        }
+
+        // ---------- MODO PROCESOS (tabla de 6 columnas) ----------
+        function renderProcessMode(sheet) {
+            cardsContainer.classList.remove('images-mode');
+            cardsContainer.style.gridTemplateColumns = '1fr';
+            cardsContainer.style.gridAutoRows = 'auto';
+            const query = state.searchQuery.toLowerCase().trim();
+            let rows = sheet.cards.slice();
+            if (query) {
+                rows = rows.filter(r => {
+                    const hay = r.cells && r.cells.some(cell => String(cell).toLowerCase().includes(query));
+                    return hay || String(r.cells[0]).toLowerCase().includes(query);
+                });
+            }
+            if (state.favOnly) rows = rows.filter(r => r.pinned);
+
+            const wrap = document.createElement('div');
+            wrap.className = 'proc-wrap';
+
+            const toolbar = document.createElement('div');
+            toolbar.className = 'proc-toolbar';
+            const addBtn = document.createElement('button');
+            addBtn.className = 'tb-btn';
+            addBtn.textContent = '➕ Añadir fila';
+            addBtn.addEventListener('click', () => {
+                const row = { id: generateId(), cells: Array(sheet.headers.length).fill(''), pinned: false, created: Date.now(), updated: Date.now() };
+                openRowEditor(sheet, row);
+            });
+            const headerBtn = document.createElement('button');
+            headerBtn.className = 'tb-btn';
+            headerBtn.textContent = '⚙️ Cabeceras';
+            headerBtn.addEventListener('click', () => openProcessHeadersEditor(sheet));
+            toolbar.appendChild(addBtn);
+            toolbar.appendChild(headerBtn);
+            wrap.appendChild(toolbar);
+
+            if (!rows.length) {
+                const empty = document.createElement('div');
+                empty.className = 'empty-cards';
+                empty.innerHTML = 'No hay filas en esta tabla.<div class="hint">Pulsa "➕ Añadir fila" para comenzar</div>';
+                wrap.appendChild(empty);
+            } else {
+                const table = document.createElement('div');
+                table.className = 'proc-table';
+
+                // Cabecera
+                const hdrRow = document.createElement('div');
+                hdrRow.className = 'proc-row proc-header';
+                sheet.headers.forEach((title, i) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'proc-cell proc-hcell';
+                    cell.dataset.col = i;
+                    cell.innerHTML = `<span class="proc-hlabel">${esc(title)}</span><span class="proc-hfilter" title="Filtrar columna ${i + 1}">☰</span>`;
+                    cell.addEventListener('click', () => openProcessFilter(sheet, i));
+                    hdrRow.appendChild(cell);
+                });
+                table.appendChild(hdrRow);
+
+                // Filas de datos
+                rows.forEach(row => {
+                    const r = document.createElement('div');
+                    r.className = 'proc-row' + (row.pinned ? ' proc-pinned' : '');
+                    r.dataset.rowId = row.id;
+                    const cells = (row.cells && row.cells.length === sheet.headers.length) ? row.cells : Array(sheet.headers.length).fill('');
+                    cells.forEach((cell, i) => {
+                        const c = document.createElement('div');
+                        c.className = 'proc-cell' + (i === 1 ? ' proc-col2' : '');
+                        c.dataset.col = i;
+                        if (i === 1) {
+                            // Columna 2: botón píldora con menú desplegable
+                            c.innerHTML = `<button class="proc-pill">${esc(String(cell)) || 'Seleccionar'}<span class="proc-pill-arrow">▾</span></button>`;
+                            c.querySelector('.proc-pill').addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                showPillMenu(e, sheet, row, i);
+                            });
+                        } else {
+                            c.textContent = cell || '';
+                            c.title = cell || '';
+                        }
+                        c.addEventListener('dblclick', (e) => {
+                            e.stopPropagation();
+                            openRowEditor(sheet, row, i);
+                        });
+                        r.appendChild(c);
+                    });
+                    r.addEventListener('contextmenu', (e) => {
+                        e.preventDefault(); e.stopPropagation();
+                        showProcessRowMenu(e.clientX, e.clientY, sheet, row);
+                    });
+                    table.appendChild(r);
+                });
+
+                wrap.appendChild(table);
+            }
+            cardsContainer.appendChild(wrap);
+
+            if (query) highlightProcessRows(query);
+        }
+
+        function showProcessRowMenu(x, y, sheet, row) {
+            const items = [
+                { icon: '✏️', label: 'Editar fila', fn: () => openRowEditor(sheet, row) },
+                { icon: '⭐', label: row.pinned ? 'Quitar de favoritas' : 'Fijar fila', fn: () => {
+                    row.pinned = !row.pinned; saveData(); render();
+                }},
+                { icon: '⧉', label: 'Duplicar fila', fn: () => {
+                    const copy = JSON.parse(JSON.stringify(row)); copy.id = generateId();
+                    const idx = sheet.cards.indexOf(row);
+                    sheet.cards.splice(idx + 1, 0, copy); saveData(); render();
+                }},
+                null,
+                { icon: '🗑', label: 'Eliminar fila', danger: true, fn: () => {
+                    showConfirm(`¿Eliminar esta fila?`, () => {
+                        const idx = sheet.cards.indexOf(row);
+                        if (idx !== -1) { sheet.cards.splice(idx, 1); saveData(); render(); showToast('🗑 Fila eliminada.', 'success'); }
+                    });
+                }}
+            ];
+            showContextMenu(x, y, items);
+        }
+
+        function highlightProcessRows(query) {
+            const cells = cardsContainer.querySelectorAll('.proc-cell');
+            cells.forEach(c => {
+                if (c.classList.contains('proc-col2')) return;
+                const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                const t = c.textContent;
+                if (t && t.toLowerCase().includes(query.toLowerCase())) {
+                    c.innerHTML = t.replace(re, '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">$1</mark>');
+                }
+            });
+        }
+
+        function showPillMenu(e, sheet, row, colIndex) {
+            const options = (sheet.col2Options && sheet.col2Options.length) ? sheet.col2Options : DEFAULT_COL2_OPTIONS;
+            const items = options.map(opt => ({
+                icon: '', label: opt,
+                fn: () => {
+                    row.cells[colIndex] = opt;
+                    saveData(); render();
+                }
+            }));
+            items.push(null, {
+                icon: '⚙️', label: 'Editar opciones de esta columna',
+                fn: () => openPillOptionsEditor(sheet)
+            });
+            showContextMenu(e.clientX, e.clientY, items);
+        }
+
+        function openRowEditor(sheet, row, colIndex) {
+            if (!sheet || !row) return;
+            const isNew = !sheet.cards.includes(row);
+            const headers = (sheet.headers && sheet.headers.length === 6) ? sheet.headers : DEFAULT_HEADERS;
+            const cells = (row.cells && row.cells.length === 6) ? row.cells.slice() : Array(6).fill('');
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `
+                <div class="modal">
+                    <div class="modal-head">
+                        <h3>${isNew ? '➕ Nueva fila' : '✏️ Editar fila'}</h3>
+                        <button class="modal-close" data-act="close">✕</button>
+                    </div>
+                    <div class="modal-body" style="max-height:70vh;overflow:auto;">
+                        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px;">
+                            ${headers.map((h, i) => `
+                                <div class="form-field">
+                                    <label>${esc(h)}</label>
+                                    ${i === 1 ? `
+                                        <select data-idx="${i}">
+                                            ${(sheet.col2Options && sheet.col2Options.length ? sheet.col2Options : DEFAULT_COL2_OPTIONS).map(o =>
+                                                `<option value="${esc(o)}" ${cells[i] === o ? 'selected' : ''}>${esc(o)}</option>`
+                                            ).join('')}
+                                        </select>
+                                    ` : `<input type="text" data-idx="${i}" value="${esc(cells[i] || '')}" ${i === 0 ? 'autofocus' : ''} />`}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="form-field">
+                            <label><input type="checkbox" data-act="pinned" ${row.pinned ? 'checked' : ''} /> ⭐ Fijar como favorita</label>
+                        </div>
+                    </div>
+                    <div class="modal-foot">
+                        <button class="btn-secondary" data-act="close">Cancelar</button>
+                        <button class="btn-primary" data-act="save">Guardar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            overlay.classList.add('show');
+
+            const doClose = () => { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); };
+            overlay.querySelectorAll('[data-act="close"]').forEach(b => b.addEventListener('click', doClose));
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose(); });
+            overlay.querySelectorAll('input[type="text"]').forEach(inp => {
+                inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
+            });
+            overlay.querySelector('[data-act="save"]').addEventListener('click', save);
+
+            function save() {
+                const vals = [];
+                overlay.querySelectorAll('[data-idx]').forEach(el => {
+                    const i = parseInt(el.dataset.idx, 10);
+                    vals[i] = el.value;
+                });
+                if (isNew) {
+                    // Nueva fila
+                    row.cells = vals;
+                    row.pinned = overlay.querySelector('[data-act="pinned"]').checked;
+                    row.created = row.created || Date.now();
+                    row.updated = Date.now();
+                    sheet.cards.push(row);
+                } else {
+                    row.cells = vals;
+                    row.pinned = overlay.querySelector('[data-act="pinned"]').checked;
+                    row.updated = Date.now();
+                }
+                saveData();
+                render();
+                doClose();
+                showToast(isNew ? '✅ Fila añadida.' : '✅ Fila guardada.', 'success', 1200);
+            }
+        }
+
+        function openProcessHeadersEditor(sheet) {
+            if (!sheet) return;
+            const headers = (sheet.headers && sheet.headers.length === 6) ? sheet.headers : DEFAULT_HEADERS.slice();
+            const opts = (sheet.col2Options && sheet.col2Options.length) ? sheet.col2Options : DEFAULT_COL2_OPTIONS.slice();
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `
+                <div class="modal">
+                    <div class="modal-head">
+                        <h3>⚙️ Cabeceras de la tabla</h3>
+                        <button class="modal-close" data-act="close">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <label>Nombres de las 6 columnas:</label>
+                        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px;">
+                            ${headers.map((h, i) => `
+                                <div class="form-field">
+                                    <label>Columna ${i + 1}</label>
+                                    <input type="text" data-idx="${i}" value="${esc(h)}" />
+                                </div>
+                            `).join('')}
+                        </div>
+                        <label style="margin-top:10px;display:block;">Opciones de la columna 2 (una por línea):</label>
+                        <textarea data-act="opts" rows="6">${esc(opts.join('\n'))}</textarea>
+                    </div>
+                    <div class="modal-foot">
+                        <button class="btn-secondary" data-act="close">Cancelar</button>
+                        <button class="btn-primary" data-act="save">Guardar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            overlay.classList.add('show');
+            const doClose = () => { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); };
+            overlay.querySelectorAll('[data-act="close"]').forEach(b => b.addEventListener('click', doClose));
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose(); });
+            overlay.querySelector('[data-act="save"]').addEventListener('click', () => {
+                const newHeaders = [];
+                overlay.querySelectorAll('[data-idx]').forEach(el => newHeaders[parseInt(el.dataset.idx, 10)] = el.value.trim() || '');
+                const newOpts = overlay.querySelector('[data-act="opts"]').value.split('\n').map(s => s.trim()).filter(Boolean);
+                sheet.headers = newHeaders;
+                sheet.col2Options = newOpts;
+                sheet.cards.forEach(r => {
+                    if (!r.cells) r.cells = [];
+                    while (r.cells.length < 6) r.cells.push('');
+                });
+                saveData();
+                render();
+                doClose();
+                showToast('✅ Cabeceras guardadas.', 'success', 1200);
+            });
+        }
+
+        function openProcessFilter(sheet, colIndex) {
+            if (!sheet) return;
+            const headers = (sheet.headers && sheet.headers.length === 6) ? sheet.headers : DEFAULT_HEADERS;
+            const values = [];
+            sheet.cards.forEach(r => {
+                const v = r.cells && r.cells[colIndex];
+                if (v && !values.includes(v)) values.push(v);
+            });
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.innerHTML = `
+                <div class="modal">
+                    <div class="modal-head">
+                        <h3>☰ Filtrar: ${esc(headers[colIndex] || 'Columna ' + (colIndex + 1))}</h3>
+                        <button class="modal-close" data-act="close">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        ${values.length ? values.map(v => `
+                            <button class="filter-opt" data-v="${esc(v)}">${esc(v)}</button>
+                        `).join('') : '<div class="empty-cards">Sin valores para filtrar.</div>'}
+                        <button class="filter-opt filter-clear" data-act="clear">✕ Quitar filtro</button>
+                    </div>
+                    <div class="modal-foot">
+                        <button class="btn-secondary" data-act="close">Cerrar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            overlay.classList.add('show');
+            const doClose = () => { overlay.classList.remove('show'); setTimeout(() => overlay.remove(), 200); };
+            overlay.querySelectorAll('[data-act="close"]').forEach(b => b.addEventListener('click', doClose));
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) doClose(); });
+            overlay.querySelectorAll('.filter-opt').forEach(b => {
+                b.addEventListener('click', () => {
+                    if (b.dataset.act === 'clear') {
+                        state.searchQuery = '';
+                        searchInput.value = '';
+                    } else {
+                        state.searchQuery = b.textContent.trim();
+                        searchInput.value = state.searchQuery;
+                    }
+                    doClose();
+                    render();
+                });
+            });
+            overlay.querySelector('[data-act="clear"]')?.addEventListener('click', () => {
+                state.searchQuery = '';
+                searchInput.value = '';
+                doClose();
+                render();
+            });
+        }
+
+        function openPillOptionsEditor(sheet) {
+            openProcessHeadersEditor(sheet);
+        }
+
+        function highlightMatches(query) {
+            const cards = cardsContainer.querySelectorAll('.card-item');
+            cards.forEach(el => {
+                const title = el.querySelector('.card-title');
+                const preview = el.querySelector('.card-body-preview');
+                const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                if (title) {
+                    const t = title.textContent;
+                    title.innerHTML = t.replace(re, '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">$1</mark>');
+                }
+                if (preview) {
+                    const t = preview.textContent;
+                    preview.innerHTML = t.replace(re, '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">$1</mark>');
+                }
+            });
+        }
+
+        function updateResultCount() {
+            const query = state.searchQuery.trim();
+            if (!query) { searchResultCount.textContent = ''; return; }
+            const sheet = getActiveSheet();
+            if (!sheet) { searchResultCount.textContent = ''; return; }
+            let count;
+            if (sheet.mode === 'process') {
+                count = sheet.cards.filter(r =>
+                    (r.cells || []).some(c => String(c || '').toLowerCase().includes(query.toLowerCase()))
+                ).length;
+            } else {
+                count = sheet.cards.filter(c =>
+                    (c.title || '').toLowerCase().includes(query.toLowerCase()) || waToPlain(c.body).toLowerCase().includes(query.toLowerCase())
+                ).length;
+            }
+            searchResultCount.textContent = count > 0 ? `${count} resultado${count > 1 ? 's' : ''}` : '';
+        }
+
+        function updateViewClass() {
+            contentEl.classList.toggle('list-view', state.view === 'list');
+            btnView.textContent = state.view === 'list' ? '▥' : '▦';
+            btnFavFilter.classList.toggle('fav-on', state.favOnly);
+        }
+
+        // ============================================================
+        // COPIADO (acción principal)
+        // ============================================================
+        async function copyText(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('📋 Copiado para WhatsApp.', 'success', 1200);
+                return true;
+            } catch (err) {
+                showToast('❌ Error al copiar.', 'error');
+                return false;
+            }
+        }
+
+        function copyCardBody(card) {
+            copyText(card.body || '');
+        }
+
+        function copyCardPlain(card) {
+            copyText(waToPlain(card.body));
+        }
+
+        function copyCardTitleBody(card) {
+            const title = card.title || '';
+            const body = waToPlain(card.body);
+            const text = (title && body) ? title + '\n\n' + body : (title || body);
+            copyText(text);
+        }
+
+        async function copyCardFirstImage(card) {
+            if (!card.images || !card.images.length) {
+                showToast('⚠️ Esta tarjeta no tiene imágenes.', 'warning');
+                return;
+            }
+            try {
+                const res = await fetch(card.images[0].data);
+                const blob = await res.blob();
+                await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                showToast('🖼️ Imagen copiada al portapapeles.', 'success');
+            } catch (err) {
+                showToast('❌ Error al copiar imagen.', 'error');
+            }
+        }
+
+        async function copyCardLinks(card) {
+            if (!card.links || !card.links.length) {
+                showToast('⚠️ Esta tarjeta no tiene enlaces.', 'warning');
+                return;
+            }
+            const text = card.links.map(l => (l.text || '') + ': ' + l.url).join('\n');
+            await copyText(text);
+        }
+
+        // Submenú de copiado
+        function showCopyMenu(e, card, sheetId) {
+            const items = [
+                { icon: '📋', label: 'Copiar texto (WhatsApp)', fn: () => copyCardBody(card) },
+                { icon: '📄', label: 'Copiar texto plano', fn: () => copyCardPlain(card) },
+                { icon: '📝', label: 'Copiar título + texto', fn: () => copyCardTitleBody(card) },
+                { icon: '🖼', label: 'Copiar primera imagen', fn: () => copyCardFirstImage(card) },
+                { icon: '🔗', label: 'Copiar enlaces', fn: () => copyCardLinks(card) },
+                null,
+                { icon: '✏️', label: 'Editar tarjeta', fn: () => openCardEditor(sheetId, card.id) }
+            ];
+            showContextMenu(e.clientX, e.clientY, items);
+        }
+
+        // ============================================================
+        // DRAWER (detalle de tarjeta)
+        // ============================================================
+        function openDrawer(sheetId, cardId) {
+            state.drawer = { sheetId, cardId };
+            render();
+        }
+        function closeDrawer() {
+            state.drawer = null;
+            render();
+        }
+
+        function renderDrawer() {
+            if (!state.drawer) { drawer.classList.remove('open'); return; }
+            const card = getCardById(state.drawer.sheetId, state.drawer.cardId);
+            if (!card) { state.drawer = null; drawer.classList.remove('open'); return; }
+            drawer.classList.add('open');
+            drawerHdrTitle.textContent = card.title || 'Sin título';
+
+            drawerScroll.innerHTML = '';
+            const bodyDiv = document.createElement('div');
+            bodyDiv.id = 'drawer-body';
+            bodyDiv.innerHTML = card.body ? waToHtml(card.body) : '<em style="opacity:0.5">Sin contenido</em>';
+            drawerScroll.appendChild(bodyDiv);
+
+            if (card.images && card.images.length) {
+                const lbl = document.createElement('div');
+                lbl.className = 'd-section-label';
+                lbl.textContent = `Imágenes (${card.images.length})`;
+                drawerScroll.appendChild(lbl);
+                const grid = document.createElement('div');
+                grid.id = 'drawer-images';
+                card.images.forEach(img => {
+                    const box = document.createElement('div');
+                    box.className = 'd-img';
+                    box.innerHTML = `
+                        <img src="${img.data}" alt="${img.label || 'Imagen'}" />
+                        <div class="d-img-actions">
+                            <button title="Abrir grande">🔍</button>
+                            <button title="Copiar">📋</button>
+                        </div>
+                    `;
+                    box.querySelector('img').addEventListener('dblclick', () => openImageBig(img));
+                    box.querySelector('.d-img-actions button:first-child').addEventListener('click', () => openImageBig(img));
+                    box.querySelector('.d-img-actions button:last-child').addEventListener('click', () => copyImage(img.data));
+                    grid.appendChild(box);
+                });
+                drawerScroll.appendChild(grid);
+            }
+
+            if (card.links && card.links.length) {
+                const lbl = document.createElement('div');
+                lbl.className = 'd-section-label';
+                lbl.textContent = `Enlaces (${card.links.length})`;
+                drawerScroll.appendChild(lbl);
+                card.links.forEach(link => {
+                    const box = document.createElement('div');
+                    box.className = 'd-link';
+                    box.innerHTML = `<span class="link-text">${esc(link.text || link.url)}</span><span>🔗</span>`;
+                    box.addEventListener('click', () => {
+                        if (link.url) require('electron').shell.openExternal(link.url);
+                    });
+                    drawerScroll.appendChild(box);
+                });
+            }
+
+            drawerActions.innerHTML = `
+                <button class="da-btn primary" data-a="copy">📋 Copiar</button>
+                <button class="da-btn" data-a="edit">✏️ Editar</button>
+                <button class="da-btn" data-a="duplicate">⧉ Duplicar</button>
+                <button class="da-btn" data-a="pin">⭐</button>
+                <button class="da-btn danger" data-a="delete">🗑</button>
+            `;
+            drawerActions.querySelector('[data-a="copy"]').addEventListener('click', () => copyCardBody(card));
+            drawerActions.querySelector('[data-a="edit"]').addEventListener('click', () => {
+                const d = state.drawer;
+                if (d) openCardEditor(d.sheetId, d.cardId);
+            });
+            drawerActions.querySelector('[data-a="duplicate"]').addEventListener('click', () => {
+                const d = state.drawer;
+                if (d) duplicateCard(d.sheetId, d.cardId);
+            });
+            drawerActions.querySelector('[data-a="pin"]').addEventListener('click', () => {
+                const d = state.drawer;
+                if (d) {
+                    const c = getCardById(d.sheetId, d.cardId);
+                    if (c) {
+                        c.pinned = !c.pinned;
+                        saveData();
+                        render();
+                    }
+                }
+            });
+            drawerActions.querySelector('[data-a="delete"]').addEventListener('click', () => {
+                const d = state.drawer;
+                if (d) confirmDeleteCard(d.sheetId, d.cardId);
+            });
+        }
+
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerCopy.addEventListener('click', () => {
+            const d = state.drawer;
+            if (!d) return;
+            const card = getCardById(d.sheetId, d.cardId);
+            if (!card) return;
+            copyCardBody(card);
+        });
+
+        function openImageBig(img) {
+            const win = window.open('', '_blank', 'width=600,height=400');
+            if (win) {
+                win.document.write(`
+                    <html><head><title>${esc(img.label || 'Imagen')}</title>
+                    <style>body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0f1117;color:#fff;font-family:sans-serif;}
+                    img{max-width:90%;max-height:80vh;border-radius:8px;border:1px solid rgba(255,255,255,0.1);}
+                    .btn{margin-top:16px;padding:8px 20px;background:#3b82f6;border:none;border-radius:4px;color:#fff;cursor:pointer;font-weight:bold;}</style></head>
+                    <body><img src="${img.data}" alt="${esc(img.label || '')}" />
+                    <button class="btn" onclick="navigator.clipboard.write([new ClipboardItem({['image/png']: this.previousElementSibling.src})]).then(()=>alert('Imagen copiada'))">📋 Copiar imagen</button>
+                    </body></html>
+                `);
+                win.document.close();
+            } else {
+                showToast('⚠️ No se pudo abrir la ventana. Permite pop-ups.', 'warning');
+            }
+        }
+
+        function copyImage(data) {
+            fetch(data).then(res => res.blob()).then(blob => {
+                navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]).then(() => {
+                    showToast('🖼️ Imagen copiada al portapapeles.', 'success');
+                }).catch(() => showToast('❌ Error al copiar imagen.', 'error'));
+            }).catch(() => showToast('❌ Error al cargar imagen.', 'error'));
+        }
+
+        // ============================================================
+        // ELIMINAR / DUPLICAR TARJETA
+        // ============================================================
+        function confirmDeleteCard(sheetId, cardId) {
+            const card = getCardById(sheetId, cardId);
+            if (!card) return;
+            showConfirm(`¿Eliminar la tarjeta "${card.title || 'Sin título'}" permanentemente?`, () => {
+                const sheet = getSheetById(sheetId);
+                if (sheet) {
+                    const idx = sheet.cards.findIndex(c => c.id === cardId);
+                    if (idx !== -1) {
+                        sheet.cards.splice(idx, 1);
+                        saveData();
+                        if (state.drawer && state.drawer.cardId === cardId) state.drawer = null;
+                        render();
+                        showToast('🗑 Tarjeta eliminada.', 'success');
+                    }
+                }
+            });
+        }
+
+        function duplicateCard(sheetId, cardId) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const original = sheet.cards.find(c => c.id === cardId);
+            if (!original) return;
+            const copy = JSON.parse(JSON.stringify(original));
+            copy.id = generateId();
+            copy.title = original.title + ' (copia)';
+            const idx = sheet.cards.indexOf(original);
+            sheet.cards.splice(idx + 1, 0, copy);
+            saveData();
+            render();
+            showToast('⧉ Tarjeta duplicada.', 'success');
+        }
+
+        // ============================================================
+        // MENÚ CONTEXTUAL GENÉRICO
+        // ============================================================
+        function showContextMenu(x, y, items) {
+            ctxMenu.innerHTML = '';
+            items.forEach(item => {
+                if (item === null) {
+                    const sep = document.createElement('div');
+                    sep.className = 'ctx-sep';
+                    ctxMenu.appendChild(sep);
+                    return;
+                }
+                if (item.children && item.children.length) {
+                    const btn = document.createElement('button');
+                    btn.className = 'ctx-item has-sub';
+                    btn.innerHTML = `<span>${item.icon || ''} ${item.label}</span><span style="margin-left:auto;opacity:0.5;">▸</span>`;
+                    const sub = document.createElement('div');
+                    sub.className = 'ctx-sub';
+                    item.children.forEach(ch => {
+                        if (ch === null) {
+                            const sep2 = document.createElement('div');
+                            sep2.className = 'ctx-sep';
+                            sub.appendChild(sep2);
+                            return;
+                        }
+                        const sbtn = document.createElement('button');
+                        sbtn.className = 'ctx-item' + (ch.danger ? ' danger' : '');
+                        if (ch.swatch) {
+                            sbtn.style.padding = '3px 8px';
+                            const dot = document.createElement('span');
+                            dot.style.cssText = `width:16px;height:16px;border-radius:4px;background:${ch.swatch};border:1px solid var(--border2);display:inline-block;`;
+                            sbtn.appendChild(dot);
+                            const lbl = document.createElement('span');
+                            lbl.textContent = ch.label || ch.swatch;
+                            lbl.style.marginLeft = '6px';
+                            sbtn.appendChild(lbl);
+                        } else {
+                            sbtn.innerHTML = `${ch.icon || ''} ${ch.label}`;
+                        }
+                        sbtn.addEventListener('click', () => { hideContextMenu(); ch.fn(); });
+                        sub.appendChild(sbtn);
+                    });
+                    btn.appendChild(sub);
+                    ctxMenu.appendChild(btn);
+                    return;
+                }
+                const btn = document.createElement('button');
+                btn.className = 'ctx-item' + (item.danger ? ' danger' : '');
+                btn.innerHTML = `${item.icon || ''} ${item.label}`;
+                btn.addEventListener('click', () => { hideContextMenu(); item.fn(); });
+                ctxMenu.appendChild(btn);
+            });
+            ctxMenu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+            ctxMenu.style.top = Math.min(y, window.innerHeight - 120) + 'px';
+            ctxMenu.classList.add('show');
+        }
+
+        function hideContextMenu() {
+            ctxMenu.classList.remove('show');
+            ctxMenu.innerHTML = '';
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#ctx-menu')) hideContextMenu();
+        });
+
+        // ============================================================
+        // MENÚ CONTEXTUAL DE HOJA
+        // ============================================================
+        function showSheetContextMenu(x, y, sheetId) {
+            const items = [
+                { icon: '✏️', label: 'Renombrar', fn: () => {
+                    const el = sheetTabs.querySelector(`.sheet-tab[data-sheet-id="${sheetId}"]`);
+                    if (el) startRenameSheet(sheetId, el);
+                }},
+                { icon: '🎨', label: 'Color de hoja', children: [
+                    ...SHEET_COLORS.map(c => ({ icon: '', label: '', swatch: c, fn: () => {
+                        const sheet = getSheetById(sheetId);
+                        if (sheet) { sheet.color = c; saveData(); render(); }
+                    }}))
+                ]},
+                { icon: '⧉', label: 'Duplicar hoja', fn: () => duplicateSheet(sheetId) },
+                { icon: '⬅', label: 'Mover a la izquierda', fn: () => moveSheet(sheetId, -1) },
+                { icon: '➡', label: 'Mover a la derecha', fn: () => moveSheet(sheetId, 1) },
+                null,
+                { icon: '🗑', label: 'Eliminar hoja', danger: true, fn: () => confirmDeleteSheet(sheetId) }
+            ];
+            showContextMenu(x, y, items);
+        }
+
+        // ============================================================
+        // MENÚ CONTEXTUAL DE TARJETA
+        // ============================================================
+        function showCardContextMenu(x, y, sheetId, cardId) {
+            const card = getCardById(sheetId, cardId);
+            if (!card) return;
+            const moveTo = state.sheets
+                .filter(s => s.id !== sheetId)
+                .map(s => ({ icon: '', label: s.name, fn: () => moveCardToSheet(sheetId, cardId, s.id) }));
+            const items = [
+                { icon: '📋', label: 'Copiar texto (WhatsApp)', fn: () => copyCardBody(card) },
+                { icon: '📄', label: 'Copiar texto plano', fn: () => copyCardPlain(card) },
+                { icon: '📝', label: 'Copiar título + texto', fn: () => copyCardTitleBody(card) },
+                null,
+                { icon: card.pinned ? '☆' : '⭐', label: card.pinned ? 'Quitar de favoritas' : 'Fijar como favorita', fn: () => {
+                    card.pinned = !card.pinned; saveData(); render();
+                }},
+                { icon: '✏️', label: 'Editar', fn: () => openCardEditor(sheetId, cardId) },
+                { icon: '⧉', label: 'Duplicar', fn: () => duplicateCard(sheetId, cardId) },
+                { icon: '🎨', label: 'Color', fn: () => showColorPalette(x - 100, y, sheetId, cardId) },
+                moveTo.length ? { icon: '➡', label: 'Mover a hoja', children: moveTo } : null,
+                null,
+                { icon: '🗑', label: 'Eliminar', danger: true, fn: () => confirmDeleteCard(sheetId, cardId) }
+            ].filter(Boolean);
+            showContextMenu(x, y, items);
+        }
+
+        function moveCardToSheet(fromSheetId, cardId, toSheetId) {
+            const from = getSheetById(fromSheetId);
+            const to = getSheetById(toSheetId);
+            if (!from || !to || fromSheetId === toSheetId) return;
+            const idx = from.cards.findIndex(c => c.id === cardId);
+            if (idx === -1) return;
+            const [moved] = from.cards.splice(idx, 1);
+            to.cards.push(moved);
+            if (state.drawer && state.drawer.cardId === cardId) state.drawer = null;
+            saveData();
+            render();
+            showToast('➡ Tarjeta movida a "' + to.name + '".', 'success', 1500);
+        }
+
+        // ============================================================
+        // PALETA DE COLORES
+        // ============================================================
+        let colorTarget = null;
+
+        function showColorPalette(x, y, sheetId, cardId) {
+            colorTarget = { sheetId, cardId };
+            colorPalette.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+            colorPalette.style.top = Math.min(y, window.innerHeight - 160) + 'px';
+            colorPalette.classList.toggle('show');
+
+            if (!colorPalette.children.length) {
+                PALETTE_COLORS.forEach(c => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = c;
+                    swatch.dataset.color = c;
+                    swatch.addEventListener('click', () => {
+                        if (colorTarget) {
+                            const card = getCardById(colorTarget.sheetId, colorTarget.cardId);
+                            if (card) {
+                                card.color = c;
+                                saveData();
+                                render();
+                                showToast('🎨 Color actualizado.', 'success');
+                            }
+                        }
+                        colorPalette.classList.remove('show');
+                    });
+                    colorPalette.appendChild(swatch);
+                });
+                const picker = document.createElement('input');
+                picker.type = 'color';
+                picker.className = 'color-picker-input';
+                picker.addEventListener('input', (e) => {
+                    const c = e.target.value;
+                    if (colorTarget) {
+                        const card = getCardById(colorTarget.sheetId, colorTarget.cardId);
+                        if (card) {
+                            card.color = c;
+                            saveData();
+                            render();
+                            showToast('🎨 Color actualizado.', 'success');
+                        }
+                    }
+                    colorPalette.classList.remove('show');
+                });
+                colorPalette.appendChild(picker);
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.color-palette')) {
+                colorPalette.classList.remove('show');
+            }
+        });
+
+        // ============================================================
+        // ARRASTRE: clic (abrir drawer) vs arrastre inmediato (mover)
+        // ============================================================
+        function onGlobalMove(e) {
+            if (!pressInfo) return;
+            if (state.searchQuery.trim()) return;
+            if (!pressInfo.dragged) {
+                const dist = Math.hypot(e.clientX - pressInfo.startX, e.clientY - pressInfo.startY);
+                if (dist > 4) {
+                    pressInfo.dragged = true;
+                    const sheet = getSheetById(pressInfo.sheetId);
+                    const card = sheet ? sheet.cards.find(c => c.id === pressInfo.cardId) : null;
+                    if (card) startDrag(pressInfo.sheetId, pressInfo.cardId, sheet.cards.indexOf(card), e);
+                }
+                return;
+            }
+            if (dragState) onDragMove(e);
+        }
+
+        function onGlobalUp(e) {
+            document.removeEventListener('mousemove', onGlobalMove);
+            document.removeEventListener('mouseup', onGlobalUp);
+            document.removeEventListener('mouseleave', onGlobalLeave);
+            const wasDragged = pressInfo ? pressInfo.dragged : false;
+            if (pressInfo && !wasDragged) {
+                openDrawer(pressInfo.sheetId, pressInfo.cardId);
+            }
+            pressInfo = null;
+            if (dragState) onDragEnd();
+        }
+
+        function onGlobalLeave() {
+            document.removeEventListener('mousemove', onGlobalMove);
+            document.removeEventListener('mouseup', onGlobalUp);
+            document.removeEventListener('mouseleave', onGlobalLeave);
+            pressInfo = null;
+            if (dragState) onDragEnd();
+        }
+
+        function startDrag(sheetId, cardId, index, e) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const card = sheet.cards[index];
+            if (!card) return;
+
+            dragState = { sheetId, cardId, fromIndex: index };
+
+            const ghost = document.createElement('div');
+            ghost.className = 'card-item';
+            ghost.style.width = '150px';
+            ghost.style.height = '190px';
+            ghost.style.position = 'fixed';
+            ghost.style.pointerEvents = 'none';
+            ghost.style.zIndex = '1000';
+            ghost.style.opacity = '0.85';
+            ghost.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
+            ghost.style.border = '2px dashed var(--primary)';
+            ghost.style.transform = 'scale(1.05)';
+            ghost.style.backgroundColor = card.color || 'var(--surface2)';
+            ghost.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
+            ghost.innerHTML = `
+                <div class="card-top"><div class="card-title">${esc(card.title) || 'Sin título'}</div></div>
+                <div class="card-body-preview">${esc(waToPlain(card.body).slice(0, 60))}</div>
+            `;
+            document.body.appendChild(ghost);
+            dragState.ghost = ghost;
+            updateGhostPosition(e.clientX, e.clientY);
+            dragGuide.classList.add('show');
+            document.body.style.userSelect = 'none';
+        }
+
+        function updateGhostPosition(x, y) {
+            if (dragState && dragState.ghost) {
+                dragState.ghost.style.left = (x - 75) + 'px';
+                dragState.ghost.style.top = (y - 95) + 'px';
+            }
+        }
+
+        function onDragMove(e) {
+            e.preventDefault();
+            updateGhostPosition(e.clientX, e.clientY);
+
+            const rect = cardsContainer.getBoundingClientRect();
+            const threshold = 60;
+            if (e.clientY < rect.top + threshold) {
+                if (!scrollInterval) scrollInterval = setInterval(() => cardsContainer.scrollTop -= SCROLL_SPEED, 16);
+            } else if (e.clientY > rect.bottom - threshold) {
+                if (!scrollInterval) scrollInterval = setInterval(() => cardsContainer.scrollTop += SCROLL_SPEED, 16);
+            } else {
+                if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; }
+            }
+
+            // 1) Reorden dentro de la misma hoja
+            const target = document.elementsFromPoint(e.clientX, e.clientY).find(el =>
+                el.classList && el.classList.contains('card-item') && el.dataset.cardId
+            );
+            if (target) {
+                const sheet = getSheetById(dragState.sheetId);
+                if (sheet) {
+                    const fromIdx = sheet.cards.findIndex(c => c.id === dragState.cardId);
+                    const toIdx = sheet.cards.findIndex(c => c.id === target.dataset.cardId);
+                    if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
+                        const [moved] = sheet.cards.splice(fromIdx, 1);
+                        const newIdx = fromIdx < toIdx ? toIdx - 1 : toIdx;
+                        sheet.cards.splice(newIdx, 0, moved);
+                        dragState.fromIndex = newIdx;
+                        saveData();
+                        render();
+                    }
+                }
+                return;
+            }
+
+            // 2) Mover a otra hoja (drop sobre sheet-tab)
+            const sideTab = document.elementsFromPoint(e.clientX, e.clientY).find(el =>
+                el.classList && el.classList.contains('sheet-tab') && el.dataset.sheetId
+            );
+            if (sideTab) {
+                const targetSheetId = sideTab.dataset.sheetId;
+                if (targetSheetId !== dragState.sheetId) {
+                    state.activeSheetId = targetSheetId;
+                    moveCardToSheet(dragState.sheetId, dragState.cardId, targetSheetId);
+                    dragState.sheetId = targetSheetId;
+                }
+            }
+        }
+
+        function onDragEnd() {
+            if (dragState && dragState.ghost) dragState.ghost.remove();
+            if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; }
+            dragState = null;
+            dragGuide.classList.remove('show');
+            document.body.style.userSelect = '';
+        }
+
+        // ============================================================
+        // EDITOR DE TARJETA
+        // ============================================================
+        let editingCard = null;
+
+        function openCardEditor(sheetId, cardId) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            let card;
+            let isNew = false;
+            if (cardId) card = sheet.cards.find(c => c.id === cardId);
+            if (!card) {
+                card = { id: generateId(), title: '', body: '', color: '#fef3c7', images: [], links: [], pinned: false, created: Date.now(), updated: Date.now() };
+                isNew = true;
+                sheet.cards.push(card);
+                saveData();
+            }
+            editingCard = { sheetId, cardId: card.id, isNew };
+
+            // Select de hoja (permite mover)
+            renderSheetSelect();
+            editSheet.value = sheetId;
+            editColor.value = card.color || '#fef3c7';
+            editPinned.checked = !!card.pinned;
+            editTitle.value = card.title || '';
+            editBody.value = waToPlain(card.body);
+            updateBodyPreview();
+            renderEditImages(card.images);
+            renderEditLinks(card.links);
+
+            modalTitleText.textContent = isNew ? '➕ Nueva tarjeta' : '✏️ Editar tarjeta';
+            modalOverlay.classList.add('show');
+            editTitle.focus();
+        }
+
+        function renderSheetSelect() {
+            editSheet.innerHTML = '';
+            state.sheets.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.name;
+                editSheet.appendChild(opt);
+            });
+        }
+
+        function updateBodyPreview() {
+            editBodyPreview.innerHTML = waToHtml(editBody.value);
+        }
+
+        // ---------- Imágenes ----------
+        function renderEditImages(images) {
+            editImagesContainer.innerHTML = '';
+            images.forEach((img, idx) => {
+                const div = document.createElement('div');
+                div.className = 'img-item';
+                div.innerHTML = `
+                    <img class="img-preview-small" src="${img.data}" alt="" />
+                    <input type="text" placeholder="Texto breve" value="${esc(img.label || '')}" data-index="${idx}" />
+                    <button class="btn-remove" data-index="${idx}">✕</button>
+                `;
+                div.querySelector('input').addEventListener('input', (e) => {
+                    const i = parseInt(e.target.dataset.index);
+                    if (!isNaN(i) && editingCard) {
+                        const card = getCardById(editingCard.sheetId, editingCard.cardId);
+                        if (card && card.images[i]) card.images[i].label = e.target.value;
+                    }
+                });
+                div.querySelector('.btn-remove').addEventListener('click', () => {
+                    const i = parseInt(div.querySelector('.btn-remove').dataset.index);
+                    if (!isNaN(i) && editingCard) {
+                        const card = getCardById(editingCard.sheetId, editingCard.cardId);
+                        if (card) {
+                            card.images.splice(i, 1);
+                            saveData();
+                            renderEditImages(card.images);
+                        }
+                    }
+                });
+                editImagesContainer.appendChild(div);
+            });
+        }
+
+        // ---------- Enlaces ----------
+        function renderEditLinks(links) {
+            editLinksContainer.innerHTML = '';
+            links.forEach((link, idx) => {
+                const div = document.createElement('div');
+                div.className = 'link-item';
+                div.innerHTML = `
+                    <input type="text" placeholder="Texto visible" value="${esc(link.text || '')}" data-index="${idx}" data-field="text" />
+                    <input type="text" placeholder="URL" value="${esc(link.url || '')}" data-index="${idx}" data-field="url" />
+                    <button class="btn-remove" data-index="${idx}">✕</button>
+                `;
+                div.querySelectorAll('input').forEach(inp => {
+                    inp.addEventListener('input', (e) => {
+                        const i = parseInt(e.target.dataset.index);
+                        const field = e.target.dataset.field;
+                        if (!isNaN(i) && editingCard) {
+                            const card = getCardById(editingCard.sheetId, editingCard.cardId);
+                            if (card && card.links[i]) card.links[i][field] = e.target.value;
+                        }
+                    });
+                });
+                div.querySelector('.btn-remove').addEventListener('click', () => {
+                    const i = parseInt(div.querySelector('.btn-remove').dataset.index);
+                    if (!isNaN(i) && editingCard) {
+                        const card = getCardById(editingCard.sheetId, editingCard.cardId);
+                        if (card) {
+                            card.links.splice(i, 1);
+                            saveData();
+                            renderEditLinks(card.links);
+                        }
+                    }
+                });
+                editLinksContainer.appendChild(div);
+            });
+        }
+
+        // ---------- Añadir imagen (archivo o portapapeles) ----------
+        function addImageToCard(dataUrl) {
+            if (!editingCard) return;
+            const card = getCardById(editingCard.sheetId, editingCard.cardId);
+            if (!card) return;
+            if (card.images.length >= 10) {
+                showToast('⚠️ Máximo 10 imágenes por tarjeta.', 'warning');
+                return;
+            }
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                const MAX = 1200;
+                if (w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                const resized = canvas.toDataURL('image/jpeg', 0.8);
+                card.images.push({ data: resized, label: '' });
+                saveData();
+                renderEditImages(card.images);
+                showToast('🖼️ Imagen agregada.', 'success');
+            };
+            img.src = dataUrl;
+        }
+
+        function addImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => addImageToCard(ev.target.result);
+            reader.readAsDataURL(file);
+        }
+
+        async function pegarImagenPortapapeles() {
+            try {
+                if (navigator.clipboard && navigator.clipboard.read) {
+                    const items = await navigator.clipboard.read();
+                    for (const item of items) {
+                        for (const type of item.types) {
+                            if (type.indexOf('image') === 0) {
+                                const blob = await item.getType(type);
+                                addImageFile(new File([blob], 'portapapeles.png', { type }));
+                                return;
+                            }
+                        }
+                    }
+                    showToast('⚠️ No hay ninguna imagen en el portapapeles.', 'warning');
+                } else {
+                    showToast('📋 Usa Ctrl+V para pegar la imagen.', 'info');
+                }
+            } catch (err) {
+                showToast('📋 Usa Ctrl+V para pegar la imagen.', 'info');
+            }
+        }
+
+        btnAddImage.addEventListener('click', () => fileInput.click());
+        btnPasteImage.addEventListener('click', pegarImagenPortapapeles);
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) addImageFile(file);
+            fileInput.value = '';
+        });
+
+        // Pegado directo con Ctrl+V (funciona en creación y edición)
+        document.addEventListener('paste', (e) => {
+            if (!modalOverlay.classList.contains('show')) return;
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') === 0) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        addImageFile(file);
+                        e.preventDefault();
+                    }
+                    break;
+                }
+            }
+        });
+
+        btnAddLink.addEventListener('click', () => {
+            if (editingCard) {
+                const card = getCardById(editingCard.sheetId, editingCard.cardId);
+                if (card) {
+                    if (card.links.length >= 10) {
+                        showToast('⚠️ Máximo 10 enlaces por tarjeta.', 'warning');
+                        return;
+                    }
+                    card.links.push({ text: '', url: '' });
+                    saveData();
+                    renderEditLinks(card.links);
+                }
+            }
+        });
+
+        // Barra de formato WhatsApp
+        document.querySelectorAll('.wa-toolbar button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const marker = btn.dataset.m;
+                const ta = editBody;
+                const start = ta.selectionStart;
+                const end = ta.selectionEnd;
+                let insert = '', before = '', after = '';
+                if (marker === 'bold') { insert = '*'; before = '*'; after = '*'; }
+                else if (marker === 'italic') { insert = '_'; before = '_'; after = '_'; }
+                else if (marker === 'strike') { insert = '~'; before = '~'; after = '~'; }
+                else if (marker === 'code') { insert = '`'; before = '`'; after = '`'; }
+                else if (marker === 'list') { insert = '\n• '; }
+                else if (marker === 'num') { insert = '\n1. '; }
+
+                let value = ta.value;
+                if (start === end) {
+                    value = value.slice(0, start) + insert + value.slice(end);
+                    ta.value = value;
+                    const pos = start + insert.length;
+                    ta.focus();
+                    ta.setSelectionRange(pos, pos);
+                } else {
+                    const sel = value.slice(start, end);
+                    value = value.slice(0, start) + before + sel + after + value.slice(end);
+                    ta.value = value;
+                    ta.focus();
+                    ta.setSelectionRange(start + before.length, end + before.length);
+                }
+                updateBodyPreview();
+            });
+        });
+
+        editBody.addEventListener('input', updateBodyPreview);
+
+        function saveCardEditor() {
+            if (!editingCard) return;
+            const card = getCardById(editingCard.sheetId, editingCard.cardId);
+            if (!card) {
+                showToast('⚠️ Error: tarjeta no encontrada.', 'error');
+                return;
+            }
+            const newSheetId = editSheet.value;
+            card.title = editTitle.value.trim();
+            card.body = editBody.value;
+            card.color = editColor.value;
+            card.pinned = !!editPinned.checked;
+            card.updated = Date.now();
+
+            if (newSheetId && newSheetId !== editingCard.sheetId) {
+                const from = getSheetById(editingCard.sheetId);
+                const to = getSheetById(newSheetId);
+                if (from && to) {
+                    const idx = from.cards.indexOf(card);
+                    if (idx !== -1) from.cards.splice(idx, 1);
+                    to.cards.push(card);
+                }
+            }
+
+            const isNew = editingCard.isNew;
+            saveData();
+            closeEditor();
+            showToast(isNew ? '✅ Tarjeta creada.' : '✅ Cambios guardados.', 'success');
+        }
+
+        function closeEditor() {
+            modalOverlay.classList.remove('show');
+            if (editingCard && editingCard.isNew) {
+                const sheet = getSheetById(editingCard.sheetId);
+                if (sheet) {
+                    const idx = sheet.cards.findIndex(c => c.id === editingCard.cardId);
+                    if (idx !== -1) {
+                        const card = sheet.cards[idx];
+                        if (!card.title && !card.body && !card.images.length && !card.links.length) {
+                            sheet.cards.splice(idx, 1);
+                            saveData();
+                        }
+                    }
+                }
+            }
+            editingCard = null;
+            render();
+        }
+
+        modalClose.addEventListener('click', closeEditor);
+        modalCancel.addEventListener('click', closeEditor);
+        modalSave.addEventListener('click', saveCardEditor);
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeEditor();
+        });
+
+        // Cierre del selector de modo
+        const modePickerOverlay = document.getElementById('mode-picker-overlay');
+        document.getElementById('mode-picker-close').addEventListener('click', () => modePickerOverlay.classList.remove('show'));
+        modePickerOverlay.addEventListener('click', (e) => {
+            if (e.target === modePickerOverlay) modePickerOverlay.classList.remove('show');
+        });
+
+        // ============================================================
+        // AJUSTES DE HOJA (tamaño de tarjetas con vista previa en vivo)
+        // ============================================================
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const settingsWSlider = document.getElementById('settings-w-slider');
+        const settingsHSlider = document.getElementById('settings-h-slider');
+        const settingsWNum = document.getElementById('settings-w-num');
+        const settingsHNum = document.getElementById('settings-h-num');
+        const settingsWVal = document.getElementById('settings-w-val');
+        const settingsHVal = document.getElementById('settings-h-val');
+        const settingsPreview = document.getElementById('settings-preview');
+        let settingsSheetId = null;
+
+        function abrirAjustesHoja() {
+            const sheet = getActiveSheet();
+            if (!sheet) return;
+            settingsSheetId = sheet.id;
+            const m = SHEET_MODES[sheet.mode] || SHEET_MODES.cards;
+            document.getElementById('settings-title').textContent = '⚙️ Ajustes: ' + sheet.name;
+            document.getElementById('settings-mode').innerHTML =
+                `<span class="sm-badge">${m.icon} ${m.label}</span><span>${m.desc}</span>`;
+
+            const sizeFields = document.getElementById('settings-size-fields');
+            if (sheet.mode === 'cards') {
+                sizeFields.style.display = '';
+                settingsWSlider.value = sheet.cardSize.w;
+                settingsHSlider.value = sheet.cardSize.h;
+                settingsWNum.value = sheet.cardSize.w;
+                settingsHNum.value = sheet.cardSize.h;
+            } else {
+                sizeFields.style.display = 'none';
+                settingsHSlider.value = sheet.cardSize.h;
+                settingsHNum.value = sheet.cardSize.h;
+            }
+            syncSettingsSliders();
+            settingsOverlay.classList.add('show');
+        }
+
+        function syncSettingsSliders() {
+            const sheet = getSheetById(settingsSheetId);
+            if (!sheet) return;
+            const w = parseInt(settingsWSlider.value, 10);
+            const h = parseInt(settingsHSlider.value, 10);
+            if (document.getElementById('settings-w-val')) document.getElementById('settings-w-val').textContent = w;
+            if (document.getElementById('settings-h-val')) document.getElementById('settings-h-val').textContent = h;
+            if (sheet.mode === 'cards') settingsWNum.value = w;
+            settingsHNum.value = h;
+
+            // Vista previa en vivo
+            if (sheet.mode === 'cards') {
+                settingsPreview.style.display = '';
+                settingsPreview.style.width = w + 'px';
+                settingsPreview.style.height = h + 'px';
+            } else if (sheet.mode === 'images') {
+                settingsPreview.style.display = '';
+                settingsPreview.style.width = '100%';
+                settingsPreview.style.height = (h + 40) + 'px';
+            } else {
+                settingsPreview.style.display = 'none';
+            }
+        }
+
+        settingsWSlider.addEventListener('input', syncSettingsSliders);
+        settingsHSlider.addEventListener('input', syncSettingsSliders);
+        settingsWNum.addEventListener('input', () => {
+            let v = parseInt(settingsWNum.value, 10);
+            if (isNaN(v)) v = 150;
+            v = Math.max(110, Math.min(420, v));
+            settingsWSlider.value = v;
+            syncSettingsSliders();
+        });
+        settingsHNum.addEventListener('input', () => {
+            let v = parseInt(settingsHNum.value, 10);
+            if (isNaN(v)) v = 190;
+            v = Math.max(120, Math.min(620, v));
+            settingsHSlider.value = v;
+            syncSettingsSliders();
+        });
+
+        document.getElementById('settings-reset').addEventListener('click', () => {
+            const sheet = getSheetById(settingsSheetId);
+            if (!sheet) return;
+            sheet.cardSize = { w: 150, h: 190 };
+            settingsWSlider.value = 150;
+            settingsHSlider.value = 190;
+            settingsWNum.value = 150;
+            settingsHNum.value = 190;
+            syncSettingsSliders();
+            saveData();
+            render();
+            showToast('🔄 Tamaño restablecido.', 'success', 1200);
+        });
+
+        document.getElementById('settings-save').addEventListener('click', () => {
+            const sheet = getSheetById(settingsSheetId);
+            if (!sheet) return;
+            const w = parseInt(settingsWSlider.value, 10);
+            const h = parseInt(settingsHSlider.value, 10);
+            sheet.cardSize = { w: w || 150, h: h || 190 };
+            saveData();
+            render();
+            settingsOverlay.classList.remove('show');
+            showToast('✅ Tamaño aplicado.', 'success', 1200);
+        });
+
+        document.getElementById('settings-close').addEventListener('click', () => settingsOverlay.classList.remove('show'));
+        settingsOverlay.addEventListener('click', (e) => {
+            if (e.target === settingsOverlay) settingsOverlay.classList.remove('show');
+        });
+
+        // ============================================================
+        // CREACIÓN DE HOJAS (con selección de modo)
+        // ============================================================
+        btnSheetAdd.addEventListener('click', abrirCrearHoja);
+
+        function abrirCrearHoja() {
+            // Pequeño prompt temático inline: usamos un input flotante sobre el sheetbar
+            const existing = document.getElementById('sheet-name-input');
+            if (existing) existing.remove();
+            const input = document.createElement('input');
+            input.id = 'sheet-name-input';
+            input.type = 'text';
+            input.placeholder = 'Nombre de la hoja...';
+            input.maxLength = 30;
+            input.style.cssText = `
+                position: fixed; bottom: 4px; right: 40px; z-index: 210;
+                background: var(--surface2); color: var(--text);
+                border: 1px solid var(--primary); border-radius: 4px;
+                padding: 4px 8px; font-size: 12px; font-family: var(--font); outline: none;
+                width: 160px;
+            `;
+            document.body.appendChild(input);
+            input.focus();
+            input.select();
+
+            const finish = (save) => {
+                if (save) {
+                    const val = input.value.trim();
+                    if (val) {
+                        input.remove();
+                        showModePicker(val);
+                    } else {
+                        showToast('⚠️ El nombre no puede estar vacío.', 'warning');
+                    }
+                } else {
+                    input.remove();
+                }
+            };
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') finish(true);
+                else if (e.key === 'Escape') finish(false);
+            });
+            input.addEventListener('blur', () => {
+                if (input.value.trim()) finish(true);
+                else input.remove();
+            });
+        }
+
+        // Selector de modo al crear una hoja
+        function showModePicker(name) {
+            const overlay = document.getElementById('mode-picker-overlay');
+            const list = document.getElementById('mode-picker-list');
+            list.innerHTML = '';
+            Object.keys(SHEET_MODES).forEach(modeId => {
+                const m = SHEET_MODES[modeId];
+                const btn = document.createElement('button');
+                btn.className = 'mode-pick-btn';
+                btn.innerHTML = `<span class="mp-icon">${m.icon}</span>
+                    <span class="mp-info"><b>${m.label}</b><i>${m.desc}</i></span>`;
+                btn.addEventListener('click', () => {
+                    overlay.classList.remove('show');
+                    newSheet(name, modeId);
+                    showToast('✅ Hoja creada en modo ' + m.label + '.', 'success');
+                });
+                list.appendChild(btn);
+            });
+            overlay.classList.add('show');
+        }
+
+        // ============================================================
+        // CREACIÓN DE TARJETA
+        // ============================================================
+        btnNewCard.addEventListener('click', () => {
+            const sheet = getActiveSheet();
+            if (!sheet) return;
+            if (sheet.mode === 'process') {
+                const row = { id: generateId(), cells: Array(6).fill(''), pinned: false, created: Date.now(), updated: Date.now() };
+                openRowEditor(sheet, row);
+            } else {
+                openCardEditor(sheet.id, null);
+            }
+        });
+        cardsContainer.addEventListener('dblclick', (e) => {
+            if (e.target.closest('.card-item') || e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+            const sheet = getActiveSheet();
+            if (!sheet) return;
+            if (sheet.mode === 'process') {
+                const row = { id: generateId(), cells: Array(6).fill(''), pinned: false, created: Date.now(), updated: Date.now() };
+                openRowEditor(sheet, row);
+            } else {
+                openCardEditor(sheet.id, null);
+            }
+        });
+
+        // ============================================================
+        // BÚSQUEDA
+        // ============================================================
+        searchInput.addEventListener('input', () => {
+            state.searchQuery = searchInput.value;
+            render();
+        });
+        searchAllCheck.addEventListener('change', () => {
+            state.searchAll = searchAllCheck.checked;
+            saveData();
+            render();
+        });
+        btnFavFilter.addEventListener('click', () => {
+            state.favOnly = !state.favOnly;
+            render();
+            showToast(state.favOnly ? '⭐ Mostrando solo favoritas.' : 'Mostrando todas las tarjetas.', 'info', 1200);
+        });
+        btnView.addEventListener('click', () => {
+            state.view = state.view === 'list' ? 'grid' : 'list';
+            saveData();
+            render();
+        });
+
+        // ============================================================
+        // NAVEGACIÓN CON TECLADO (flechas + Enter copia)
+        // ============================================================
+        let visibleCards = [];
+        let selectedIndex = -1;
+
+        function collectVisibleCards() {
+            visibleCards = [];
+            document.querySelectorAll('.card-item').forEach(el => {
+                visibleCards.push({ sheetId: el.dataset.sheetId, cardId: el.dataset.cardId, el });
+            });
+            if (selectedIndex >= visibleCards.length) selectedIndex = -1;
+            updateSelection();
+        }
+
+        function updateSelection() {
+            document.querySelectorAll('.card-item.selected').forEach(el => el.classList.remove('selected'));
+            if (selectedIndex >= 0 && visibleCards[selectedIndex]) {
+                const { el } = visibleCards[selectedIndex];
+                el.classList.add('selected');
+                el.scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        // ============================================================
+        // ATAJOS DE TECLADO
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'n':
+                        if (!modalOverlay.classList.contains('show')) {
+                            e.preventDefault();
+                            const sheet = getActiveSheet();
+                            if (sheet) openCardEditor(sheet.id, null);
+                        }
+                        break;
+                    case 't':
+                        e.preventDefault();
+                        abrirCrearHoja();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        searchInput.focus();
+                        searchInput.select();
+                        break;
+                    case 's':
+                        if (modalOverlay.classList.contains('show')) {
+                            e.preventDefault();
+                            saveCardEditor();
+                        }
+                        break;
+                    case 'v':
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            state.view = state.view === 'list' ? 'grid' : 'list';
+                            saveData();
+                            render();
+                        }
+                        break;
+                    case '1': case '2': case '3': case '4': case '5':
+                    case '6': case '7': case '8': case '9':
+                        e.preventDefault();
+                        const idx = parseInt(e.key, 10) - 1;
+                        if (state.sheets[idx]) {
+                            state.activeSheetId = state.sheets[idx].id;
+                            state.drawer = null;
+                            selectedIndex = -1;
+                            saveData();
+                            render();
+                        }
+                        break;
+                }
+                return;
+            }
+            // Flechas + Enter copia (fuera de inputs/modal)
+            const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
+            if (typing || modalOverlay.classList.contains('show')) {
+                if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+                    e.preventDefault();
+                    closeEditor();
+                }
+                return;
+            }
+            if (visibleCards.length === 0) return;
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, visibleCards.length - 1);
+                updateSelection();
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                updateSelection();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && visibleCards[selectedIndex]) {
+                    const { sheetId, cardId } = visibleCards[selectedIndex];
+                    const card = getCardById(sheetId, cardId);
+                    if (card) copyCardBody(card);
+                }
+            }
+        });
+
+        // ============================================================
+        // ESC / CIERRE DE SUPERFICIES
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (modalOverlay.classList.contains('show')) { closeEditor(); return; }
+                if (confirmOverlay.classList.contains('show')) { closeConfirm(); return; }
+                if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
+                if (colorPalette.classList.contains('show')) { colorPalette.classList.remove('show'); return; }
+                if (state.drawer) { closeDrawer(); }
+            }
+        });
+
+        // ============================================================
+        // CIERRE DE LA HERRAMIENTA
+        // ============================================================
+        function cerrarFast() {
+            if (editingCard) saveCardEditor();
+            saveData();
+            let attempts = 0;
+            const waitForSave = () => {
+                if (isSaving || saveQueue.length > 0) {
+                    attempts++;
+                    if (attempts < 20) {
+                        setTimeout(waitForSave, 50);
+                        return;
+                    }
+                }
+                ipcRenderer.send('close-tool', 'fast');
+            };
+            waitForSave();
+        }
+        ipcRenderer.on('fast-close-request', cerrarFast);
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        async function init() {
+            await obtenerRuta();
+            loadData();
+            // Asegurar que exista al menos una tarjeta de bienvenida si todo está vacío
+            const sheet = getActiveSheet();
+            if (sheet && sheet.cards.length === 0 && state.sheets.length === 1 && sheet.name === 'Hoja 1') {
+                sheet.cards.push({
+                    id: generateId(),
+                    title: '¡Bienvenido a Fast 2.0!',
+                    body: 'Esta es una *tarjeta de ejemplo*.\n\n1. Crea tus hojas con el botón ＋\n2. Agrega tarjetas con ➕ Tarjeta\n3. Copia con un clic en *📋 COPIAR*\n\n`Todo listo para WhatsApp.`',
+                    color: '#dbeafe',
+                    images: [],
+                    links: [],
+                    pinned: true,
+                    created: Date.now(),
+                    updated: Date.now()
+                });
+                saveData();
+            }
+            render();
+        }
+
+        init();
+    </script>
+</body>
+</html>
+
+
+
+
+

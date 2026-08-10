@@ -1,0 +1,42 @@
+{
+  "name": "gestor-casos",
+  "version": "6.0.3",
+  "description": "Gestor de Casos Call Center v6",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64",
+    "build:portable": "electron-builder --win portable --x64"
+  },
+  "build": {
+    "appId": "com.callcenter.gestor",
+    "productName": "Gestor de Casos",
+    "asar": true,
+    "files": [
+      "src/**/*"
+    ],
+    "extraMetadata": {
+      "main": "src/main.js"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "src/assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "GestorCasos-portable-${version}.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "33.4.0",
+    "electron-builder": "25.1.8"
+  }
+}

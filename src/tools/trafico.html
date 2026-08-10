@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tráfico Móvil PRO</title>
+    <!-- Librería SheetJS para leer Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        /* ============================================================
+               ROOT – Tema oscuro consistente con la app
+               ============================================================ */
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+
+        /* ============================================================
+               RESET Y ESTRUCTURA BASE
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+               HEADER (frameless + drag)
+               ============================================================ */
+        #hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        #hdr-title {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+
+        .hbtn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hbtn.danger:hover {
+            color: var(--danger);
+        }
+
+        /* ============================================================
+               CUERPO PRINCIPAL (scroll)
+               ============================================================ */
+        #main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #main::-webkit-scrollbar {
+            width: 4px;
+        }
+        #main::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        /* ============================================================
+               PANEL DE CONTROLES (dos columnas en grid)
+               ============================================================ */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .control-group {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-group .group-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .control-row label {
+            font-size: 11px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .control-row input[type="date"],
+        .control-row select,
+        .control-row input[type="text"] {
+            padding: 4px 6px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text);
+            font-size: 11px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .control-row input[type="date"]:focus,
+        .control-row select:focus,
+        .control-row input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .control-row input[type="file"] {
+            font-size: 11px;
+            color: var(--muted);
+            flex: 1;
+        }
+
+        .control-row .btn {
+            padding: 4px 12px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            font-family: var(--font);
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+
+        .control-row .btn:hover {
+            background: #2563eb;
+        }
+
+        .control-row .btn.secondary {
+            background: var(--surface3);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .control-row .btn.secondary:hover {
+            background: var(--surface2);
+        }
+
+        /* ============================================================
+               FILTROS RÁPIDOS (chips)
+               ============================================================ */
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 6px 0 2px;
+        }
+
+        .quick-filters .chip {
+            padding: 3px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 10px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .quick-filters .chip:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+
+        .quick-filters .chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        /* ============================================================
+               KPIS (cuatro tarjetas)
+               ============================================================ */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            text-align: center;
+        }
+
+        .kpi-card .kpi-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .kpi-card .kpi-label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .kpi-card .kpi-value.datos {
+            color: var(--warning);
+        }
+        .kpi-card .kpi-value.voz {
+            color: var(--success);
+        }
+        .kpi-card .kpi-value.saldo {
+            color: var(--primary);
+        }
+        .kpi-card .kpi-value.registros {
+            color: var(--text);
+        }
+
+        /* ============================================================
+               INSIGHTS (grid 2x2)
+               ============================================================ */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .insight-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .insight-item .insight-title {
+            font-weight: 700;
+            color: var(--muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .insight-item .insight-text {
+            color: var(--text);
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+               EXPLICACIÓN
+               ============================================================ */
+        .explanation-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .explanation-box textarea {
+            width: 100%;
+            min-height: 80px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            padding: 6px 8px;
+            resize: vertical;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .explanation-box textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .explanation-box .exp-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .explanation-box .exp-actions .btn {
+            padding: 5px 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .explanation-box .exp-actions .btn:hover {
+            background: #2563eb;
+        }
+
+        .explanation-box .exp-actions .btn.secondary {
+            background: var(--surface3);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .explanation-box .exp-actions .btn.secondary:hover {
+            background: var(--surface2);
+        }
+
+        /* ============================================================
+               TABLA
+               ============================================================ */
+        .table-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .table-wrapper .table-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .table-scroll {
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        .table-scroll::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        th {
+            background: var(--surface3);
+            color: var(--muted);
+            padding: 6px 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        th:hover {
+            color: var(--text);
+        }
+
+        th.sorted-asc::after {
+            content: ' ▲';
+            font-size: 8px;
+        }
+        th.sorted-desc::after {
+            content: ' ▼';
+            font-size: 8px;
+        }
+
+        td {
+            padding: 5px 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        tr:hover td {
+            background: var(--surface2);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--faint);
+            padding: 30px 0;
+            font-size: 13px;
+        }
+
+        /* ============================================================
+               TOAST
+               ============================================================ */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+        .toast.warning {
+            background: var(--warning);
+            color: #000;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 700px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 450px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-row input[type="file"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <div id="hdr">
+        <span id="hdr-title">📶 Tráfico Móvil PRO</span>
+        <button class="hbtn" onclick="ipcRenderer.send('close-tool','trafico')">✕</button>
+    </div>
+
+    <!-- ============================================================
+    CUERPO PRINCIPAL
+    ============================================================ -->
+    <div id="main">
+
+        <!-- CONTROLES -->
+        <div class="controls-grid">
+            <!-- Columna izquierda: Carga de datos -->
+            <div class="control-group">
+                <div class="group-title">📂 Carga de datos</div>
+                <div class="control-row">
+                    <label>📄 Excel</label>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" />
+                </div>
+                <div class="control-row">
+                    <label>📋 Pegar desde Excel (TSV)</label>
+                    <textarea id="pasteInput" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas desde Excel..."></textarea>
+                </div>
+                <div class="control-row">
+                    <button class="btn secondary" id="clearBtn">🗑 Limpiar datos</button>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Filtros -->
+            <div class="control-group">
+                <div class="group-title">🔍 Filtros</div>
+                <div class="control-row">
+                    <label>Desde</label>
+                    <input type="date" id="filterFrom" />
+                    <label>Hasta</label>
+                    <input type="date" id="filterTo" />
+                </div>
+                <div class="control-row">
+                    <label>Tipo</label>
+                    <select id="filterTipo">
+                        <option value="todos">Todos</option>
+                        <option value="datos">Datos</option>
+                        <option value="voz">Voz</option>
+                    </select>
+                    <label>Registro</label>
+                    <select id="filterRegistro">
+                        <option value="todos">Todos</option>
+                        <option value="saldo">Saldo (min/msg)</option>
+                        <option value="trafico">Tráfico (datos/voz)</option>
+                    </select>
+                </div>
+                <div class="control-row">
+                    <label>🔎 Buscar</label>
+                    <input type="text" id="filterDestino" placeholder="Destino, roaming, etc." />
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTROS RÁPIDOS -->
+        <div>
+            <div class="quick-filters" id="quickFilters">
+                <span class="chip" data-qf="last7">📅 Últimos 7 días</span>
+                <span class="chip" data-qf="last30">📅 Últimos 30 días</span>
+                <span class="chip" data-qf="monthcurrent">📅 Mes actual</span>
+                <span class="chip" data-qf="monthprev">📅 Mes anterior</span>
+                <span class="chip" data-qf="soloDatos">📶 Datos Nacional</span>
+                <span class="chip" data-qf="roamingDatos">✈️ Roaming Datos</span>
+                <span class="chip" data-qf="smsNacional">💬 SMS Nacional</span>
+                <span class="chip" data-qf="smsIntl">🌍 SMS Internacional</span>
+                <span class="chip" data-qf="soloVoz">📞 Voz Nacional</span>
+                <span class="chip" data-qf="roamingVoz">✈️ Voz Roaming</span>
+                <span class="chip" data-qf="vozLDI">🌍 Voz LDI</span>
+                <span class="chip" data-qf="saldoMin">⏱ Saldo (minutos)</span>
+                <span class="chip" data-qf="saldoMsg">💬 Saldo (SMS)</span>
+                <span class="chip" id="clearFiltersBtn">✖ Quitar filtros</span>
+            </div>
+        </div>
+
+        <!-- KPIS -->
+        <div class="kpi-grid" id="kpiGrid">
+            <div class="kpi-card">
+                <div class="kpi-value registros" id="kpiRegistros">0</div>
+                <div class="kpi-label">Registros visibles</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value datos" id="kpiDatos">0 MB</div>
+                <div class="kpi-label">Datos totales</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value voz" id="kpiVoz">0 min</div>
+                <div class="kpi-label">Voz total</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value saldo" id="kpiSaldo">0 min / 0 msg</div>
+                <div class="kpi-label">Saldo consumido</div>
+            </div>
+        </div>
+
+        <!-- INSIGHTS -->
+        <div class="insights-grid" id="insightsGrid">
+            <div class="insight-item">
+                <div class="insight-title">✈️ Roaming</div>
+                <div class="insight-text" id="insightRoaming">Sin uso de roaming.</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-title">🌙 Uso nocturno (00:00–06:00)</div>
+                <div class="insight-text" id="insightNocturno">Sin actividad nocturna relevante.</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-title">📈 Picos de consumo (&gt;1 GB)</div>
+                <div class="insight-text" id="insightPicos">Sin picos de consumo altos.</div>
+            </div>
+            <div class="insight-item">
+                <div class="insight-title">📊 Voz / SMS / Saldo</div>
+                <div class="insight-text" id="insightVozSms">Sin actividad de voz, SMS o saldo.</div>
+            </div>
+        </div>
+
+        <!-- EXPLICACIÓN -->
+        <div class="explanation-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:700;font-size:12px;color:var(--muted);">💬 Explicación para el cliente</span>
+                <span style="font-size:10px;color:var(--faint);" id="periodoChip">Período: —</span>
+            </div>
+            <textarea id="explanationText" placeholder="Genera una explicación automática..."></textarea>
+            <div class="exp-actions">
+                <button class="btn" id="generateExplanationBtn">🔄 Generar explicación</button>
+                <button class="btn secondary" id="copyExplanationBtn">📋 Copiar</button>
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-wrapper">
+            <div class="table-header">
+                <span>📋 Detalle de tráfico</span>
+                <span id="rowCount">0 registros</span>
+            </div>
+            <div class="table-scroll" id="tableScroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-sort="FechaObj">Fecha</th>
+                            <th data-sort="Destino">Destino</th>
+                            <th data-sort="Unidad">Unidad</th>
+                            <th data-sort="Cantidad">Cantidad</th>
+                            <th data-sort="MB">MB</th>
+                            <th data-sort="GB">GB</th>
+                            <th data-sort="Segundos">Segundos</th>
+                            <th data-sort="Minutos">Minutos</th>
+                            <th data-sort="SaldoMin">Saldo (min)</th>
+                            <th data-sort="SaldoMsg">Saldo (msg)</th>
+                            <th data-sort="spDes">sp Des</th>
+                            <th data-sort="snDes">sn Des</th>
+                            <th data-sort="Tecnologia">Tecnología</th>
+                            <th data-sort="CallType">Call Type</th>
+                            <th data-sort="Monto">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="15" class="empty-state">Sube un archivo Excel o pega datos desde Excel para comenzar.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    TOAST CONTAINER
+    ============================================================ -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================================
+    SCRIPT
+    ============================================================ -->
+    <script>
+        const { ipcRenderer, shell } = require('electron');
+
+        function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+        // ============================================================
+        // REFERENCIAS DOM
+        // ============================================================
+        const fileInput = document.getElementById('fileInput');
+        const pasteInput = document.getElementById('pasteInput');
+        const filterFrom = document.getElementById('filterFrom');
+        const filterTo = document.getElementById('filterTo');
+        const filterTipo = document.getElementById('filterTipo');
+        const filterRegistro = document.getElementById('filterRegistro');
+        const filterDestino = document.getElementById('filterDestino');
+        const clearBtn = document.getElementById('clearBtn');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        const kpiRegistros = document.getElementById('kpiRegistros');
+        const kpiDatos = document.getElementById('kpiDatos');
+        const kpiVoz = document.getElementById('kpiVoz');
+        const kpiSaldo = document.getElementById('kpiSaldo');
+        const insightRoaming = document.getElementById('insightRoaming');
+        const insightNocturno = document.getElementById('insightNocturno');
+        const insightPicos = document.getElementById('insightPicos');
+        const insightVozSms = document.getElementById('insightVozSms');
+        const explanationText = document.getElementById('explanationText');
+        const generateExplanationBtn = document.getElementById('generateExplanationBtn');
+        const copyExplanationBtn = document.getElementById('copyExplanationBtn');
+        const tableBody = document.getElementById('tableBody');
+        const rowCount = document.getElementById('rowCount');
+        const periodoChip = document.getElementById('periodoChip');
+
+        // ============================================================
+        // ESTADO
+        // ============================================================
+        let allRows = [];
+        let filteredRows = [];
+        let sortState = { key: null, dir: 'asc' };
+        let lastSummary = null;
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        // ============================================================
+        // PERSISTENCIA DE FILTROS (localStorage)
+        // ============================================================
+        const FILTER_STORAGE_KEY = 'trafico-filtros';
+
+        function guardarFiltros() {
+            try {
+                localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify({
+                    from: filterFrom.value,
+                    to: filterTo.value,
+                    tipo: filterTipo.value,
+                    registro: filterRegistro.value,
+                    destino: filterDestino.value
+                }));
+            } catch (e) {}
+        }
+
+        function cargarFiltros() {
+            try {
+                const raw = localStorage.getItem(FILTER_STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data.from) filterFrom.value = data.from;
+                if (data.to) filterTo.value = data.to;
+                if (data.tipo) filterTipo.value = data.tipo;
+                if (data.registro) filterRegistro.value = data.registro;
+                if (data.destino) filterDestino.value = data.destino;
+            } catch (e) {}
+        }
+
+        // ============================================================
+        // TRANSFORMACIÓN DE FILAS (normalización mejorada)
+        // ============================================================
+        function transformRow(row) {
+            // Detección flexible de columnas (case-insensitive)
+            const getField = (key) => {
+                const lowerKey = key.toLowerCase();
+                const keys = Object.keys(row);
+                const found = keys.find(k => k.toLowerCase() === lowerKey);
+                return found ? row[found] : '';
+            };
+
+            const unidad = getField('unidad').toString();
+            const cantidad = Number(getField('cantidad')) || 0;
+            const monto = Number(getField('monto')) || 0;
+            const destino = getField('destino').toString();
+            const spDes = getField('sp des').toString();
+            const snDes = getField('sn des').toString();
+            const tecnologia = getField('tecnologia') || getField('tecnología') || '';
+            const callType = getField('call type') || '';
+
+            const desLower = (destino + ' ' + spDes + ' ' + snDes).toLowerCase();
+            const unidadLower = unidad.toLowerCase();
+
+            let mb = null,
+                gb = null,
+                segundos = null,
+                minutos = null;
+            let saldoMin = null,
+                saldoMsg = null;
+            let esSaldo = false;
+
+            const esSaldoKeyword = desLower.includes('saldo') ||
+                desLower.includes('prepago') ||
+                desLower.includes('controlado') ||
+                desLower.includes('bolsa') ||
+                desLower.includes('minutos') ||
+                desLower.includes('mensajes');
+
+            if (unidadLower.includes('second')) {
+                segundos = cantidad;
+                minutos = cantidad / 60;
+                if (esSaldoKeyword) {
+                    saldoMin = minutos;
+                    esSaldo = true;
+                }
+            } else if (unidadLower.includes('msg') || (unidadLower.includes('message') && esSaldoKeyword)) {
+                saldoMsg = cantidad;
+                esSaldo = true;
+            }
+
+            if (unidadLower.includes('byte') && !esSaldo) {
+                mb = cantidad / (1024 * 1024);
+                gb = cantidad / (1024 * 1024 * 1024);
+            }
+
+            // Parser de fechas robusto
+            let fechaObj = null;
+            const rawFecha = getField('fecha');
+            if (rawFecha) {
+                if (rawFecha instanceof Date) {
+                    fechaObj = new Date(rawFecha);
+                } else if (typeof rawFecha === 'number') {
+                    // Número de Excel (días desde 1899-12-30)
+                    const ms = (rawFecha - 25569) * 86400 * 1000;
+                    fechaObj = new Date(ms);
+                } else if (typeof rawFecha === 'string') {
+                    // Intentar varios formatos
+                    let str = rawFecha.trim();
+                    // Formato YYYY-MM-DD o YYYY-MM-DD HH:MM:SS
+                    let match = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s(\d{2}):(\d{2}):?(\d{2})?)?/);
+                    if (match) {
+                        const y = parseInt(match[1]),
+                            m = parseInt(match[2]) - 1,
+                            d = parseInt(match[3]);
+                        const hh = match[4] ? parseInt(match[4]) : 0;
+                        const mm = match[5] ? parseInt(match[5]) : 0;
+                        const ss = match[6] ? parseInt(match[6]) : 0;
+                        fechaObj = new Date(y, m, d, hh, mm, ss);
+                    } else {
+                        // Formato DD/MM/YYYY o DD-MM-YYYY
+                        match = str.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})(?:\s(\d{2}):(\d{2}):?(\d{2})?)?/);
+                        if (match) {
+                            const d = parseInt(match[1]),
+                                m = parseInt(match[2]) - 1,
+                                y = parseInt(match[3]);
+                            const hh = match[4] ? parseInt(match[4]) : 0;
+                            const mm = match[5] ? parseInt(match[5]) : 0;
+                            const ss = match[6] ? parseInt(match[6]) : 0;
+                            fechaObj = new Date(y, m, d, hh, mm, ss);
+                        } else {
+                            // Último intento: Date nativo
+                            const d = new Date(str);
+                            if (!isNaN(d.getTime())) fechaObj = d;
+                        }
+                    }
+                }
+            }
+            // Ajuste UTC-3 (Chile)
+            if (fechaObj) fechaObj.setHours(fechaObj.getHours() - 3);
+
+            let fechaFormateada = '';
+            if (fechaObj && !isNaN(fechaObj.getTime())) {
+                const y = fechaObj.getFullYear();
+                const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
+                const d = String(fechaObj.getDate()).padStart(2, '0');
+                const hh = String(fechaObj.getHours()).padStart(2, '0');
+                const mm = String(fechaObj.getMinutes()).padStart(2, '0');
+                fechaFormateada = `${d}-${m}-${y} ${hh}:${mm}`;
+            }
+
+            // Detección de tipos especiales
+            let tipoSMS = null;
+            if (desLower.includes('sms') || desLower.includes('mensaje')) {
+                if (desLower.includes('internacional')) tipoSMS = 'SMS_Internacional';
+                else tipoSMS = 'SMS_Nacional';
+            }
+            let tipoLDI = null;
+            if (desLower.includes('ldi') || desLower.includes('carrier') || desLower.includes('larga distancia')) {
+                tipoLDI = 'LDI';
+            }
+            let tipoRoaming = null;
+            if (desLower.includes('roam') || desLower.includes('roaming')) {
+                if (desLower.includes('tarifa especial')) tipoRoaming = 'RoamingVozTarifaEspecial';
+                else if (!isNaN(monto) && monto > 0) tipoRoaming = 'RoamingVozConCobro';
+                else if (monto === 0) tipoRoaming = 'RoamingVozConBolsa';
+            }
+
+            return {
+                ...row,
+                UnidadNorm: unidad,
+                CantidadNum: isNaN(cantidad) ? 0 : cantidad,
+                MontoNum: isNaN(monto) ? 0 : monto,
+                MB: mb,
+                GB: gb,
+                Segundos: segundos,
+                Minutos: minutos,
+                SaldoMin: saldoMin,
+                SaldoMsg: saldoMsg,
+                EsSaldo: esSaldo,
+                FechaObj: fechaObj,
+                FechaFormateada: fechaFormateada,
+                DestinoNorm: destino.toLowerCase(),
+                spDesNorm: spDes.toLowerCase(),
+                snDesNorm: snDes.toLowerCase(),
+                TecnologiaNorm: tecnologia.toLowerCase(),
+                CallTypeNorm: callType.toLowerCase(),
+                tipoSMS,
+                tipoLDI,
+                tipoRoaming,
+                // Guardar originales para mostrar
+                Destino: destino,
+                Unidad: unidad,
+                Cantidad: cantidad,
+                spDes: spDes,
+                snDes: snDes,
+                Tecnologia: tecnologia,
+                CallType: callType,
+                Monto: monto
+            };
+        }
+
+        // ============================================================
+        // PROCESAR DATOS
+        // ============================================================
+        function processData(json) {
+            try {
+                allRows = json.map(transformRow);
+                aplicarFiltros();
+                showToast(`✅ Cargados ${allRows.length} registros.`, 'success');
+            } catch (err) {
+                showToast(`❌ Error al procesar los datos: ${err.message}`, 'error');
+            }
+        }
+
+        function loadFromExcel(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                    processData(json);
+                } catch (err) {
+                    showToast(`❌ Error al leer el archivo Excel: ${err.message}`, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processPastedText(text) {
+            if (!text || !text.trim()) {
+                showToast('⚠️ No se detectaron datos.', 'warning');
+                return;
+            }
+            try {
+                const lines = text.trim().split(/\r?\n/);
+                if (lines.length < 2) {
+                    showToast('⚠️ Se necesitan al menos encabezados y una fila de datos.', 'warning');
+                    return;
+                }
+                const headers = lines[0].split('\t').map(h => h.trim());
+                const dataRows = lines.slice(1).map(line => line.split('\t'));
+                const json = dataRows
+                    .filter(cols => cols.some(c => c && c.trim() !== ''))
+                    .map(cols => {
+                        const obj = {};
+                        headers.forEach((h, i) => {
+                            obj[h] = cols[i] !== undefined ? cols[i] : '';
+                        });
+                        return obj;
+                    });
+                if (!json.length) {
+                    showToast('⚠️ No se encontraron filas de datos.', 'warning');
+                    return;
+                }
+                processData(json);
+            } catch (err) {
+                showToast(`❌ Error al procesar el texto pegado: ${err.message}`, 'error');
+            }
+        }
+
+        // ============================================================
+        // APLICAR FILTROS (unificado)
+        // ============================================================
+        function aplicarFiltros() {
+            if (!allRows.length) {
+                filteredRows = [];
+                renderTable();
+                updateSummary();
+                return;
+            }
+
+            const fromStr = filterFrom.value;
+            const toStr = filterTo.value;
+            const tipo = filterTipo.value;
+            const registro = filterRegistro.value;
+            const destinoText = filterDestino.value.trim().toLowerCase();
+
+            const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : null;
+            const toDate = toStr ? new Date(toStr + 'T23:59:59') : null;
+
+            let rows = allRows.filter(row => {
+                if (fromDate && row.FechaObj && row.FechaObj < fromDate) return false;
+                if (toDate && row.FechaObj && row.FechaObj > toDate) return false;
+
+                const unidadLower = (row.UnidadNorm || '').toLowerCase();
+                if (tipo === 'datos' && !unidadLower.includes('byte')) return false;
+                if (tipo === 'voz' && !unidadLower.includes('second')) return false;
+
+                if (registro === 'saldo' && !row.EsSaldo) return false;
+                if (registro === 'trafico' && row.EsSaldo) return false;
+
+                if (destinoText) {
+                    // Códigos especiales usados por los chips de filtro rápido
+                    if (destinoText === 'sms_nac' && row.tipoSMS !== 'SMS_Nacional') return false;
+                    if (destinoText === 'sms_intl' && row.tipoSMS !== 'SMS_Internacional') return false;
+                    if (destinoText === 'ldi' && row.tipoLDI !== 'LDI') return false;
+                    if (destinoText === 'roamingvoz' && (!row.tipoRoaming || !row.tipoRoaming.startsWith('RoamingVoz'))) return false;
+                    if (destinoText === 'saldomin' && (row.SaldoMin == null)) return false;
+                    if (destinoText === 'saldomsg' && (row.SaldoMsg == null)) return false;
+
+                    const combo = (row.DestinoNorm || '') + ' ' +
+                        (row.spDesNorm || '') + ' ' +
+                        (row.snDesNorm || '') + ' ' +
+                        (row.TecnologiaNorm || '');
+                    if (!['sms_nac', 'sms_intl', 'ldi', 'roamingvoz', 'saldomin', 'saldomsg'].includes(destinoText) && !combo.includes(destinoText)) return false;
+                }
+
+                return true;
+            });
+
+            if (sortState.key) {
+                rows = sortRows(rows, sortState.key, sortState.dir);
+            }
+
+            filteredRows = rows;
+            renderTable();
+            updateSummary();
+            updatePeriodoChip();
+            guardarFiltros();
+        }
+
+        // ============================================================
+        // ORDENAMIENTO
+        // ============================================================
+        function sortRows(rows, key, dir) {
+            const factor = dir === 'asc' ? 1 : -1;
+            return rows.slice().sort((a, b) => {
+                let va = a[key],
+                    vb = b[key];
+                if (va == null && vb == null) return 0;
+                if (va == null) return 1;
+                if (vb == null) return -1;
+                if (va instanceof Date && vb instanceof Date) return (va - vb) * factor;
+                if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * factor;
+                va = va.toString().toLowerCase();
+                vb = vb.toString().toLowerCase();
+                if (va < vb) return -factor;
+                if (va > vb) return factor;
+                return 0;
+            });
+        }
+
+        // ============================================================
+        // RENDERIZAR TABLA
+        // ============================================================
+        function renderTable() {
+            if (!filteredRows.length) {
+                tableBody.innerHTML =
+                    `<tr><td colspan="15" class="empty-state">${allRows.length ? 'Sin resultados con los filtros actuales.' : 'Sube un archivo o pega datos para comenzar.'}</td></tr>`;
+                rowCount.textContent = '0 registros';
+                return;
+            }
+
+            let html = '';
+            filteredRows.forEach(row => {
+                const fecha = row.FechaFormateada || '';
+                const destino = row.Destino || '';
+                const unidad = row.Unidad || '';
+                const cantidad = row.CantidadNum || '';
+                const mb = row.MB != null ? row.MB.toFixed(2) : '';
+                const gb = row.GB != null ? row.GB.toFixed(3) : '';
+                const seg = row.Segundos != null ? row.Segundos.toFixed(0) : '';
+                const min = row.Minutos != null ? row.Minutos.toFixed(2) : '';
+                const saldoMin = row.SaldoMin != null ? row.SaldoMin.toFixed(2) : '';
+                const saldoMsg = row.SaldoMsg != null ? row.SaldoMsg : '';
+                const spDes = row.spDes || '';
+                const snDes = row.snDes || '';
+                const tec = row.Tecnologia || '';
+                const callType = row.CallType || '';
+                const monto = row.MontoNum != null ? row.MontoNum.toLocaleString('es-CL') : '';
+
+                html += `<tr>
+                            <td>${esc(fecha)}</td>
+                            <td>${esc(destino)}</td>
+                            <td>${esc(unidad)}</td>
+                            <td>${esc(cantidad)}</td>
+                            <td>${esc(mb)}</td>
+                            <td>${esc(gb)}</td>
+                            <td>${esc(seg)}</td>
+                            <td>${esc(min)}</td>
+                            <td>${esc(saldoMin)}</td>
+                            <td>${esc(saldoMsg)}</td>
+                            <td>${esc(spDes)}</td>
+                            <td>${esc(snDes)}</td>
+                            <td>${esc(tec)}</td>
+                            <td>${esc(callType)}</td>
+                            <td>${esc(monto)}</td>
+                        </tr>`;
+            });
+            tableBody.innerHTML = html;
+            rowCount.textContent = filteredRows.length + ' registros';
+        }
+
+        // ============================================================
+        // ACTUALIZAR SUMMARY (KPIs e Insights)
+        // ============================================================
+        function updateSummary() {
+            if (!filteredRows.length) {
+                kpiRegistros.textContent = '0';
+                kpiDatos.textContent = '0 MB';
+                kpiVoz.textContent = '0 min';
+                kpiSaldo.textContent = '0 min / 0 msg';
+                insightRoaming.textContent = 'Sin uso de roaming.';
+                insightNocturno.textContent = 'Sin actividad nocturna relevante.';
+                insightPicos.textContent = 'Sin picos de consumo altos.';
+                insightVozSms.textContent = 'Sin actividad de voz, SMS o saldo.';
+                lastSummary = null;
+                return;
+            }
+
+            let totalMB = 0,
+                totalGB = 0,
+                totalMin = 0;
+            let saldoMinTotal = 0,
+                saldoMsgTotal = 0;
+            let roamingDatosMB = 0,
+                roamingSMS = 0,
+                roamingVozSeg = 0;
+            let noctNacMB = 0,
+                noctRoamMB = 0;
+            let picos = [];
+            let vozNacSeg = 0,
+                vozLDISeg = 0,
+                vozRoamSeg = 0;
+            let smsNac = 0,
+                smsIntl = 0;
+            let minFecha = null,
+                maxFecha = null;
+
+            filteredRows.forEach(row => {
+                if (row.MB && !isNaN(row.MB)) {
+                    totalMB += row.MB;
+                    totalGB += row.GB || 0;
+                }
+                if (row.Minutos && !isNaN(row.Minutos)) {
+                    totalMin += row.Minutos;
+                }
+                if (row.SaldoMin && !isNaN(row.SaldoMin)) saldoMinTotal += row.SaldoMin;
+                if (row.SaldoMsg && !isNaN(row.SaldoMsg)) saldoMsgTotal += row.SaldoMsg;
+
+                if (row.FechaObj && !isNaN(row.FechaObj.getTime())) {
+                    if (!minFecha || row.FechaObj < minFecha) minFecha = row.FechaObj;
+                    if (!maxFecha || row.FechaObj > maxFecha) maxFecha = row.FechaObj;
+                }
+
+                const combo = (row.DestinoNorm || '') + ' ' + (row.snDesNorm || '') + ' ' + (row.spDesNorm || '');
+                const esRoaming = combo.includes('roam') || combo.includes('roaming');
+                if (esRoaming && row.MB && !isNaN(row.MB)) {
+                    roamingDatosMB += row.MB;
+                }
+                if (esRoaming && row.tipoSMS) {
+                    if (row.tipoSMS === 'SMS_Nacional' || row.tipoSMS === 'SMS_Internacional') roamingSMS++;
+                }
+                if (esRoaming && row.Segundos && !isNaN(row.Segundos)) {
+                    roamingVozSeg += row.Segundos;
+                }
+
+                if (row.FechaObj && !isNaN(row.FechaObj.getTime())) {
+                    const h = row.FechaObj.getHours();
+                    if (h >= 0 && h < 6) {
+                        if (row.MB && !isNaN(row.MB)) {
+                            if (esRoaming) noctRoamMB += row.MB;
+                            else noctNacMB += row.MB;
+                        }
+                    }
+                }
+
+                if (row.MB && row.MB > 1024) {
+                    picos.push({ mb: row.MB, fecha: row.FechaObj, roaming: esRoaming });
+                }
+
+                if (row.Segundos && !isNaN(row.Segundos)) {
+                    if (row.tipoLDI === 'LDI') vozLDISeg += row.Segundos;
+                    else if (esRoaming) vozRoamSeg += row.Segundos;
+                    else vozNacSeg += row.Segundos;
+                }
+                if (row.tipoSMS === 'SMS_Nacional') smsNac++;
+                if (row.tipoSMS === 'SMS_Internacional') smsIntl++;
+            });
+
+            kpiRegistros.textContent = filteredRows.length;
+
+            if (totalGB >= 1) {
+                kpiDatos.textContent = totalGB.toFixed(2) + ' GB';
+            } else {
+                kpiDatos.textContent = Math.round(totalMB).toLocaleString('es-CL') + ' MB';
+            }
+
+            kpiVoz.textContent = Math.round(totalMin).toLocaleString('es-CL') + ' min';
+            kpiSaldo.textContent = Math.round(saldoMinTotal) + ' min / ' + Math.round(saldoMsgTotal) + ' msg';
+
+            let roamParts = [];
+            if (roamingDatosMB > 0) {
+                const roamGB = (roamingDatosMB / 1024).toFixed(2);
+                roamParts.push(`📶 ${Math.round(roamingDatosMB)} MB (${roamGB} GB) en datos`);
+            }
+            if (roamingSMS > 0) roamParts.push(`💬 ${roamingSMS} SMS`);
+            if (roamingVozSeg > 0) roamParts.push(`📞 ${Math.round(roamingVozSeg/60)} min en llamadas`);
+            insightRoaming.textContent = roamParts.length ? 'Se detecta roaming: ' + roamParts.join('; ') :
+                'Sin uso de roaming.';
+
+            let noctParts = [];
+            if (noctNacMB > 0) noctParts.push(`🇨🇱 ${Math.round(noctNacMB)} MB nacional`);
+            if (noctRoamMB > 0) noctParts.push(`✈️ ${Math.round(noctRoamMB)} MB roaming`);
+            insightNocturno.textContent = noctParts.length ? 'Uso nocturno (00:00–06:00): ' + noctParts.join('; ') :
+                'Sin actividad nocturna relevante.';
+
+            if (picos.length) {
+                const maxPico = picos.reduce((a, b) => a.mb > b.mb ? a : b);
+                const maxGB = (maxPico.mb / 1024).toFixed(2);
+                let fechaStr = '';
+                if (maxPico.fecha && !isNaN(maxPico.fecha.getTime())) {
+                    const d = String(maxPico.fecha.getDate()).padStart(2, '0');
+                    const m = String(maxPico.fecha.getMonth() + 1).padStart(2, '0');
+                    const y = maxPico.fecha.getFullYear();
+                    const hh = String(maxPico.fecha.getHours()).padStart(2, '0');
+                    const mm = String(maxPico.fecha.getMinutes()).padStart(2, '0');
+                    fechaStr = ` (máximo el ${d}-${m}-${y} ${hh}:${mm})`;
+                }
+                insightPicos.textContent = `${picos.length} pico(s) >1 GB, máximo ${maxGB} GB${fechaStr}`;
+            } else {
+                insightPicos.textContent = 'Sin picos de consumo altos (>1 GB).';
+            }
+
+            let vsParts = [];
+            if (vozNacSeg > 0) vsParts.push(`📞 ${Math.round(vozNacSeg/60)} min nacional`);
+            if (vozLDISeg > 0) vsParts.push(`🌍 ${Math.round(vozLDISeg/60)} min LDI`);
+            if (vozRoamSeg > 0) vsParts.push(`✈️ ${Math.round(vozRoamSeg/60)} min roaming`);
+            if (smsNac > 0) vsParts.push(`💬 ${smsNac} SMS nacionales`);
+            if (smsIntl > 0) vsParts.push(`🌍 ${smsIntl} SMS internacionales`);
+            if (saldoMinTotal > 0) vsParts.push(`⏱ ${Math.round(saldoMinTotal)} min de saldo`);
+            if (saldoMsgTotal > 0) vsParts.push(`💬 ${Math.round(saldoMsgTotal)} msg de saldo`);
+            insightVozSms.textContent = vsParts.length ? vsParts.join('; ') :
+                'Sin actividad de voz, SMS o saldo.';
+
+            lastSummary = {
+                totalMB,
+                totalGB,
+                totalMin,
+                saldoMinTotal,
+                saldoMsgTotal,
+                roamingDatosMB,
+                roamingSMS,
+                roamingVozSeg,
+                noctNacMB,
+                noctRoamMB,
+                picos,
+                vozNacSeg,
+                vozLDISeg,
+                vozRoamSeg,
+                smsNac,
+                smsIntl,
+                rowsCount: filteredRows.length,
+                minFecha,
+                maxFecha
+            };
+        }
+
+        // ============================================================
+        // PERÍODO VISIBLE
+        // ============================================================
+        function updatePeriodoChip() {
+            if (!lastSummary || !lastSummary.minFecha || !lastSummary.maxFecha) {
+                periodoChip.textContent = 'Período: —';
+                return;
+            }
+            const min = lastSummary.minFecha;
+            const max = lastSummary.maxFecha;
+            const d1 = String(min.getDate()).padStart(2, '0');
+            const m1 = String(min.getMonth() + 1).padStart(2, '0');
+            const y1 = min.getFullYear();
+            const d2 = String(max.getDate()).padStart(2, '0');
+            const m2 = String(max.getMonth() + 1).padStart(2, '0');
+            const y2 = max.getFullYear();
+            if (d1 === d2 && m1 === m2 && y1 === y2) {
+                periodoChip.textContent = `📅 ${d1}-${m1}-${y1}`;
+            } else {
+                periodoChip.textContent = `📅 ${d1}-${m1}-${y1} → ${d2}-${m2}-${y2}`;
+            }
+        }
+
+        // ============================================================
+        // GENERAR EXPLICACIÓN
+        // ============================================================
+        function generateExplanation() {
+            if (!lastSummary || !filteredRows.length) {
+                explanationText.value = 'Primero carga datos y aplica filtros para generar una explicación.';
+                return;
+            }
+
+            const s = lastSummary;
+            const f1 = s.minFecha ? `${String(s.minFecha.getDate()).padStart(2,'0')}-${String(s.minFecha.getMonth()+1).padStart(2,'0')}-${s.minFecha.getFullYear()}` :
+                '';
+            const f2 = s.maxFecha ? `${String(s.maxFecha.getDate()).padStart(2,'0')}-${String(s.maxFecha.getMonth()+1).padStart(2,'0')}-${s.maxFecha.getFullYear()}` :
+                '';
+
+            let lines = [];
+            lines.push(`(Nombre del cliente), revisé el detalle de uso de tu línea para entregarte una explicación clara y sencilla:`);
+            lines.push('');
+            lines.push(`• Entre el ${f1} y el ${f2}, se registraron ${s.rowsCount.toLocaleString('es-CL')} acciones entre uso de datos y llamadas.`);
+
+            if (s.totalGB >= 1) {
+                lines.push(`• En ese período, tu línea utilizó aproximadamente ${s.totalGB.toFixed(2)} GB en datos móviles.`);
+            } else {
+                lines.push(
+                    `• En ese período, tu línea utilizó aproximadamente ${Math.round(s.totalMB).toLocaleString('es-CL')} MB en datos móviles.`
+                    );
+            }
+
+            if (s.totalMin > 0) {
+                lines.push(
+                    `• Además, se registraron aproximadamente ${Math.round(s.totalMin).toLocaleString('es-CL')} minutos en llamadas.`
+                    );
+            }
+
+            if (s.saldoMinTotal > 0 || s.saldoMsgTotal > 0) {
+                let saldoParts = [];
+                if (s.saldoMinTotal > 0) saldoParts.push(`${Math.round(s.saldoMinTotal)} minutos`);
+                if (s.saldoMsgTotal > 0) saldoParts.push(`${Math.round(s.saldoMsgTotal)} mensajes`);
+                lines.push(`• Se consumieron ${saldoParts.join(' y ')} de saldo desde tu plan/bolsa activa.`);
+            }
+
+            if (s.roamingDatosMB > 0 || s.roamingSMS > 0 || s.roamingVozSeg > 0) {
+                let roamParts = [];
+                if (s.roamingDatosMB > 0) roamParts.push(`${Math.round(s.roamingDatosMB)} MB en datos`);
+                if (s.roamingSMS > 0) roamParts.push(`${s.roamingSMS} SMS`);
+                if (s.roamingVozSeg > 0) roamParts.push(`${Math.round(s.roamingVozSeg/60)} min en llamadas`);
+                lines.push(`• Se detecta uso de roaming: ${roamParts.join(', ')}.`);
+            }
+
+            if (s.noctNacMB > 0 || s.noctRoamMB > 0) {
+                let noctParts = [];
+                if (s.noctNacMB > 0) noctParts.push(`${Math.round(s.noctNacMB)} MB nacional`);
+                if (s.noctRoamMB > 0) noctParts.push(`${Math.round(s.noctRoamMB)} MB roaming`);
+                lines.push(`• Parte del uso ocurrió durante la madrugada (00:00–06:00): ${noctParts.join(' y ')}.`);
+            }
+
+            if (s.picos.length) {
+                const maxPico = s.picos.reduce((a, b) => a.mb > b.mb ? a : b);
+                const maxGB = (maxPico.mb / 1024).toFixed(2);
+                lines.push(`• Se identificaron ${s.picos.length} sesión(es) de alto consumo (>1 GB), la mayor con ${maxGB} GB.`);
+            }
+
+            let vsParts = [];
+            if (s.vozNacSeg > 0) vsParts.push(`${Math.round(s.vozNacSeg/60)} min nacional`);
+            if (s.vozLDISeg > 0) vsParts.push(`${Math.round(s.vozLDISeg/60)} min LDI`);
+            if (s.vozRoamSeg > 0) vsParts.push(`${Math.round(s.vozRoamSeg/60)} min roaming`);
+            if (s.smsNac > 0) vsParts.push(`${s.smsNac} SMS nacionales`);
+            if (s.smsIntl > 0) vsParts.push(`${s.smsIntl} SMS internacionales`);
+            if (vsParts.length) {
+                lines.push(`• Detalle de llamadas y SMS: ${vsParts.join(', ')}.`);
+            }
+
+            lines.push('');
+            lines.push(
+                `Si hay algo en este uso que no te calza o quieres revisar algún punto más a fondo, estoy aquí para ayudarte y aclararte todo lo que necesites. 💙`
+            );
+
+            explanationText.value = lines.join('\n');
+            showToast('✅ Explicación generada.', 'success');
+        }
+
+        // ============================================================
+        // COPIAR EXPLICACIÓN
+        // ============================================================
+        function copyExplanation() {
+            const text = explanationText.value;
+            if (!text || text.trim() === '') {
+                showToast('⚠️ No hay texto para copiar.', 'warning');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('📋 Explicación copiada al portapapeles.', 'success');
+            }).catch(() => {
+                showToast('❌ Error al copiar.', 'error');
+            });
+        }
+
+        // ============================================================
+        // FILTROS RÁPIDOS
+        // ============================================================
+        function applyQuickFilter(type) {
+            const now = new Date();
+            let from = null,
+                to = null;
+
+            switch (type) {
+                case 'last7':
+                    from = new Date(now);
+                    from.setDate(from.getDate() - 6);
+                    to = new Date(now);
+                    break;
+                case 'last30':
+                    from = new Date(now);
+                    from.setDate(from.getDate() - 29);
+                    to = new Date(now);
+                    break;
+                case 'monthcurrent':
+                    from = new Date(now.getFullYear(), now.getMonth(), 1);
+                    to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    break;
+                case 'monthprev':
+                    from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    to = new Date(now.getFullYear(), now.getMonth(), 0);
+                    break;
+                case 'soloDatos':
+                    filterTipo.value = 'datos';
+                    break;
+                case 'roamingDatos':
+                    filterTipo.value = 'datos';
+                    filterDestino.value = 'roam';
+                    break;
+                case 'smsNacional':
+                    filterDestino.value = 'sms_nac';
+                    break;
+                case 'smsIntl':
+                    filterDestino.value = 'sms_intl';
+                    break;
+                case 'soloVoz':
+                    filterTipo.value = 'voz';
+                    break;
+                case 'roamingVoz':
+                    filterTipo.value = 'voz';
+                    filterDestino.value = 'roamingvoz';
+                    break;
+                case 'vozLDI':
+                    filterTipo.value = 'voz';
+                    filterDestino.value = 'ldi';
+                    break;
+                case 'saldoMin':
+                    filterRegistro.value = 'saldo';
+                    filterDestino.value = 'saldomin';
+                    break;
+                case 'saldoMsg':
+                    filterRegistro.value = 'saldo';
+                    filterDestino.value = 'saldomsg';
+                    break;
+                default:
+                    return;
+            }
+
+            if (from && to) {
+                const f = from.getFullYear() + '-' + String(from.getMonth() + 1).padStart(2, '0') + '-' + String(from
+                .getDate()).padStart(2, '0');
+                const t = to.getFullYear() + '-' + String(to.getMonth() + 1).padStart(2, '0') + '-' + String(to.getDate())
+                    .padStart(2, '0');
+                filterFrom.value = f;
+                filterTo.value = t;
+            }
+
+            document.querySelectorAll('.chip[data-qf]').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.qf === type);
+            });
+            if (['last7', 'last30', 'monthcurrent', 'monthprev'].includes(type)) {
+                document.querySelectorAll('.chip[data-qf]').forEach(chip => {
+                    if (!['last7', 'last30', 'monthcurrent', 'monthprev'].includes(chip.dataset.qf)) {
+                        chip.classList.remove('active');
+                    }
+                });
+            }
+
+            aplicarFiltros();
+        }
+
+        function clearAllFilters() {
+            filterFrom.value = '';
+            filterTo.value = '';
+            filterTipo.value = 'todos';
+            filterRegistro.value = 'todos';
+            filterDestino.value = '';
+            document.querySelectorAll('.chip[data-qf]').forEach(chip => chip.classList.remove('active'));
+            aplicarFiltros();
+            showToast('✅ Filtros eliminados.', 'success');
+        }
+
+        // ============================================================
+        // EVENTOS
+        // ============================================================
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) loadFromExcel(e.target.files[0]);
+            e.target.value = '';
+        });
+
+        pasteInput.addEventListener('paste', () => {
+            setTimeout(() => {
+                const text = pasteInput.value;
+                if (text.trim()) processPastedText(text);
+            }, 50);
+        });
+
+        filterFrom.addEventListener('change', aplicarFiltros);
+        filterTo.addEventListener('change', aplicarFiltros);
+        filterTipo.addEventListener('change', aplicarFiltros);
+        filterRegistro.addEventListener('change', aplicarFiltros);
+        let destinoTimeout;
+        filterDestino.addEventListener('input', () => {
+            clearTimeout(destinoTimeout);
+            destinoTimeout = setTimeout(aplicarFiltros, 300);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            allRows = [];
+            filteredRows = [];
+            fileInput.value = '';
+            pasteInput.value = '';
+            clearAllFilters();
+            renderTable();
+            updateSummary();
+            updatePeriodoChip();
+            explanationText.value = '';
+            showToast('🗑 Datos limpiados.', 'success');
+        });
+
+        clearFiltersBtn.addEventListener('click', clearAllFilters);
+
+        document.querySelectorAll('.chip[data-qf]').forEach(chip => {
+            chip.addEventListener('click', () => {
+                const type = chip.dataset.qf;
+                if (chip.classList.contains('active')) {
+                    chip.classList.remove('active');
+                    if (['last7', 'last30', 'monthcurrent', 'monthprev'].includes(type)) {
+                        filterFrom.value = '';
+                        filterTo.value = '';
+                    }
+                    if (['soloDatos', 'roamingDatos', 'soloVoz', 'roamingVoz', 'vozLDI'].includes(type)) {
+                        filterTipo.value = 'todos';
+                        filterDestino.value = '';
+                    }
+                    if (['smsNacional', 'smsIntl'].includes(type)) {
+                        filterDestino.value = '';
+                    }
+                    if (['saldoMin', 'saldoMsg'].includes(type)) {
+                        filterRegistro.value = 'todos';
+                        filterDestino.value = '';
+                    }
+                    aplicarFiltros();
+                    return;
+                }
+                applyQuickFilter(type);
+            });
+        });
+
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.dataset.sort;
+                let dir = 'asc';
+                if (sortState.key === key) {
+                    dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+                }
+                sortState = { key, dir };
+                document.querySelectorAll('th[data-sort]').forEach(h => {
+                    h.classList.remove('sorted-asc', 'sorted-desc');
+                });
+                th.classList.add(dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+                aplicarFiltros();
+            });
+        });
+
+        generateExplanationBtn.addEventListener('click', generateExplanation);
+        copyExplanationBtn.addEventListener('click', copyExplanation);
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        cargarFiltros();
+        renderTable();
+        updateSummary();
+        updatePeriodoChip();
+
+        showToast('📶 Sube un archivo Excel o pega datos desde Excel para comenzar.', 'success', 3000);
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'g') {
+                e.preventDefault();
+                generateExplanation();
+            }
+        });
+    </script>
+</body>
+</html>

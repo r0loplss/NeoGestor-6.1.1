@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<style>
+:root{
+  --bg:#0f1117;--surface:#161b27;--surface2:#1c2333;--surface3:#232c3f;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e2e8f0;--muted:#8892a4;--faint:#4a5568;
+  --primary:#3b82f6;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444;
+  --purple:#8b5cf6;--teal:#14b8a6;
+  --font:'Segoe UI',system-ui,sans-serif;--radius:5px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text);}
+body{display:flex;flex-direction:column;border:1px solid var(--border2);}
+
+#hdr{display:flex;align-items:center;padding:0 8px;height:32px;flex-shrink:0;background:#0d1220;border-bottom:1px solid var(--border);-webkit-app-region:drag;user-select:none;}
+#hdr-title{flex:1;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+.hbtn{-webkit-app-region:no-drag;background:none;border:none;cursor:pointer;color:var(--faint);font-size:12px;padding:2px 6px;border-radius:3px;transition:all 0.15s;}
+.hbtn:hover{color:var(--text);background:rgba(255,255,255,0.08);}
+.hbtn.danger:hover{color:var(--danger);}
+
+#tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;background:#0d1220;-webkit-app-region:no-drag;}
+.tab{flex:1;padding:7px 0;font-size:10px;font-weight:700;text-align:center;cursor:pointer;color:var(--muted);border:none;background:none;border-bottom:2px solid transparent;transition:all 0.15s;font-family:var(--font);text-transform:uppercase;letter-spacing:0.5px;}
+.tab:hover{color:var(--text);}
+.tab.active{border-bottom-color:var(--warning);color:var(--warning);}
+.tab.nc.active{border-bottom-color:var(--purple);color:var(--purple);}
+.tab.prepago.active{border-bottom-color:var(--success);color:var(--success);}
+
+.panel{display:none;flex:1;overflow-y:auto;padding:10px;flex-direction:column;}
+.panel.active{display:flex;}
+.panel::-webkit-scrollbar{width:4px;}
+.panel::-webkit-scrollbar-thumb{background:var(--faint);border-radius:2px;}
+
+.field{margin-bottom:8px;}
+.field label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:4px;}
+.inp{width:100%;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;outline:none;font-family:var(--font);transition:border-color 0.15s;}
+.inp:focus{border-color:var(--primary);}
+.inp::placeholder{color:var(--faint);}
+.inp:disabled{opacity:0.4;cursor:not-allowed;}
+
+#occ-cargo:not(:disabled):focus{border-color:var(--warning);}
+#nc-cargo:focus,#nc-descuento:focus{border-color:var(--purple);}
+.prepago-inp:focus{border-color:var(--success) !important;}
+
+#ciclos{display:flex;gap:5px;}
+.ciclo-btn{flex:1;padding:5px 0;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:12px;font-weight:700;transition:all 0.15s;font-family:var(--font);}
+.ciclo-btn:hover{border-color:var(--warning);color:var(--text);}
+.ciclo-btn.active{background:var(--warning);border-color:var(--warning);color:#000;}
+
+.chk-row{display:flex;align-items:center;gap:7px;padding:6px 0;cursor:pointer;user-select:none;}
+.chk-row input{width:14px;height:14px;cursor:pointer;accent-color:var(--warning);}
+.chk-row span{font-size:12px;color:var(--muted);}
+
+#sinboleta-aviso{display:none;font-size:11px;color:var(--warning);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:4px;padding:6px 8px;margin-bottom:4px;line-height:1.5;}
+#sinboleta-aviso.show{display:block;}
+
+.hint{font-size:10px;color:var(--faint);min-height:16px;margin-bottom:4px;transition:color 0.2s;}
+.hint.warn{color:var(--warning);}
+.sep{height:1px;background:var(--border);margin:8px 0;}
+
+#occ-resultado, #nc-resultado{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px;margin:8px 0;display:none;}
+#nc-resultado{border-color:rgba(139,92,246,0.3);}
+.res-monto{font-size:22px;font-weight:700;margin-bottom:3px;font-variant-numeric:tabular-nums;}
+#occ-res-monto{color:var(--warning);}
+#nc-res-monto{color:var(--purple);}
+.res-detalle{font-size:11px;color:var(--faint);margin-bottom:3px;}
+.res-mes{font-size:12px;color:var(--muted);}
+.res-mes span{color:var(--teal);font-weight:700;}
+
+.copy-btns{display:none;flex-direction:column;gap:5px;margin-bottom:8px;}
+.copy-btn{padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface2);color:var(--text);cursor:pointer;font-size:12px;font-weight:600;text-align:left;transition:all 0.15s;font-family:var(--font);display:flex;align-items:center;gap:8px;}
+.copy-btn:hover{background:var(--surface3);border-color:var(--primary);}
+.copy-btn.copiado{background:rgba(34,197,94,0.15);border-color:var(--success);color:var(--success);}
+.copy-btn .cb-icon{font-size:14px;flex-shrink:0;}
+.copy-btn .cb-label{flex:1;}
+.copy-btn .cb-hint{font-size:10px;color:var(--faint);}
+.copy-btn.copiado .cb-hint{color:var(--success);}
+
+.btn-add{width:100%;padding:7px;border:1px dashed var(--faint);border-radius:var(--radius);background:none;color:var(--faint);cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;font-family:var(--font);}
+.btn-add:hover:not(:disabled){color:var(--text);border-color:var(--text);}
+.btn-add:disabled{opacity:0.3;cursor:not-allowed;}
+
+.occ-card, .nc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 10px;margin-bottom:6px;border-left:3px solid var(--warning);animation:slideIn 0.18s ease-out;}
+.nc-card{border-left-color:var(--purple);}
+.card-header{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+.card-monto-occ{font-size:13px;font-weight:700;color:var(--warning);flex:1;}
+.card-monto-nc{font-size:13px;font-weight:700;color:var(--purple);flex:1;}
+.card-meta{font-size:11px;color:var(--teal);}
+.card-del{background:none;border:none;cursor:pointer;color:var(--faint);font-size:12px;padding:2px 4px;border-radius:3px;transition:color 0.15s;}
+.card-del:hover{color:var(--danger);}
+.card-btns{display:flex;flex-direction:row;gap:5px;}
+.card-btn{flex:1;padding:6px 0;border:1px solid var(--border2);border-radius:4px;background:var(--surface2);color:var(--text);cursor:pointer;font-size:14px;transition:all 0.15s;display:flex;align-items:center;justify-content:center;}
+.card-btn:hover{background:var(--surface3);border-color:var(--primary);}
+.card-btn.copiado{background:rgba(34,197,94,0.15);border-color:var(--success);color:var(--success);}
+
+/* NUEVOS ESTILOS PREPAGO (V5) */
+.ruta-box { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; font-size: 11px; line-height: 1.6; color: var(--text); margin-bottom: 12px; }
+.ruta-box b { color: var(--muted); }
+.ruta-warn { color: var(--danger); font-size: 9px; font-weight: bold; margin-top: 6px; display: block; border-top: 1px dashed var(--border); padding-top: 6px; }
+
+@keyframes slideIn{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <span id="hdr-title">🧮 Calculadora Comercial</span>
+  <button class="hbtn danger" onclick="borrarTodo()" title="Restablecer">🗑</button>
+  <button class="hbtn" onclick="ipcRenderer.send('close-tool','occ')">✕</button>
+</div>
+
+<div id="tabs">
+  <button class="tab active" id="tab-occ" onclick="switchTab('occ')">OCC Postpago</button>
+  <button class="tab nc"     id="tab-nc"  onclick="switchTab('nc')">NC Excepción</button>
+  <button class="tab prepago" id="tab-prepago" onclick="switchTab('prepago')">Recargas Prepago</button>
+</div>
+
+<div class="panel active" id="panel-occ">
+  <div class="field">
+    <label>Ciclo</label>
+    <div id="ciclos">
+      <button class="ciclo-btn" onclick="selCiclo(50)">50</button>
+      <button class="ciclo-btn" onclick="selCiclo(51)">51</button>
+      <button class="ciclo-btn" onclick="selCiclo(52)">52</button>
+      <button class="ciclo-btn" onclick="selCiclo(53)">53</button>
+      <button class="ciclo-btn" onclick="selCiclo(54)">54</button>
+    </div>
+  </div>
+  <div class="field">
+    <label>Fecha de aplicación</label>
+    <input type="date" class="inp" id="occ-fecha" oninput="calcularOCC()"/>
+  </div>
+  <div class="field">
+    <label>Cargo fijo <span id="lbl-pct" style="color:var(--faint);font-weight:400;text-transform:none;letter-spacing:0;">— se aplicará el 20%</span></label>
+    <input type="number" class="inp" id="occ-cargo" placeholder="Ej: 12990" min="0" oninput="calcularOCC()"/>
+  </div>
+  <label class="chk-row">
+    <input type="checkbox" id="occ-sinboleta" onchange="toggleSinBoleta()"/>
+    <span>Cliente sin boletas emitidas — cobro fijo $2.000</span>
+  </label>
+  <button class="btn-add" id="occ-btn-add" onclick="agregarOCC()" disabled>＋ Agregar línea OCC</button>
+  <div id="sinboleta-aviso">Cliente nuevo sin boleta — se cobra <strong>$2.000 fijo</strong>.<br/>No se aplica el 20% sobre cargo fijo.</div>
+  <div class="hint" id="hint-occ"></div>
+  <div class="sep"></div>
+  
+  <div id="occ-resultado">
+    <div class="res-monto" id="occ-res-monto">$0</div>
+    <div class="res-detalle" id="occ-res-detalle"></div>
+    <div class="res-mes">Impacta en boleta de <span id="occ-res-mes"></span></div>
+  </div>
+  <div class="copy-btns" id="occ-copy-btns">
+    <button class="copy-btn" onclick="copiarOCC('tipif',this)"><span class="cb-icon">📋</span><span class="cb-label">Tipificación</span><span class="cb-hint">clic para copiar</span></button>
+    <button class="copy-btn" onclick="copiarOCC('comp',this)"><span class="cb-icon">📎</span><span class="cb-label">Complemento</span><span class="cb-hint">clic para copiar</span></button>
+    <button class="copy-btn" onclick="copiarOCC('sms',this)"><span class="cb-icon">💬</span><span class="cb-label">SMS</span><span class="cb-hint">clic para copiar</span></button>
+  </div>
+  <div id="occ-cards"></div>
+</div>
+
+<div class="panel" id="panel-nc">
+  <div class="field">
+    <label>Cargo fijo</label>
+    <input type="number" class="inp" id="nc-cargo" placeholder="Ej: 12990" min="0" oninput="calcularNC()"/>
+  </div>
+  <div class="field">
+    <label>Descuento a aplicar</label>
+    <input type="number" class="inp" id="nc-descuento" placeholder="Ej: 5000" min="0" oninput="calcularNC()"/>
+  </div>
+  <div id="nc-pct-preview" style="font-size:11px;color:var(--purple);min-height:16px;margin-top:3px;opacity:0.8;"></div>
+  <div class="field">
+    <label>Mes de impacto</label>
+    <input type="month" class="inp" id="nc-mes" oninput="calcularNC()"/>
+  </div>
+  <div class="hint" id="hint-nc"></div>
+  <div class="sep"></div>
+  
+  <div id="nc-resultado">
+    <div class="res-monto" id="nc-res-monto">$0</div>
+    <div class="res-detalle" id="nc-res-detalle"></div>
+    <div class="res-mes">Impacta en boleta de <span id="nc-res-mes-val"></span></div>
+  </div>
+  <div class="copy-btns" id="nc-copy-btns">
+    <button class="copy-btn" onclick="copiarNC('plantilla',this)"><span class="cb-icon">📋</span><span class="cb-label">Plantilla tipificación</span><span class="cb-hint">clic para copiar</span></button>
+    <button class="copy-btn" onclick="copiarNC('sms',this)"><span class="cb-icon">💬</span><span class="cb-label">SMS</span><span class="cb-hint">clic para copiar</span></button>
+  </div>
+  <div id="nc-cards"></div>
+  <button class="btn-add" id="nc-btn-add" onclick="agregarNC()" disabled>＋ Agregar línea NC</button>
+</div>
+
+<div class="panel" id="panel-prepago">
+  <div class="ruta-box">
+    <b>🖥️ RUTA:</b> Recarga Dificultad de Navegación<br>
+    <b>Tipo:</b> Problema<br>
+    <b>Área:</b> Gestionar mis Recargas<br>
+    <b>Subárea:</b> Recarga problemas servicios<br>
+    <b>Estado:</b> En Progreso + ctrl s<br>
+    🗓️ <i>Tiempo de respuesta: 2 hrs</i>
+    <span class="ruta-warn">*NO PUEDE HABER RECIBIDO OTRA RECARGA SIMILAR DENTRO DEL MES Y SE ENVÍA A JP EN TURNO*</span>
+  </div>
+
+  <div class="field">
+    <label>Número de Prepago</label>
+    <input type="text" class="inp prepago-inp" id="prep-num" placeholder="Ej: 56912345678"/>
+  </div>
+
+  <div class="field">
+    <label>Monto a Recargar</label>
+    <input type="number" class="inp prepago-inp" id="prep-monto" value="2000" disabled/>
+  </div>
+
+  <div class="field">
+    <label>Argumento</label>
+    <input type="text" class="inp prepago-inp" id="prep-arg" value="Problemas de Navegación" disabled/>
+  </div>
+
+  <label class="chk-row" style="margin-bottom:10px;">
+    <input type="checkbox" id="prep-excepcion" onchange="togglePrepagoExc()" style="accent-color:var(--success);"/>
+    <span>Recarga excepcional (Autorizada)</span>
+  </label>
+
+  <div class="copy-btns" style="display:flex;">
+    <button class="copy-btn" onclick="copiarPrepago('tipif', this)"><span class="cb-icon">📋</span><span class="cb-label">Copiar Tipificación</span><span class="cb-hint">clic para copiar</span></button>
+    <button class="copy-btn" onclick="copiarPrepago('sms', this)"><span class="cb-icon">💬</span><span class="cb-label">Copiar SMS</span><span class="cb-hint">clic para copiar</span></button>
+  </div>
+</div>
+
+<script>
+const { ipcRenderer } = require('electron');
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+const TABLA = {
+  50: [[1,1,31,1,"Febrero"],[1,2,29,2,"Marzo"],[1,3,31,3,"Abril"],[1,4,30,4,"Mayo"],[1,5,31,5,"Junio"],[1,6,30,6,"Julio"],[1,7,31,7,"Agosto"],[1,8,31,8,"Septiembre"],[1,9,30,9,"Octubre"],[1,10,31,10,"Noviembre"],[1,11,30,11,"Diciembre"],[1,12,31,12,"Enero"]],
+  51: [[1,1,31,1,"Marzo"],[1,2,29,2,"Abril"],[1,3,31,3,"Mayo"],[1,4,30,4,"Junio"],[1,5,31,5,"Julio"],[1,6,30,6,"Agosto"],[1,7,31,7,"Septiembre"],[1,8,31,8,"Octubre"],[1,9,30,9,"Noviembre"],[1,10,31,10,"Diciembre"],[1,11,30,11,"Enero"],[1,12,31,12,"Febrero"]],
+  52: [[8,1,7,2,"Febrero"],[8,2,7,3,"Marzo"],[8,3,7,4,"Abril"],[8,4,7,5,"Mayo"],[8,5,7,6,"Junio"],[8,6,7,7,"Julio"],[8,7,7,8,"Agosto"],[8,8,7,9,"Septiembre"],[8,9,7,10,"Octubre"],[8,10,7,11,"Noviembre"],[8,11,7,12,"Diciembre"],[8,12,7,1,"Enero"]],
+  53: [[16,1,15,2,"Marzo"],[16,2,15,3,"Abril"],[16,3,15,4,"Mayo"],[16,4,15,5,"Junio"],[16,5,15,6,"Julio"],[16,6,15,7,"Agosto"],[16,7,15,8,"Septiembre"],[16,8,15,9,"Octubre"],[16,9,15,10,"Noviembre"],[16,10,15,11,"Diciembre"],[16,11,15,12,"Enero"],[16,12,15,1,"Febrero"]],
+  54: [[23,1,22,2,"Marzo"],[23,2,22,3,"Abril"],[23,3,22,4,"Mayo"],[23,4,22,5,"Junio"],[23,5,22,6,"Julio"],[23,6,22,7,"Agosto"],[23,7,22,8,"Septiembre"],[23,8,22,9,"Octubre"],[23,9,22,10,"Noviembre"],[23,10,22,11,"Diciembre"],[23,11,22,12,"Enero"],[23,12,22,1,"Febrero"]]
+};
+
+function fechaEnRango(dia, mes, dIni, mIni, dFin, mFin) {
+  const f = mes * 100 + dia; const i = mIni * 100 + dIni; const e = mFin * 100 + dFin;
+  return i <= e ? (f >= i && f <= e) : (f >= i || f <= e);
+}
+
+function getImpacto(ciclo, fecha) {
+  const dia = fecha.getDate(); const mes = fecha.getMonth() + 1;
+  for (const [dIni, mIni, dFin, mFin, impacto] of TABLA[ciclo]) {
+    if (fechaEnRango(dia, mes, dIni, mIni, dFin, mFin)) return impacto;
+  }
+  return '???';
+}
+
+const MESES_NOMBRES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+let tabActual = 'occ';
+let cicloSel  = null;
+let occCards  = [];
+let ncCards   = [];
+
+ipcRenderer.on('init-occ', (e, data) => {
+  if (data) {
+    try {
+      tabActual = data.tab || 'occ';
+      if (data.ciclo)       selCiclo(data.ciclo, false);
+      if (data.occCargo)    document.getElementById('occ-cargo').value    = data.occCargo;
+      if (data.occSinbol)   { document.getElementById('occ-sinboleta').checked = true; aplicarEstadoSinBoleta(true); }
+      if (data.ncCargo)     document.getElementById('nc-cargo').value     = data.ncCargo;
+      if (data.ncDescuento) document.getElementById('nc-descuento').value = data.ncDescuento;
+      if (data.ncMes)       document.getElementById('nc-mes').value       = data.ncMes;
+      occCards = data.occCards || [];
+      ncCards  = data.ncCards  || [];
+      renderCards('occ'); renderCards('nc');
+    } catch(err) {}
+  }
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('occ-fecha').value = (data && data.occFecha) || hoy;
+  if (!document.getElementById('nc-mes').value) {
+    const n = new Date(); document.getElementById('nc-mes').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  }
+  switchTab(tabActual, false);
+  calcularOCC(); calcularNC();
+});
+
+function switchTab(tab, save=true) {
+  tabActual = tab;
+  document.getElementById('tab-occ').classList.toggle('active', tab==='occ');
+  document.getElementById('tab-nc').classList.toggle('active',  tab==='nc');
+  document.getElementById('tab-prepago').classList.toggle('active',  tab==='prepago');
+  document.getElementById('panel-occ').classList.toggle('active', tab==='occ');
+  document.getElementById('panel-nc').classList.toggle('active',  tab==='nc');
+  document.getElementById('panel-prepago').classList.toggle('active',  tab==='prepago');
+  if (save) guardarEstado();
+}
+
+// ── PREPAGO (V5) ───────────────────────────────────────────────────────────────────
+function togglePrepagoExc() {
+  const isChecked = document.getElementById('prep-excepcion').checked;
+  const inMonto = document.getElementById('prep-monto');
+  const inArg = document.getElementById('prep-arg');
+  
+  if (isChecked) {
+    inMonto.disabled = false;
+    inArg.disabled = false;
+    inMonto.focus();
+  } else {
+    inMonto.disabled = true;
+    inArg.disabled = true;
+    inMonto.value = "2000";
+    inArg.value = "Problemas de Navegación";
+  }
+}
+
+function copiarPrepago(tipo, btn) {
+  const num = document.getElementById('prep-num').value || 'Sin especificar';
+  const monto = document.getElementById('prep-monto').value || '2000';
+  const arg = document.getElementById('prep-arg').value || 'Problemas de Navegación';
+
+  let texto = '';
+  if (tipo === 'tipif') {
+    texto = `Número de prepago: ${num}\nMonto: $${monto}\nArgumento: ${arg}`;
+  } else {
+    texto = `¡Hola! Aplicaremos una recarga a tu móvil. La verás reflejada en tu saldo en un plazo máximo de 2 horas.\n\nLamentamos los inconvenientes. Entel.`;
+  }
+  copiarTexto(texto, btn);
+}
+
+// ── LOGICA OCC Y NC (Mantenida de V4) ───────────────────────────────────────────────
+function selCiclo(n, doCalc=true) {
+  cicloSel = n;
+  document.querySelectorAll('.ciclo-btn').forEach(b => b.classList.toggle('active', parseInt(b.textContent) === n));
+  if (doCalc) calcularOCC();
+}
+
+function toggleSinBoleta() { aplicarEstadoSinBoleta(document.getElementById('occ-sinboleta').checked); calcularOCC(); }
+function aplicarEstadoSinBoleta(sinbol) {
+  const cargoInp = document.getElementById('occ-cargo'); const aviso = document.getElementById('sinboleta-aviso'); const lblPct = document.getElementById('lbl-pct');
+  if (sinbol) { cargoInp.disabled = true; cargoInp.value = ''; aviso.classList.add('show'); lblPct.style.display = 'none'; } 
+  else { cargoInp.disabled = false; aviso.classList.remove('show'); lblPct.style.display = ''; setTimeout(() => cargoInp.focus(), 50); }
+}
+
+function calcularOCC() {
+  const sinbol = document.getElementById('occ-sinboleta').checked; const cargo = parseFloat(document.getElementById('occ-cargo').value) || 0;
+  const fechaVal = document.getElementById('occ-fecha').value; const hint = document.getElementById('hint-occ'); const faltan = [];
+  if (!cicloSel) faltan.push('ciclo'); if (!fechaVal) faltan.push('fecha'); if (!sinbol && cargo===0) faltan.push('cargo fijo');
+  if (faltan.length) { hint.textContent = 'Falta: ' + faltan.join(', '); hint.className = 'hint warn'; ocultarOCC(); guardarEstado(); return; }
+  hint.textContent = ''; hint.className = 'hint';
+  const fecha = new Date(fechaVal + 'T12:00:00'); const mes = getImpacto(cicloSel, fecha);
+  let monto, detalle;
+  if (sinbol) { monto = 2000; detalle = 'Sin boletas emitidas — cobro fijo $2.000'; } else { monto = Math.round(cargo * 0.20); detalle = `$${cargo.toLocaleString('es-CL')} × 20% = $${monto.toLocaleString('es-CL')}`; }
+  document.getElementById('occ-res-monto').textContent = '$' + monto.toLocaleString('es-CL'); document.getElementById('occ-res-detalle').textContent = detalle;
+  document.getElementById('occ-res-mes').textContent = mes; document.getElementById('occ-resultado').style.display = 'block'; document.getElementById('occ-copy-btns').style.display = 'flex'; document.getElementById('occ-btn-add').disabled = false;
+  guardarEstado();
+}
+
+function ocultarOCC() { document.getElementById('occ-resultado').style.display = 'none'; document.getElementById('occ-copy-btns').style.display = 'none'; document.getElementById('occ-btn-add').disabled = true; }
+function buildTextosOCC(monto, mes) { return { tipif: `Dificultad de Navegación - Descuento cargo fijo por ${monto} y se verá reflejado en la boleta vencimiento de ${mes}`, comp: 'Compensación dificultad de navegación', sms: `Hola! Acabamos de aplicar un descuento a tu plan móvil. Lo verás reflejado en la boleta que vence en el mes de ${mes}. Si tienes dudas, contáctanos. ¡Hasta pronto!` }; }
+function copiarOCC(tipo, btn) { copiarTexto(buildTextosOCC(document.getElementById('occ-res-monto').textContent, document.getElementById('occ-res-mes').textContent)[tipo], btn); }
+function agregarOCC() {
+  if (document.getElementById('occ-btn-add').disabled) return;
+  const monto = document.getElementById('occ-res-monto').textContent; const mes = document.getElementById('occ-res-mes').textContent; const det = document.getElementById('occ-res-detalle').textContent;
+  occCards.unshift({ id: Date.now(), monto, mes, det }); renderCards('occ'); resetOCC(); guardarEstado();
+  setTimeout(() => { const c = document.getElementById('occ-cargo'); if (!c.disabled) c.focus(); }, 150);
+}
+function resetOCC() { document.getElementById('occ-sinboleta').checked = false; aplicarEstadoSinBoleta(false); document.getElementById('occ-cargo').value = ''; document.getElementById('hint-occ').textContent = ''; document.getElementById('hint-occ').className = 'hint'; ocultarOCC(); }
+
+function calcularNC() {
+  const cargo = parseFloat(document.getElementById('nc-cargo').value) || 0; const descuento = parseFloat(document.getElementById('nc-descuento').value) || 0;
+  const mesVal = document.getElementById('nc-mes').value; const hint = document.getElementById('hint-nc'); const preview = document.getElementById('nc-pct-preview'); const faltan = [];
+  if (!cargo) faltan.push('cargo fijo'); if (!descuento) faltan.push('descuento'); if (!mesVal) faltan.push('mes');
+  preview.textContent = (cargo && descuento) ? `${((descuento/cargo)*100).toFixed(1)}% del cargo fijo` : '';
+  if (faltan.length) { hint.textContent = 'Falta: ' + faltan.join(', '); hint.className = 'hint warn'; ocultarNC(); guardarEstado(); return; }
+  hint.textContent = ''; hint.className = 'hint'; const mes = MESES_NOMBRES[parseInt(mesVal.split('-')[1]) - 1];
+  document.getElementById('nc-res-monto').textContent = '$' + descuento.toLocaleString('es-CL'); document.getElementById('nc-res-detalle').textContent = `Descuento de $${descuento.toLocaleString('es-CL')} sobre cargo $${cargo.toLocaleString('es-CL')}`;
+  document.getElementById('nc-res-mes-val').textContent = mes; document.getElementById('nc-resultado').style.display = 'block'; document.getElementById('nc-copy-btns').style.display = 'flex'; document.getElementById('nc-btn-add').disabled = false;
+  guardarEstado();
+}
+
+function ocultarNC() { document.getElementById('nc-resultado').style.display = 'none'; document.getElementById('nc-copy-btns').style.display = 'none'; document.getElementById('nc-btn-add').disabled = true; }
+function buildTextosNC(monto, mes) { return { plantilla: `-Nro. de ciclo\n-Vencimiento\n-Línea\n-Concepto\n-Reprogramación\n-FolioBoleta\n-Argumento del cliente\nautorizada por JP`, sms: `Hola! Acabamos de aplicar un descuento excepcional a tu plan móvil por ${monto}. Lo verás reflejado en la boleta del mes de ${mes}. Si tienes dudas, contáctanos. ¡Hasta pronto!` }; }
+function copiarNC(tipo, btn) { copiarTexto(buildTextosNC(document.getElementById('nc-res-monto').textContent, document.getElementById('nc-res-mes-val').textContent)[tipo], btn); }
+function agregarNC() {
+  if (document.getElementById('nc-btn-add').disabled) return;
+  const monto = document.getElementById('nc-res-monto').textContent; const mes = document.getElementById('nc-res-mes-val').textContent; const det = document.getElementById('nc-res-detalle').textContent;
+  ncCards.unshift({ id: Date.now(), monto, mes, det }); renderCards('nc'); resetNC(); guardarEstado(); setTimeout(() => document.getElementById('nc-cargo').focus(), 150);
+}
+function resetNC() { document.getElementById('nc-cargo').value = ''; document.getElementById('nc-descuento').value = ''; document.getElementById('nc-pct-preview').textContent = ''; document.getElementById('hint-nc').textContent = ''; document.getElementById('hint-nc').className = 'hint'; ocultarNC(); }
+
+function renderCards(tipo) {
+  const cards = tipo==='occ' ? occCards : ncCards; const list = document.getElementById(`${tipo}-cards`); list.innerHTML = '';
+  cards.forEach(c => {
+    const div = document.createElement('div'); div.className = tipo==='occ' ? 'occ-card' : 'nc-card'; const montoClass = tipo==='occ' ? 'card-monto-occ' : 'card-monto-nc';
+    const btns = tipo==='occ'
+      ? `<button class="card-btn" data-copy="tipif" title="Copiar Tipificación">📋</button><button class="card-btn" data-copy="comp" title="Copiar Complemento">📎</button><button class="card-btn" data-copy="sms" title="Copiar SMS">💬</button>`
+      : `<button class="card-btn" data-copy="plantilla" title="Copiar Plantilla">📋</button><button class="card-btn" data-copy="sms" title="Copiar SMS">💬</button>`;
+    div.innerHTML = `<div class="card-header"><span class="${montoClass}">${esc(c.monto)}</span><span class="card-meta">${esc(c.mes)}</span><button class="card-del" data-del="1" title="Eliminar">✕</button></div>${c.det ? `<div style="font-size:10px;color:var(--faint);margin-bottom:6px;">${esc(c.det)}</div>` : ''}<div class="card-btns">${btns}</div>`; list.appendChild(div);
+    div.querySelectorAll('[data-copy]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.copy;
+        if (tipo === 'occ') copiarCardOCC(t, c.monto, c.mes, btn);
+        else copiarCardNC(t, c.monto, c.mes, btn);
+      });
+    });
+    div.querySelector('[data-del]').addEventListener('click', () => eliminarCard(tipo, c.id));
+  });
+}
+
+function eliminarCard(tipo, id) { if (tipo==='occ') occCards = occCards.filter(c => c.id !== id); else ncCards = ncCards.filter(c => c.id !== id); renderCards(tipo); guardarEstado(); }
+function copiarCardOCC(tipo, monto, mes, btn) { copiarTexto(buildTextosOCC(monto, mes)[tipo], btn); }
+function copiarCardNC(tipo, monto, mes, btn)  { copiarTexto(buildTextosNC(monto, mes)[tipo], btn); }
+
+function copiarTexto(texto, btn) {
+  navigator.clipboard.writeText(texto).then(() => {
+    btn.classList.add('copiado'); const hint = btn.querySelector('.cb-hint');
+    if (hint) { hint.textContent = '¡Copiado!'; setTimeout(() => { btn.classList.remove('copiado'); hint.textContent = 'clic para copiar'; }, 1800); } 
+    else { const originalHTML = btn.innerHTML; btn.innerHTML = '✅'; setTimeout(() => { btn.classList.remove('copiado'); btn.innerHTML = originalHTML; }, 1800); }
+  });
+}
+
+function guardarEstado() {
+  ipcRenderer.send('save-occ', {
+    tab: tabActual, ciclo: cicloSel, occFecha: document.getElementById('occ-fecha').value,
+    occCargo: document.getElementById('occ-cargo').value, occSinbol: document.getElementById('occ-sinboleta').checked,
+    ncCargo: document.getElementById('nc-cargo').value, ncDescuento: document.getElementById('nc-descuento').value,
+    ncMes: document.getElementById('nc-mes').value, occCards, ncCards
+  });
+}
+
+function borrarTodo() {
+  cicloSel = null; occCards = []; ncCards = [];
+  document.querySelectorAll('.ciclo-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('occ-fecha').value = new Date().toISOString().split('T')[0];
+  const n = new Date(); document.getElementById('nc-mes').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('prep-excepcion').checked = false; togglePrepagoExc(); document.getElementById('prep-num').value = '';
+  resetOCC(); resetNC(); renderCards('occ'); renderCards('nc'); guardarEstado();
+}
+</script>
+</body>
+</html>

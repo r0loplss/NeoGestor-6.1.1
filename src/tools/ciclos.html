@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Cambio de Ciclo</title>
+    <style>
+        /* ============================================================
+               ROOT – Tema oscuro consistente con la app
+               ============================================================ */
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+
+        /* ============================================================
+               RESET Y ESTRUCTURA BASE
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+               HEADER (frameless + drag)
+               ============================================================ */
+        #hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        #hdr-title {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+
+        .hbtn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hbtn.danger:hover {
+            color: var(--danger);
+        }
+
+        /* ============================================================
+               CUERPO PRINCIPAL (scroll vertical)
+               ============================================================ */
+        #main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #main::-webkit-scrollbar {
+            width: 4px;
+        }
+        #main::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        /* ============================================================
+               CAMPOS DE ENTRADA
+               ============================================================ */
+        .field-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-row label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .field-row select,
+        .field-row input[type="date"] {
+            padding: 7px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 13px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s;
+            color-scheme: dark;
+        }
+
+        .field-row select:focus,
+        .field-row input[type="date"]:focus {
+            border-color: var(--primary);
+        }
+
+        /* ============================================================
+               BOTÓN CALCULAR
+               ============================================================ */
+        .btn-calc {
+            padding: 10px 0;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: var(--font);
+            margin-top: 4px;
+        }
+
+        .btn-calc:hover {
+            background: #2563eb;
+        }
+
+        .btn-calc:active {
+            transform: scale(0.98);
+        }
+
+        /* ============================================================
+               RESULTADOS – DOS CUADROS LADO A LADO
+               ============================================================ */
+        .result-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .result-box.show {
+            display: flex;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .card-boleta {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .card-boleta .titulo {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-boleta .titulo .icon {
+            font-size: 16px;
+        }
+
+        .card-boleta .campo {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .card-boleta .campo .label {
+            color: var(--muted);
+        }
+
+        .card-boleta .campo .valor {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .card-boleta .campo .valor.destacado {
+            color: var(--warning);
+        }
+
+        /* ============================================================
+               SPEECH Y BOTÓN COPIAR
+               ============================================================ */
+        .speech-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .speech-box::-webkit-scrollbar {
+            width: 4px;
+        }
+        .speech-box::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        .btn-copy {
+            padding: 8px 0;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: var(--font);
+            margin-top: 4px;
+        }
+
+        .btn-copy:hover {
+            background: var(--surface2);
+            border-color: var(--primary);
+        }
+
+        .btn-copy.copiado {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        /* ============================================================
+               TOAST (notificación emergente)
+               ============================================================ */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+        .toast.warning {
+            background: var(--warning);
+            color: #000;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 500px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <div id="hdr">
+        <span id="hdr-title">🔄 Cambio de Ciclo de Facturación</span>
+        <button class="hbtn" onclick="ipcRenderer.send('close-tool','ciclos')">✕</button>
+    </div>
+
+    <!-- ============================================================
+    CUERPO
+    ============================================================ -->
+    <div id="main">
+
+        <!-- Ciclo Actual -->
+        <div class="field-row">
+            <label for="ciclo-actual">📌 Ciclo Actual</label>
+            <select id="ciclo-actual">
+                <option value="50">50</option>
+                <option value="51">51</option>
+                <option value="52" selected>52</option>
+                <option value="53">53</option>
+                <option value="54">54</option>
+            </select>
+        </div>
+
+        <!-- Nuevo Ciclo -->
+        <div class="field-row">
+            <label for="ciclo-nuevo">🔄 Nuevo Ciclo</label>
+            <select id="ciclo-nuevo">
+                <option value="52">52</option>
+                <option value="53" selected>53</option>
+                <option value="54">54</option>
+            </select>
+        </div>
+
+        <!-- Fecha de la orden -->
+        <div class="field-row">
+            <label for="fecha-orden">📅 Fecha de la orden</label>
+            <input type="date" id="fecha-orden" />
+        </div>
+
+        <!-- Botón Calcular -->
+        <button class="btn-calc" id="btn-calcular">🔍 Calcular</button>
+
+        <!-- Resultados (ocultos por defecto) -->
+        <div class="result-box" id="resultados">
+
+            <!-- Dos cuadros -->
+            <div class="cards-grid">
+                <!-- Boleta anterior -->
+                <div class="card-boleta" id="card-anterior">
+                    <div class="titulo"><span class="icon">📄</span> Boleta anterior</div>
+                    <div class="campo"><span class="label">Ciclo</span><span class="valor" id="res-ciclo-ant">—</span></div>
+                    <div class="campo"><span class="label">Período</span><span class="valor" id="res-periodo-ant">—</span></div>
+                    <div class="campo"><span class="label">Días a cobrar</span><span class="valor destacado" id="res-dias-ant">—</span></div>
+                    <div class="campo"><span class="label">Emisión</span><span class="valor" id="res-emision-ant">—</span></div>
+                    <div class="campo"><span class="label">Vencimiento</span><span class="valor" id="res-vencimiento-ant">—</span></div>
+                </div>
+
+                <!-- Boleta nueva -->
+                <div class="card-boleta" id="card-nueva">
+                    <div class="titulo"><span class="icon">📄</span> Boleta nueva</div>
+                    <div class="campo"><span class="label">Ciclo</span><span class="valor" id="res-ciclo-nue">—</span></div>
+                    <div class="campo"><span class="label">Período</span><span class="valor" id="res-periodo-nue">—</span></div>
+                    <div class="campo"><span class="label">Días a cobrar</span><span class="valor destacado" id="res-dias-nue">—</span></div>
+                    <div class="campo"><span class="label">Emisión</span><span class="valor" id="res-emision-nue">—</span></div>
+                    <div class="campo"><span class="label">Vencimiento</span><span class="valor" id="res-vencimiento-nue">—</span></div>
+                    <div class="campo"><span class="label">Reinicio plan</span><span class="valor" id="res-reinicio-nue">—</span></div>
+                </div>
+            </div>
+
+            <!-- Speech -->
+            <div class="speech-box" id="speech-box">
+                💬 Speech sugerido:
+                <span id="speech-text">(Realiza un cálculo para generar el speech)</span>
+            </div>
+
+            <!-- Botón Copiar Speech -->
+            <button class="btn-copy" id="btn-copy-speech">📋 Copiar Speech</button>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    TOAST CONTAINER (notificaciones)
+    ============================================================ -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================================
+    SCRIPT
+    ============================================================ -->
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Referencias DOM
+        const cicloActual = document.getElementById('ciclo-actual');
+        const cicloNuevo = document.getElementById('ciclo-nuevo');
+        const fechaOrden = document.getElementById('fecha-orden');
+        const btnCalcular = document.getElementById('btn-calcular');
+        const resultados = document.getElementById('resultados');
+        const speechText = document.getElementById('speech-text');
+        const btnCopySpeech = document.getElementById('btn-copy-speech');
+
+        // ============================================================
+        // TABLA DE CICLOS (con mesVenc)
+        // ============================================================
+        const CICLOS = {
+            50: {
+                inicio: 1,
+                fin: 31,
+                reinicio: 1,
+                emision: 5,
+                vencimiento: [21, 25, 30],
+                vencimientoTxt: '21, 25 o 30',
+                mesVenc: 0 // 0 = mismo mes, 1 = mes siguiente
+            },
+            51: {
+                inicio: 1,
+                fin: 31,
+                reinicio: 1,
+                emision: 13,
+                vencimiento: [5, 8, 10, 12],
+                vencimientoTxt: '5, 8, 10 o 12',
+                mesVenc: 1
+            },
+            52: {
+                inicio: 8,
+                fin: 7,
+                reinicio: 8,
+                emision: 17,
+                vencimiento: [28],
+                vencimientoTxt: '28',
+                mesVenc: 0
+            },
+            53: {
+                inicio: 16,
+                fin: 15,
+                reinicio: 16,
+                emision: 23,
+                vencimiento: [6],
+                vencimientoTxt: '06',
+                mesVenc: 1
+            },
+            54: {
+                inicio: 23,
+                fin: 22,
+                reinicio: 26,
+                emision: 27,
+                vencimiento: [13],
+                vencimientoTxt: '13',
+                mesVenc: 1
+            }
+        };
+
+        // Ciclos disponibles para "nuevo" según el actual
+        const NUEVOS_PERMITIDOS = {
+            50: [52, 53, 54],
+            51: [52, 53, 54],
+            52: [53, 54],
+            53: [52, 54],
+            54: [52, 53]
+        };
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        // ============================================================
+        // PERSISTENCIA (localStorage)
+        // ============================================================
+        const STORAGE_KEY = 'ciclos-estado';
+
+        function guardarEstado() {
+            try {
+                const data = {
+                    actual: cicloActual.value,
+                    nuevo: cicloNuevo.value,
+                    fecha: fechaOrden.value
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (e) {}
+        }
+
+        function cargarEstado() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data.actual) cicloActual.value = data.actual;
+                if (data.nuevo) cicloNuevo.value = data.nuevo;
+                if (data.fecha) fechaOrden.value = data.fecha;
+            } catch (e) {}
+        }
+
+        // Prellenar fecha de hoy
+        function setFechaHoy() {
+            if (fechaOrden.value) return;
+            const hoy = new Date();
+            const y = hoy.getFullYear();
+            const m = String(hoy.getMonth() + 1).padStart(2, '0');
+            const d = String(hoy.getDate()).padStart(2, '0');
+            fechaOrden.value = `${y}-${m}-${d}`;
+        }
+
+        // ============================================================
+        // ACTUALIZAR OPCIONES DE NUEVO CICLO SEGÚN ACTUAL
+        // ============================================================
+        function actualizarOpcionesNuevo() {
+            const actual = parseInt(cicloActual.value);
+            const permitidos = NUEVOS_PERMITIDOS[actual] || [52, 53, 54];
+            const actualValue = parseInt(cicloNuevo.value);
+
+            cicloNuevo.innerHTML = '';
+            permitidos.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                cicloNuevo.appendChild(opt);
+            });
+
+            if (!permitidos.includes(actualValue)) {
+                cicloNuevo.value = permitidos[0] || 52;
+            }
+        }
+
+        // ============================================================
+        // CALCULAR
+        // ============================================================
+        function calcular() {
+            const actual = parseInt(cicloActual.value);
+            const nuevo = parseInt(cicloNuevo.value);
+            const fechaOrd = fechaOrden.value;
+
+            if (!fechaOrd) {
+                showToast('⚠️ Por favor selecciona la fecha de la orden.', 'warning');
+                return;
+            }
+
+            const fechaBase = new Date(fechaOrd + 'T12:00:00');
+            const fechaEfectiva = new Date(fechaBase);
+            fechaEfectiva.setDate(fechaEfectiva.getDate() + 1); // cambio al día siguiente
+
+            const infoActual = CICLOS[actual];
+            const infoNuevo = CICLOS[nuevo];
+
+            // ============================================================
+            // Período anterior
+            // ============================================================
+            let fechaInicioAnt = new Date(fechaBase);
+            fechaInicioAnt.setDate(infoActual.inicio);
+            if (fechaInicioAnt > fechaBase) {
+                fechaInicioAnt.setMonth(fechaInicioAnt.getMonth() - 1);
+            }
+            const fechaFinAnt = new Date(fechaBase); // hasta el día de la orden
+
+            // Días del período anterior
+            const diffAnt = Math.floor((fechaFinAnt - fechaInicioAnt) / (1000 * 60 * 60 * 24)) + 1;
+
+            // ============================================================
+            // Período nuevo
+            // ============================================================
+            const fechaInicioNue = new Date(fechaEfectiva);
+            // El nuevo período termina el día anterior al día de inicio del nuevo ciclo
+            const diaInicioNue = infoNuevo.inicio;
+            // Sumamos un mes a la fecha de inicio y luego restamos un día
+            let fechaFinNue = new Date(fechaInicioNue);
+            fechaFinNue.setMonth(fechaFinNue.getMonth() + 1);
+            fechaFinNue.setDate(0); // último día del mes anterior
+            // Si el día de inicio es 1, el último día del mes anterior es correcto.
+            // Si el día de inicio es >1, el último día del mes anterior es correcto.
+            // Pero si la fecha de inicio es el día 16, el período termina el 15 del mes siguiente.
+            // Con este método, sumamos un mes y luego ponemos el día 0 => último día del mes anterior.
+            // Para que sea el día 15, necesitamos sumar un mes y luego restar (diaInicioNue - 1) días.
+            // Mejor usar el método simple: sumar un mes y restar un día.
+            // Pero si el día de inicio es 1, sumar un mes y restar un día da el último día del mes anterior, que es correcto.
+            // Si el día de inicio es 16, sumar un mes y restar un día da el día 15 del mes siguiente.
+            // Esto funciona porque al sumar un mes, la fecha se ajusta al día correspondiente.
+            // Ejemplo: 23/10 + 1 mes = 23/11, -1 día = 22/11.
+            // Pero para ciclo 54, el período es 23 al 22 del mes siguiente. Si la fecha de inicio es 23, el período termina el 22 del mes siguiente.
+            // Así que con este método funciona.
+            // Sin embargo, si la fecha de inicio es mayor que el número de días del mes siguiente, el ajuste de fecha puede dar problemas.
+            // Por ejemplo, 31/01 + 1 mes = 31/02 (que se convierte en 03/03) y luego -1 día = 02/03. Eso no es correcto.
+            // Mejor usar la lógica de sumar un mes y luego poner el día 0, pero eso da el último día del mes anterior.
+            // Vamos a hacerlo más robusto:
+
+            // Calculamos el último día del nuevo período:
+            // Si la fecha de inicio es 16, el último día es 15 del mes siguiente.
+            // Si la fecha de inicio es 23, el último día es 22 del mes siguiente.
+            // Si la fecha de inicio es 1, el último día es el último día del mes.
+            // Así que: sumamos un mes a la fecha de inicio, luego restamos (diaInicioNue - 1) días.
+
+            fechaFinNue = new Date(fechaInicioNue);
+            fechaFinNue.setDate(1); // evitar desborde de mes (ej. 31 ene + 1 mes)
+            fechaFinNue.setMonth(fechaFinNue.getMonth() + 1);
+            if (diaInicioNue <= 1) {
+                // Ciclo que inicia el día 1: termina el último día del mes de inicio
+                fechaFinNue.setDate(0);
+            } else {
+                fechaFinNue.setDate(diaInicioNue - 1);
+            }
+            // Si el día resultante es 0, ajustamos al último día del mes anterior.
+            if (fechaFinNue.getDate() === 0) {
+                fechaFinNue.setDate(0);
+            }
+
+            // Si la fecha fin es anterior a la fecha de inicio (por ejemplo, si la fecha de inicio es 1 y se calcula el mes siguiente, el día 0 da el último día del mes, que puede ser mayor que la fecha de inicio)
+            // Pero con este método, si la fecha de inicio es 1, diaInicioNue - 1 = 0, fechaFinNue se queda en el último día del mes anterior.
+            // Eso es correcto para el ciclo 50 y 51 que van del 1 al 30/31.
+            // Para ciclo 52 (inicio 8), fechaFinNue sería el 7 del mes siguiente.
+            // Para ciclo 53 (inicio 16), fechaFinNue sería el 15 del mes siguiente.
+            // Para ciclo 54 (inicio 23), fechaFinNue sería el 22 del mes siguiente.
+            // Todo correcto.
+
+            // Si fechaFinNue es anterior a fechaInicioNue, sumamos un mes.
+            if (fechaFinNue < fechaInicioNue) {
+                fechaFinNue.setMonth(fechaFinNue.getMonth() + 1);
+            }
+
+            const diffNue = Math.floor((fechaFinNue - fechaInicioNue) / (1000 * 60 * 60 * 24)) + 1;
+
+            // ============================================================
+            // Calcular fechas de emisión y vencimiento
+            // ============================================================
+            // Para la boleta anterior: se emite según el ciclo actual, en el mes siguiente al período
+            const mesEmisionAnt = fechaFinAnt.getMonth() + 1;
+            const añoEmisionAnt = fechaFinAnt.getFullYear();
+            const diaEmisionAnt = infoActual.emision;
+            let fechaEmisionAnt = new Date(añoEmisionAnt, mesEmisionAnt, diaEmisionAnt);
+            if (fechaEmisionAnt < fechaFinAnt) {
+                fechaEmisionAnt.setMonth(fechaEmisionAnt.getMonth() + 1);
+            }
+
+            // Vencimiento anterior: usar el primer día de vencimiento del ciclo actual
+            const diaVencAnt = infoActual.vencimiento[0];
+            let fechaVencAnt = new Date(fechaEmisionAnt);
+            fechaVencAnt.setMonth(fechaVencAnt.getMonth() + infoActual.mesVenc);
+            fechaVencAnt.setDate(diaVencAnt);
+
+            // Para la boleta nueva: se emite según el nuevo ciclo
+            const mesEmisionNue = fechaFinNue.getMonth() + 1;
+            const añoEmisionNue = fechaFinNue.getFullYear();
+            const diaEmisionNue = infoNuevo.emision;
+            let fechaEmisionNue = new Date(añoEmisionNue, mesEmisionNue, diaEmisionNue);
+            if (fechaEmisionNue < fechaFinNue) {
+                fechaEmisionNue.setMonth(fechaEmisionNue.getMonth() + 1);
+            }
+
+            const diaVencNue = infoNuevo.vencimiento[0];
+            let fechaVencNue = new Date(fechaEmisionNue);
+            fechaVencNue.setMonth(fechaVencNue.getMonth() + infoNuevo.mesVenc);
+            fechaVencNue.setDate(diaVencNue);
+
+            // Reinicio del nuevo ciclo
+            const diaReinicio = infoNuevo.reinicio;
+            let fechaReinicio = new Date(fechaInicioNue);
+            fechaReinicio.setDate(diaReinicio);
+            if (fechaReinicio < fechaInicioNue) {
+                fechaReinicio.setMonth(fechaReinicio.getMonth() + 1);
+            }
+
+            // ============================================================
+            // RENDERIZAR RESULTADOS (sin año en la interfaz)
+            // ============================================================
+            function fmtDM(fecha) {
+                if (!fecha || isNaN(fecha)) return '—';
+                const d = String(fecha.getDate()).padStart(2, '0');
+                const m = String(fecha.getMonth() + 1).padStart(2, '0');
+                return `${d}/${m}`;
+            }
+
+            function fmtDMY(fecha) {
+                if (!fecha || isNaN(fecha)) return '—';
+                const d = String(fecha.getDate()).padStart(2, '0');
+                const m = String(fecha.getMonth() + 1).padStart(2, '0');
+                const y = fecha.getFullYear();
+                return `${d}/${m}/${y}`;
+            }
+
+            // Boleta anterior
+            document.getElementById('res-ciclo-ant').textContent = actual;
+            document.getElementById('res-periodo-ant').textContent = `${fmtDM(fechaInicioAnt)} → ${fmtDM(fechaFinAnt)}`;
+            document.getElementById('res-dias-ant').textContent = diffAnt;
+            document.getElementById('res-emision-ant').textContent = fmtDM(fechaEmisionAnt);
+            document.getElementById('res-vencimiento-ant').textContent = fmtDM(fechaVencAnt);
+
+            // Boleta nueva
+            document.getElementById('res-ciclo-nue').textContent = nuevo;
+            document.getElementById('res-periodo-nue').textContent = `${fmtDM(fechaInicioNue)} → ${fmtDM(fechaFinNue)}`;
+            document.getElementById('res-dias-nue').textContent = diffNue;
+            document.getElementById('res-emision-nue').textContent = fmtDM(fechaEmisionNue);
+            document.getElementById('res-vencimiento-nue').textContent = fmtDM(fechaVencNue);
+            document.getElementById('res-reinicio-nue').textContent = fmtDM(fechaReinicio);
+
+            // ============================================================
+            // GENERAR SPEECH (con año)
+            // ============================================================
+            const speech = `
+        Su cambio de ciclo quedará aplicado desde el ${fmtDMY(fechaEfectiva)}.
+        La boleta anterior considerará los consumos hasta el ${fmtDMY(fechaFinAnt)}.
+        Luego, el nuevo ciclo comenzará el ${fmtDMY(fechaInicioNue)} y cubrirá el período hasta el ${fmtDMY(fechaFinNue)}.
+        El vencimiento de la nueva boleta es el ${fmtDMY(fechaVencNue)}.
+        `.trim();
+
+            speechText.textContent = speech;
+
+            // Mostrar resultados
+            resultados.classList.add('show');
+
+            // Guardar estado
+            guardarEstado();
+        }
+
+        // ============================================================
+        // COPIAR SPEECH
+        // ============================================================
+        function copiarSpeech() {
+            const texto = speechText.textContent;
+            if (!texto || texto === '(Realiza un cálculo para generar el speech)') {
+                showToast('⚠️ No hay speech para copiar.', 'warning');
+                return;
+            }
+            navigator.clipboard.writeText(texto).then(() => {
+                btnCopySpeech.textContent = '✅ ¡Copiado!';
+                btnCopySpeech.classList.add('copiado');
+                setTimeout(() => {
+                    btnCopySpeech.textContent = '📋 Copiar Speech';
+                    btnCopySpeech.classList.remove('copiado');
+                }, 2000);
+                showToast('📋 Speech copiado al portapapeles.', 'success');
+            }).catch(() => {
+                showToast('❌ Error al copiar.', 'error');
+            });
+        }
+
+        // ============================================================
+        // EVENTOS
+        // ============================================================
+        cicloActual.addEventListener('change', () => {
+            actualizarOpcionesNuevo();
+            guardarEstado();
+        });
+
+        cicloNuevo.addEventListener('change', guardarEstado);
+        fechaOrden.addEventListener('change', guardarEstado);
+
+        btnCalcular.addEventListener('click', calcular);
+        btnCopySpeech.addEventListener('click', copiarSpeech);
+
+        // Enter en campos -> calcular
+        fechaOrden.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') calcular();
+        });
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        cargarEstado();
+        actualizarOpcionesNuevo();
+        setFechaHoy();
+
+        // Si hay datos guardados y fecha, calcular al abrir
+        if (fechaOrden.value && cicloActual.value && cicloNuevo.value) {
+            calcular();
+        }
+    </script>
+</body>
+</html>

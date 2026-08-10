@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Tipificaciones</title>
+    <style>
+        /* ============================================================
+               ROOT – Tema oscuro consistente con la app
+               ============================================================ */
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+
+        /* ============================================================
+               RESET Y ESTRUCTURA BASE
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+               HEADER (frameless + drag)
+               ============================================================ */
+        #hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        #hdr-title {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+
+        .hbtn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hbtn.danger:hover {
+            color: var(--danger);
+        }
+
+        /* ============================================================
+               BARRA DE HERRAMIENTAS (búsqueda, filtros, botones)
+               ============================================================ */
+        #toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        #toolbar input[type="search"] {
+            flex: 1;
+            min-width: 120px;
+            padding: 6px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            font-family: var(--font);
+        }
+
+        #toolbar input[type="search"]:focus {
+            border-color: var(--primary);
+        }
+
+        #toolbar select {
+            padding: 6px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            font-family: var(--font);
+            cursor: pointer;
+        }
+
+        #toolbar select:focus {
+            border-color: var(--primary);
+        }
+
+        .tb-btn {
+            padding: 6px 12px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .tb-btn:hover {
+            background: var(--surface2);
+            border-color: var(--primary);
+        }
+
+        .tb-btn.import {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+        }
+        .tb-btn.import:hover {
+            background: rgba(59, 130, 246, 0.3);
+        }
+
+        .tb-btn.export {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: var(--success);
+        }
+        .tb-btn.export:hover {
+            background: rgba(34, 197, 94, 0.25);
+        }
+
+        /* ============================================================
+               LISTA DE TARJETAS (scroll)
+               ============================================================ */
+        #list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        #list::-webkit-scrollbar {
+            width: 4px;
+        }
+        #list::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--faint);
+            font-size: 13px;
+            padding: 40px 0;
+        }
+
+        /* ============================================================
+               TARJETA DE REGISTRO
+               ============================================================ */
+        .card-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: border-color 0.15s;
+        }
+
+        .card-item:hover {
+            border-color: var(--border2);
+        }
+
+        .card-item .row1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-item .row1 .motivo {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text);
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .card-item .row1 .btn-edit {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 14px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: 0.15s;
+            flex-shrink: 0;
+        }
+
+        .card-item .row1 .btn-edit:hover {
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .card-item .row2 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .card-item .row2 .ruta {
+            color: var(--warning);
+        }
+
+        .card-item .row2 .estado {
+            color: var(--success);
+        }
+
+        /* ============================================================
+               MODAL DE EDICIÓN (overlay)
+               ============================================================ */
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 18px 20px;
+            width: 100%;
+            max-width: 580px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-box .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .modal-box .modal-title .close-modal {
+            background: none;
+            border: none;
+            color: var(--faint);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .modal-box .modal-title .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .modal-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .modal-field label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+        }
+
+        .modal-field input,
+        .modal-field textarea {
+            padding: 6px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s;
+            width: 100%;
+            resize: vertical;
+        }
+
+        .modal-field input:focus,
+        .modal-field textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-field textarea {
+            min-height: 40px;
+        }
+
+        .modal-field textarea.importante {
+            min-height: 120px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-shrink: 0;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .modal-actions .btn-cancel {
+            background: var(--surface3);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .modal-actions .btn-cancel:hover {
+            background: var(--surface2);
+        }
+
+        .modal-actions .btn-save {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .modal-actions .btn-save:hover {
+            background: #2563eb;
+        }
+
+        /* ============================================================
+               TOAST (notificación emergente)
+               ============================================================ */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+        .toast.warning {
+            background: var(--warning);
+            color: #000;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 500px) {
+            #toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #toolbar input[type="search"],
+            #toolbar select {
+                width: 100%;
+            }
+            .modal-box {
+                padding: 14px;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <div id="hdr">
+        <span id="hdr-title">📋 Tipificaciones</span>
+        <button class="hbtn" onclick="ipcRenderer.send('close-tool','tipificaciones')">✕</button>
+    </div>
+
+    <!-- ============================================================
+    TOOLBAR
+    ============================================================ -->
+    <div id="toolbar">
+        <input type="search" id="search-input" placeholder="🔍 Buscar motivo..." />
+        <select id="filter-procedimiento">
+            <option value="todos">📁 Todos los procedimientos</option>
+        </select>
+        <button class="tb-btn import" id="btn-import">📥 Importar CSV</button>
+        <button class="tb-btn export" id="btn-export">📤 Exportar CSV</button>
+    </div>
+
+    <!-- ============================================================
+    LISTA DE TARJETAS
+    ============================================================ -->
+    <div id="list">
+        <div class="empty-state">Cargando datos...</div>
+    </div>
+
+    <!-- ============================================================
+    MODAL DE EDICIÓN
+    ============================================================ -->
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">
+                ✏️ Editar Tipificación
+                <button class="close-modal" id="modal-close">✕</button>
+            </div>
+            <div class="modal-scroll" id="modal-scroll">
+                <!-- Campos del formulario -->
+                <div class="modal-field">
+                    <label>Procedimiento</label>
+                    <input type="text" id="edit-procedimiento" />
+                </div>
+                <div class="modal-field">
+                    <label>Motivo del llamado</label>
+                    <input type="text" id="edit-motivo" />
+                </div>
+                <div class="modal-field">
+                    <label>Tipo</label>
+                    <input type="text" id="edit-tipo" />
+                </div>
+                <div class="modal-field">
+                    <label>Área</label>
+                    <input type="text" id="edit-area" />
+                </div>
+                <div class="modal-field">
+                    <label>Subárea</label>
+                    <input type="text" id="edit-subarea" />
+                </div>
+                <div class="modal-field">
+                    <label>Estado</label>
+                    <input type="text" id="edit-estado" />
+                </div>
+                <div class="modal-field">
+                    <label>Tiempo de respuesta</label>
+                    <input type="text" id="edit-tiempo" />
+                </div>
+                <div class="modal-field">
+                    <label>Campo descripción (exigencia)</label>
+                    <textarea id="edit-descripcion" rows="3"></textarea>
+                </div>
+                <div class="modal-field">
+                    <label>Importante (observaciones - soporta HTML)</label>
+                    <textarea id="edit-importante" class="importante" rows="6"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="modal-cancel">Cancelar</button>
+                <button class="btn-save" id="modal-save">💾 Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    TOAST CONTAINER
+    ============================================================ -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================================
+    SCRIPT
+    ============================================================ -->
+    <script>
+        const { ipcRenderer, shell } = require('electron');
+        const fs = require('fs');
+        const path = require('path');
+
+        function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+        // ============================================================
+        // ESTADO
+        // ============================================================
+        let data = [];
+        let filteredData = [];
+        let currentEditIndex = -1;
+        let currentFilePath = null;
+        let USER_DATA_PATH = '';
+
+        const COLUMNS = [
+            'Procedimiento',
+            'Motivo del llamado',
+            'Tipo',
+            'Área',
+            'Subárea',
+            'Estado',
+            'Tiempo de respuesta',
+            'Campo descripción',
+            'Importante'
+        ];
+
+        const DEFAULT_CSV_NAME = 'Tipis 2025 II - Última Data.csv';
+
+        // ============================================================
+        // REFERENCIAS DOM
+        // ============================================================
+        const listEl = document.getElementById('list');
+        const searchInput = document.getElementById('search-input');
+        const filterProc = document.getElementById('filter-procedimiento');
+        const btnImport = document.getElementById('btn-import');
+        const btnExport = document.getElementById('btn-export');
+
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalClose = document.getElementById('modal-close');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalSave = document.getElementById('modal-save');
+
+        const editProcedimiento = document.getElementById('edit-procedimiento');
+        const editMotivo = document.getElementById('edit-motivo');
+        const editTipo = document.getElementById('edit-tipo');
+        const editArea = document.getElementById('edit-area');
+        const editSubarea = document.getElementById('edit-subarea');
+        const editEstado = document.getElementById('edit-estado');
+        const editTiempo = document.getElementById('edit-tiempo');
+        const editDescripcion = document.getElementById('edit-descripcion');
+        const editImportante = document.getElementById('edit-importante');
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        // ============================================================
+        // OBTENER RUTA DE USER DATA (IPC)
+        // ============================================================
+        function getUserDataPath() {
+            return new Promise((resolve) => {
+                ipcRenderer.invoke('get-user-data-path').then((ruta) => {
+                    resolve(ruta);
+                }).catch(() => {
+                    // Fallback
+                    resolve(path.join(require('os').homedir(), 'AppData', 'Roaming', 'gestor-casos'));
+                });
+            });
+        }
+
+        // ============================================================
+        // PERSISTENCIA DE UI (localStorage)
+        // ============================================================
+        const STORAGE_KEY = 'tipificaciones-ui';
+
+        function guardarUI() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    search: searchInput.value,
+                    filter: filterProc.value
+                }));
+            } catch (e) {}
+        }
+
+        function cargarUI() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data.search) searchInput.value = data.search;
+                if (data.filter) filterProc.value = data.filter;
+            } catch (e) {}
+        }
+
+        // ============================================================
+        // PARSER / STRINGIFIER CSV
+        // ============================================================
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/);
+            if (lines.length === 0) return [];
+            const headers = lines[0].split('\t').map(h => h.trim());
+            const result = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                for (let j = 0; j < line.length; j++) {
+                    const ch = line[j];
+                    if (ch === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (ch === '\t' && !inQuotes) {
+                        values.push(current);
+                        current = '';
+                    } else {
+                        current += ch;
+                    }
+                }
+                values.push(current);
+                while (values.length < headers.length) values.push('');
+                const obj = {};
+                headers.forEach((h, idx) => {
+                    let val = values[idx] || '';
+                    if (val.startsWith('"') && val.endsWith('"')) {
+                        val = val.slice(1, -1);
+                        val = val.replace(/""/g, '"');
+                    }
+                    obj[h] = val;
+                });
+                result.push(obj);
+            }
+            return result;
+        }
+
+        function stringifyCSV(rows) {
+            if (!rows || rows.length === 0) return '';
+            const headers = COLUMNS;
+            let lines = [headers.join('\t')];
+            rows.forEach(row => {
+                const values = headers.map(h => {
+                    let val = row[h] || '';
+                    if (val.includes('\t') || val.includes('"') || val.includes('\n')) {
+                        val = val.replace(/"/g, '""');
+                        val = `"${val}"`;
+                    }
+                    return val;
+                });
+                lines.push(values.join('\t'));
+            });
+            return lines.join('\n');
+        }
+
+        // ============================================================
+        // CARGA DE DATOS DESDE ARCHIVO
+        // ============================================================
+        function loadFromFile(filePath) {
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                const parsed = parseCSV(content);
+                if (parsed.length === 0) {
+                    showToast('⚠️ El archivo CSV está vacío o tiene formato incorrecto.', 'warning');
+                    return false;
+                }
+                data = parsed;
+                currentFilePath = filePath;
+                populateFilter();
+                applyFilters();
+                showToast(`✅ Cargados ${data.length} registros.`, 'success');
+                document.getElementById('hdr-title').textContent = `📋 Tipificaciones — ${path.basename(filePath)}`;
+                return true;
+            } catch (err) {
+                showToast(`❌ Error al leer el archivo: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        // ============================================================
+        // GUARDAR DATOS AL ARCHIVO
+        // ============================================================
+        function saveToFile(filePath) {
+            try {
+                const csv = stringifyCSV(data);
+                // Crear backup automático
+                try {
+                    const backupDir = path.join(path.dirname(filePath), 'backups');
+                    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+                    const basename = path.basename(filePath, '.csv');
+                    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                    const backupFile = path.join(backupDir, `${basename}_${ts}.csv`);
+                    fs.copyFileSync(filePath, backupFile);
+                    const files = fs.readdirSync(backupDir).filter(f => f.startsWith(basename) && f.endsWith('.csv')).sort();
+                    while (files.length > 5) {
+                        const oldest = files.shift();
+                        fs.unlinkSync(path.join(backupDir, oldest));
+                    }
+                } catch (backupErr) {}
+
+                fs.writeFileSync(filePath, csv, 'utf8');
+                showToast('✅ Cambios guardados correctamente.', 'success');
+                return true;
+            } catch (err) {
+                showToast(`❌ Error al guardar: ${err.message}`, 'error');
+                return false;
+            }
+        }
+
+        // ============================================================
+        // FILTRAR Y MOSTRAR
+        // ============================================================
+        function applyFilters() {
+            const search = searchInput.value.toLowerCase().trim();
+            const procFilter = filterProc.value;
+
+            filteredData = data.filter(row => {
+                const motivo = (row['Motivo del llamado'] || '').toLowerCase();
+                const procedimiento = (row['Procedimiento'] || '');
+
+                if (procFilter !== 'todos' && procedimiento !== procFilter) return false;
+
+                if (search) {
+                    const searchable = [
+                        motivo,
+                        (row['Procedimiento'] || '').toLowerCase(),
+                        (row['Tipo'] || '').toLowerCase(),
+                        (row['Área'] || '').toLowerCase(),
+                        (row['Subárea'] || '').toLowerCase(),
+                        (row['Campo descripción'] || '').toLowerCase(),
+                        (row['Importante'] || '').toLowerCase()
+                    ].join(' ');
+                    if (!searchable.includes(search)) return false;
+                }
+
+                return true;
+            });
+
+            renderList();
+            guardarUI();
+        }
+
+        // ============================================================
+        // RENDERIZAR LISTA
+        // ============================================================
+        function renderList() {
+            if (!filteredData.length) {
+                listEl.innerHTML = `<div class="empty-state">${data.length ? 'Sin resultados' : 'No hay datos cargados'}</div>`;
+                return;
+            }
+
+            let html = '';
+            filteredData.forEach((row, idx) => {
+                const motivo = row['Motivo del llamado'] || 'Sin motivo';
+                const procedimiento = row['Procedimiento'] || '—';
+                const tipo = row['Tipo'] || '—';
+                const area = row['Área'] || '—';
+                const subarea = row['Subárea'] || '—';
+                const estado = row['Estado'] || '—';
+                const ruta = area + (subarea ? ` > ${subarea}` : '');
+
+                const realIndex = data.indexOf(row);
+
+                html += `
+                    <div class="card-item" data-index="${realIndex}">
+                        <div class="row1">
+                            <span class="motivo" title="${esc(motivo)}">${esc(motivo)}</span>
+                            <button class="btn-edit" data-index="${realIndex}" title="Editar">✏️</button>
+                        </div>
+                        <div class="row2">
+                            <span class="ruta">📂 ${esc(ruta)}</span>
+                            <span>📌 ${esc(tipo)}</span>
+                            <span class="estado">⏱ ${esc(estado)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html;
+
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(btn.dataset.index);
+                    openEditor(idx);
+                });
+            });
+
+            document.querySelectorAll('.card-item').forEach(el => {
+                el.addEventListener('dblclick', () => {
+                    const idx = parseInt(el.dataset.index);
+                    if (!isNaN(idx)) openEditor(idx);
+                });
+            });
+        }
+
+        // ============================================================
+        // POBLAR FILTRO DE PROCEDIMIENTOS
+        // ============================================================
+        function populateFilter() {
+            const procs = new Set();
+            data.forEach(row => {
+                const p = row['Procedimiento'];
+                if (p) procs.add(p);
+            });
+            const sorted = Array.from(procs).sort();
+            filterProc.innerHTML = '<option value="todos">📁 Todos los procedimientos</option>';
+            sorted.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = p;
+                filterProc.appendChild(opt);
+            });
+        }
+
+        // ============================================================
+        // EDITOR (MODAL)
+        // ============================================================
+        function openEditor(index) {
+            if (index < 0 || index >= data.length) return;
+            const row = data[index];
+            currentEditIndex = index;
+
+            editProcedimiento.value = row['Procedimiento'] || '';
+            editMotivo.value = row['Motivo del llamado'] || '';
+            editTipo.value = row['Tipo'] || '';
+            editArea.value = row['Área'] || '';
+            editSubarea.value = row['Subárea'] || '';
+            editEstado.value = row['Estado'] || '';
+            editTiempo.value = row['Tiempo de respuesta'] || '';
+            editDescripcion.value = row['Campo descripción'] || '';
+            editImportante.value = row['Importante'] || '';
+
+            modalOverlay.classList.add('show');
+            setTimeout(() => editProcedimiento.focus(), 100);
+        }
+
+        function closeEditor() {
+            modalOverlay.classList.remove('show');
+            currentEditIndex = -1;
+        }
+
+        function saveEditor() {
+            if (currentEditIndex < 0 || currentEditIndex >= data.length) {
+                showToast('⚠️ No hay registro seleccionado para guardar.', 'warning');
+                return;
+            }
+
+            const row = data[currentEditIndex];
+            row['Procedimiento'] = editProcedimiento.value.trim();
+            row['Motivo del llamado'] = editMotivo.value.trim();
+            row['Tipo'] = editTipo.value.trim();
+            row['Área'] = editArea.value.trim();
+            row['Subárea'] = editSubarea.value.trim();
+            row['Estado'] = editEstado.value.trim();
+            row['Tiempo de respuesta'] = editTiempo.value.trim();
+            row['Campo descripción'] = editDescripcion.value.trim();
+            row['Importante'] = editImportante.value.trim();
+
+            if (currentFilePath) {
+                const ok = saveToFile(currentFilePath);
+                if (ok) {
+                    closeEditor();
+                    populateFilter();
+                    applyFilters();
+                    showToast('✅ Registro actualizado.', 'success');
+                }
+            } else {
+                closeEditor();
+                populateFilter();
+                applyFilters();
+                showToast('✅ Registro actualizado en memoria (no se guardó en archivo).', 'warning');
+            }
+        }
+
+        // ============================================================
+        // IMPORTAR / EXPORTAR
+        // ============================================================
+        function importCSV() {
+            ipcRenderer.invoke('show-open-dialog', {
+                properties: ['openFile'],
+                filters: [{ name: 'CSV', extensions: ['csv'] }]
+            }).then(result => {
+                if (result.canceled || !result.filePaths.length) return;
+                const filePath = result.filePaths[0];
+                const success = loadFromFile(filePath);
+                if (success) {
+                    // Copiar el archivo a userData para futuras ediciones
+                    if (USER_DATA_PATH) {
+                        const destDir = path.join(USER_DATA_PATH, 'tipificaciones');
+                        if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+                        const destFile = path.join(destDir, path.basename(filePath));
+                        fs.copyFileSync(filePath, destFile);
+                        currentFilePath = destFile;
+                        document.getElementById('hdr-title').textContent = `📋 Tipificaciones — ${path.basename(destFile)}`;
+                    }
+                }
+            }).catch(err => {
+                showToast(`❌ Error al importar: ${err.message}`, 'error');
+            });
+        }
+
+        function exportCSV() {
+            if (!data.length) {
+                showToast('⚠️ No hay datos para exportar.', 'warning');
+                return;
+            }
+            ipcRenderer.invoke('show-save-dialog', {
+                defaultPath: 'tipificaciones_export.csv',
+                filters: [{ name: 'CSV', extensions: ['csv'] }]
+            }).then(result => {
+                if (result.canceled || !result.filePath) return;
+                const ok = saveToFile(result.filePath);
+                if (ok) {
+                    showToast('✅ Archivo exportado correctamente.', 'success');
+                }
+            }).catch(err => {
+                showToast(`❌ Error al exportar: ${err.message}`, 'error');
+            });
+        }
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        async function init() {
+            // Obtener ruta de userData
+            USER_DATA_PATH = await getUserDataPath();
+
+            // Buscar el CSV en userData/tipificaciones
+            const tipiDir = path.join(USER_DATA_PATH, 'tipificaciones');
+            if (!fs.existsSync(tipiDir)) fs.mkdirSync(tipiDir, { recursive: true });
+
+            const defaultPath = path.join(tipiDir, DEFAULT_CSV_NAME);
+
+            // Si no existe en userData, intentar copiar desde la carpeta de la app (src/tools)
+            if (!fs.existsSync(defaultPath)) {
+                const srcPath = path.join(__dirname, DEFAULT_CSV_NAME);
+                if (fs.existsSync(srcPath)) {
+                    fs.copyFileSync(srcPath, defaultPath);
+                    showToast('📂 Archivo CSV copiado a la carpeta de usuario.', 'info', 3000);
+                } else {
+                    showToast('⚠️ Archivo CSV por defecto no encontrado. Usa "Importar CSV" para cargar uno.', 'warning');
+                    listEl.innerHTML = `<div class="empty-state">Sin datos. Importa un archivo CSV para comenzar.</div>`;
+                }
+            }
+
+            if (fs.existsSync(defaultPath)) {
+                loadFromFile(defaultPath);
+            }
+
+            cargarUI();
+            if (data.length) applyFilters();
+
+            searchInput.addEventListener('input', applyFilters);
+            filterProc.addEventListener('change', applyFilters);
+
+            btnImport.addEventListener('click', importCSV);
+            btnExport.addEventListener('click', exportCSV);
+
+            modalClose.addEventListener('click', closeEditor);
+            modalCancel.addEventListener('click', closeEditor);
+            modalSave.addEventListener('click', saveEditor);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+                    closeEditor();
+                }
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && modalOverlay.classList.contains('show')) {
+                    saveEditor();
+                }
+            });
+
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeEditor();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    if (modalOverlay.classList.contains('show')) {
+                        e.preventDefault();
+                        saveEditor();
+                    }
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

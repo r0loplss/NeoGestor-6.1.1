@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<style>
+:root{
+  --bg:#0f1117;--surface:#161b27;--surface2:#1c2333;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e2e8f0;--muted:#8892a4;--faint:#4a5568;
+  --primary:#3b82f6;--warning:#f59e0b;--danger:#ef4444;
+  --font:'Segoe UI',system-ui,sans-serif;--radius:5px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:var(--bg);
+  font-family:var(--font);font-size:13px;color:var(--text);}
+body{display:flex;flex-direction:column;border:1px solid var(--border2);border-radius:6px;}
+
+/* HEADER */
+#hdr{display:flex;align-items:center;padding:0 6px;height:28px;flex-shrink:0;
+  background:#0d1220;border-bottom:1px solid var(--border);
+  border-radius:6px 6px 0 0;
+  -webkit-app-region:drag;user-select:none;gap:4px;}
+#hdr-dot{width:8px;height:8px;border-radius:50%;background:var(--warning);flex-shrink:0;}
+#hdr-title{flex:1;font-size:10px;font-weight:700;color:var(--faint);
+  text-transform:uppercase;letter-spacing:0.5px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+.hbtn{-webkit-app-region:no-drag;background:none;border:none;cursor:pointer;
+  color:var(--faint);font-size:11px;padding:2px 5px;border-radius:3px;transition:all 0.15s;}
+.hbtn:hover{color:var(--text);background:rgba(255,255,255,0.08);}
+.hbtn.danger:hover{color:var(--danger);}
+
+/* EDITOR - FIX OVERFLOW */
+#editor{flex:1;width:100%;padding:8px 10px;background:var(--bg);
+  color:var(--text);font-size:12px;line-height:1.6;
+  border:none;outline:none;resize:none;font-family:var(--font);
+  min-height: 0; overflow-y: auto;}
+#editor::placeholder{color:var(--faint);}
+#editor:disabled{opacity:0.85;cursor:default;}
+
+/* FOOTER */
+#ftr{display:flex;align-items:center;justify-content:flex-end;
+  padding:3px 6px;height:22px;flex-shrink:0;
+  background:#0d1220;border-top:1px solid var(--border);
+  border-radius:0 0 6px 6px;}
+#char-count{font-size:10px;color:var(--faint);}
+
+/* Modo preview readonly */
+body.readonly{border-color:rgba(245,158,11,0.4);}
+body.readonly #hdr{background:#1a1400;}
+body.readonly #hdr-dot{background:var(--warning);opacity:0.6;}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div id="hdr-dot"></div>
+  <span id="hdr-title">Nota</span>
+  <button class="hbtn" id="btn-min" onclick="minimizar()" title="Minimizar">—</button>
+  <button class="hbtn danger" id="btn-del" onclick="eliminar()" title="Eliminar nota">🗑</button>
+  <button class="hbtn" id="btn-close" onclick="cerrar()" title="Cerrar">✕</button>
+</div>
+
+<textarea id="editor" placeholder="Escribe tu nota aquí..."></textarea>
+
+<div id="ftr">
+  <span id="char-count">0 chars</span>
+</div>
+
+<script>
+const { ipcRenderer } = require('electron');
+
+let noteId    = null;
+let saveTimer = null;
+let initDone  = false;
+let isReadonly = false;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+ipcRenderer.on('init-note', (e, data) => {
+  noteId     = data.id;
+  isReadonly = !!data.readonly;
+
+  const editor = document.getElementById('editor');
+  if (editor) {
+    applyInit(editor, data.content || '');
+  } else {
+    window.addEventListener('DOMContentLoaded', () => {
+      applyInit(document.getElementById('editor'), data.content || '');
+    }, { once: true });
+  }
+});
+
+function applyInit(editor, content) {
+  if (initDone) return;
+  initDone = true;
+
+  editor.value = content;
+  actualizarContador(content);
+  actualizarTitulo(content);
+
+  if (isReadonly) {
+    editor.disabled = true;
+    document.body.classList.add('readonly');
+    document.getElementById('btn-min').style.display   = 'none';
+    document.getElementById('btn-del').style.display   = 'none';
+    document.getElementById('btn-close').style.display = 'none';
+    document.getElementById('ftr').style.display       = 'none';
+    return;
+  }
+
+  editor.addEventListener('contextmenu', mostrarContextMenu);
+  editor.addEventListener('input',   onInput);
+  editor.addEventListener('keydown', onKeydown);
+}
+
+// ── INPUT ─────────────────────────────────────────────────────────────────────
+function onInput() {
+  const val = document.getElementById('editor').value;
+  actualizarContador(val);
+  actualizarTitulo(val);
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => guardar(), 600);
+}
+
+function onKeydown(e) {
+  if (e.ctrlKey && e.key === 'b') { e.preventDefault(); wrapSel('**'); }
+}
+
+function wrapSel(mark) {
+  const el  = document.getElementById('editor');
+  const s   = el.selectionStart, end = el.selectionEnd;
+  const sel = el.value.slice(s, end);
+  el.setRangeText(mark + sel + mark, s, end, 'select');
+  onInput();
+}
+
+// ── GUARDAR ───────────────────────────────────────────────────────────────────
+function guardar() {
+  if (!noteId || isReadonly) return;
+  const content = document.getElementById('editor')?.value || '';
+  ipcRenderer.send('note-update', { id: noteId, content });
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function actualizarContador(val) {
+  const el = document.getElementById('char-count');
+  if (el) el.textContent = val.length + ' chars';
+}
+
+function actualizarTitulo(val) {
+  const titulo = (val || '').trim().split('\n')[0].slice(0, 28) || 'Nota';
+  const el = document.getElementById('hdr-title');
+  if (el) el.textContent = titulo;
+}
+
+// ── MENÚ CONTEXTUAL ───────────────────────────────────────────────────────────
+let ctxMenu = null;
+
+function mostrarContextMenu(e) {
+  e.preventDefault();
+  eliminarContextMenu();
+
+  ctxMenu = document.createElement('div');
+  ctxMenu.style.cssText = `
+    position:fixed;left:${Math.min(e.clientX, window.innerWidth-130)}px;
+    top:${Math.min(e.clientY, window.innerHeight-90)}px;
+    background:#1c2333;border:1px solid rgba(255,255,255,0.12);
+    border-radius:5px;padding:4px 0;z-index:9999;min-width:120px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);font-size:12px;`;
+
+  const opciones = [
+    { label: '✂️ Cortar',   action: () => document.execCommand('cut') },
+    { label: '📋 Copiar',   action: () => document.execCommand('copy') },
+    { label: '📌 Pegar',    action: () => document.execCommand('paste') },
+    { sep: true },
+    { label: '𝐁 Negrita',   action: () => wrapSel('**') },
+    { label: '𝐼 Cursiva',   action: () => wrapSel('_') },
+    { label: 'U͟ Subrayado', action: () => wrapSel('__') },
+  ];
+
+  opciones.forEach(op => {
+    if (op.sep) {
+      const s = document.createElement('div');
+      s.style.cssText = 'height:1px;background:rgba(255,255,255,0.07);margin:3px 0;';
+      ctxMenu.appendChild(s);
+      return;
+    }
+    const item = document.createElement('div');
+    item.textContent = op.label;
+    item.style.cssText = 'padding:5px 12px;cursor:pointer;color:#e2e8f0;';
+    item.onmouseenter = () => item.style.background = '#232c3f';
+    item.onmouseleave = () => item.style.background = '';
+    item.onclick = () => { op.action(); eliminarContextMenu(); };
+    ctxMenu.appendChild(item);
+  });
+
+  document.body.appendChild(ctxMenu);
+  setTimeout(() => document.addEventListener('click', eliminarContextMenu, { once: true }), 10);
+}
+
+function eliminarContextMenu() {
+  if (ctxMenu) { ctxMenu.remove(); ctxMenu = null; }
+}
+
+// ── ACCIONES ──────────────────────────────────────────────────────────────────
+function minimizar() {
+  ipcRenderer.send('note-minimize', noteId);
+}
+
+function eliminar() {
+  if (noteId) ipcRenderer.send('note-delete', noteId);
+}
+
+function cerrar() {
+  clearTimeout(saveTimer);
+  guardar();
+  window.close();
+}
+</script>
+</body>
+</html>

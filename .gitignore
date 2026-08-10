@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+
+# Builds y artefactos
+dist/
+*.exe
+*.rar
+*.blockmap
+builder-debug.yml
+builder-effective-config.yaml
+
+# Datos locales
+*.tmp
+
+# Sistema
+Thumbs.db
+Desktop.ini

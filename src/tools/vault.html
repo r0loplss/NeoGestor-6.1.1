@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>Bóveda de notas</title>
+<style>
+:root{
+  --bg:#0f1117;--surface:#161b27;--surface2:#1c2333;--surface3:#232c3f;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e2e8f0;--muted:#8892a4;--faint:#4a5568;
+  --primary:#3b82f6;--warning:#f59e0b;--danger:#ef4444;
+  --font:'Segoe UI',system-ui,sans-serif;--radius:5px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:var(--bg);
+  font-family:var(--font);font-size:13px;color:var(--text);}
+body{display:flex;flex-direction:column;border:1px solid var(--border2);border-radius:6px;}
+
+/* HEADER */
+#hdr{display:flex;align-items:center;padding:0 6px;height:32px;flex-shrink:0;
+  background:#0d1220;border-bottom:1px solid var(--border);
+  border-radius:6px 6px 0 0;
+  -webkit-app-region:drag;user-select:none;gap:6px;}
+#hdr-title{flex:1;font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:0.5px;}
+.hbtn{-webkit-app-region:no-drag;background:none;border:none;cursor:pointer;
+  color:var(--faint);font-size:12px;padding:3px 7px;border-radius:3px;transition:all 0.15s;
+  font-family:var(--font);}
+.hbtn:hover{color:var(--text);background:rgba(255,255,255,0.08);}
+.hbtn.danger:hover{color:var(--danger);}
+#btn-new-note{background:var(--surface3);border:1px solid var(--border2);}
+
+/* SEARCH */
+#search-row{display:flex;align-items:center;gap:6px;padding:6px 8px;
+  background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+#nv-search{flex:1;padding:5px 10px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text);outline:none;font-size:12px;font-family:var(--font);}
+#nv-search:focus{border-color:var(--primary);}
+#search-count{font-size:10px;color:var(--faint);white-space:nowrap;}
+
+/* GRID */
+#nv-grid{flex:1;overflow-y:auto;padding:10px;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;align-content:start;}
+#nv-grid::-webkit-scrollbar{width:4px;}
+#nv-grid::-webkit-scrollbar-thumb{background:var(--faint);border-radius:2px;}
+.n-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+  padding:10px;display:flex;flex-direction:column;gap:6px;height:110px;cursor:pointer;
+  position:relative;transition:border-color 0.15s;}
+.n-card:hover{border-color:var(--primary);}
+.n-title{font-weight:700;font-size:11px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;color:var(--warning);padding-right:20px;}
+.n-body{font-size:10px;color:var(--muted);flex:1;overflow:hidden;
+  text-overflow:ellipsis;white-space:pre-wrap;line-height:1.4;word-break:break-word;}
+.n-star{position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;
+  color:var(--faint);font-size:14px;transition:0.15s;}
+.n-star:hover{transform:scale(1.2);}
+.n-star.fav{color:var(--warning);}
+.n-del{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.3);
+  border:1px solid var(--border);cursor:pointer;color:var(--faint);font-size:11px;
+  padding:3px 5px;border-radius:4px;transition:0.15s;opacity:0;}
+.n-card:hover .n-del{opacity:1;}
+.n-del:hover{color:var(--danger);border-color:var(--danger);background:rgba(239,68,68,0.1);}
+.empty-msg{font-size:11px;color:var(--faint);text-align:center;grid-column:1/-1;padding:14px 0;}
+
+/* CONFIRM OVERLAY */
+#confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:600;
+  display:none;align-items:center;justify-content:center;}
+#confirm-overlay.show{display:flex;}
+#confirm-box{background:var(--surface);border:1px solid var(--border2);border-radius:8px;
+  padding:18px;width:270px;text-align:center;}
+#confirm-msg{font-size:12px;line-height:1.5;margin-bottom:15px;}
+.conf-btns{display:flex;gap:8px;justify-content:center;}
+.conf-btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;
+  font-family:var(--font);}
+.conf-ok{background:var(--danger);color:#fff;}
+.conf-cancel{background:var(--surface3);color:var(--muted);border:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <span id="hdr-title">📚 Bóveda</span>
+  <button class="hbtn" id="btn-new-note" onclick="crearNota()" title="Crear nueva nota">➕ Nueva</button>
+  <button class="hbtn danger" onclick="window.close()" title="Cerrar">✕</button>
+</div>
+
+<div id="search-row">
+  <input type="text" id="nv-search" placeholder="Buscar nota..." oninput="filtrar()"/>
+  <span id="search-count"></span>
+</div>
+
+<div id="nv-grid"></div>
+
+<div id="confirm-overlay">
+  <div id="confirm-box">
+    <div id="confirm-msg"></div>
+    <div class="conf-btns">
+      <button class="conf-btn conf-ok" id="conf-ok-btn">Confirmar</button>
+      <button class="conf-btn conf-cancel" onclick="closeConfirm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const { ipcRenderer } = require('electron');
+
+let notes = [];
+let favNotes = [];
+let filtro = '';
+let confirmCb = null;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function showConfirm(msg, cb) {
+  confirmCb = cb;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-overlay').classList.add('show');
+  document.getElementById('conf-ok-btn').onclick = () => { closeConfirm(); if (cb) cb(); };
+}
+function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('show'); }
+
+function render() {
+  const grid = document.getElementById('nv-grid');
+  grid.innerHTML = '';
+  const q = filtro.toLowerCase();
+  const list = notes.filter(n => !q || (n.content || '').toLowerCase().includes(q));
+
+  const countEl = document.getElementById('search-count');
+  countEl.textContent = filtro ? (list.length + ' resultado' + (list.length !== 1 ? 's' : '')) : '';
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty-msg">Sin notas' + (filtro ? ' que coincidan' : '. Pulsa ➕ Nueva para crear una.') + '</div>';
+    return;
+  }
+
+  list.forEach(n => {
+    const fav = favNotes.includes(n.id);
+    const body = (n.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const idx = notes.indexOf(n);
+    const card = document.createElement('div');
+    card.className = 'n-card';
+    card.innerHTML = `
+      <span class="n-title">${esc(body.split('\n')[0].slice(0, 28)) || 'Nota'}</span>
+      <div class="n-body">${esc(body.slice(0, 140)) || 'Sin contenido'}</div>
+      <button class="n-star ${fav ? 'fav' : ''}" title="Favorita">★</button>
+      <button class="n-del" title="Eliminar">✕</button>
+    `;
+    card.onclick = () => { ipcRenderer.send('open-note', n.id); };
+    card.querySelector('.n-star').onclick = (e) => {
+      e.stopPropagation();
+      favNotes = favNotes.includes(n.id) ? favNotes.filter(x => x !== n.id) : [...favNotes, n.id];
+      ipcRenderer.send('save-data', { favNotes });
+      render();
+    };
+    card.querySelector('.n-del').onclick = (e) => {
+      e.stopPropagation();
+      showConfirm(`¿Eliminar nota ${idx + 1}?`, () => ipcRenderer.send('note-delete', n.id));
+    };
+    grid.appendChild(card);
+  });
+}
+
+function filtrar() {
+  filtro = document.getElementById('nv-search').value;
+  render();
+}
+
+function crearNota() { ipcRenderer.send('note-create'); }
+
+// Sincronizar cuando main notifica cambios de notas
+ipcRenderer.on('notes-updated', (e, data) => { notes = data || []; render(); });
+
+// Datos iniciales (enviados desde main.js en open-tool ready-to-show)
+ipcRenderer.on('init-vault', (e, data) => {
+  notes = data.notes || [];
+  favNotes = data.favNotes || [];
+  render();
+});
+
+// Petición manual por si el init llega antes del render
+window.addEventListener('DOMContentLoaded', () => {
+  if (!notes.length) {
+    try { notes = ipcRenderer.sendSync('get-vault-notes') || []; } catch (err) {}
+    render();
+  }
+});
+</script>
+</body>
+</html>

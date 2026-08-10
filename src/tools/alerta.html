@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  :root {
+    --danger: #ef4444;
+    --warning: #f97316;
+    --surface: #1e2a3a;
+    --text: #ffffff;
+    --muted: #cbd5e1;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  
+  html, body {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: transparent; overflow: hidden;
+    font-family: var(--font);
+  }
+
+  .bubble-container {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .bubble {
+    background: var(--surface);
+    color: var(--text);
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+  }
+
+  /* Colores de Urgencia */
+  .bubble.urgency-red {
+    background: var(--danger);
+    border-color: rgba(255,255,255,0.4);
+    animation: pulseRed 1.5s infinite alternate;
+  }
+  
+  .bubble.urgency-orange {
+    background: var(--warning);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  @keyframes pulseRed {
+    0% { box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); }
+    100% { box-shadow: 0 4px 25px rgba(239, 68, 68, 0.8); }
+  }
+
+  /* La Flecha Inteligente */
+  .bubble.side-right::before {
+    content: ''; position: absolute; left: -7px; top: 50%; transform: translateY(-50%);
+    border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+    border-right: 7px solid var(--surface);
+    transition: border-right-color 0.3s;
+  }
+  .bubble.side-right.urgency-red::before { border-right-color: var(--danger); }
+  .bubble.side-right.urgency-orange::before { border-right-color: var(--warning); }
+
+  .bubble.side-left::after {
+    content: ''; position: absolute; right: -7px; top: 50%; transform: translateY(-50%);
+    border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+    border-left: 7px solid var(--surface);
+    transition: border-left-color 0.3s;
+  }
+  .bubble.side-left.urgency-red::after { border-left-color: var(--danger); }
+  .bubble.side-left.urgency-orange::after { border-left-color: var(--warning); }
+
+  .info-area {
+    display: flex; align-items: center; gap: 6px; overflow: hidden;
+    cursor: default; user-select: none;
+  }
+  .icon { font-size: 14px; flex-shrink: 0;}
+  .name { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px;}
+
+  .action-area {
+    display: flex; gap: 4px; flex-shrink: 0;
+  }
+  
+  .btn-act {
+    background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text); border-radius: 4px; width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 11px; transition: 0.15s;
+  }
+  .btn-act:hover { background: rgba(255,255,255,0.2); }
+  .btn-act:active { transform: scale(0.9); }
+  .btn-act.close:hover { background: rgba(255,255,255,0.3); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="bubble-container">
+  <div class="bubble side-right" id="alert-box">
+    
+    <div class="info-area">
+      <span class="icon" id="alert-icon">🚨</span>
+      <span class="name" id="alert-name">Cargando...</span>
+    </div>
+
+    <div class="action-area">
+      <button class="btn-act" title="Posponer 5 minutos" onclick="fireAction('snooze')">💤</button>
+      <button class="btn-act" title="Copiar Número" onclick="fireAction('copy')" id="btn-copy">📋</button>
+      <button class="btn-act close" title="Ocultar Alerta" onclick="fireAction('close')">✕</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const { ipcRenderer } = require('electron');
+
+let currentData = null;
+
+ipcRenderer.on('init-alerta', (e, data) => updateUI(data));
+ipcRenderer.on('update-alerta', (e, data) => updateUI(data));
+
+function updateUI(data) {
+  currentData = data;
+  const iconEl = document.getElementById('alert-icon');
+  const nameEl = document.getElementById('alert-name');
+  const boxEl  = document.getElementById('alert-box');
+  
+  if (data.type === 'sms') iconEl.textContent = '💬';
+  else iconEl.textContent = '📞';
+  
+  nameEl.textContent = data.name || 'Sin nombre';
+
+  // Manejar el lado de la flecha (Inteligencia espacial)
+  if (data.side === 'left') {
+    boxEl.classList.remove('side-right'); boxEl.classList.add('side-left');
+  } else {
+    boxEl.classList.remove('side-left'); boxEl.classList.add('side-right');
+  }
+
+  // Manejar el color según la urgencia enviada por index.html
+  boxEl.classList.remove('urgency-red', 'urgency-orange');
+  if (data.urgency === 'red') boxEl.classList.add('urgency-red');
+  else if (data.urgency === 'orange') boxEl.classList.add('urgency-orange');
+}
+
+function fireAction(actionType) {
+  if (!currentData) return;
+  
+  if (actionType === 'copy') {
+    navigator.clipboard.writeText(currentData.num || '');
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = '✅';
+    setTimeout(() => btn.textContent = '📋', 1500);
+  }
+
+  // Enviar orden al cerebro (main.js)
+  ipcRenderer.send('alerta-action', { 
+    action: actionType, 
+    id: currentData.id 
+  });
+}
+</script>
+</body>
+</html>

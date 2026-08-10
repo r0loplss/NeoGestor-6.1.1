@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Radar de Contingencias PRO</title>
+    <style>
+        /* ============================================================
+               ROOT – Tema oscuro consistente con la app
+               ============================================================ */
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+
+        /* ============================================================
+               RESET Y ESTRUCTURA BASE
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+               HEADER (frameless + drag)
+               ============================================================ */
+        #hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        #hdr-title {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+
+        .hbtn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hbtn.danger:hover {
+            color: var(--danger);
+        }
+
+        /* ============================================================
+               TOOLBAR
+               ============================================================ */
+        #toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 6px 10px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        #toolbar .status {
+            font-size: 11px;
+            color: var(--muted);
+            flex: 1;
+        }
+
+        #toolbar .status b {
+            color: var(--text);
+        }
+
+        .tb-btn {
+            padding: 4px 12px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .tb-btn:hover {
+            background: var(--surface2);
+            border-color: var(--primary);
+        }
+
+        .tb-btn.copy-det {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--primary);
+        }
+        .tb-btn.copy-det:hover {
+            background: rgba(59, 130, 246, 0.25);
+        }
+        .tb-btn.copy-breve {
+            background: rgba(34, 197, 94, 0.12);
+            border-color: var(--success);
+        }
+        .tb-btn.copy-breve:hover {
+            background: rgba(34, 197, 94, 0.2);
+        }
+        .tb-btn.danger:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* ============================================================
+               CUERPO PRINCIPAL (scroll)
+               ============================================================ */
+        #main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #main::-webkit-scrollbar {
+            width: 4px;
+        }
+        #main::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        /* ============================================================
+               ÁREA DE CARGA DE TEXTO
+               ============================================================ */
+        .input-area {
+            background: var(--surface);
+            border: 1px dashed var(--border2);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-area textarea {
+            width: 100%;
+            min-height: 80px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            padding: 6px 8px;
+            resize: vertical;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .input-area textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .input-area .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .input-area .btn-row .btn {
+            padding: 6px 16px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .input-area .btn-row .btn:hover {
+            background: #2563eb;
+        }
+
+        .input-area .btn-row .btn.secondary {
+            background: var(--surface3);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .input-area .btn-row .btn.secondary:hover {
+            background: var(--surface2);
+        }
+
+        /* ============================================================
+               LISTA DE CONTINGENCIAS
+               ============================================================ */
+        .empty-state {
+            text-align: center;
+            color: var(--faint);
+            font-size: 13px;
+            padding: 30px 0;
+        }
+
+        .c-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: border-color 0.15s;
+        }
+
+        .c-card:hover {
+            border-color: var(--border2);
+        }
+
+        .c-card .c-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .c-card .c-row .c-zona {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .c-card .c-row .c-id {
+            font-size: 11px;
+            color: var(--text);
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: 0.15s;
+        }
+
+        .c-card .c-row .c-id:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+        }
+
+        .c-card .c-row .c-del {
+            background: none;
+            border: none;
+            color: var(--faint);
+            cursor: pointer;
+            font-size: 13px;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: 0.15s;
+        }
+
+        .c-card .c-row .c-del:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .c-card .c-meta {
+            font-size: 10px;
+            color: var(--faint);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .c-card .c-meta .c-pops {
+            color: var(--muted);
+        }
+
+        .c-card .c-meta .c-contexto {
+            color: var(--primary);
+            font-style: italic;
+        }
+
+        /* ============================================================
+               TOAST
+               ============================================================ */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+        .toast.warning {
+            background: var(--warning);
+            color: #000;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 500px) {
+            #toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #toolbar .status {
+                text-align: center;
+            }
+            .input-area .btn-row {
+                flex-direction: column;
+            }
+            .input-area .btn-row .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <div id="hdr">
+        <span id="hdr-title">📡 Radar de Contingencias PRO</span>
+        <button class="hbtn danger" id="btn-limpiar-todo" title="Limpiar todo">🗑</button>
+        <button class="hbtn" onclick="ipcRenderer.send('close-tool','contingencias')">✕</button>
+    </div>
+
+    <!-- ============================================================
+    TOOLBAR
+    ============================================================ -->
+    <div id="toolbar">
+        <span class="status" id="status-bar">Casos en Radar: <b id="count-actives">0</b></span>
+        <button class="tb-btn copy-det" id="btn-copy-det">📋 Copiar Detallado</button>
+        <button class="tb-btn copy-breve" id="btn-copy-breve">📋 Copiar Breve</button>
+        <button class="tb-btn danger" id="btn-limpiar">🗑 Limpiar</button>
+    </div>
+
+    <!-- ============================================================
+    CUERPO PRINCIPAL
+    ============================================================ -->
+    <div id="main">
+
+        <!-- Área de carga de texto -->
+        <div class="input-area">
+            <textarea id="raw-input" placeholder="Pega aquí cualquier formato de contingencia (1 al 5)..."></textarea>
+            <div class="btn-row">
+                <button class="btn" id="btn-procesar">⚡ Escanear y Reemplazar Radar</button>
+                <button class="btn secondary" id="btn-limpiar-input">🗑 Limpiar texto</button>
+            </div>
+        </div>
+
+        <!-- Lista de contingencias -->
+        <div id="list-container">
+            <div class="empty-state">Esperando datos...</div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    TOAST CONTAINER
+    ============================================================ -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================================
+    SCRIPT
+    ============================================================ -->
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+        // ============================================================
+        // ESTADO
+        // ============================================================
+        let contingencias = [];
+
+        // ============================================================
+        // REFERENCIAS DOM
+        // ============================================================
+        const rawInput = document.getElementById('raw-input');
+        const btnProcesar = document.getElementById('btn-procesar');
+        const btnLimpiarInput = document.getElementById('btn-limpiar-input');
+        const btnLimpiarTodo = document.getElementById('btn-limpiar-todo');
+        const btnLimpiar = document.getElementById('btn-limpiar');
+        const btnCopyDet = document.getElementById('btn-copy-det');
+        const btnCopyBreve = document.getElementById('btn-copy-breve');
+        const listContainer = document.getElementById('list-container');
+        const countActives = document.getElementById('count-actives');
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        // ============================================================
+        // FUNCIÓN ROBUSTA PARA PARSEAR FECHAS
+        // ============================================================
+        function parseFechaContingencia(fechaStr) {
+            if (!fechaStr) return null;
+            // Ejemplo de entrada: "07/08/2026 01:57:06" o "07/08/2026 01:57"
+            const partes = fechaStr.trim().split(' ');
+            if (partes.length === 0) return null;
+
+            const fechaPart = partes[0].split('/');
+            if (fechaPart.length !== 3) return null;
+
+            const dia = parseInt(fechaPart[0], 10);
+            const mes = parseInt(fechaPart[1], 10) - 1; // 0-index
+            const anio = parseInt(fechaPart[2], 10);
+
+            let horas = 0,
+                minutos = 0,
+                segundos = 0;
+            if (partes.length > 1) {
+                const horaPart = partes[1].split(':');
+                if (horaPart.length >= 2) {
+                    horas = parseInt(horaPart[0], 10) || 0;
+                    minutos = parseInt(horaPart[1], 10) || 0;
+                    if (horaPart.length >= 3) {
+                        segundos = parseInt(horaPart[2], 10) || 0;
+                    }
+                }
+            }
+
+            if (isNaN(dia) || isNaN(mes) || isNaN(anio)) return null;
+            return new Date(anio, mes, dia, horas, minutos, segundos);
+        }
+
+        // ============================================================
+        // FUNCIONES DE PROCESAMIENTO
+        // ============================================================
+
+        function extraerPOPs(texto) {
+            if (!texto) return [];
+            const regex = /\b([A-Z]{2,3}[0-9]{1,4})\b/g;
+            const matches = texto.match(regex);
+            if (!matches) return [];
+            const stopWords = ['TEC', 'SITIO', 'NOMBRE', 'COMUNA', 'REGION', 'POP', 'LTE', '3G', '5G', 'INC', 'UID', 'ID'];
+            const pops = matches
+                .filter(p => !stopWords.includes(p))
+                .map(p => p.toUpperCase());
+            return [...new Set(pops)].sort();
+        }
+
+        function generarContexto(descripcion, infoAdicional) {
+            const textoCompleto = (descripcion || '') + ' ' + (infoAdicional || '');
+            if (!textoCompleto.trim()) {
+                return 'Contingencia operacional sin descripción específica';
+            }
+
+            const palabrasClave = {
+                lentitud: /lentitud|slow|lento/i,
+                caida: /caída|caida|falla|caído/i,
+                corte: /corte|interrupción|interrupcion/i,
+                intermitencia: /intermitencia|intermitente/i,
+                problemas: /problema|dificultad|inconveniente/i,
+                sistemas: /sistema|plataforma|aplicación|app|web|portal/i,
+                red: /red|señal|cobertura/i,
+                voz: /voz|llamada|telefonía/i,
+                datos: /datos|internet|navegación|navegacion/i,
+                facturacion: /facturación|facturacion|boleta|pago/i,
+                atencion: /atención|atencion|contacto|ejecutivo/i,
+                oneTouch: /onetouch|ot|siebel/i
+            };
+
+            let tipoProblema = '';
+            let areaAfectada = '';
+
+            for (const [key, regex] of Object.entries(palabrasClave)) {
+                if (regex.test(textoCompleto)) {
+                    if (['lentitud', 'caida', 'corte', 'intermitencia', 'problemas'].includes(key)) {
+                        tipoProblema = key;
+                    } else if (['sistemas', 'red', 'voz', 'datos', 'facturacion', 'atencion', 'oneTouch'].includes(key)) {
+                        areaAfectada = key;
+                    }
+                }
+            }
+
+            const tipoMap = {
+                lentitud: 'problemas de lentitud',
+                caida: 'caída de servicio',
+                corte: 'corte de servicio',
+                intermitencia: 'intermitencia en el servicio',
+                problemas: 'problemas operacionales'
+            };
+
+            const areaMap = {
+                sistemas: 'en sistemas de atención',
+                red: 'en la red móvil',
+                voz: 'en servicios de voz',
+                datos: 'en servicios de datos',
+                facturacion: 'en facturación',
+                atencion: 'en atención al cliente',
+                oneTouch: 'en plataforma OneTouch'
+            };
+
+            let texto = '';
+            if (tipoProblema && tipoMap[tipoProblema]) {
+                texto += tipoMap[tipoProblema];
+            } else {
+                texto += 'incidencia operacional';
+            }
+
+            if (areaAfectada && areaMap[areaAfectada]) {
+                texto += ' ' + areaMap[areaAfectada];
+            } else {
+                const extra = textoCompleto.match(/(sistemas|red|voz|datos|facturación|atención|plataforma|aplicación)/i);
+                if (extra) {
+                    texto += ' en ' + extra[0].toLowerCase();
+                } else {
+                    texto += ' a nivel nacional';
+                }
+            }
+
+            const palabras = texto.split(' ');
+            while (palabras.length < 5) {
+                palabras.push('operacional');
+            }
+
+            const resultado = palabras.join(' ');
+            return resultado.charAt(0).toUpperCase() + resultado.slice(1);
+        }
+
+        function procesarContingencias(raw) {
+            if (!raw || !raw.trim()) {
+                showToast('⚠️ No hay texto para procesar.', 'warning');
+                return false;
+            }
+
+            const defaultDate = "Fecha de publicación en chat apoyo";
+            const nuevasContingencias = [];
+
+            if (raw.includes('Nº de Contingencia') || raw.includes('INC0000')) {
+                const chunks = raw.split(/(?=1-\d{11,12})/);
+                chunks.forEach(chunk => {
+                    const idMatch = chunk.match(/(1-\d{11,12})/);
+                    if (!idMatch) return;
+                    const id = idMatch[1];
+                    const dateMatch = chunk.match(/(\d{2}\/\d{2}\/\d{4}(?:\s\d{2}:\d{2}:\d{2})?)/);
+                    const fecha = dateMatch ? dateMatch[1] : defaultDate;
+                    let zona = "Desconocida";
+                    if (dateMatch) {
+                        const textAfterDate = chunk.substring(chunk.indexOf(dateMatch[1]) + dateMatch[1].length).trim();
+                        const zonaMatch = textAfterDate.match(/^([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+?)(?=Serv\.|Trabajo|INC|En estos|$)/);
+                        if (zonaMatch) zona = zonaMatch[1].trim();
+                    }
+                    const descripcion = chunk.match(/Serv\.\sVoz\sy\sdatos\sCongestión|Trabajo\sProgramado\sMóvil|Sistemas\sde\sAtencion/i);
+                    const infoAdicional = chunk.match(/(Lentitud en OT|Caída de Sitios|Corte Energía|Intermitencia|Sistemas de Atencion)/i);
+                    nuevasContingencias.push({
+                        id,
+                        zona,
+                        inicio: fecha,
+                        descripcion: descripcion ? descripcion[0] : '',
+                        infoAdicional: infoAdicional ? infoAdicional[0] : '',
+                        textoCompleto: chunk
+                    });
+                });
+            } else {
+                const lineas = raw.split('\n');
+                lineas.forEach(linea => {
+                    if (!linea.trim()) return;
+                    const idMatch = linea.match(/(1-\d{11,12})/);
+                    if (!idMatch) return;
+                    const id = idMatch[1];
+                    let zona = "Desconocida";
+                    let fecha = defaultDate;
+                    let descripcion = '';
+                    let infoAdicional = '';
+
+                    if (linea.includes('|')) {
+                        const partes = linea.split('|').map(p => p.replace(/[*#📍📌]/g, '').trim());
+                        if (partes.length >= 2) {
+                            zona = partes[1] || "Desconocida";
+                            if (partes[2]) {
+                                fecha = partes[2].split('|')[0].trim() || defaultDate;
+                            }
+                        }
+                        const descMatch = linea.match(/Serv\.\sVoz\sy\sdatos\sCongestión|Trabajo\sProgramado\sMóvil|Sistemas\sde\sAtencion/i);
+                        if (descMatch) descripcion = descMatch[0];
+                        const infoMatch = linea.match(/(Lentitud en OT|Caída de Sitios|Corte Energía|Intermitencia)/i);
+                        if (infoMatch) infoAdicional = infoMatch[0];
+                    } else if (linea.includes('📍') || linea.includes('📌')) {
+                        const textoLimpio = linea.replace(/[📍📌*]/g, '').replace(id, '').trim();
+                        zona = textoLimpio || "Desconocida";
+                    } else {
+                        zona = linea.replace(id, '').trim() || "Desconocida";
+                    }
+
+                    nuevasContingencias.push({
+                        id,
+                        zona,
+                        inicio: fecha,
+                        descripcion: descripcion || '',
+                        infoAdicional: infoAdicional || '',
+                        textoCompleto: linea
+                    });
+                });
+            }
+
+            if (!nuevasContingencias.length) {
+                showToast('⚠️ No se encontraron contingencias válidas en el texto.', 'warning');
+                return false;
+            }
+
+            contingencias = nuevasContingencias;
+
+            // Ordenar por fecha usando el parseo robusto
+            contingencias.sort((a, b) => {
+                const dateA = parseFechaContingencia(a.inicio);
+                const dateB = parseFechaContingencia(b.inicio);
+                if (!dateA && !dateB) return 0;
+                if (!dateA) return 1;
+                if (!dateB) return -1;
+                return dateB - dateA;
+            });
+
+            guardarYNotificar();
+            actualizarUI();
+            showToast(`✅ Radar actualizado: ${contingencias.length} casos activos.`, 'success');
+            return true;
+        }
+
+        // ============================================================
+        // ACTUALIZAR UI
+        // ============================================================
+        function actualizarUI() {
+            countActives.textContent = contingencias.length;
+
+            if (!contingencias.length) {
+                listContainer.innerHTML =
+                    `<div class="empty-state">No hay contingencias cargadas.<br><span style="opacity:0.5;font-size:10px;">Pega un reporte para comenzar</span></div>`;
+                return;
+            }
+
+            let html = '';
+            contingencias.forEach(c => {
+                const pops = extraerPOPs(c.textoCompleto || '');
+                const contexto = c.zona === 'Desconocida' || c.zona === 'Nacional' || c.zona === 'Varias' ?
+                    generarContexto(c.descripcion, c.infoAdicional) :
+                    null;
+
+                html += `
+                    <div class="c-card" data-id="${esc(c.id)}">
+                        <div class="c-row">
+                            <span class="c-zona">📍 ${esc(c.zona)}</span>
+                            <button class="c-del" data-action="del" title="Eliminar">✕</button>
+                        </div>
+                        <div class="c-row">
+                            <span class="c-id" data-action="copy" title="Copiar ID">📋 ${esc(c.id)}</span>
+                            <span class="c-meta">${esc(c.inicio)}</span>
+                        </div>
+                        ${contexto ? `<div class="c-meta"><span class="c-contexto">💬 ${esc(contexto)}</span></div>` : ''}
+                        ${pops.length ? `<div class="c-meta"><span class="c-pops">📡 POPs: ${esc(pops.join(', '))}</span></div>` : ''}
+                    </div>
+                `;
+            });
+            listContainer.innerHTML = html;
+
+            listContainer.querySelectorAll('[data-action="del"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    eliminar(btn.closest('.c-card').dataset.id);
+                });
+            });
+            listContainer.querySelectorAll('[data-action="copy"]').forEach(span => {
+                span.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    copiarId(span.closest('.c-card').dataset.id);
+                });
+            });
+        }
+
+        // ============================================================
+        // FUNCIONES DE ACCIÓN
+        // ============================================================
+        function eliminar(id) {
+            contingencias = contingencias.filter(c => c.id !== id);
+            guardarYNotificar();
+            actualizarUI();
+            showToast('🗑 Contingencia eliminada.', 'success');
+        }
+
+        function copiarId(id) {
+            navigator.clipboard.writeText(id).then(() => {
+                showToast('📋 ID copiado.', 'success');
+            }).catch(() => {});
+        }
+
+        function limpiarTodo() {
+            if (!contingencias.length) {
+                showToast('⚠️ No hay contingencias para limpiar.', 'warning');
+                return;
+            }
+            if (confirm('¿Deseas limpiar todo el radar de contingencias?')) {
+                contingencias = [];
+                guardarYNotificar();
+                actualizarUI();
+                showToast('🗑 Radar limpiado.', 'success');
+            }
+        }
+
+        function guardarYNotificar() {
+            ipcRenderer.send('save-contingencias', contingencias);
+            ipcRenderer.send('contingencias-updated', contingencias);
+        }
+
+        // ============================================================
+        // FORMATOS DE COPIA
+        // ============================================================
+
+        function generarDetallado() {
+            if (!contingencias.length) {
+                showToast('⚠️ No hay contingencias para copiar.', 'warning');
+                return null;
+            }
+
+            const conComuna = contingencias.filter(c =>
+                c.zona && !['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
+            );
+            const sinComuna = contingencias.filter(c =>
+                !c.zona || ['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
+            );
+
+            const comunasUnicas = [...new Set(conComuna.map(c => c.zona))].sort();
+            const totalComunas = comunasUnicas.length;
+            const totalContingencias = contingencias.length;
+
+            let lines = [];
+            lines.push('📌 *CONTINGENCIAS ACTIVAS* ✍');
+            lines.push('');
+            lines.push(
+                `🗺 *COMUNAS/DISTRITOS AFECTADOS (${totalComunas}) | CONTINGENCIAS ÚNICAS (${totalContingencias}) :*`
+            );
+            lines.push('');
+            lines.push(`> *${comunasUnicas.join(', ')}*`);
+            lines.push('');
+            lines.push('**Detalle ordenado de forma descendente por fecha de apertura** 👇🏻');
+            lines.push('');
+
+            const sorted = [...contingencias];
+            sorted.sort((a, b) => {
+                const da = parseFechaContingencia(a.inicio);
+                const db = parseFechaContingencia(b.inicio);
+                if (!da && !db) return 0;
+                if (!da) return 1;
+                if (!db) return -1;
+                return db - da;
+            });
+
+            const ahora = new Date();
+
+            sorted.forEach(c => {
+                const zona = c.zona && !['Desconocida', 'Nacional', 'Varias'].includes(c.zona) ?
+                    c.zona :
+                    generarContexto(c.descripcion, c.infoAdicional);
+
+                const fechaObj = parseFechaContingencia(c.inicio);
+                let diasDiff = 0;
+                if (fechaObj) {
+                    const diffMs = ahora - fechaObj;
+                    diasDiff = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                }
+                const diasStr = String(diasDiff).padStart(2, '0') + ' días';
+
+                const pops = extraerPOPs(c.textoCompleto || '');
+                const popLine = pops.length ? `> POP afectados: ${pops.join(', ')}` : '> (Sin POPs específicos)';
+
+                lines.push(`📍 *${c.id} | ${zona} | ${c.inicio}* | ${diasStr}`);
+                lines.push(popLine);
+                lines.push('');
+            });
+
+            return lines.join('\n');
+        }
+
+        function generarBreve() {
+            if (!contingencias.length) {
+                showToast('⚠️ No hay contingencias para copiar.', 'warning');
+                return null;
+            }
+
+            const conComuna = contingencias.filter(c =>
+                c.zona && !['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
+            );
+            const sinComuna = contingencias.filter(c =>
+                !c.zona || ['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
+            );
+
+            const sortedConComuna = [...conComuna].sort((a, b) => a.zona.localeCompare(b.zona));
+
+            let lines = [];
+            lines.push('📌*CONTINGENCIAS*📌');
+            lines.push('');
+
+            sortedConComuna.forEach(c => {
+                lines.push(`📍 *${c.zona}* ${c.id}`);
+            });
+
+            sinComuna.forEach(c => {
+                const contexto = generarContexto(c.descripcion, c.infoAdicional);
+                lines.push(`📍 *${contexto}* ${c.id}`);
+            });
+
+            return lines.join('\n');
+        }
+
+        // ============================================================
+        // COPIAR FORMATOS
+        // ============================================================
+        function copiarDetallado() {
+            const texto = generarDetallado();
+            if (!texto) return;
+            navigator.clipboard.writeText(texto).then(() => {
+                showToast('📋 Texto detallado copiado al portapapeles.', 'success');
+            }).catch(() => {
+                showToast('❌ Error al copiar.', 'error');
+            });
+        }
+
+        function copiarBreve() {
+            const texto = generarBreve();
+            if (!texto) return;
+            navigator.clipboard.writeText(texto).then(() => {
+                showToast('📋 Texto breve copiado al portapapeles.', 'success');
+            }).catch(() => {
+                showToast('❌ Error al copiar.', 'error');
+            });
+        }
+
+        // ============================================================
+        // EVENTOS
+        // ============================================================
+        btnProcesar.addEventListener('click', () => {
+            const raw = rawInput.value;
+            if (raw.trim()) {
+                const ok = procesarContingencias(raw);
+                if (ok) rawInput.value = '';
+            } else {
+                showToast('⚠️ Pega un texto para escanear.', 'warning');
+            }
+        });
+
+        btnLimpiarInput.addEventListener('click', () => {
+            rawInput.value = '';
+        });
+
+        btnLimpiarTodo.addEventListener('click', limpiarTodo);
+        btnLimpiar.addEventListener('click', limpiarTodo);
+        btnCopyDet.addEventListener('click', copiarDetallado);
+        btnCopyBreve.addEventListener('click', copiarBreve);
+
+        // ============================================================
+        // INIT (IPC)
+        // ============================================================
+        ipcRenderer.on('init-contingencias', (e, data) => {
+            contingencias = Array.isArray(data) ? data : [];
+            actualizarUI();
+        });
+
+        // ============================================================
+        // INICIO
+        // ============================================================
+        showToast('📡 Radar de Contingencias PRO cargado.', 'success', 2000);
+    </script>
+</body>
+</html>

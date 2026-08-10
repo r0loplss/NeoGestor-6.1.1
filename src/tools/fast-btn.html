@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
+    body { background: transparent; }
+    #b {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        -webkit-app-region: no-drag;
+    }
+    #b .bolt-wrap {
+        width: 18px; height: 92%;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(180deg, #1e3a5f, #16283f);
+        border: 1px solid #2c3e5c;
+        border-radius: 9px;
+        color: #7fb3ff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        transition: all 0.15s ease;
+    }
+    #b .bolt { font-size: 13px; line-height: 1; }
+    #b:hover .bolt-wrap {
+        background: linear-gradient(180deg, #223050, #1a2540);
+        border-color: #4f9dff;
+        box-shadow: 0 2px 14px rgba(79, 157, 255, 0.45);
+        transform: scale(1.05);
+    }
+    #b.active .bolt-wrap {
+        border-color: #fbbf24;
+        color: #fbbf24;
+        background: linear-gradient(180deg, #1a3a63, #132a4a);
+        box-shadow: 0 2px 14px rgba(251, 191, 36, 0.5);
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+<button id="b" title="Abrir Fast (Ctrl+Shift+F)">
+    <span class="bolt-wrap"><span class="bolt">⚡</span></span>
+</button>
+<script>
+    const { ipcRenderer } = require('electron');
+    const b = document.getElementById('b');
+    b.addEventListener('click', () => ipcRenderer.send('fast-toggle'));
+    ipcRenderer.on('fast-state', (e, s) => {
+        b.classList.toggle('active', !!(s && s.visible));
+        b.title = (s && s.visible) ? 'Cerrar Fast (Ctrl+Shift+F)' : 'Abrir Fast (Ctrl+Shift+F)';
+    });
+    ipcRenderer.send('fast-request-state');
+</script>
+</body>
+</html>

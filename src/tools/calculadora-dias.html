@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Calculadora de Días</title>
+    <style>
+        /* ============================================================
+               ROOT – Tema oscuro consistente con la app
+               ============================================================ */
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+
+        /* ============================================================
+               RESET Y ESTRUCTURA BASE
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+               HEADER (frameless + drag)
+               ============================================================ */
+        #hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        #hdr-title {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+
+        .hbtn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hbtn.danger:hover {
+            color: var(--danger);
+        }
+
+        /* ============================================================
+               CUERPO PRINCIPAL (scroll vertical)
+               ============================================================ */
+        #main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        #main::-webkit-scrollbar {
+            width: 4px;
+        }
+        #main::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        /* ============================================================
+               CAMPOS DE FECHA
+               ============================================================ */
+        .field-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-row label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .field-row input[type="date"] {
+            padding: 7px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 13px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s;
+            color-scheme: dark;
+        }
+
+        .field-row input[type="date"]:focus {
+            border-color: var(--primary);
+        }
+
+        /* ============================================================
+               BOTÓN CALCULAR
+               ============================================================ */
+        .btn-calc {
+            padding: 10px 0;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: var(--font);
+            margin-top: 4px;
+        }
+
+        .btn-calc:hover {
+            background: #2563eb;
+        }
+
+        .btn-calc:active {
+            transform: scale(0.98);
+        }
+
+        /* ============================================================
+               RESULTADOS
+               ============================================================ */
+        .result-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .result-box.show {
+            display: flex;
+        }
+
+        /* Totales */
+        .totales {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .total-item {
+            background: var(--surface2);
+            padding: 10px;
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .total-item .num {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .total-item .lbl {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Hitos (dos cuadros lado a lado) */
+        .hitos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .hito {
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-align: center;
+        }
+
+        .hito .icono {
+            font-size: 18px;
+        }
+
+        .hito .estado {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .hito .fecha-ref {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* Estados de color */
+        .hito.cumplido {
+            border-color: var(--success);
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .hito.cumplido .estado {
+            color: var(--success);
+        }
+
+        .hito.pendiente {
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .hito.pendiente .estado {
+            color: var(--warning);
+        }
+
+        /* ============================================================
+               BOTÓN COPIAR
+               ============================================================ */
+        .btn-copy {
+            padding: 8px 0;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: var(--font);
+            margin-top: 4px;
+        }
+
+        .btn-copy:hover {
+            background: var(--surface2);
+            border-color: var(--primary);
+        }
+
+        .btn-copy.copiado {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        /* ============================================================
+               TOAST (notificación emergente)
+               ============================================================ */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+        .toast.warning {
+            background: var(--warning);
+            color: #000;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 400px) {
+            .totales {
+                grid-template-columns: 1fr;
+            }
+            .hitos {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <div id="hdr">
+        <span id="hdr-title">📅 Calculadora de Días</span>
+        <button class="hbtn" onclick="ipcRenderer.send('close-tool','calculadora-dias')">✕</button>
+    </div>
+
+    <!-- ============================================================
+    CUERPO
+    ============================================================ -->
+    <div id="main">
+
+        <!-- Fecha de activación -->
+        <div class="field-row">
+            <label for="fecha-activacion">📌 Fecha de activación</label>
+            <input type="date" id="fecha-activacion" />
+        </div>
+
+        <!-- Fecha actual (editable) -->
+        <div class="field-row">
+            <label for="fecha-actual">📅 Fecha actual</label>
+            <input type="date" id="fecha-actual" />
+        </div>
+
+        <!-- Botón Calcular -->
+        <button class="btn-calc" id="btn-calcular">🔍 Calcular</button>
+
+        <!-- Resultados (ocultos por defecto) -->
+        <div class="result-box" id="resultados">
+
+            <!-- Totales -->
+            <div class="totales">
+                <div class="total-item">
+                    <div class="num" id="total-dias">0</div>
+                    <div class="lbl">Días transcurridos</div>
+                </div>
+                <div class="total-item">
+                    <div class="num" id="total-meses">0</div>
+                    <div class="lbl">Meses y días</div>
+                </div>
+            </div>
+
+            <!-- Hitos -->
+            <div class="hitos">
+                <!-- Hito 120 días -->
+                <div class="hito" id="hito-120">
+                    <div class="icono">⏳</div>
+                    <div class="estado">—</div>
+                    <div class="fecha-ref">—</div>
+                </div>
+                <!-- Hito 18 meses -->
+                <div class="hito" id="hito-18m">
+                    <div class="icono">📆</div>
+                    <div class="estado">—</div>
+                    <div class="fecha-ref">—</div>
+                </div>
+            </div>
+
+            <!-- Botón Copiar -->
+            <button class="btn-copy" id="btn-copy-resultado">📋 Copiar resultado</button>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    TOAST CONTAINER (notificaciones)
+    ============================================================ -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================================
+    SCRIPT
+    ============================================================ -->
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Referencias DOM
+        const fechaActivacion = document.getElementById('fecha-activacion');
+        const fechaActual = document.getElementById('fecha-actual');
+        const btnCalcular = document.getElementById('btn-calcular');
+        const resultados = document.getElementById('resultados');
+        const totalDias = document.getElementById('total-dias');
+        const totalMeses = document.getElementById('total-meses');
+        const hito120 = document.getElementById('hito-120');
+        const hito18m = document.getElementById('hito-18m');
+        const btnCopy = document.getElementById('btn-copy-resultado');
+
+        // ============================================================
+        // TOAST (notificaciones emergentes)
+        // ============================================================
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            container.appendChild(el);
+
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        // ============================================================
+        // PERSISTENCIA DE FECHAS (localStorage)
+        // ============================================================
+        const STORAGE_KEY = 'calculadora-dias-fechas';
+
+        function guardarFechas() {
+            try {
+                const data = {};
+                if (fechaActivacion.value) data.activacion = fechaActivacion.value;
+                if (fechaActual.value) data.actual = fechaActual.value;
+                if (Object.keys(data).length > 0) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                }
+            } catch (e) { /* silencio */ }
+        }
+
+        function cargarFechas() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data.activacion) fechaActivacion.value = data.activacion;
+                if (data.actual) fechaActual.value = data.actual;
+            } catch (e) { /* silencio */ }
+        }
+
+        // Prellenar fecha actual con hoy si no hay guardado
+        function setFechaHoy() {
+            if (fechaActual.value) return;
+            const hoy = new Date();
+            const y = hoy.getFullYear();
+            const m = String(hoy.getMonth() + 1).padStart(2, '0');
+            const d = String(hoy.getDate()).padStart(2, '0');
+            fechaActual.value = `${y}-${m}-${d}`;
+        }
+
+        // ============================================================
+        // CÁLCULO PRINCIPAL
+        // ============================================================
+        function calcular() {
+            const fAct = fechaActivacion.value;
+            const fActua = fechaActual.value;
+
+            if (!fAct || !fActua) {
+                showToast('⚠️ Por favor selecciona ambas fechas.', 'warning');
+                return;
+            }
+
+            const fechaInicio = new Date(fAct + 'T12:00:00');
+            const fechaFin = new Date(fActua + 'T12:00:00');
+
+            if (fechaFin < fechaInicio) {
+                showToast('⚠️ La fecha actual debe ser posterior a la de activación.', 'warning');
+                return;
+            }
+
+            // ============================================================
+            // 1. Días totales
+            // ============================================================
+            const diffMs = fechaFin.getTime() - fechaInicio.getTime();
+            const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            // ============================================================
+            // 2. Meses y días (cálculo preciso)
+            // ============================================================
+            let años = fechaFin.getFullYear() - fechaInicio.getFullYear();
+            let meses = fechaFin.getMonth() - fechaInicio.getMonth();
+            let dias = fechaFin.getDate() - fechaInicio.getDate();
+
+            if (dias < 0) {
+                // Préstamo iterativo de días desde los meses anteriores a la fecha fin
+                // (evita quedarse con días negativos si el día de inicio es alto, p. ej. 31 → 1 mar)
+                while (dias < 0) {
+                    meses--;
+                    const mesAnterior = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + meses, 0);
+                    dias += mesAnterior.getDate();
+                }
+            }
+
+            if (meses < 0) {
+                años--;
+                meses += 12;
+            }
+
+            const totalMesesNum = años * 12 + meses;
+            const textoMeses = totalMesesNum > 0 ? `${totalMesesNum} meses y ${dias} días` : `${dias} días`;
+
+            // ============================================================
+            // 3. Hitos
+            // ============================================================
+            // 120 días
+            const fecha120 = new Date(fechaInicio);
+            fecha120.setDate(fecha120.getDate() + 120);
+            const cumplio120 = diffDias >= 120;
+            const diff120 = diffDias - 120;
+
+            // 18 meses (usando meses exactos)
+            const fecha18m = new Date(fechaInicio);
+            fecha18m.setMonth(fecha18m.getMonth() + 18);
+            const cumplio18m = fechaFin >= fecha18m;
+            const diff18m = cumplio18m ? 0 : Math.ceil((fecha18m - fechaFin) / (1000 * 60 * 60 * 24));
+
+            // ============================================================
+            // 4. Renderizar UI
+            // ============================================================
+            // Totales
+            totalDias.textContent = diffDias.toLocaleString('es-CL');
+            totalMeses.textContent = textoMeses;
+
+            // Hito 120 días
+            const icon120 = cumplio120 ? '✅' : '⏳';
+            const estado120 = cumplio120 ?
+                `120 días CUMPLIDO` :
+                `Faltan ${Math.abs(diff120)} días`;
+            const fecha120Str = fecha120.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const ref120 = `(desde el ${fecha120Str})`;
+
+            hito120.className = 'hito ' + (cumplio120 ? 'cumplido' : 'pendiente');
+            hito120.querySelector('.icono').textContent = icon120;
+            hito120.querySelector('.estado').textContent = estado120;
+            hito120.querySelector('.fecha-ref').textContent = ref120;
+
+            // Hito 18 meses
+            const icon18m = cumplio18m ? '✅' : '⏳';
+            const estado18m = cumplio18m ?
+                `18 meses CUMPLIDO` :
+                `Faltan ${Math.abs(diff18m)} días`;
+            const fecha18mStr = fecha18m.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const ref18m = `(desde el ${fecha18mStr})`;
+
+            hito18m.className = 'hito ' + (cumplio18m ? 'cumplido' : 'pendiente');
+            hito18m.querySelector('.icono').textContent = icon18m;
+            hito18m.querySelector('.estado').textContent = estado18m;
+            hito18m.querySelector('.fecha-ref').textContent = ref18m;
+
+            // Mostrar resultados
+            resultados.classList.add('show');
+
+            // Guardar fechas
+            guardarFechas();
+        }
+
+        // ============================================================
+        // COPIAR RESULTADO
+        // ============================================================
+        function copiarResultado() {
+            if (!resultados.classList.contains('show')) {
+                showToast('⚠️ Primero calcula las fechas.', 'warning');
+                return;
+            }
+
+            const fAct = fechaActivacion.value;
+            const fActua = fechaActual.value;
+            if (!fAct || !fActua) return;
+
+            const fechaInicio = new Date(fAct + 'T12:00:00');
+            const fechaFin = new Date(fActua + 'T12:00:00');
+            const diffDias = Math.floor((fechaFin.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24));
+
+            const estado120 = hito120.querySelector('.estado').textContent;
+            const estado18m = hito18m.querySelector('.estado').textContent;
+            const ref120 = hito120.querySelector('.fecha-ref').textContent;
+            const ref18m = hito18m.querySelector('.fecha-ref').textContent;
+
+            const fActStr = fechaInicio.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const fActuaStr = fechaFin.toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const totalMesesText = totalMeses.textContent;
+
+            const texto = `
+        📅 Cálculo de días
+        ─────────────────
+        Fecha de activación: ${fActStr}
+        Fecha actual:        ${fActuaStr}
+        Días transcurridos:  ${diffDias.toLocaleString('es-CL')} días
+        Meses y días:        ${totalMesesText}
+        ✅ 120 días:         ${estado120} ${ref120}
+        ✅ 18 meses:         ${estado18m} ${ref18m}
+        `.trim();
+
+            navigator.clipboard.writeText(texto).then(() => {
+                btnCopy.textContent = '✅ ¡Copiado!';
+                btnCopy.classList.add('copiado');
+                setTimeout(() => {
+                    btnCopy.textContent = '📋 Copiar resultado';
+                    btnCopy.classList.remove('copiado');
+                }, 2000);
+                showToast('📋 Resultado copiado al portapapeles.', 'success');
+            }).catch(() => {
+                showToast('❌ Error al copiar.', 'error');
+            });
+        }
+
+        // ============================================================
+        // EVENTOS
+        // ============================================================
+        btnCalcular.addEventListener('click', calcular);
+
+        btnCopy.addEventListener('click', copiarResultado);
+
+        // Enter en campos de fecha -> calcular
+        fechaActivacion.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') calcular();
+        });
+        fechaActual.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') calcular();
+        });
+
+        // Al cambiar las fechas, recalcular automáticamente y guardar
+        fechaActivacion.addEventListener('change', () => {
+            guardarFechas();
+            if (fechaActivacion.value && fechaActual.value) calcular();
+        });
+        fechaActual.addEventListener('change', () => {
+            guardarFechas();
+            if (fechaActivacion.value && fechaActual.value) calcular();
+        });
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        cargarFechas();
+        setFechaHoy();
+
+        // Si ambas fechas están cargadas, calcular automáticamente al abrir
+        if (fechaActivacion.value && fechaActual.value) {
+            calcular();
+        }
+    </script>
+</body>
+</html>

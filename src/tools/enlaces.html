@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Mis Enlaces</title>
+    <style>
+        /* ============================================================
+               ROOT – Tema oscuro consistente con la app
+               ============================================================ */
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+               HEADER (frameless + drag)
+               ============================================================ */
+        #hdr {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+
+        #hdr-title {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            transition: all 0.15s;
+            font-family: var(--font);
+        }
+
+        .hbtn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .hbtn.danger:hover {
+            color: var(--danger);
+        }
+
+        /* ============================================================
+               TOOLBAR (búsqueda, filtros, acciones)
+               ============================================================ */
+        #toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 6px 10px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        #toolbar input[type="search"] {
+            flex: 1;
+            min-width: 120px;
+            padding: 4px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            font-family: var(--font);
+        }
+
+        #toolbar input[type="search"]:focus {
+            border-color: var(--primary);
+        }
+
+        #toolbar select {
+            padding: 4px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            font-family: var(--font);
+            cursor: pointer;
+        }
+
+        #toolbar select:focus {
+            border-color: var(--primary);
+        }
+
+        .tb-btn {
+            padding: 4px 12px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .tb-btn:hover {
+            background: var(--surface2);
+            border-color: var(--primary);
+        }
+
+        .tb-btn.import {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--primary);
+        }
+        .tb-btn.import:hover {
+            background: rgba(59, 130, 246, 0.25);
+        }
+        .tb-btn.export {
+            background: rgba(34, 197, 94, 0.12);
+            border-color: var(--success);
+        }
+        .tb-btn.export:hover {
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        /* ============================================================
+               FORMULARIO (acordeón)
+               ============================================================ */
+        #form-section {
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        #form-hdr {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px;
+            cursor: pointer;
+            background: var(--surface);
+            user-select: none;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+
+        #form-hdr:hover {
+            background: var(--surface2);
+        }
+
+        #form-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+            flex: 1;
+        }
+
+        #form-chev {
+            color: var(--faint);
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        #form-chev.open {
+            transform: rotate(90deg);
+        }
+
+        #form-body {
+            padding: 8px 10px;
+            display: none;
+            background: var(--surface);
+        }
+
+        #form-body.open {
+            display: block;
+        }
+
+        .field {
+            margin-bottom: 6px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            padding: 5px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .field input:focus,
+        .field textarea:focus,
+        .field select:focus {
+            border-color: var(--primary);
+        }
+
+        .field textarea {
+            min-height: 40px;
+            resize: vertical;
+        }
+
+        .field .img-preview-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .field .img-preview-row img {
+            max-height: 60px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .field .img-preview-row .btn-remove-img {
+            background: none;
+            border: none;
+            color: var(--faint);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+
+        .field .img-preview-row .btn-remove-img:hover {
+            color: var(--danger);
+        }
+
+        .field .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .field .tag-row .tag-chip {
+            padding: 2px 8px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 11px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .field .tag-row .tag-chip:hover {
+            border-color: var(--primary);
+            color: var(--text);
+        }
+
+        .field .tag-row .tag-chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .field .tag-row .tag-chip.custom {
+            cursor: default;
+        }
+
+        .field .tag-row .tag-chip.custom::after {
+            content: '×';
+            margin-left: 4px;
+            opacity: 0.5;
+            cursor: pointer;
+        }
+
+        .field .tag-row .tag-chip.custom::after:hover {
+            opacity: 1;
+            color: var(--danger);
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 7px 0;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .btn-save:hover {
+            background: #2563eb;
+        }
+
+        /* ============================================================
+               LISTA DE TARJETAS (scroll)
+               ============================================================ */
+        #list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        #list::-webkit-scrollbar {
+            width: 4px;
+        }
+        #list::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--faint);
+            font-size: 13px;
+            padding: 40px 0;
+        }
+
+        /* ============================================================
+               TARJETA (compacta, vertical apilada)
+               ============================================================ */
+        .card-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            user-select: none;
+            min-height: 52px;
+            position: relative;
+        }
+
+        .card-item:hover {
+            border-color: var(--border2);
+            background: var(--surface3);
+        }
+
+        .card-item .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-item .card-top .card-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .card-item .card-top .card-tag {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: #fff;
+            flex-shrink: 0;
+            margin-left: 6px;
+        }
+
+        .card-item .card-top .card-tag.proceso {
+            background: var(--success);
+        }
+        .card-item .card-top .card-tag.custom {
+            background: var(--purple, #8b5cf6);
+        }
+
+        .card-item .card-preview {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 35px;
+        }
+
+        .card-item .card-preview .preview-img {
+            width: 35px;
+            height: 35px;
+            object-fit: cover;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            background: var(--bg);
+        }
+
+        .card-item .card-preview .preview-text {
+            font-size: 11px;
+            color: var(--muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .card-item .card-preview .preview-text.url-text {
+            color: var(--primary);
+        }
+
+        .card-item .card-preview .preview-text.url-text:hover {
+            text-decoration: underline;
+        }
+
+        /* ============================================================
+               MENÚ CONTEXTUAL (clic derecho)
+               ============================================================ */
+        #ctx-menu {
+            position: fixed;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 4px 0;
+            z-index: 9999;
+            display: none;
+            min-width: 150px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .ctx-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text);
+            transition: 0.1s;
+        }
+
+        .ctx-item:hover {
+            background: var(--surface3);
+            color: var(--primary);
+        }
+
+        .ctx-item.danger {
+            color: var(--danger);
+        }
+
+        .ctx-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .ctx-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 3px 0;
+        }
+
+        /* ============================================================
+               MODAL DE EDICIÓN
+               ============================================================ */
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 18px 20px;
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-box .modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .modal-box .modal-title .close-modal {
+            background: none;
+            border: none;
+            color: var(--faint);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .modal-box .modal-title .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .modal-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .modal-field label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+        }
+
+        .modal-field input,
+        .modal-field textarea,
+        .modal-field select {
+            padding: 5px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s;
+            width: 100%;
+        }
+
+        .modal-field input:focus,
+        .modal-field textarea:focus,
+        .modal-field select:focus {
+            border-color: var(--primary);
+        }
+
+        .modal-field textarea {
+            min-height: 40px;
+            resize: vertical;
+        }
+
+        .modal-field .img-preview-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .modal-field .img-preview-row img {
+            max-height: 60px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .modal-field .img-preview-row .btn-remove-img {
+            background: none;
+            border: none;
+            color: var(--faint);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+
+        .modal-field .img-preview-row .btn-remove-img:hover {
+            color: var(--danger);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-shrink: 0;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .modal-actions .btn-cancel {
+            background: var(--surface3);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .modal-actions .btn-cancel:hover {
+            background: var(--surface2);
+        }
+
+        .modal-actions .btn-save {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .modal-actions .btn-save:hover {
+            background: #2563eb;
+        }
+
+        /* ============================================================
+               VISOR DE IMAGEN (overlay)
+               ============================================================ */
+        .image-viewer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .image-viewer-overlay.show {
+            display: flex;
+        }
+
+        .image-viewer-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 16px 20px;
+            max-width: 95%;
+            max-height: 95%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .image-viewer-box .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .image-viewer-box .viewer-header .viewer-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .image-viewer-box .viewer-header .viewer-close {
+            background: none;
+            border: none;
+            color: var(--faint);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        .image-viewer-box .viewer-header .viewer-close:hover {
+            color: var(--danger);
+        }
+
+        .image-viewer-box .viewer-body {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        .image-viewer-box .viewer-body .viewer-image {
+            flex: 1;
+            min-width: 200px;
+            max-width: 60%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .image-viewer-box .viewer-body .viewer-image img {
+            max-width: 100%;
+            max-height: 60vh;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            object-fit: contain;
+        }
+
+        .image-viewer-box .viewer-body .viewer-image .btn-copy-img {
+            padding: 6px 16px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .image-viewer-box .viewer-body .viewer-image .btn-copy-img:hover {
+            background: #2563eb;
+        }
+
+        .image-viewer-box .viewer-body .viewer-text {
+            flex: 1;
+            min-width: 180px;
+            max-width: 40%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .image-viewer-box .viewer-body .viewer-text .viewer-text-content {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text);
+            max-height: 40vh;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .image-viewer-box .viewer-body .viewer-text .btn-copy-text {
+            padding: 6px 16px;
+            background: var(--surface3);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            font-family: var(--font);
+            transition: background 0.15s;
+        }
+
+        .image-viewer-box .viewer-body .viewer-text .btn-copy-text:hover {
+            background: var(--surface2);
+        }
+
+        /* ============================================================
+               TOAST
+               ============================================================ */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 320px;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+        .toast.warning {
+            background: var(--warning);
+            color: #000;
+        }
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================
+               RESPONSIVE
+               ============================================================ */
+        @media (max-width: 500px) {
+            #toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #toolbar input[type="search"],
+            #toolbar select {
+                width: 100%;
+            }
+            .modal-box {
+                padding: 14px;
+                max-width: 100%;
+            }
+            .image-viewer-box .viewer-body {
+                flex-direction: column;
+                align-items: center;
+            }
+            .image-viewer-box .viewer-body .viewer-image,
+            .image-viewer-box .viewer-body .viewer-text {
+                max-width: 100%;
+                min-width: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <div id="hdr">
+        <span id="hdr-title">🔗 Mis Enlaces</span>
+        <button class="hbtn" onclick="ipcRenderer.send('close-tool','enlaces')">✕</button>
+    </div>
+
+    <!-- ============================================================
+    TOOLBAR
+    ============================================================ -->
+    <div id="toolbar">
+        <input type="search" id="search-input" placeholder="🔍 Buscar enlaces e imágenes..." />
+        <select id="filter-tag">
+            <option value="todos">🏷️ Todos</option>
+        </select>
+        <button class="tb-btn import" id="btn-import">📥 Importar</button>
+        <button class="tb-btn export" id="btn-export">📤 Exportar</button>
+    </div>
+
+    <!-- ============================================================
+    FORMULARIO (acordeón)
+    ============================================================ -->
+    <div id="form-section">
+        <div id="form-hdr">
+            <span id="form-label">➕ Nuevo recurso</span>
+            <span id="form-chev" class="open">▶</span>
+        </div>
+        <div id="form-body" class="open">
+            <div class="field">
+                <label>Título *</label>
+                <input type="text" id="inp-titulo" placeholder="Nombre del enlace o imagen" />
+            </div>
+            <div class="field">
+                <label>Descripción <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+                <input type="text" id="inp-desc" placeholder="¿Para qué sirve?" />
+            </div>
+            <div class="field">
+                <label>URL o Imagen *</label>
+                <input type="text" id="inp-url" placeholder="https://... o pega una imagen (Ctrl+V)" />
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                    <button class="tb-btn" id="btn-select-file">📁 Seleccionar archivo</button>
+                    <input type="file" id="inp-file" accept="image/*" style="display:none" />
+                </div>
+                <div class="img-preview-row" id="img-preview-row" style="display:none;">
+                    <img id="img-preview" src="" alt="Vista previa" />
+                    <button class="btn-remove-img" id="btn-clear-img">✕</button>
+                </div>
+            </div>
+            <div class="field">
+                <label>📝 Texto asociado a la imagen</label>
+                <textarea id="inp-texto-asociado" rows="2" placeholder="Descripción breve o comentario sobre la imagen..."></textarea>
+            </div>
+            <div class="field">
+                <label>🏷️ Etiqueta</label>
+                <div class="tag-row" id="tag-row"></div>
+                <div style="display:flex;gap:6px;margin-top:4px;">
+                    <input type="text" id="inp-newtag" placeholder="Nueva etiqueta..." style="flex:1;padding:4px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;font-family:var(--font);outline:none;" />
+                    <button class="tb-btn" id="btn-add-tag">➕ Crear</button>
+                </div>
+            </div>
+            <button class="btn-save" id="btn-guardar">💾 Guardar recurso</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    LISTA DE TARJETAS
+    ============================================================ -->
+    <div id="list">
+        <div class="empty-state">No hay recursos guardados.</div>
+    </div>
+
+    <!-- ============================================================
+    MENÚ CONTEXTUAL (clic derecho)
+    ============================================================ -->
+    <div id="ctx-menu">
+        <div class="ctx-item" data-action="edit">✏️ Editar</div>
+        <div class="ctx-item" data-action="copyurl" id="ctx-copyurl">📋 Copiar URL</div>
+        <div class="ctx-sep"></div>
+        <div class="ctx-item danger" data-action="delete">🗑 Eliminar</div>
+    </div>
+
+    <!-- ============================================================
+    MODAL DE EDICIÓN
+    ============================================================ -->
+    <div id="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span id="modal-title-text">✏️ Editar recurso</span>
+                <button class="close-modal" id="modal-close">✕</button>
+            </div>
+            <div class="modal-scroll">
+                <div class="modal-field">
+                    <label>Título *</label>
+                    <input type="text" id="edit-titulo" />
+                </div>
+                <div class="modal-field">
+                    <label>Descripción</label>
+                    <input type="text" id="edit-desc" />
+                </div>
+                <div class="modal-field">
+                    <label>URL o Imagen *</label>
+                    <input type="text" id="edit-url" placeholder="https://... o imagen base64" />
+                    <div style="display:flex;gap:6px;margin-top:4px;">
+                        <button class="tb-btn" id="edit-btn-select-file">📁 Seleccionar archivo</button>
+                        <input type="file" id="edit-file" accept="image/*" style="display:none" />
+                    </div>
+                    <div class="img-preview-row" id="edit-img-preview-row" style="display:none;">
+                        <img id="edit-img-preview" src="" alt="Vista previa" />
+                        <button class="btn-remove-img" id="edit-btn-clear-img">✕</button>
+                    </div>
+                </div>
+                <div class="modal-field">
+                    <label>📝 Texto asociado a la imagen</label>
+                    <textarea id="edit-texto-asociado" rows="2"></textarea>
+                </div>
+                <div class="modal-field">
+                    <label>🏷️ Etiqueta</label>
+                    <select id="edit-tag"></select>
+                    <div style="display:flex;gap:6px;margin-top:4px;">
+                        <input type="text" id="edit-newtag" placeholder="Nueva etiqueta..." style="flex:1;padding:4px 6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;font-family:var(--font);outline:none;" />
+                        <button class="tb-btn" id="edit-btn-add-tag">➕ Crear</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="modal-cancel">Cancelar</button>
+                <button class="btn-save" id="modal-save">💾 Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    VISOR DE IMAGEN (overlay)
+    ============================================================ -->
+    <div class="image-viewer-overlay" id="viewer-overlay">
+        <div class="image-viewer-box">
+            <div class="viewer-header">
+                <span class="viewer-title" id="viewer-title">Imagen</span>
+                <button class="viewer-close" id="viewer-close">✕</button>
+            </div>
+            <div class="viewer-body">
+                <div class="viewer-image">
+                    <img id="viewer-img" src="" alt="Imagen" />
+                    <button class="btn-copy-img" id="viewer-copy-img">📋 Copiar imagen</button>
+                </div>
+                <div class="viewer-text">
+                    <div class="viewer-text-content" id="viewer-text-content">Sin texto asociado.</div>
+                    <button class="btn-copy-text" id="viewer-copy-text">📋 Copiar texto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    TOAST CONTAINER
+    ============================================================ -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================================
+    SCRIPT
+    ============================================================ -->
+    <script>
+        const { ipcRenderer, shell } = require('electron');
+
+        // ============================================================
+        // ESTADO
+        // ============================================================
+        let enlaces = [];
+        let tags = ['Enlace', 'Proceso'];
+        let tagSel = null;
+        let searchQuery = '';
+        let editingId = null;
+        let dragState = null;
+        let pendingImageBase64 = null;
+
+        // ============================================================
+        // ESCAPE DE HTML (evita XSS en innerHTML)
+        // ============================================================
+        function esc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ============================================================
+        // REFERENCIAS DOM
+        // ============================================================
+        const searchInput = document.getElementById('search-input');
+        const filterTag = document.getElementById('filter-tag');
+        const formBody = document.getElementById('form-body');
+        const formChev = document.getElementById('form-chev');
+        const inpTitulo = document.getElementById('inp-titulo');
+        const inpDesc = document.getElementById('inp-desc');
+        const inpUrl = document.getElementById('inp-url');
+        const inpFile = document.getElementById('inp-file');
+        const btnSelectFile = document.getElementById('btn-select-file');
+        const imgPreviewRow = document.getElementById('img-preview-row');
+        const imgPreview = document.getElementById('img-preview');
+        const btnClearImg = document.getElementById('btn-clear-img');
+        const inpTextoAsociado = document.getElementById('inp-texto-asociado');
+        const tagRow = document.getElementById('tag-row');
+        const inpNewtag = document.getElementById('inp-newtag');
+        const btnAddTag = document.getElementById('btn-add-tag');
+        const btnGuardar = document.getElementById('btn-guardar');
+        const listEl = document.getElementById('list');
+        const ctxMenu = document.getElementById('ctx-menu');
+        const ctxCopyUrl = document.getElementById('ctx-copyurl');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalClose = document.getElementById('modal-close');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalSave = document.getElementById('modal-save');
+        const modalTitleText = document.getElementById('modal-title-text');
+        const editTitulo = document.getElementById('edit-titulo');
+        const editDesc = document.getElementById('edit-desc');
+        const editUrl = document.getElementById('edit-url');
+        const editFile = document.getElementById('edit-file');
+        const editBtnSelectFile = document.getElementById('edit-btn-select-file');
+        const editImgPreviewRow = document.getElementById('edit-img-preview-row');
+        const editImgPreview = document.getElementById('edit-img-preview');
+        const editBtnClearImg = document.getElementById('edit-btn-clear-img');
+        const editTextoAsociado = document.getElementById('edit-texto-asociado');
+        const editTag = document.getElementById('edit-tag');
+        const editNewtag = document.getElementById('edit-newtag');
+        const editBtnAddTag = document.getElementById('edit-btn-add-tag');
+        const viewerOverlay = document.getElementById('viewer-overlay');
+        const viewerClose = document.getElementById('viewer-close');
+        const viewerTitle = document.getElementById('viewer-title');
+        const viewerImg = document.getElementById('viewer-img');
+        const viewerCopyImg = document.getElementById('viewer-copy-img');
+        const viewerTextContent = document.getElementById('viewer-text-content');
+        const viewerCopyText = document.getElementById('viewer-copy-text');
+        const btnImport = document.getElementById('btn-import');
+        const btnExport = document.getElementById('btn-export');
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        // ============================================================
+        // PERSISTENCIA DE UI
+        // ============================================================
+        const STORAGE_KEY = 'enlaces-ui';
+        const SEED_FLAG = 'enlaces-seed';
+
+        function guardarUI() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    search: searchInput.value,
+                    filter: filterTag.value,
+                    formOpen: formBody.classList.contains('open')
+                }));
+            } catch (e) {}
+        }
+
+        function cargarUI() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data.search !== undefined) searchInput.value = data.search;
+                if (data.filter !== undefined) filterTag.value = data.filter;
+                if (data.formOpen !== undefined) {
+                    if (data.formOpen) {
+                        formBody.classList.add('open');
+                        formChev.classList.add('open');
+                    } else {
+                        formBody.classList.remove('open');
+                        formChev.classList.remove('open');
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // ============================================================
+        // GUARDAR DATOS
+        // ============================================================
+        function saveData() {
+            ipcRenderer.send('save-enlaces', { enlaces, tags });
+        }
+
+        // Los ids pueden ser número (Date.now()) o string (data-id del DOM);
+        // buscar comparando de forma flexible.
+        function findEn(id) {
+            const s = String(id);
+            return enlaces.find(e => String(e.id) === s);
+        }
+        function findEnIndex(id) {
+            const s = String(id);
+            return enlaces.findIndex(e => String(e.id) === s);
+        }
+
+        // ============================================================
+        // MIGRACIÓN DE DATOS ANTIGUOS
+        // ============================================================
+        function migrarDatos(originalEnlaces, originalTags) {
+            let migrated = false;
+
+            if (!originalTags.includes('Enlace')) { originalTags.push('Enlace');
+                migrated = true; }
+            if (!originalTags.includes('Proceso')) { originalTags.push('Proceso');
+                migrated = true; }
+
+            originalEnlaces.forEach((en, idx) => {
+                if (en.textoAsociado === undefined) {
+                    en.textoAsociado = '';
+                    migrated = true;
+                }
+                if (en.order === undefined) {
+                    en.order = idx;
+                    migrated = true;
+                }
+                if (en.tag && !originalTags.includes(en.tag)) {
+                    originalTags.push(en.tag);
+                    migrated = true;
+                }
+            });
+
+            return migrated;
+        }
+
+        // ============================================================
+        // RENDERIZAR TAGS
+        // ============================================================
+        function renderTags() {
+            const currentFilter = filterTag.value;
+            filterTag.innerHTML = '<option value="todos">🏷️ Todos</option>';
+            tags.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                filterTag.appendChild(opt);
+            });
+            filterTag.value = currentFilter;
+
+            tagRow.innerHTML = '';
+            tags.forEach(t => {
+                const chip = document.createElement('span');
+                chip.className = 'tag-chip' + (tagSel === t ? ' active' : '') + (['Enlace', 'Proceso'].includes(t) ?
+                    '' : ' custom');
+                chip.textContent = t;
+                chip.dataset.tag = t;
+                chip.addEventListener('click', () => {
+                    tagSel = tagSel === t ? null : t;
+                    renderTags();
+                });
+                if (!['Enlace', 'Proceso'].includes(t)) {
+                    chip.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        if (confirm(`¿Eliminar la etiqueta "${t}"?`)) {
+                            tags = tags.filter(tt => tt !== t);
+                            enlaces.forEach(en => {
+                                if (en.tag === t) en.tag = 'Enlace';
+                            });
+                            if (tagSel === t) tagSel = null;
+                            // Si el filtro activo era la etiqueta eliminada, volver a "Todos"
+                            if (filterTag.value === t) filterTag.value = 'todos';
+                            saveData();
+                            renderAll();
+                            showToast(`🗑 Etiqueta "${t}" eliminada.`, 'success');
+                        }
+                    });
+                }
+                tagRow.appendChild(chip);
+            });
+
+            const currentEditTag = editTag.value;
+            editTag.innerHTML = '';
+            tags.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                editTag.appendChild(opt);
+            });
+            if (currentEditTag && tags.includes(currentEditTag)) {
+                editTag.value = currentEditTag;
+            } else {
+                editTag.value = tags[0] || 'Enlace';
+            }
+        }
+
+        // ============================================================
+        // RENDERIZAR LISTA
+        // ============================================================
+        function renderList() {
+            const query = searchInput.value.toLowerCase().trim();
+            const tagFilter = filterTag.value;
+
+            const sorted = [...enlaces].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            let filtered = sorted;
+            if (tagFilter !== 'todos') {
+                filtered = filtered.filter(e => e.tag === tagFilter);
+            }
+            if (query) {
+                filtered = filtered.filter(e => {
+                    const searchable = [
+                        (e.titulo || '').toLowerCase(),
+                        (e.desc || '').toLowerCase(),
+                        (e.url || '').toLowerCase(),
+                        (e.textoAsociado || '').toLowerCase()
+                    ].join(' ');
+                    return searchable.includes(query);
+                });
+            }
+
+            if (!filtered.length) {
+                listEl.innerHTML =
+                    `<div class="empty-state">${enlaces.length ? 'Sin resultados con los filtros actuales.' : 'No hay recursos guardados.'}</div>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((en, idx) => {
+                const isImage = en.isImage || false;
+                const tagClass = en.tag === 'Proceso' ? 'proceso' : (!['Enlace', 'Proceso'].includes(en.tag) ? 'custom' :
+                    '');
+                const previewText = en.textoAsociado || en.desc || (isImage ? '🖼️ Imagen' : en.url || '');
+                const previewImg = isImage ? en.url : '';
+
+                html += `
+                    <div class="card-item" data-id="${esc(en.id)}" data-index="${idx}" draggable="true">
+                        <div class="card-top">
+                            <span class="card-title">${esc(en.titulo) || 'Sin título'}</span>
+                            <span class="card-tag ${tagClass}">${esc(en.tag) || 'Enlace'}</span>
+                        </div>
+                        <div class="card-preview">
+                            ${isImage ? `<img class="preview-img" src="${esc(previewImg)}" alt="Imagen" />` : `<span style="width:35px;flex-shrink:0;text-align:center;font-size:18px;">🔗</span>`}
+                            <span class="preview-text ${isImage ? '' : 'url-text'}">${esc(previewText)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+
+            document.querySelectorAll('.card-item').forEach(el => {
+                const id = el.dataset.id;
+                el.addEventListener('click', (e) => {
+                    if (e.button !== 0) return;
+                    const en = findEn(id);
+                    if (!en) return;
+                    if (en.isImage) {
+                        openImageViewer(id);
+                    } else {
+                        let url = en.url;
+                        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+                        shell.openExternal(url);
+                    }
+                });
+                el.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    const en = findEn(id);
+                    if (!en) return;
+                    showContextMenu(e.clientX, e.clientY, id, en.isImage);
+                });
+                el.addEventListener('dragstart', (e) => {
+                    if (filterTag.value !== 'todos' || searchInput.value.trim()) {
+                        e.preventDefault();
+                        showToast('⚠️ Desactiva filtros/búsqueda para reordenar.', 'warning', 2000);
+                        return;
+                    }
+                    const fromIndex = findEnIndex(id);
+                    dragState = { id: id, fromIndex: fromIndex };
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', id);
+                });
+                el.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                });
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const targetId = el.dataset.id;
+                    if (!dragState || dragState.id === targetId) return;
+                    const fromIdx = dragState.fromIndex;
+                    const toIdx = findEnIndex(targetId);
+                    if (fromIdx === -1 || toIdx === -1) return;
+                    const [moved] = enlaces.splice(fromIdx, 1);
+                    const newIdx = fromIdx < toIdx ? toIdx - 1 : toIdx;
+                    enlaces.splice(newIdx, 0, moved);
+                    enlaces.forEach((e, i) => e.order = i);
+                    saveData();
+                    renderAll();
+                    showToast('✅ Orden actualizado.', 'success');
+                    dragState = null;
+                });
+                el.addEventListener('dragend', () => {
+                    dragState = null;
+                });
+            });
+        }
+
+        // ============================================================
+        // MENÚ CONTEXTUAL
+        // ============================================================
+        let ctxTargetId = null;
+
+        function showContextMenu(x, y, id, isImage) {
+            ctxTargetId = id;
+            ctxCopyUrl.style.display = isImage ? 'none' : 'flex';
+            ctxMenu.style.left = x + 'px';
+            ctxMenu.style.top = y + 'px';
+            ctxMenu.style.display = 'block';
+        }
+
+        function hideContextMenu() {
+            ctxMenu.style.display = 'none';
+            ctxTargetId = null;
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#ctx-menu')) hideContextMenu();
+        });
+
+        document.querySelectorAll('.ctx-item[data-action]').forEach(item => {
+            item.addEventListener('click', () => {
+                const action = item.dataset.action;
+                const id = ctxTargetId;
+                if (!id) return;
+                const en = findEn(id);
+                if (!en) return;
+                hideContextMenu();
+
+                switch (action) {
+                    case 'edit':
+                        openEditor(id);
+                        break;
+                    case 'copyurl':
+                        if (!en.isImage) {
+                            navigator.clipboard.writeText(en.url).then(() => {
+                                showToast('📋 URL copiada.', 'success');
+                            }).catch(() => {});
+                        }
+                        break;
+                    case 'delete':
+                        if (confirm(`¿Eliminar "${en.titulo || 'este recurso'}"?`)) {
+                            enlaces = enlaces.filter(e => String(e.id) !== String(id));
+                            saveData();
+                            renderAll();
+                            showToast('🗑 Recurso eliminado.', 'success');
+                        }
+                        break;
+                }
+            });
+        });
+
+        // ============================================================
+        // VISOR DE IMAGEN (overlay mejorado)
+        // ============================================================
+        let viewerData = null;
+
+        function openImageViewer(id) {
+            const en = findEn(id);
+            if (!en || !en.isImage) return;
+            viewerData = en;
+            viewerTitle.textContent = en.titulo || 'Imagen';
+            viewerImg.src = en.url;
+            viewerTextContent.textContent = en.textoAsociado || 'Sin texto asociado.';
+            viewerOverlay.classList.add('show');
+        }
+
+        function closeImageViewer() {
+            viewerOverlay.classList.remove('show');
+            viewerData = null;
+        }
+
+        viewerClose.addEventListener('click', closeImageViewer);
+        viewerOverlay.addEventListener('click', (e) => {
+            if (e.target === viewerOverlay) closeImageViewer();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && viewerOverlay.classList.contains('show')) closeImageViewer();
+        });
+
+        viewerCopyImg.addEventListener('click', () => {
+            if (!viewerData) return;
+            fetch(viewerData.url)
+                .then(res => res.blob())
+                .then(blob => {
+                    navigator.clipboard.write([
+                        new ClipboardItem({ [blob.type]: blob })
+                    ]).then(() => {
+                        showToast('🖼️ Imagen copiada al portapapeles.', 'success');
+                    }).catch(() => {
+                        showToast('❌ Error al copiar imagen.', 'error');
+                    });
+                }).catch(() => {
+                    showToast('❌ Error al cargar la imagen.', 'error');
+                });
+        });
+
+        viewerCopyText.addEventListener('click', () => {
+            if (!viewerData) return;
+            const text = viewerData.textoAsociado || 'Sin texto asociado.';
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('📋 Texto copiado.', 'success');
+            }).catch(() => {
+                showToast('❌ Error al copiar texto.', 'error');
+            });
+        });
+
+        // ============================================================
+        // EDITOR (MODAL)
+        // ============================================================
+        let editingData = null;
+
+        function openEditor(id) {
+            const en = findEn(id);
+            if (!en) return;
+            editingData = en;
+            modalTitleText.textContent = '✏️ Editar recurso';
+            editTitulo.value = en.titulo || '';
+            editDesc.value = en.desc || '';
+            editUrl.value = en.url || '';
+            editTextoAsociado.value = en.textoAsociado || '';
+            editTag.value = en.tag || 'Enlace';
+            if (en.isImage && en.url) {
+                editImgPreview.src = en.url;
+                editImgPreviewRow.style.display = 'flex';
+            } else {
+                editImgPreviewRow.style.display = 'none';
+            }
+            editNewtag.value = '';
+            modalOverlay.classList.add('show');
+            setTimeout(() => editTitulo.focus(), 100);
+        }
+
+        function closeEditor() {
+            modalOverlay.classList.remove('show');
+            editingData = null;
+            editImgPreviewRow.style.display = 'none';
+            editImgPreview.src = '';
+            editFile.value = '';
+        }
+
+        function saveEditor() {
+            if (!editingData) return;
+            const titulo = editTitulo.value.trim();
+            const desc = editDesc.value.trim();
+            let url = editUrl.value.trim();
+            const textoAsociado = editTextoAsociado.value.trim();
+            const tag = editTag.value || 'Enlace';
+
+            let isImage = !!url && url.startsWith('data:image/');
+
+            if (!url && !isImage) {
+                showToast('⚠️ Debes proporcionar una URL o imagen.', 'warning');
+                return;
+            }
+            if (!titulo) {
+                showToast('⚠️ El título es obligatorio.', 'warning');
+                return;
+            }
+
+            editingData.titulo = titulo;
+            editingData.desc = desc;
+            editingData.url = url;
+            editingData.textoAsociado = textoAsociado;
+            editingData.tag = tag;
+            editingData.isImage = isImage;
+            if (editingData.order === undefined) {
+                editingData.order = enlaces.indexOf(editingData);
+            }
+
+            saveData();
+            closeEditor();
+            renderAll();
+            showToast('✅ Recurso actualizado.', 'success');
+        }
+
+        // ============================================================
+        // FORMULARIO DE CREACIÓN
+        // ============================================================
+        function toggleForm() {
+            const isOpen = formBody.classList.toggle('open');
+            formChev.classList.toggle('open', isOpen);
+            guardarUI();
+        }
+
+        document.getElementById('form-hdr').addEventListener('click', toggleForm);
+
+        inpUrl.addEventListener('paste', (e) => {
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') === 0) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    processImageFile(file, (dataUrl) => {
+                        pendingImageBase64 = dataUrl;
+                        inpUrl.value = '[Imagen adjunta]';
+                        inpUrl.disabled = true;
+                        imgPreview.src = dataUrl;
+                        imgPreviewRow.style.display = 'flex';
+                        showToast('🖼️ Imagen pegada.', 'success');
+                    });
+                    break;
+                }
+            }
+        });
+
+        btnSelectFile.addEventListener('click', () => inpFile.click());
+        inpFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            processImageFile(file, (dataUrl) => {
+                pendingImageBase64 = dataUrl;
+                inpUrl.value = '[Imagen adjunta]';
+                inpUrl.disabled = true;
+                imgPreview.src = dataUrl;
+                imgPreviewRow.style.display = 'flex';
+                showToast('🖼️ Imagen cargada.', 'success');
+            });
+            inpFile.value = '';
+        });
+
+        btnClearImg.addEventListener('click', () => {
+            pendingImageBase64 = null;
+            inpUrl.value = '';
+            inpUrl.disabled = false;
+            imgPreview.src = '';
+            imgPreviewRow.style.display = 'none';
+        });
+
+        function processImageFile(file, callback) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width,
+                        h = img.height;
+                    const MAX = 1200;
+                    if (w > MAX) { h = Math.round((h * MAX) / w);
+                        w = MAX; }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', 0.8));
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        btnAddTag.addEventListener('click', () => {
+            const val = inpNewtag.value.trim();
+            if (!val) return;
+            if (tags.includes(val)) {
+                showToast('⚠️ La etiqueta ya existe.', 'warning');
+                return;
+            }
+            tags.push(val);
+            tagSel = val;
+            inpNewtag.value = '';
+            saveData();
+            renderAll();
+            showToast('✅ Etiqueta creada.', 'success');
+        });
+
+        inpNewtag.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') btnAddTag.click();
+        });
+
+        btnGuardar.addEventListener('click', () => {
+            const titulo = inpTitulo.value.trim();
+            const desc = inpDesc.value.trim();
+            let url = inpUrl.value.trim();
+            const textoAsociado = inpTextoAsociado.value.trim();
+            const tag = tagSel || 'Enlace';
+
+            let isImage = !!pendingImageBase64;
+            if (!isImage && url.startsWith('data:image/')) {
+                isImage = true;
+            }
+
+            if (!titulo) {
+                showToast('⚠️ El título es obligatorio.', 'warning');
+                return;
+            }
+            if (!url && !isImage) {
+                showToast('⚠️ Debes proporcionar una URL o imagen.', 'warning');
+                return;
+            }
+
+            if (isImage && pendingImageBase64) {
+                url = pendingImageBase64;
+            }
+
+            if (!isImage && !/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+
+            const nuevo = {
+                id: Date.now(),
+                titulo,
+                desc,
+                url,
+                isImage,
+                textoAsociado,
+                tag,
+                order: enlaces.length
+            };
+            enlaces.push(nuevo);
+            saveData();
+
+            inpTitulo.value = '';
+            inpDesc.value = '';
+            inpUrl.value = '';
+            inpUrl.disabled = false;
+            inpTextoAsociado.value = '';
+            pendingImageBase64 = null;
+            imgPreview.src = '';
+            imgPreviewRow.style.display = 'none';
+            tagSel = null;
+            renderAll();
+            showToast('✅ Recurso guardado.', 'success');
+            if (formBody.classList.contains('open')) toggleForm();
+        });
+
+        // ============================================================
+        // IMPORTAR / EXPORTAR
+        // ============================================================
+        function importCollection() {
+            ipcRenderer.invoke('show-open-dialog', {
+                properties: ['openFile'],
+                filters: [{ name: 'JSON', extensions: ['json'] }]
+            }).then(result => {
+                if (result.canceled || !result.filePaths.length) return;
+                const filePath = result.filePaths[0];
+                try {
+                    const raw = fs.readFileSync(filePath, 'utf8');
+                    const data = JSON.parse(raw);
+                    if (!data.enlaces || !Array.isArray(data.enlaces)) {
+                        showToast('⚠️ El archivo no tiene formato válido.', 'warning');
+                        return;
+                    }
+                    enlaces = data.enlaces;
+                    if (data.tags) tags = [...new Set([...data.tags])];
+                    if (!tags.includes('Enlace')) tags.push('Enlace');
+                    if (!tags.includes('Proceso')) tags.push('Proceso');
+                    enlaces.forEach((e, i) => {
+                        if (e.order === undefined) e.order = i;
+                        if (e.textoAsociado === undefined) e.textoAsociado = '';
+                    });
+                    saveData();
+                    renderAll();
+                    showToast(`✅ Importados ${enlaces.length} recursos.`, 'success');
+                } catch (err) {
+                    showToast(`❌ Error al importar: ${err.message}`, 'error');
+                }
+            }).catch(() => {});
+        }
+
+        function exportCollection() {
+            if (!enlaces.length) {
+                showToast('⚠️ No hay recursos para exportar.', 'warning');
+                return;
+            }
+            ipcRenderer.invoke('show-save-dialog', {
+                defaultPath: 'mis_enlaces.json',
+                filters: [{ name: 'JSON', extensions: ['json'] }]
+            }).then(result => {
+                if (result.canceled || !result.filePath) return;
+                const data = { enlaces, tags };
+                try {
+                    fs.writeFileSync(result.filePath, JSON.stringify(data, null, 2), 'utf8');
+                    showToast('✅ Exportación exitosa.', 'success');
+                } catch (err) {
+                    showToast(`❌ Error al exportar: ${err.message}`, 'error');
+                }
+            }).catch(() => {});
+        }
+
+        btnImport.addEventListener('click', importCollection);
+        btnExport.addEventListener('click', exportCollection);
+
+        // ============================================================
+        // MANEJAR EVENTOS DEL MODAL DE EDICIÓN
+        // ============================================================
+        modalClose.addEventListener('click', closeEditor);
+        modalCancel.addEventListener('click', closeEditor);
+        modalSave.addEventListener('click', saveEditor);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
+                closeEditor();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's' && modalOverlay.classList.contains('show')) {
+                e.preventDefault();
+                saveEditor();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeEditor();
+        });
+
+        editBtnSelectFile.addEventListener('click', () => editFile.click());
+        editFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            processImageFile(file, (dataUrl) => {
+                editUrl.value = dataUrl;
+                editImgPreview.src = dataUrl;
+                editImgPreviewRow.style.display = 'flex';
+                showToast('🖼️ Imagen cargada en edición.', 'success');
+            });
+            editFile.value = '';
+        });
+
+        editBtnClearImg.addEventListener('click', () => {
+            editUrl.value = '';
+            editImgPreview.src = '';
+            editImgPreviewRow.style.display = 'none';
+        });
+
+        editBtnAddTag.addEventListener('click', () => {
+            const val = editNewtag.value.trim();
+            if (!val) return;
+            if (tags.includes(val)) {
+                showToast('⚠️ La etiqueta ya existe.', 'warning');
+                return;
+            }
+            tags.push(val);
+            editNewtag.value = '';
+            const current = editTag.value;
+            editTag.innerHTML = '';
+            tags.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                editTag.appendChild(opt);
+            });
+            editTag.value = val;
+            saveData();
+            renderAll();
+            showToast('✅ Etiqueta creada.', 'success');
+        });
+
+        // ============================================================
+        // RENDERIZAR TODO
+        // ============================================================
+        function renderAll() {
+            renderTags();
+            renderList();
+            guardarUI();
+        }
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        let gotInit = false;
+        let seeded = false;
+
+        function seedIfFirstRun(title, desc) {
+            if (seeded || localStorage.getItem(SEED_FLAG)) return;
+            seeded = true;
+            localStorage.setItem(SEED_FLAG, '1');
+            enlaces.push({
+                id: Date.now(),
+                titulo: title,
+                desc: desc,
+                url: 'https://www.entel.cl',
+                isImage: false,
+                textoAsociado: '',
+                tag: 'Enlace',
+                order: 0
+            });
+            saveData();
+        }
+
+        ipcRenderer.on('init-enlaces', (e, data, tagsData) => {
+            gotInit = true;
+            if (seeded) { cargarUI(); renderAll(); return; }
+
+            let originalEnlaces = [];
+            let originalTags = [];
+
+            if (data && Array.isArray(data)) {
+                originalEnlaces = data;
+                if (tagsData && Array.isArray(tagsData)) {
+                    originalTags = [...tagsData];
+                } else {
+                    originalTags = ['Enlace', 'Proceso'];
+                }
+            } else if (data && data.enlaces) {
+                originalEnlaces = data.enlaces || [];
+                originalTags = data.tags || [];
+            }
+
+            if (!originalTags.includes('Enlace')) originalTags.push('Enlace');
+            if (!originalTags.includes('Proceso')) originalTags.push('Proceso');
+
+            const migrated = migrarDatos(originalEnlaces, originalTags);
+
+            enlaces = originalEnlaces;
+            tags = originalTags;
+
+            if (migrated) {
+                saveData();
+                showToast('🔄 Datos migrados al nuevo formato automáticamente.', 'success', 3000);
+            }
+
+            // Solo insertar la tarjeta de bienvenida la primera vez que se abre la herramienta
+            if (!enlaces.length) {
+                seedIfFirstRun('Bienvenido a Mis Enlaces', 'Ejemplo de enlace');
+            }
+
+            cargarUI();
+            renderAll();
+        });
+
+        // Respaldo por si el main no envía init a tiempo (evita la carrera con init-enlaces)
+        setTimeout(() => {
+            if (gotInit) return;
+            if (!enlaces.length) {
+                seedIfFirstRun('Ejemplo', 'Crea tus propios enlaces');
+                cargarUI();
+                renderAll();
+                showToast('🔗 Cargados datos de ejemplo.', 'success', 2500);
+            } else {
+                renderAll();
+            }
+        }, 500);
+
+        searchInput.addEventListener('input', () => {
+            renderList();
+            guardarUI();
+        });
+        filterTag.addEventListener('change', () => {
+            renderList();
+            guardarUI();
+        });
+
+        showToast('🔗 Mis Enlaces mejorado. Tus datos están seguros.', 'success', 2500);
+    </script>
+</body>
+</html>
