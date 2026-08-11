@@ -409,6 +409,7 @@
     <div id="hdr">
         <span id="hdr-title">📡 Radar de Contingencias PRO</span>
         <button class="hbtn danger" id="btn-limpiar-todo" title="Limpiar todo">🗑</button>
+        <button class="hbtn" onclick="ipcRenderer.send('minimize-tool','contingencias')" title="Minimizar">—</button>
         <button class="hbtn" onclick="ipcRenderer.send('close-tool','contingencias')">✕</button>
     </div>
 
@@ -620,6 +621,29 @@
             return resultado.charAt(0).toUpperCase() + resultado.slice(1);
         }
 
+        function esSinComuna(c) {
+            return !c.zona || ['Desconocida', 'Nacional', 'Varias'].includes(c.zona);
+        }
+
+        function limpiarTextoC(c) {
+            if (!c.textoCompleto) return '';
+            return String(c.textoCompleto)
+                .replace(/[*#📍📌]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function obtenerProblema(c) {
+            const partes = [];
+            if (c.descripcion) partes.push(c.descripcion);
+            if (c.infoAdicional) partes.push(c.infoAdicional);
+            const texto = partes.join(' — ').trim();
+            if (texto) return texto;
+            const limpio = limpiarTextoC(c);
+            if (limpio) return limpio;
+            return '';
+        }
+
         function procesarContingencias(raw) {
             if (!raw || !raw.trim()) {
                 showToast('⚠️ No hay texto para procesar.', 'warning');
@@ -734,9 +758,15 @@
             let html = '';
             contingencias.forEach(c => {
                 const pops = extraerPOPs(c.textoCompleto || '');
-                const contexto = c.zona === 'Desconocida' || c.zona === 'Nacional' || c.zona === 'Varias' ?
-                    generarContexto(c.descripcion, c.infoAdicional) :
-                    null;
+                const sinComuna = esSinComuna(c);
+                const contexto = sinComuna ? generarContexto(c.descripcion, c.infoAdicional) : null;
+                const problema = obtenerProblema(c);
+                let extra = '';
+                if (sinComuna) {
+                    extra = `<div class="c-meta"><span class="c-contexto">💬 ${esc(problema || contexto)}</span></div>`;
+                } else if (!pops.length && problema) {
+                    extra = `<div class="c-meta"><span class="c-contexto">💬 ${esc(problema)}</span></div>`;
+                }
 
                 html += `
                     <div class="c-card" data-id="${esc(c.id)}">
@@ -748,7 +778,7 @@
                             <span class="c-id" data-action="copy" title="Copiar ID">📋 ${esc(c.id)}</span>
                             <span class="c-meta">${esc(c.inicio)}</span>
                         </div>
-                        ${contexto ? `<div class="c-meta"><span class="c-contexto">💬 ${esc(contexto)}</span></div>` : ''}
+                        ${extra}
                         ${pops.length ? `<div class="c-meta"><span class="c-pops">📡 POPs: ${esc(pops.join(', '))}</span></div>` : ''}
                     </div>
                 `;
@@ -862,7 +892,17 @@
                 const diasStr = String(diasDiff).padStart(2, '0') + ' días';
 
                 const pops = extraerPOPs(c.textoCompleto || '');
-                const popLine = pops.length ? `> POP afectados: ${pops.join(', ')}` : '> (Sin POPs específicos)';
+                const sinComuna = esSinComuna(c);
+                const problema = obtenerProblema(c);
+                let popLine;
+                if (pops.length) {
+                    popLine = `> POP afectados: ${pops.join(', ')}`;
+                    if (sinComuna && problema) {
+                        popLine += `\n> Detalle: ${problema}`;
+                    }
+                } else {
+                    popLine = problema ? `> Detalle: ${problema}` : '> (Sin POPs específicos)';
+                }
 
                 lines.push(`📍 *${c.id} | ${zona} | ${c.inicio}* | ${diasStr}`);
                 lines.push(popLine);
@@ -896,8 +936,9 @@
             });
 
             sinComuna.forEach(c => {
+                const problema = obtenerProblema(c);
                 const contexto = generarContexto(c.descripcion, c.infoAdicional);
-                lines.push(`📍 *${contexto}* ${c.id}`);
+                lines.push(`📍 *${problema || contexto}* ${c.id}`);
             });
 
             return lines.join('\n');

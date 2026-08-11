@@ -17,7 +17,7 @@
             --text: #e2e8f0;
             --muted: #8892a4;
             --faint: #4a5568;
-            --primary: #3b82f6;
+            --primary: #0F80CE;
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
@@ -25,9 +25,6 @@
             --radius: 5px;
         }
 
-        /* ============================================================
-               RESET Y ESTRUCTURA BASE
-               ============================================================ */
         *,
         *::before,
         *::after {
@@ -71,12 +68,21 @@
         }
 
         #hdr-title {
-            flex: 1;
             font-size: 11px;
             font-weight: 700;
             color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        #hdr-status {
+            flex: 1;
+            font-size: 10px;
+            color: var(--faint);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
         }
 
         .hbtn {
@@ -97,194 +103,462 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        .hbtn.danger:hover {
-            color: var(--danger);
+        /* ============================================================
+               COLUMNAS 30 / 35 / 35
+               ============================================================ */
+        #columns {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
         }
 
-        /* ============================================================
-               BARRA DE HERRAMIENTAS (búsqueda, filtros, botones)
-               ============================================================ */
-        #toolbar {
+        .col {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 8px 12px;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #left {
+            flex: 0 0 30%;
+            min-width: 230px;
+            border-right: 1px solid var(--border2);
+            background: var(--surface);
+        }
+
+        #center {
+            flex: 0 0 35%;
+            min-width: 280px;
+            border-right: 1px solid var(--border2);
+        }
+
+        #right {
+            flex: 1 1 35%;
+            min-width: 280px;
+        }
+
+        .col-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--muted);
             background: var(--surface);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
-            align-items: center;
-        }
-
-        #toolbar input[type="search"] {
-            flex: 1;
-            min-width: 120px;
-            padding: 6px 10px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text);
-            font-size: 12px;
-            outline: none;
-            font-family: var(--font);
-        }
-
-        #toolbar input[type="search"]:focus {
-            border-color: var(--primary);
-        }
-
-        #toolbar select {
-            padding: 6px 10px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text);
-            font-size: 12px;
-            outline: none;
-            font-family: var(--font);
-            cursor: pointer;
-        }
-
-        #toolbar select:focus {
-            border-color: var(--primary);
-        }
-
-        .tb-btn {
-            padding: 6px 12px;
-            background: var(--surface3);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text);
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: var(--font);
-            transition: all 0.15s;
-            white-space: nowrap;
-        }
-
-        .tb-btn:hover {
-            background: var(--surface2);
-            border-color: var(--primary);
-        }
-
-        .tb-btn.import {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: var(--primary);
-        }
-        .tb-btn.import:hover {
-            background: rgba(59, 130, 246, 0.3);
-        }
-
-        .tb-btn.export {
-            background: rgba(34, 197, 94, 0.15);
-            border-color: var(--success);
-        }
-        .tb-btn.export:hover {
-            background: rgba(34, 197, 94, 0.25);
         }
 
         /* ============================================================
-               LISTA DE TARJETAS (scroll)
+               PANEL IZQUIERDO
                ============================================================ */
-        #list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 12px;
+        #left-tools {
             display: flex;
             flex-direction: column;
             gap: 6px;
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
-        #list::-webkit-scrollbar {
+        #search-input {
+            width: 100%;
+            padding: 6px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            font-family: var(--font);
+        }
+
+        #search-input:focus {
+            border-color: var(--primary);
+        }
+
+        #filter-procedimiento {
+            width: 100%;
+            padding: 6px 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12px;
+            outline: none;
+            font-family: var(--font);
+            cursor: pointer;
+        }
+
+        #filter-procedimiento:focus {
+            border-color: var(--primary);
+        }
+
+        #lista {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        #lista::-webkit-scrollbar {
             width: 4px;
         }
-        #list::-webkit-scrollbar-thumb {
+        #lista::-webkit-scrollbar-thumb {
             background: var(--faint);
             border-radius: 2px;
         }
 
-        .empty-state {
-            text-align: center;
-            color: var(--faint);
-            font-size: 13px;
-            padding: 40px 0;
-        }
-
-        /* ============================================================
-               TARJETA DE REGISTRO
-               ============================================================ */
-        .card-item {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 10px 12px;
+        .motivo-item {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            transition: border-color 0.15s;
+            gap: 2px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            background: var(--surface2);
+            transition: border-color 0.12s, background 0.12s;
         }
 
-        .card-item:hover {
+        .motivo-item:hover {
             border-color: var(--border2);
         }
 
-        .card-item .row1 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
+        .motivo-item.sel {
+            background: var(--primary);
+            border-color: #1aa6ff;
         }
 
-        .card-item .row1 .motivo {
+        .motivo-item.sel .m-titulo {
+            color: #fff;
+        }
+
+        .motivo-item.sel .m-meta {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .m-titulo {
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text);
-            flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .card-item .row1 .btn-edit {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--faint);
-            font-size: 14px;
-            padding: 2px 4px;
-            border-radius: 3px;
-            transition: 0.15s;
+        .m-meta {
+            font-size: 10px;
+            color: var(--muted);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .m-meta .m-ruta {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 8px;
             flex-shrink: 0;
         }
 
-        .card-item .row1 .btn-edit:hover {
-            color: var(--primary);
-            background: rgba(59, 130, 246, 0.1);
+        .empty-state {
+            text-align: center;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 30px 10px;
         }
 
-        .card-item .row2 {
+        #left-foot {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px 12px;
+            gap: 6px;
+            padding: 6px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .foot-btn {
+            flex: 1;
+            padding: 5px 0;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 11px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.15s;
+        }
+
+        .foot-btn:hover {
+            background: var(--surface2);
+            border-color: var(--primary);
+        }
+
+        /* ============================================================
+               PANEL CENTRAL
+               ============================================================ */
+        #ctx-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        #ctx-bar .ctx-tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--faint);
+        }
+
+        #ctx-label {
+            flex: 1;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #center-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        #center-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        #center-scroll::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            background: var(--surface);
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meta-row .k {
+            width: 120px;
+            flex-shrink: 0;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--faint);
+        }
+
+        .meta-row .v {
+            flex: 1;
+            font-size: 12px;
+            color: var(--text);
+            word-break: break-word;
+        }
+
+        .estado-badge {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 8px;
+        }
+
+        /* ============================================================
+               SECCIÓN DESCRIPCIÓN (plantilla editable)
+               ============================================================ */
+        .sec-box {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sec-head {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .sec-head .sec-title {
+            flex: 1;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sec-action {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font);
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .sec-action:hover {
+            border-color: var(--primary);
+            background: var(--surface2);
+        }
+
+        #desc-textarea {
+            width: 100%;
+            min-height: 90px;
+            resize: vertical;
+            padding: 8px 10px;
+            background: var(--surface2);
+            border: none;
+            color: var(--text);
+            font-size: 12px;
+            line-height: 1.5;
+            font-family: 'Consolas', 'Courier New', monospace;
+            outline: none;
+            white-space: pre-wrap;
+        }
+
+        #desc-textarea:focus {
+            box-shadow: inset 0 0 0 1px var(--primary);
+        }
+
+        /* ============================================================
+               PANEL DERECHO (instrucciones / políticas)
+               ============================================================ */
+        #right-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #right-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        #right-scroll::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 2px;
+        }
+
+        #right-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.35;
+        }
+
+        #right-sub {
             font-size: 11px;
             color: var(--muted);
         }
 
-        .card-item .row2 .ruta {
-            color: var(--warning);
+        #important-box {
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 6px;
+            background: var(--surface);
+            padding: 10px 12px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text);
+            word-break: break-word;
         }
 
-        .card-item .row2 .estado {
-            color: var(--success);
+        #important-box img {
+            max-width: 100%;
+        }
+
+        .img-fallback {
+            padding: 12px 10px;
+            margin: 6px 0;
+            text-align: center;
+            color: var(--muted);
+            font-size: 11px;
+            background: var(--surface2);
+            border: 1px dashed var(--border2);
+            border-radius: 6px;
+        }
+
+        #important-box strong {
+            color: var(--primary);
         }
 
         /* ============================================================
-               MODAL DE EDICIÓN (overlay)
+               BOTÓN DE COLUMNA
+               ============================================================ */
+        .col-btn {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.15s;
+            margin-left: auto;
+        }
+
+        .col-btn:hover {
+            border-color: var(--primary);
+            background: var(--surface2);
+        }
+
+        /* ============================================================
+               MODAL EDITOR (edición base / permanente)
                ============================================================ */
         #modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.78);
             z-index: 600;
             display: none;
             align-items: center;
@@ -302,14 +576,14 @@
             border-radius: 8px;
             padding: 18px 20px;
             width: 100%;
-            max-width: 580px;
+            max-width: 660px;
             max-height: 90vh;
             display: flex;
             flex-direction: column;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
         }
 
-        .modal-box .modal-title {
+        .modal-title {
             font-size: 15px;
             font-weight: 700;
             display: flex;
@@ -319,7 +593,7 @@
             flex-shrink: 0;
         }
 
-        .modal-box .modal-title .close-modal {
+        .modal-title .close-modal {
             background: none;
             border: none;
             color: var(--faint);
@@ -328,7 +602,7 @@
             padding: 0 4px;
         }
 
-        .modal-box .modal-title .close-modal:hover {
+        .modal-title .close-modal:hover {
             color: var(--danger);
         }
 
@@ -395,6 +669,12 @@
             white-space: pre-wrap;
         }
 
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
         .modal-actions {
             display: flex;
             gap: 8px;
@@ -434,12 +714,12 @@
         }
 
         /* ============================================================
-               TOAST (notificación emergente)
+               TOAST
                ============================================================ */
         #toast-container {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 16px;
+            right: 16px;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -449,14 +729,14 @@
 
         .toast {
             pointer-events: auto;
-            padding: 10px 16px;
+            padding: 9px 14px;
             border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             color: #fff;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
             animation: toastIn 0.3s ease-out;
-            max-width: 320px;
+            max-width: 300px;
         }
 
         .toast.success {
@@ -480,24 +760,6 @@
                 transform: translateY(0);
             }
         }
-
-        /* ============================================================
-               RESPONSIVE
-               ============================================================ */
-        @media (max-width: 500px) {
-            #toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            #toolbar input[type="search"],
-            #toolbar select {
-                width: 100%;
-            }
-            .modal-box {
-                padding: 14px;
-                max-width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
@@ -507,79 +769,134 @@
     ============================================================ -->
     <div id="hdr">
         <span id="hdr-title">📋 Tipificaciones</span>
+        <span id="hdr-status"></span>
+        <button class="hbtn" onclick="ipcRenderer.send('minimize-tool','tipificaciones')" title="Minimizar">—</button>
         <button class="hbtn" onclick="ipcRenderer.send('close-tool','tipificaciones')">✕</button>
     </div>
 
     <!-- ============================================================
-    TOOLBAR
+    COLUMNAS 30 / 35 / 35
     ============================================================ -->
-    <div id="toolbar">
-        <input type="search" id="search-input" placeholder="🔍 Buscar motivo..." />
-        <select id="filter-procedimiento">
-            <option value="todos">📁 Todos los procedimientos</option>
-        </select>
-        <button class="tb-btn import" id="btn-import">📥 Importar CSV</button>
-        <button class="tb-btn export" id="btn-export">📤 Exportar CSV</button>
+    <div id="columns">
+
+        <!-- ── PANEL IZQUIERDO: búsqueda + categoría + lista ── -->
+        <div class="col" id="left">
+            <div class="col-header">📂 Procedimientos</div>
+            <div id="left-tools">
+                <input type="search" id="search-input" placeholder="🔍 Buscar motivo..." />
+                <select id="filter-procedimiento">
+                    <option value="todos">📁 Todos los procedimientos</option>
+                </select>
+            </div>
+            <div id="lista">
+                <div class="empty-state">Cargando datos...</div>
+            </div>
+            <div id="left-foot">
+                <button class="foot-btn" id="btn-import">📥 Importar</button>
+                <button class="foot-btn" id="btn-export">📤 Exportar</button>
+            </div>
+        </div>
+
+        <!-- ── PANEL CENTRAL: metadatos + plantilla de descripción ── -->
+        <div class="col" id="center">
+            <div class="col-header">🖥 Datos del ticket
+                <button class="col-btn" id="btn-edit-base" title="Edición base: modifica y guarda permanentemente la tipificación">✏️ Editar base</button>
+            </div>
+            <div id="ctx-bar">
+                <span class="ctx-tag">Motivo:</span>
+                <span id="ctx-label">—</span>
+            </div>
+            <div id="center-scroll">
+                <div class="meta-grid" id="meta-grid">
+                    <div class="meta-row"><span class="k">Tipo de problema</span><span class="v" id="m-tipo">—</span></div>
+                    <div class="meta-row"><span class="k">Área</span><span class="v" id="m-area">—</span></div>
+                    <div class="meta-row"><span class="k">Subárea</span><span class="v" id="m-subarea">—</span></div>
+                    <div class="meta-row"><span class="k">Estado ticket</span><span class="v" id="m-estado">—</span></div>
+                    <div class="meta-row"><span class="k">Tiempo de respuesta</span><span class="v" id="m-tiempo">—</span></div>
+                </div>
+
+                <div class="sec-box">
+                    <div class="sec-head">
+                        <span class="sec-title">✏️ Plantilla de descripción</span>
+                        <button class="sec-action" id="btn-copy-desc">📋 Copiar</button>
+                        <button class="sec-action" id="btn-copy-all">📤 Copiar todo</button>
+                    </div>
+                    <textarea id="desc-textarea" spellcheck="false" placeholder="Selecciona un motivo para cargar su plantilla de descripción."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── PANEL DERECHO: instrucciones / políticas ── -->
+        <div class="col" id="right">
+            <div class="col-header">📖 Instrucciones y políticas</div>
+            <div id="right-scroll">
+                <div>
+                    <div id="right-title">—</div>
+                    <div id="right-sub"></div>
+                </div>
+                <div id="important-box">Selecciona un motivo para ver sus instrucciones y observaciones.</div>
+            </div>
+        </div>
     </div>
 
     <!-- ============================================================
-    LISTA DE TARJETAS
-    ============================================================ -->
-    <div id="list">
-        <div class="empty-state">Cargando datos...</div>
-    </div>
-
-    <!-- ============================================================
-    MODAL DE EDICIÓN
+    MODAL EDITOR (edición base / permanente)
     ============================================================ -->
     <div id="modal-overlay">
         <div class="modal-box">
             <div class="modal-title">
-                ✏️ Editar Tipificación
+                ✏️ Editar Tipificación (base)
                 <button class="close-modal" id="modal-close">✕</button>
             </div>
             <div class="modal-scroll" id="modal-scroll">
-                <!-- Campos del formulario -->
                 <div class="modal-field">
                     <label>Procedimiento</label>
-                    <input type="text" id="edit-procedimiento" />
+                    <input type="text" id="edit-procedimiento" list="dl-procedimientos" />
+                    <datalist id="dl-procedimientos"></datalist>
                 </div>
                 <div class="modal-field">
                     <label>Motivo del llamado</label>
                     <input type="text" id="edit-motivo" />
                 </div>
-                <div class="modal-field">
-                    <label>Tipo</label>
-                    <input type="text" id="edit-tipo" />
-                </div>
-                <div class="modal-field">
-                    <label>Área</label>
-                    <input type="text" id="edit-area" />
-                </div>
-                <div class="modal-field">
-                    <label>Subárea</label>
-                    <input type="text" id="edit-subarea" />
-                </div>
-                <div class="modal-field">
-                    <label>Estado</label>
-                    <input type="text" id="edit-estado" />
+                <div class="modal-grid">
+                    <div class="modal-field">
+                        <label>Tipo</label>
+                        <input type="text" id="edit-tipo" list="dl-tipo" />
+                        <datalist id="dl-tipo"></datalist>
+                    </div>
+                    <div class="modal-field">
+                        <label>Estado</label>
+                        <input type="text" id="edit-estado" list="dl-estado" />
+                        <datalist id="dl-estado"></datalist>
+                    </div>
+                    <div class="modal-field">
+                        <label>Área</label>
+                        <input type="text" id="edit-area" list="dl-area" />
+                        <datalist id="dl-area"></datalist>
+                    </div>
+                    <div class="modal-field">
+                        <label>Subárea</label>
+                        <input type="text" id="edit-subarea" list="dl-subarea" />
+                        <datalist id="dl-subarea"></datalist>
+                    </div>
                 </div>
                 <div class="modal-field">
                     <label>Tiempo de respuesta</label>
-                    <input type="text" id="edit-tiempo" />
+                    <input type="text" id="edit-tiempo" list="dl-tiempo" />
+                    <datalist id="dl-tiempo"></datalist>
                 </div>
                 <div class="modal-field">
-                    <label>Campo descripción (exigencia)</label>
-                    <textarea id="edit-descripcion" rows="3"></textarea>
+                    <label>Campo descripción (template)</label>
+                    <textarea id="edit-descripcion" rows="4"></textarea>
                 </div>
                 <div class="modal-field">
-                    <label>Importante (observaciones - soporta HTML)</label>
+                    <label>Importante (observaciones / instrucciones - soporta HTML)</label>
                     <textarea id="edit-importante" class="importante" rows="6"></textarea>
                 </div>
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" id="modal-cancel">Cancelar</button>
-                <button class="btn-save" id="modal-save">💾 Guardar cambios</button>
+                <button class="btn-save" id="modal-save">💾 Guardar (base)</button>
             </div>
         </div>
     </div>
@@ -593,62 +910,28 @@
     SCRIPT
     ============================================================ -->
     <script>
-        const { ipcRenderer, shell } = require('electron');
+        const { ipcRenderer, clipboard, shell } = require('electron');
         const fs = require('fs');
         const path = require('path');
-
-        function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
         // ============================================================
         // ESTADO
         // ============================================================
         let data = [];
-        let filteredData = [];
-        let currentEditIndex = -1;
         let currentFilePath = null;
-        let USER_DATA_PATH = '';
-
-        const COLUMNS = [
-            'Procedimiento',
-            'Motivo del llamado',
-            'Tipo',
-            'Área',
-            'Subárea',
-            'Estado',
-            'Tiempo de respuesta',
-            'Campo descripción',
-            'Importante'
-        ];
-
-        const DEFAULT_CSV_NAME = 'Tipis 2025 II - Última Data.csv';
+        let selectedIndex = -1;
+        let filteredRows = [];
+        let baseDesc = ''; // descripción base (estado permanente) del motivo seleccionado
 
         // ============================================================
-        // REFERENCIAS DOM
+        // UTILIDADES
         // ============================================================
-        const listEl = document.getElementById('list');
-        const searchInput = document.getElementById('search-input');
-        const filterProc = document.getElementById('filter-procedimiento');
-        const btnImport = document.getElementById('btn-import');
-        const btnExport = document.getElementById('btn-export');
+        function esc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
 
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalClose = document.getElementById('modal-close');
-        const modalCancel = document.getElementById('modal-cancel');
-        const modalSave = document.getElementById('modal-save');
-
-        const editProcedimiento = document.getElementById('edit-procedimiento');
-        const editMotivo = document.getElementById('edit-motivo');
-        const editTipo = document.getElementById('edit-tipo');
-        const editArea = document.getElementById('edit-area');
-        const editSubarea = document.getElementById('edit-subarea');
-        const editEstado = document.getElementById('edit-estado');
-        const editTiempo = document.getElementById('edit-tiempo');
-        const editDescripcion = document.getElementById('edit-descripcion');
-        const editImportante = document.getElementById('edit-importante');
-
-        // ============================================================
-        // TOAST
-        // ============================================================
         function showToast(msg, tipo = 'success', duracion = 2500) {
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
@@ -663,106 +946,181 @@
             }, duracion);
         }
 
-        // ============================================================
-        // OBTENER RUTA DE USER DATA (IPC)
-        // ============================================================
-        function getUserDataPath() {
-            return new Promise((resolve) => {
-                ipcRenderer.invoke('get-user-data-path').then((ruta) => {
-                    resolve(ruta);
-                }).catch(() => {
-                    // Fallback
-                    resolve(path.join(require('os').homedir(), 'AppData', 'Roaming', 'gestor-casos'));
-                });
-            });
-        }
-
-        // ============================================================
-        // PERSISTENCIA DE UI (localStorage)
-        // ============================================================
-        const STORAGE_KEY = 'tipificaciones-ui';
-
-        function guardarUI() {
+        function copyText(txt) {
+            if (!txt || !txt.trim()) {
+                showToast('⚠️ No hay contenido para copiar.', 'warning');
+                return;
+            }
             try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    search: searchInput.value,
-                    filter: filterProc.value
-                }));
-            } catch (e) {}
-        }
-
-        function cargarUI() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (!raw) return;
-                const data = JSON.parse(raw);
-                if (data.search) searchInput.value = data.search;
-                if (data.filter) filterProc.value = data.filter;
-            } catch (e) {}
+                clipboard.writeText(txt);
+                showToast('✅ Copiado al portapapeles.');
+            } catch (err) {
+                showToast(`❌ Error al copiar: ${err.message}`, 'error');
+            }
         }
 
         // ============================================================
-        // PARSER / STRINGIFIER CSV
+        // LIMPIAR HTML / CÓDIGOS (para WhatsApp o copia limpia)
+        // Convierte <br> y otras etiquetas en saltos de línea reales y
+        // elimina el resto de etiquetas. Conserva asteriscos/guiones bajos.
         // ============================================================
+        function cleanHTML(html) {
+            if (!html) return '';
+            let s = String(html);
+            // Etiquetas de bloque / br -> nueva línea
+            s = s.replace(/<br\s*\/?>/gi, '\n');
+            s = s.replace(/<\/(p|div|li|ul|ol|table|tr|h[1-6])>/gi, '\n\n');
+            s = s.replace(/<li[^>]*>/gi, '• ');
+            // Eliminar etiquetas restantes
+            s = s.replace(/<[^>]+>/g, '');
+            // Decodificar entidades comunes
+            const entities = {
+                '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"',
+                '&#39;': "'", '&#x27;': "'", '&apos;': "'", '&nbsp;': ' '
+            };
+            s = s.replace(/&(amp|lt|gt|quot|#39|#x27|apos|nbsp);/gi,
+                (m) => entities[m.toLowerCase()] || m);
+            // Colapsar múltiples líneas en blanco
+            s = s.replace(/[ \t]*\n[ \t]*\n+/g, '\n\n');
+            // Quitar espacios/TAB al inicio de cada línea (alineación limpia)
+            s = s.split('\n').map(l => l.replace(/^[ \t]+/, '')).join('\n');
+            // Normalizar el separador de viñetas (espacio delante de •)
+            s = s.replace(/\s+•/g, '\n•');
+            s = s.trim();
+            return s;
+        }
+
+        // ============================================================
+        // COLOR SEGÚN ESTADO (referencia KROMERO / ECC Chile)
+        // ============================================================
+        function estadoColor(estado) {
+            const s = String(estado == null ? '' : estado).trim().toLowerCase();
+            if (s.startsWith('cerrado')) return { bg: '#0ECC83', fg: '#04261a' };
+            if (s.startsWith('en progreso')) return { bg: '#2962ff', fg: '#e8f0ff' };
+            if (s.startsWith('pendiente')) return { bg: '#FF3D00', fg: '#fff' };
+            if (s === 'na' || s === 'n/a') return { bg: '#3a4152', fg: '#c7ccd6' };
+            return { bg: '#232c3f', fg: '#e2e8f0' };
+        }
+
+        // ============================================================
+        // PARSER CSV (comma-separated, quoted fields, " encabezados: ")
+        // ============================================================
+        function normalizeHeader(h) {
+            return String(h).replace(/^\uFEFF/, '').replace(/:+\s*$/, '').trim();
+        }
+
         function parseCSV(text) {
-            const lines = text.split(/\r?\n/);
-            if (lines.length === 0) return [];
-            const headers = lines[0].split('\t').map(h => h.trim());
-            const result = [];
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (!line.trim()) continue;
-                const values = [];
-                let current = '';
-                let inQuotes = false;
-                for (let j = 0; j < line.length; j++) {
-                    const ch = line[j];
+            const rows = [];
+            let row = [];
+            let field = '';
+            let inQuotes = false;
+            const pushField = () => { row.push(field); field = ''; };
+
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                if (inQuotes) {
                     if (ch === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (ch === '\t' && !inQuotes) {
-                        values.push(current);
-                        current = '';
+                        if (text[i + 1] === '"') { field += '"'; i++; }
+                        else inQuotes = false;
                     } else {
-                        current += ch;
+                        field += ch;
+                    }
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                    } else if (ch === ',') {
+                        pushField();
+                    } else if (ch === '\r') {
+                        // ignorar
+                    } else if (ch === '\n') {
+                        pushField();
+                        rows.push(row);
+                        row = [];
+                    } else {
+                        field += ch;
                     }
                 }
-                values.push(current);
-                while (values.length < headers.length) values.push('');
+            }
+            if (field !== '' || row.length > 0) { pushField(); rows.push(row); }
+
+            if (rows.length === 0) return [];
+            const headers = rows[0].map(normalizeHeader).filter(h => h);
+            const result = [];
+            for (let i = 1; i < rows.length; i++) {
+                const r = rows[i];
+                if (r.length === 1 && !r[0].trim()) continue;
                 const obj = {};
-                headers.forEach((h, idx) => {
-                    let val = values[idx] || '';
-                    if (val.startsWith('"') && val.endsWith('"')) {
-                        val = val.slice(1, -1);
-                        val = val.replace(/""/g, '"');
-                    }
-                    obj[h] = val;
-                });
+                headers.forEach((h, idx) => { obj[h] = (r[idx] || '').trim(); });
                 result.push(obj);
             }
             return result;
         }
 
         function stringifyCSV(rows) {
-            if (!rows || rows.length === 0) return '';
-            const headers = COLUMNS;
-            let lines = [headers.join('\t')];
+            const keys = [
+                'Procedimiento', 'Motivo del llamado', 'Tipo', 'Área', 'Subárea',
+                'Estado', 'Tiempo de respuesta', 'Campo descripción', 'Importante'
+            ];
+            let lines = [keys.join(',')];
             rows.forEach(row => {
-                const values = headers.map(h => {
-                    let val = row[h] || '';
-                    if (val.includes('\t') || val.includes('"') || val.includes('\n')) {
+                const values = keys.map(k => {
+                    let val = row[k] || '';
+                    if (val.includes(',') || val.includes('"') || val.includes('\n')) {
                         val = val.replace(/"/g, '""');
                         val = `"${val}"`;
                     }
                     return val;
                 });
-                lines.push(values.join('\t'));
+                lines.push(values.join(','));
             });
             return lines.join('\n');
         }
 
         // ============================================================
-        // CARGA DE DATOS DESDE ARCHIVO
+        // CARGA DE DATOS DESDE ARCHIVO LOCAL
         // ============================================================
+        async function getUserDataPath() {
+            try {
+                return await ipcRenderer.invoke('get-user-data-path');
+            } catch (e) {
+                return path.join(require('os').homedir(), 'AppData', 'Roaming', 'gestor-casos');
+            }
+        }
+
+        function highestPriorityCsv(fileList) {
+            if (!fileList.length) return null;
+            return fileList.find(f => /ltima|ultima|vigente/i.test(f)) || fileList[0];
+        }
+
+        async function findDefaultCsv() {
+            const userData = await getUserDataPath();
+            const tipiDir = path.join(userData, 'tipificaciones');
+            if (fs.existsSync(tipiDir)) {
+                const files = fs.readdirSync(tipiDir)
+                    .filter(f => f.toLowerCase().endsWith('.csv'))
+                    .sort((a, b) =>
+                        fs.statSync(path.join(tipiDir, b)).mtimeMs -
+                        fs.statSync(path.join(tipiDir, a)).mtimeMs);
+                const pick = highestPriorityCsv(files);
+                if (pick) return { filePath: path.join(tipiDir, pick), tipiDir };
+            }
+            // Fallback: copiar desde src/tools si existe algún CSV allí
+            const toolsDir = path.join(__dirname);
+            if (fs.existsSync(toolsDir)) {
+                const files = fs.readdirSync(toolsDir)
+                    .filter(f => f.toLowerCase().endsWith('.csv'));
+                const pick = highestPriorityCsv(files);
+                if (pick) {
+                    const destDir = tipiDir || path.join(userData, 'tipificaciones');
+                    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+                    const dest = path.join(destDir, pick);
+                    fs.copyFileSync(path.join(toolsDir, pick), dest);
+                    return { filePath: dest, tipiDir: destDir };
+                }
+            }
+            return { filePath: null, tipiDir };
+        }
+
         function loadFromFile(filePath) {
             try {
                 const content = fs.readFileSync(filePath, 'utf8');
@@ -774,9 +1132,10 @@
                 data = parsed;
                 currentFilePath = filePath;
                 populateFilter();
-                applyFilters();
-                showToast(`✅ Cargados ${data.length} registros.`, 'success');
-                document.getElementById('hdr-title').textContent = `📋 Tipificaciones — ${path.basename(filePath)}`;
+                renderList();
+                showToast(`✅ Cargados ${data.length} registros.`);
+                document.getElementById('hdr-status').textContent =
+                    `${path.basename(filePath)} · ${data.length} registros`;
                 return true;
             } catch (err) {
                 showToast(`❌ Error al leer el archivo: ${err.message}`, 'error');
@@ -785,125 +1144,28 @@
         }
 
         // ============================================================
-        // GUARDAR DATOS AL ARCHIVO
+        // FILTROS
         // ============================================================
-        function saveToFile(filePath) {
-            try {
-                const csv = stringifyCSV(data);
-                // Crear backup automático
-                try {
-                    const backupDir = path.join(path.dirname(filePath), 'backups');
-                    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
-                    const basename = path.basename(filePath, '.csv');
-                    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-                    const backupFile = path.join(backupDir, `${basename}_${ts}.csv`);
-                    fs.copyFileSync(filePath, backupFile);
-                    const files = fs.readdirSync(backupDir).filter(f => f.startsWith(basename) && f.endsWith('.csv')).sort();
-                    while (files.length > 5) {
-                        const oldest = files.shift();
-                        fs.unlinkSync(path.join(backupDir, oldest));
-                    }
-                } catch (backupErr) {}
+        const searchInput = document.getElementById('search-input');
+        const filterProc = document.getElementById('filter-procedimiento');
+        const listaEl = document.getElementById('lista');
 
-                fs.writeFileSync(filePath, csv, 'utf8');
-                showToast('✅ Cambios guardados correctamente.', 'success');
-                return true;
-            } catch (err) {
-                showToast(`❌ Error al guardar: ${err.message}`, 'error');
-                return false;
-            }
-        }
-
-        // ============================================================
-        // FILTRAR Y MOSTRAR
-        // ============================================================
-        function applyFilters() {
+        function getFiltered() {
             const search = searchInput.value.toLowerCase().trim();
             const procFilter = filterProc.value;
-
-            filteredData = data.filter(row => {
-                const motivo = (row['Motivo del llamado'] || '').toLowerCase();
-                const procedimiento = (row['Procedimiento'] || '');
-
-                if (procFilter !== 'todos' && procedimiento !== procFilter) return false;
-
-                if (search) {
-                    const searchable = [
-                        motivo,
-                        (row['Procedimiento'] || '').toLowerCase(),
-                        (row['Tipo'] || '').toLowerCase(),
-                        (row['Área'] || '').toLowerCase(),
-                        (row['Subárea'] || '').toLowerCase(),
-                        (row['Campo descripción'] || '').toLowerCase(),
-                        (row['Importante'] || '').toLowerCase()
-                    ].join(' ');
-                    if (!searchable.includes(search)) return false;
-                }
-
-                return true;
-            });
-
-            renderList();
-            guardarUI();
-        }
-
-        // ============================================================
-        // RENDERIZAR LISTA
-        // ============================================================
-        function renderList() {
-            if (!filteredData.length) {
-                listEl.innerHTML = `<div class="empty-state">${data.length ? 'Sin resultados' : 'No hay datos cargados'}</div>`;
-                return;
-            }
-
-            let html = '';
-            filteredData.forEach((row, idx) => {
-                const motivo = row['Motivo del llamado'] || 'Sin motivo';
-                const procedimiento = row['Procedimiento'] || '—';
-                const tipo = row['Tipo'] || '—';
-                const area = row['Área'] || '—';
-                const subarea = row['Subárea'] || '—';
-                const estado = row['Estado'] || '—';
-                const ruta = area + (subarea ? ` > ${subarea}` : '');
-
-                const realIndex = data.indexOf(row);
-
-                html += `
-                    <div class="card-item" data-index="${realIndex}">
-                        <div class="row1">
-                            <span class="motivo" title="${esc(motivo)}">${esc(motivo)}</span>
-                            <button class="btn-edit" data-index="${realIndex}" title="Editar">✏️</button>
-                        </div>
-                        <div class="row2">
-                            <span class="ruta">📂 ${esc(ruta)}</span>
-                            <span>📌 ${esc(tipo)}</span>
-                            <span class="estado">⏱ ${esc(estado)}</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            listEl.innerHTML = html;
-
-            document.querySelectorAll('.btn-edit').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const idx = parseInt(btn.dataset.index);
-                    openEditor(idx);
-                });
-            });
-
-            document.querySelectorAll('.card-item').forEach(el => {
-                el.addEventListener('dblclick', () => {
-                    const idx = parseInt(el.dataset.index);
-                    if (!isNaN(idx)) openEditor(idx);
-                });
+            return data.filter(row => {
+                const proc = row['Procedimiento'] || '';
+                if (procFilter !== 'todos' && proc !== procFilter) return false;
+                if (!search) return true;
+                const searchable = [
+                    row['Motivo del llamado'], row['Procedimiento'], row['Tipo'],
+                    row['Área'], row['Subárea'], row['Estado'],
+                    row['Campo descripción'], row['Importante']
+                ].join(' ').toLowerCase();
+                return searchable.includes(search);
             });
         }
 
-        // ============================================================
-        // POBLAR FILTRO DE PROCEDIMIENTOS
-        // ============================================================
         function populateFilter() {
             const procs = new Set();
             data.forEach(row => {
@@ -920,175 +1182,365 @@
             });
         }
 
-        // ============================================================
-        // EDITOR (MODAL)
-        // ============================================================
-        function openEditor(index) {
-            if (index < 0 || index >= data.length) return;
-            const row = data[index];
-            currentEditIndex = index;
-
-            editProcedimiento.value = row['Procedimiento'] || '';
-            editMotivo.value = row['Motivo del llamado'] || '';
-            editTipo.value = row['Tipo'] || '';
-            editArea.value = row['Área'] || '';
-            editSubarea.value = row['Subárea'] || '';
-            editEstado.value = row['Estado'] || '';
-            editTiempo.value = row['Tiempo de respuesta'] || '';
-            editDescripcion.value = row['Campo descripción'] || '';
-            editImportante.value = row['Importante'] || '';
-
-            modalOverlay.classList.add('show');
-            setTimeout(() => editProcedimiento.focus(), 100);
-        }
-
-        function closeEditor() {
-            modalOverlay.classList.remove('show');
-            currentEditIndex = -1;
-        }
-
-        function saveEditor() {
-            if (currentEditIndex < 0 || currentEditIndex >= data.length) {
-                showToast('⚠️ No hay registro seleccionado para guardar.', 'warning');
+        function renderList() {
+            filteredRows = getFiltered();
+            if (!filteredRows.length) {
+                listaEl.innerHTML = `<div class="empty-state">${
+                    data.length ? 'Sin resultados' : 'Sin datos. Usa «Importar CSV» para cargar uno.'
+                }</div>`;
+                renderDetail(null);
                 return;
             }
 
-            const row = data[currentEditIndex];
-            row['Procedimiento'] = editProcedimiento.value.trim();
-            row['Motivo del llamado'] = editMotivo.value.trim();
-            row['Tipo'] = editTipo.value.trim();
-            row['Área'] = editArea.value.trim();
-            row['Subárea'] = editSubarea.value.trim();
-            row['Estado'] = editEstado.value.trim();
-            row['Tiempo de respuesta'] = editTiempo.value.trim();
-            row['Campo descripción'] = editDescripcion.value.trim();
-            row['Importante'] = editImportante.value.trim();
+            let html = '';
+            filteredRows.forEach((row, idx) => {
+                const motivo = row['Motivo del llamado'] || 'Sin motivo';
+                const area = row['Área'] || '';
+                const subarea = row['Subárea'] || '';
+                const tipo = row['Tipo'] || '';
+                const ruta = area + (subarea ? ` > ${subarea}` : '');
+                const col = estadoColor(row['Estado']);
 
-            if (currentFilePath) {
-                const ok = saveToFile(currentFilePath);
-                if (ok) {
-                    closeEditor();
-                    populateFilter();
-                    applyFilters();
-                    showToast('✅ Registro actualizado.', 'success');
-                }
-            } else {
-                closeEditor();
-                populateFilter();
-                applyFilters();
-                showToast('✅ Registro actualizado en memoria (no se guardó en archivo).', 'warning');
+                html += `
+                    <div class="motivo-item${idx === selectedIndex ? ' sel' : ''}" data-index="${idx}">
+                        <span class="m-titulo" title="${esc(motivo)}">${esc(motivo)}</span>
+                        <span class="m-meta">
+                            ${ruta ? `<span class="m-ruta">📂 ${esc(ruta)}</span>` : ''}
+                            ${tipo ? `<span class="mini-badge" style="background:${col.bg};color:${col.fg}">${esc(tipo)}</span>` : ''}
+                        </span>
+                    </div>
+                `;
+            });
+            listaEl.innerHTML = html;
+
+            if (selectedIndex < 0 || selectedIndex >= filteredRows.length) {
+                selectedIndex = 0;
             }
+            document.querySelectorAll('.motivo-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    selectedIndex = parseInt(el.dataset.index, 10);
+                    renderList();
+                    renderDetail(filteredRows[selectedIndex]);
+                });
+            });
+
+            const selEl = listaEl.querySelector('.motivo-item.sel');
+            if (selEl) selEl.scrollIntoView({ block: 'nearest' });
+            renderDetail(filteredRows[selectedIndex]);
         }
 
         // ============================================================
-        // IMPORTAR / EXPORTAR
+        // DETALLE (panel central + derecho)
         // ============================================================
+        function renderDetail(row) {
+            const set = (id, val) => { document.getElementById(id).textContent = val || '—'; };
+
+            if (!row) {
+                set('m-tipo', '—'); set('m-area', '—'); set('m-subarea', '—');
+                set('m-estado', '—'); set('m-tiempo', '—');
+                document.getElementById('ctx-label').textContent = '—';
+                document.getElementById('desc-textarea').value = '';
+                baseDesc = '';
+                document.getElementById('right-title').textContent = '—';
+                document.getElementById('right-sub').textContent = '';
+                document.getElementById('important-box').innerHTML =
+                    'Selecciona un motivo para ver sus instrucciones y observaciones.';
+                return;
+            }
+
+            document.getElementById('ctx-label').textContent =
+                row['Motivo del llamado'] || '—';
+
+            set('m-tipo', row['Tipo']);
+            set('m-area', row['Área']);
+            set('m-subarea', row['Subárea']);
+            set('m-tiempo', row['Tiempo de respuesta']);
+
+            const col = estadoColor(row['Estado']);
+            const estEl = document.getElementById('m-estado');
+            estEl.innerHTML = `<span class="estado-badge" style="background:${col.bg};color:${col.fg}">${esc(row['Estado'] || '—')}</span>`;
+
+            const desc = row['Campo descripción'] || '';
+            // Mostrar la descripción ya limpia (saltos de línea reales, sin <br>)
+            baseDesc = cleanHTML(desc);
+            document.getElementById('desc-textarea').value = baseDesc;
+
+            document.getElementById('right-title').textContent =
+                row['Motivo del llamado'] || '—';
+            document.getElementById('right-sub').textContent =
+                row['Procedimiento'] ? `Macro-categoría: ${row['Procedimiento']}` : '';
+
+            const imp = row['Importante'];
+            const importantBox = document.getElementById('important-box');
+            importantBox.innerHTML =
+                imp && imp.trim() ? imp : 'Sin instrucciones adicionales para este motivo.';
+            // Guardar como datos: los <img> vienen envueltos en <a href>. Evitar que
+            // el clic navegue/abra la imagen dentro de la app (muestra texto raro o
+            // intenta abrir la imagen). Fuerzo apertura externa y remplazo de imágenes rotas.
+            importantBox.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', () => {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'img-fallback';
+                    placeholder.textContent = '🖼 Imagen de referencia no disponible';
+                    img.replaceWith(placeholder);
+                });
+            });
+        }
+
+        // ============================================================
+        // BOTONES: copiar / exportar / importar
+        // ============================================================
+        function getCurrentRow() {
+            return filteredRows[selectedIndex] || null;
+        }
+
+        document.getElementById('btn-copy-desc').addEventListener('click', () => {
+            const textarea = document.getElementById('desc-textarea');
+            const val = textarea.value;
+            if (!val) { showToast('⚠️ No hay descripción para copiar.', 'warning'); return; }
+            // Temporal: si el texto fue modificado (difiere de la base),
+            // se limpian los códigos HTML para una copia limpia (Siebel).
+            // Si NO fue modificado, se conserva tal cual (mantiene WhatsApp).
+            const modified = val !== baseDesc;
+            copyText(modified ? cleanHTML(val) : val);
+        });
+
+        document.getElementById('btn-copy-all').addEventListener('click', () => {
+            const row = getCurrentRow();
+            if (!row) { showToast('⚠️ No hay motivo seleccionado.', 'warning'); return; }
+            const parts = [];
+            const push = (k, v) => { if (v && String(v).trim()) parts.push(`*${k}:* ${v}`); };
+            push('Tipo', row['Tipo']);
+            push('Área', row['Área']);
+            push('Subárea', row['Subárea']);
+            push('Estado', row['Estado']);
+            push('Tiempo de Respuesta', row['Tiempo de respuesta']);
+            parts.push(''); // separador
+            const textarea = document.getElementById('desc-textarea');
+            const modified = textarea.value !== baseDesc;
+            // WhatsApp: siempre limpiar HTML de la descripción (el <br> no sirve
+            // en WhatsApp). Si fue editada temporalmente, se copia la versión actual.
+            parts.push(cleanHTML(textarea.value));
+            copyText(parts.join('\n'));
+        });
+
         function importCSV() {
             ipcRenderer.invoke('show-open-dialog', {
                 properties: ['openFile'],
                 filters: [{ name: 'CSV', extensions: ['csv'] }]
-            }).then(result => {
+            }).then(async (result) => {
                 if (result.canceled || !result.filePaths.length) return;
                 const filePath = result.filePaths[0];
-                const success = loadFromFile(filePath);
-                if (success) {
-                    // Copiar el archivo a userData para futuras ediciones
-                    if (USER_DATA_PATH) {
-                        const destDir = path.join(USER_DATA_PATH, 'tipificaciones');
-                        if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
-                        const destFile = path.join(destDir, path.basename(filePath));
-                        fs.copyFileSync(filePath, destFile);
-                        currentFilePath = destFile;
-                        document.getElementById('hdr-title').textContent = `📋 Tipificaciones — ${path.basename(destFile)}`;
-                    }
-                }
+                if (!loadFromFile(filePath)) return;
+                const userData = await getUserDataPath();
+                const destDir = path.join(userData, 'tipificaciones');
+                if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+                const destFile = path.join(destDir, path.basename(filePath));
+                try {
+                    fs.copyFileSync(filePath, destFile);
+                    currentFilePath = destFile;
+                } catch (e) {}
             }).catch(err => {
                 showToast(`❌ Error al importar: ${err.message}`, 'error');
             });
         }
 
         function exportCSV() {
-            if (!data.length) {
-                showToast('⚠️ No hay datos para exportar.', 'warning');
-                return;
-            }
+            if (!data.length) { showToast('⚠️ No hay datos para exportar.', 'warning'); return; }
             ipcRenderer.invoke('show-save-dialog', {
                 defaultPath: 'tipificaciones_export.csv',
                 filters: [{ name: 'CSV', extensions: ['csv'] }]
             }).then(result => {
                 if (result.canceled || !result.filePath) return;
-                const ok = saveToFile(result.filePath);
-                if (ok) {
-                    showToast('✅ Archivo exportado correctamente.', 'success');
+                try {
+                    fs.writeFileSync(result.filePath, stringifyCSV(data), 'utf8');
+                    showToast('✅ Archivo exportado correctamente.');
+                } catch (err) {
+                    showToast(`❌ Error al exportar: ${err.message}`, 'error');
                 }
             }).catch(err => {
                 showToast(`❌ Error al exportar: ${err.message}`, 'error');
             });
         }
 
+        document.getElementById('btn-import').addEventListener('click', importCSV);
+        document.getElementById('btn-export').addEventListener('click', exportCSV);
+
+        // ============================================================
+        // EDITOR BASE (edición permanente de la tipificación)
+        // ============================================================
+        const modalOverlay = document.getElementById('modal-overlay');
+        let editingIndex = -1; // índice real en `data`
+
+        function getObjectKey(row, col) { return row[col] || ''; }
+
+        function fillDatalist(id, values) {
+            const dl = document.getElementById(id);
+            if (!dl) return;
+            dl.innerHTML = '';
+            const seen = new Set();
+            values.forEach(v => {
+                if (v && !seen.has(v)) {
+                    seen.add(v);
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    dl.appendChild(opt);
+                }
+            });
+        }
+
+        function openBaseEditor() {
+            const row = getCurrentRow();
+            if (!row) { showToast('⚠️ No hay motivo seleccionado.', 'warning'); return; }
+            editingIndex = data.indexOf(row);
+            if (editingIndex < 0) return;
+
+            document.getElementById('edit-procedimiento').value = row['Procedimiento'] || '';
+            document.getElementById('edit-motivo').value = row['Motivo del llamado'] || '';
+            document.getElementById('edit-tipo').value = row['Tipo'] || '';
+            document.getElementById('edit-area').value = row['Área'] || '';
+            document.getElementById('edit-subarea').value = row['Subárea'] || '';
+            document.getElementById('edit-estado').value = row['Estado'] || '';
+            document.getElementById('edit-tiempo').value = row['Tiempo de respuesta'] || '';
+            document.getElementById('edit-descripcion').value = row['Campo descripción'] || '';
+            document.getElementById('edit-importante').value = row['Importante'] || '';
+
+            // Sugerencias (datalist) desde los datos existentes
+            fillDatalist('dl-procedimientos', data.map(r => r['Procedimiento']));
+            fillDatalist('dl-tipo', data.map(r => r['Tipo']));
+            fillDatalist('dl-estado', data.map(r => r['Estado']));
+            fillDatalist('dl-area', data.map(r => r['Área']));
+            fillDatalist('dl-subarea', data.map(r => r['Subárea']));
+            fillDatalist('dl-tiempo', data.map(r => r['Tiempo de respuesta']));
+
+            modalOverlay.classList.add('show');
+            setTimeout(() => document.getElementById('edit-procedimiento').focus(), 100);
+        }
+
+        function closeBaseEditor() {
+            modalOverlay.classList.remove('show');
+            editingIndex = -1;
+        }
+
+        function saveBaseEditor() {
+            if (editingIndex < 0 || editingIndex >= data.length) {
+                showToast('⚠️ No hay registro seleccionado para guardar.', 'warning');
+                return;
+            }
+            const row = data[editingIndex];
+            row['Procedimiento'] = document.getElementById('edit-procedimiento').value.trim();
+            row['Motivo del llamado'] = document.getElementById('edit-motivo').value.trim();
+            row['Tipo'] = document.getElementById('edit-tipo').value.trim();
+            row['Área'] = document.getElementById('edit-area').value.trim();
+            row['Subárea'] = document.getElementById('edit-subarea').value.trim();
+            row['Estado'] = document.getElementById('edit-estado').value.trim();
+            row['Tiempo de respuesta'] = document.getElementById('edit-tiempo').value.trim();
+            row['Campo descripción'] = document.getElementById('edit-descripcion').value;
+            row['Importante'] = document.getElementById('edit-importante').value;
+
+            if (currentFilePath) {
+                // Backup antes de sobrescribir
+                try {
+                    const dir = path.dirname(currentFilePath);
+                    const backupsDir = path.join(dir, 'backups-base');
+                    if (!fs.existsSync(backupsDir)) fs.mkdirSync(backupsDir, { recursive: true });
+                    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                    const basename = path.basename(currentFilePath, '.csv');
+                    fs.copyFileSync(currentFilePath, path.join(backupsDir, `${basename}_${ts}.csv`));
+                    // Mantener solo últimos 10 backups
+                    const files = fs.readdirSync(backupsDir)
+                        .filter(f => f.startsWith(basename) && f.endsWith('.csv')).sort();
+                    while (files.length > 10) {
+                        fs.unlinkSync(path.join(backupsDir, files.shift()));
+                    }
+                } catch (e) {}
+                fs.writeFileSync(currentFilePath, stringifyCSV(data), 'utf8');
+            }
+
+            closeBaseEditor();
+            populateFilter();
+            renderList();
+            showToast('✅ Tipificación guardada (base).');
+        }
+
+        document.getElementById('btn-edit-base').addEventListener('click', openBaseEditor);
+        document.getElementById('modal-close').addEventListener('click', closeBaseEditor);
+        document.getElementById('modal-cancel').addEventListener('click', closeBaseEditor);
+        document.getElementById('modal-save').addEventListener('click', saveBaseEditor);
+        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeBaseEditor(); });
+
+        document.addEventListener('keydown', (e) => {
+            if (!modalOverlay.classList.contains('show')) return;
+            if (e.key === 'Escape') { closeBaseEditor(); }
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+                saveBaseEditor();
+            }
+        });
+
+        // ============================================================
+        // NAVEGACIÓN CON TECLADO
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (modalOverlay.classList.contains('show')) return;
+            if (!filteredRows.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, filteredRows.length - 1);
+                renderList();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                renderList();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                renderDetail(getCurrentRow());
+            }
+        });
+
+        // ============================================================
+        // ENLACES EXTERNOS EN INSTrucciones (apertura externa)
+        // Los <img> del CSV están envueltos en <a href>; al hacer clic la app
+        // intentaba abrir la imagen dentro de la ventana (texto raro / imagen).
+        // ============================================================
+        document.getElementById('important-box').addEventListener('click', (e) => {
+            const a = e.target.closest('a');
+            if (!a) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const href = a.getAttribute('href') || '';
+            if (href && /^https?:\/\//i.test(href)) {
+                try {
+                    shell.openExternal(href);
+                    showToast('🔗 Enlace abierto en el navegador.');
+                } catch (err) {
+                    showToast(`❌ No se pudo abrir el enlace: ${err.message}`, 'error');
+                }
+            }
+        });
+
         // ============================================================
         // INICIALIZACIÓN
         // ============================================================
         async function init() {
-            // Obtener ruta de userData
-            USER_DATA_PATH = await getUserDataPath();
+            searchInput.addEventListener('input', () => {
+                selectedIndex = -1;
+                renderList();
+            });
+            filterProc.addEventListener('change', () => {
+                selectedIndex = -1;
+                renderList();
+            });
 
-            // Buscar el CSV en userData/tipificaciones
-            const tipiDir = path.join(USER_DATA_PATH, 'tipificaciones');
-            if (!fs.existsSync(tipiDir)) fs.mkdirSync(tipiDir, { recursive: true });
-
-            const defaultPath = path.join(tipiDir, DEFAULT_CSV_NAME);
-
-            // Si no existe en userData, intentar copiar desde la carpeta de la app (src/tools)
-            if (!fs.existsSync(defaultPath)) {
-                const srcPath = path.join(__dirname, DEFAULT_CSV_NAME);
-                if (fs.existsSync(srcPath)) {
-                    fs.copyFileSync(srcPath, defaultPath);
-                    showToast('📂 Archivo CSV copiado a la carpeta de usuario.', 'info', 3000);
-                } else {
-                    showToast('⚠️ Archivo CSV por defecto no encontrado. Usa "Importar CSV" para cargar uno.', 'warning');
-                    listEl.innerHTML = `<div class="empty-state">Sin datos. Importa un archivo CSV para comenzar.</div>`;
-                }
+            const { filePath } = await findDefaultCsv();
+            if (filePath) {
+                loadFromFile(filePath);
+            } else {
+                listaEl.innerHTML =
+                    `<div class="empty-state">Sin datos. Usa «Importar CSV» para cargar uno.</div>`;
+                showToast('⚠️ No se encontró archivo CSV. Importa uno para comenzar.', 'warning', 3500);
+                renderDetail(null);
             }
-
-            if (fs.existsSync(defaultPath)) {
-                loadFromFile(defaultPath);
-            }
-
-            cargarUI();
-            if (data.length) applyFilters();
-
-            searchInput.addEventListener('input', applyFilters);
-            filterProc.addEventListener('change', applyFilters);
-
-            btnImport.addEventListener('click', importCSV);
-            btnExport.addEventListener('click', exportCSV);
-
-            modalClose.addEventListener('click', closeEditor);
-            modalCancel.addEventListener('click', closeEditor);
-            modalSave.addEventListener('click', saveEditor);
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
-                    closeEditor();
-                }
-                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && modalOverlay.classList.contains('show')) {
-                    saveEditor();
-                }
-            });
-
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target === modalOverlay) closeEditor();
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                    if (modalOverlay.classList.contains('show')) {
-                        e.preventDefault();
-                        saveEditor();
-                    }
-                }
-            });
         }
 
         if (document.readyState === 'loading') {

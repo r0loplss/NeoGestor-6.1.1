@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Acerca de</title>
+<style>
+    :root {
+        --surface: #121926;
+        --surface2: #1b2436;
+        --surface3: #243049;
+        --border: #2b3650;
+        --border2: #3b4a6b;
+        --text: #e8edf6;
+        --muted: #a8b3c7;
+        --faint: #6b7790;
+        --primary: #4d8dff;
+        --danger: #f87171;
+        --radius: 10px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+        width: 100%; height: 100%;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        overflow: hidden;
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    #hdr {
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px 0 14px;
+        background: var(--surface2);
+        border-bottom: 1px solid var(--border);
+        -webkit-app-region: drag;
+        user-select: none;
+    }
+    #hdr .hdr-title {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    #hdr .close-btn {
+        -webkit-app-region: no-drag;
+        background: none;
+        border: none;
+        color: var(--faint);
+        font-size: 15px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: color 0.15s, background 0.15s;
+    }
+    #hdr .close-btn:hover { color: #fff; background: var(--danger); }
+
+    #content {
+        height: calc(100% - 34px);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 16px;
+    }
+    #col-texto {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        line-height: 1.35;
+        min-width: 0;
+    }
+    .at-nombre { font-size: 13px; font-weight: 700; }
+    .at-dev { font-size: 11px; color: var(--muted); }
+    .at-dev b { color: var(--text); }
+    .at-opencode { font-size: 11px; color: var(--muted); }
+    .at-opencode b { color: var(--primary); }
+    .at-pct { font-size: 11px; font-weight: 700; margin-top: 3px; }
+
+    .hab-leyenda {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        font-size: 10px;
+        color: var(--muted);
+    }
+    .hab-leyenda .dot {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .hab-leyenda .dot i {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .hab-leyenda b { color: var(--text); font-weight: 600; }
+
+    .hab-bar {
+        display: flex;
+        align-items: stretch;
+        gap: 2px;
+        height: 13px;
+        border-radius: 7px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.05);
+        margin-top: 2px;
+    }
+    .hab-seg { border-radius: 6px; width: 0; transition: width 1.2s cubic-bezier(0.25, 1, 0.4, 1); }
+    .hab-seg.gem  { background: linear-gradient(180deg, #a78bfa, #8b5cf6); }
+    .hab-seg.oc   { background: linear-gradient(180deg, #60a5fa, #3b82f6); }
+    .hab-seg.hum  { background: linear-gradient(180deg, #34d399, #10b981); }
+
+    .at-descarga {
+        margin-top: 6px;
+        font-size: 11px;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+        align-self: flex-start;
+    }
+    .at-descarga:hover { text-decoration: underline; }
+
+    #col-logo {
+        flex-shrink: 0;
+        width: 92px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #col-logo svg { width: 100%; height: auto; }
+</style>
+</head>
+<body>
+    <div id="hdr">
+        <span class="hdr-title">ℹ️ Acerca de</span>
+        <button class="close-btn" onclick="window.close()" title="Cerrar">✕</button>
+    </div>
+
+    <div id="content">
+        <div id="col-texto">
+            <span class="at-nombre">Herramienta de gestión integral Call Center</span>
+            <span class="at-dev">Desarrollado por: <b>Rolando Tapia</b></span>
+            <span class="at-opencode">Compilado y revisado vía <b>Open Code</b></span>
+            <span class="at-pct">% de desarrollo con agentes basados en IA</span>
+            <div class="hab-leyenda">
+                <span class="dot"><i style="background:#8b5cf6"></i>Gémini <b>6%</b></span>
+                <span class="dot"><i style="background:#3b82f6"></i>Open Code <b>30%</b></span>
+                <span class="dot"><i style="background:#10b981"></i>Desarrollo Humano <b>64%</b></span>
+            </div>
+            <div class="hab-bar">
+                <div class="hab-seg gem" data-pct="6%"></div>
+                <div class="hab-seg oc" data-pct="30%"></div>
+                <div class="hab-seg hum" data-pct="64%"></div>
+            </div>
+            <a class="at-descarga" onclick="carDownload()" href="javascript:void(0)">⬇️ Descargar Open Code</a>
+        </div>
+        <div id="col-logo">
+            <svg viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="4" width="30" height="56" rx="15" fill="rgba(255,255,255,0.04)" />
+                <rect x="9" y="4" width="30" height="56" rx="15" fill="none" stroke="#5b6b8c" stroke-width="2" />
+                <rect x="15" y="10" width="18" height="44" rx="9" fill="none" stroke="#e8edf6" stroke-width="6" />
+            </svg>
+        </div>
+    </div>
+
+<script>
+    function carDownload() {
+        const { shell } = require('electron');
+        shell.openExternal('https://github.com/anomalyco/opencode');
+    }
+
+    // Barra de porcentajes: una sola pasada (sin ciclo), se detiene en su valor
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.querySelectorAll('.hab-seg').forEach(s => {
+                s.style.width = s.dataset.pct;
+            });
+        }, 150);
+    });
+</script>
+</body>
+</html>

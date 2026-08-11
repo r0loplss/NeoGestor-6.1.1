@@ -58,7 +58,7 @@
         /* ============================================================
                HEADER
                ============================================================ */
-        #hdr {
+#hdr {
             display: flex;
             align-items: center;
             gap: 4px;
@@ -70,6 +70,7 @@
             -webkit-app-region: drag;
             user-select: none;
             z-index: 400;
+            overflow: hidden;
         }
 
         #hdr-sep {
@@ -78,6 +79,7 @@
             background: var(--border);
             margin: 0 2px;
             flex-shrink: 0;
+            margin-left: auto;
         }
 
         .hdr-wbtn {
@@ -103,12 +105,24 @@
             color: var(--danger);
         }
 
-        #btn-drawer {
+#btn-drawer {
             color: var(--text);
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
+            min-width: 26px;
+            overflow: hidden;
+        }
+        #btn-drawer .dlbl {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 560px) {
+            #btn-drawer .dlbl { display: none; }
+            #btn-drawer { padding: 2px 6px; }
         }
 
         /* ============================================================
@@ -128,8 +142,9 @@
             position: absolute;
             top: 34px;
             left: 6px;
-            border-radius: 0 0 6px 6px;
-            min-width: 180px;
+border-radius: 0 0 6px 6px;
+            min-width: min(180px, calc(100vw - 12px));
+            max-width: min(300px, calc(100vw - 12px));
         }
 
         #tools-drawer.show {
@@ -154,9 +169,12 @@
             align-items: center;
             gap: 8px;
             transition: 0.15s;
-            font-family: var(--font);
+font-family: var(--font);
             font-weight: 600;
             text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .td-btn:hover {
@@ -169,6 +187,11 @@
             background: rgba(59,130,246,0.2);
             border-color: var(--primary);
             color: #fff;
+        }
+
+        @media (max-width: 420px) {
+            .td-btn { font-size: 10px; padding: 6px 8px; gap: 6px; }
+            #tools-drawer { padding: 4px; gap: 3px; }
         }
 
         /* ============================================================
@@ -243,26 +266,28 @@
         #modal-ajustes.show {
             display: flex;
         }
-        #modal-ajustes .modal-box {
+#modal-ajustes .modal-box {
             background: var(--surface);
             border: 1px solid var(--border2);
             border-radius: 8px;
-            padding: 18px 20px;
+            padding: 16px clamp(8px, 4.5cqw, 20px);
             width: 100%;
             max-width: 420px;
             max-height: 90vh;
             display: flex;
             flex-direction: column;
             box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            container-type: inline-size;
         }
         #modal-ajustes .modal-title {
-            font-size: 15px;
+            font-size: clamp(11px, 3.8cqw, 15px);
             font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: clamp(8px, 3cqw, 12px);
             flex-shrink: 0;
+            min-width: 0;
         }
         #modal-ajustes .modal-title .close-modal {
             background: none;
@@ -271,6 +296,7 @@
             font-size: 18px;
             cursor: pointer;
             padding: 0 4px;
+            flex-shrink: 0;
         }
         #modal-ajustes .modal-title .close-modal:hover {
             color: var(--danger);
@@ -281,7 +307,8 @@
             padding-right: 4px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: clamp(8px, 3cqw, 12px);
+            min-width: 0;
         }
         #modal-ajustes .modal-scroll::-webkit-scrollbar {
             width: 4px;
@@ -294,9 +321,10 @@
             display: flex;
             flex-direction: column;
             gap: 3px;
+            min-width: 0;
         }
         #modal-ajustes .modal-field label {
-            font-size: 10px;
+            font-size: clamp(8px, 2.7cqw, 10px);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.4px;
@@ -304,15 +332,16 @@
         }
         #modal-ajustes .modal-field select,
         #modal-ajustes .modal-field input[type="color"] {
-            padding: 5px 8px;
+            padding: clamp(4px, 1.6cqw, 6px) clamp(6px, 2.2cqw, 8px);
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             color: var(--text);
-            font-size: 12px;
+            font-size: clamp(10px, 3.2cqw, 12px);
             font-family: var(--font);
             outline: none;
             width: 100%;
+            min-width: 0;
         }
         #modal-ajustes .modal-field input[type="checkbox"] {
             accent-color: var(--primary);
@@ -322,30 +351,32 @@
             flex-direction: row;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
         #modal-ajustes .modal-field.check-row label {
             text-transform: none;
             font-weight: 400;
-            font-size: 12px;
+            font-size: clamp(9px, 3cqw, 12px);
             color: var(--text);
             cursor: pointer;
         }
         #modal-ajustes .modal-actions {
             display: flex;
             gap: 8px;
-            margin-top: 12px;
+            margin-top: clamp(8px, 3cqw, 12px);
             flex-shrink: 0;
         }
         #modal-ajustes .modal-actions button {
             flex: 1;
-            padding: 10px 0;
+            padding: clamp(7px, 2.6cqw, 10px) 0;
             border: none;
             border-radius: var(--radius);
             font-weight: 700;
-            font-size: 13px;
+            font-size: clamp(10px, 3.5cqw, 13px);
             cursor: pointer;
             font-family: var(--font);
             transition: background 0.15s;
+            min-width: 0;
         }
         #modal-ajustes .btn-cancel {
             background: var(--surface3);
@@ -361,6 +392,35 @@
         }
         #modal-ajustes .btn-save:hover {
             background: #2563eb;
+        }
+
+        #modal-ajustes .about-link {
+            padding: clamp(7px, 2.4cqw, 9px) clamp(8px, 3cqw, 12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface2);
+            color: var(--primary);
+            font-size: clamp(9px, 3cqw, 12px);
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.15s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #modal-ajustes .about-link:hover {
+            background: var(--surface3);
+            color: #fff;
+        }
+        @container (max-width: 320px) {
+            #modal-ajustes .modal-actions {
+                flex-direction: column;
+                gap: 6px;
+            }
+            #modal-ajustes .modal-actions button {
+                padding: clamp(6px, 4cqw, 8px) 0;
+            }
         }
 
         /* ============================================================
@@ -1193,96 +1253,68 @@
             margin-top: 5px;
         }
 
-        /* Turno */
+/* Turno (barra de cuenta regresiva) */
         #turno-fixed {
             flex-shrink: 0;
-            background: var(--surface);
+            background: #0d1220;
             border-top: 1px solid var(--border);
-            max-height: 250px;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
+            z-index: 400;
         }
-        #turno-hdr {
+        #turno-bar {
             display: flex;
             align-items: center;
-            padding: 5px 10px;
+            gap: 6px;
+            padding: 4px 10px;
             cursor: pointer;
             user-select: none;
-            gap: 6px;
-            flex-shrink: 0;
         }
-        #turno-label {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--muted);
+        #turno-bar:hover {
+            background: rgba(255, 255, 255, 0.04);
         }
-        #turno-next {
-            font-size: 10px;
-            color: var(--warning);
+        #turno-countdown {
             flex: 1;
-            padding-left: 4px;
+            font-size: 11px;
+            color: var(--text);
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
         }
-        #btn-inter {
-            font-size: 10px;
+        #turno-countdown .muted {
             color: var(--faint);
-            padding: 2px 6px;
-            cursor: pointer;
-            border-radius: 3px;
-            border: none;
-            background: none;
-            opacity: 0.5;
         }
-        #btn-inter.on {
-            opacity: 1;
-            color: var(--text);
-        }
-        #turno-body {
-            overflow-y: auto;
-            flex: 1;
+        #turno-panel {
             display: none;
-            padding: 6px 10px 8px;
+            padding: 4px 10px 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            max-height: 40vh;
+            overflow-y: auto;
         }
-        #turno-body.open {
+        #turno-panel.open {
             display: block;
         }
-        .t-row {
+        .trow {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 3px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .t-row.inter {
-            opacity: 0.5;
-        }
-        .t-row.hide-inter {
-            display: none;
-        }
-        .t-row.t-active {
-            background: rgba(245,158,11,0.15);
+            padding: 3px 4px;
             border-radius: 4px;
-            padding: 3px 5px;
+            font-size: 11px;
         }
-        .t-icon {
-            font-size: 13px;
-            flex-shrink: 0;
+        .trow:hover {
+            background: rgba(255, 255, 255, 0.04);
         }
-        .t-name {
+        .trow .t-icon {
+            font-size: 12px;
+        }
+        .trow .t-name {
             flex: 1;
-            font-size: 11px;
         }
-        .t-time {
-            font-size: 11px;
-            color: var(--muted);
+        .trow .t-time {
+            color: var(--faint);
+            font-feature-settings: "tnum";
         }
 
-        /* Footer */
+/* Footer */
         #footer {
             display: flex;
             align-items: center;
@@ -1448,53 +1480,45 @@
             border: 1px solid var(--border);
         }
 
-        #easter-egg-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
+/* ============================================================
+               ADAPTACIÓN INTELIGENTE A VENTANAS ANGOSTAS
+               ============================================================ */
+        #main { min-width: 0; overflow-x: hidden; }
+        .sec-body, .sec-hdr, #turno-panel, #footer { min-width: 0; }
+
+        @media (max-width: 520px) {
+            #hdr { padding: 0 3px; gap: 2px; }
+            .sec-hdr { padding: 5px 6px; gap: 4px; }
+            .sec-body { padding: 6px; }
+            .nv-hdr { padding: 5px 6px; gap: 5px; }
+            .dyn-inp, .dyn-area { padding-left: 6px; padding-right: 6px; }
+            .pcard-compact { padding: 6px 7px; }
+            .pcard-actions { padding: 7px; }
+            .pc-name { font-size: 11px; }
+            .pc-row-sub { font-size: 10px; }
+            #turno-countdown { font-size: 10px; }
+            .sec-title { letter-spacing: 0.2px; }
         }
-        .egg-container {
-            position: relative;
-            max-width: 85%;
-            max-height: 85%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+
+        @media (max-width: 400px) {
+            .nv-title { display: none; }
+            .nv-add-text { display: none; }
+            #footer { flex-wrap: wrap; overflow-x: auto; }
+            #notes-dots { flex-wrap: wrap; }
+            .act-btns { gap: 4px; }
+            .btn-icon { font-size: 12px; }
+            #turno-bar { padding: 3px 6px; }
         }
-        .egg-btn-close {
-            position: absolute;
-            top: -15px;
-            right: -15px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
-        .egg-btn-close:hover {
-            transform: scale(1.1);
-            background: #f87171;
-        }
-        .egg-img {
-            max-width: 100%;
-            max-height: 75vh;
-            border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            object-fit: contain;
+
+        /* Por debajo de 170px (límite de buena visual): se permite seguir
+           achicando, la UI se compacta al máximo y los controles se mantienen */
+        @media (max-width: 170px) {
+            #hdr { padding: 0 2px; gap: 0; }
+            #hdr-sep { display: none; }
+            #btn-drawer { min-width: 20px; padding: 2px 2px; font-size: 11px; }
+            .hdr-wbtn { padding: 2px 3px; }
+            .sec-body, .sec-hdr { padding: 3px; }
+            #turno-countdown { font-size: 9px; }
         }
     </style>
 </head>
@@ -1504,7 +1528,7 @@
     HEADER CON TOGGLE
     ============================================================ -->
     <div id="hdr">
-        <button class="hdr-wbtn" onclick="toggleDrawer(event)" id="btn-drawer" title="Desplegar aplicaciones satélite">🛠️ Herramientas</button>
+        <button class="hdr-wbtn" onclick="toggleDrawer(event)" id="btn-drawer" title="Desplegar aplicaciones satélite">🛠️<span class="dlbl"> Herramientas</span></button>
         <div id="hdr-sep"></div>
         <button class="hdr-wbtn" onclick="ipcRenderer.send('minimize-main')">—</button>
         <button class="hdr-wbtn cls" onclick="closeApp()">✕</button>
@@ -1516,8 +1540,8 @@
     <div id="tools-drawer">
         <button class="td-btn" id="btn-notas" onclick="toggleNotasVault()" title="Gestor de notas completo estilo Keep">📚 Mis Notas</button>
         <button class="td-btn" id="btn-occ" onclick="toggleTool('occ')" title="Abre la calculadora comercial para cobros proporcionales">🧮 Calculadora OCC</button>
-        <button class="td-btn" id="btn-enlaces" onclick="toggleTool('enlaces')" title="Gestor rápido de enlaces y herramientas web">🔗 Mis enlaces</button>
-        <button class="td-btn" id="btn-horario" onclick="toggleTool('horario')" title="Control de turnos, breaks y colación">📅 Horario semanal</button>
+<button class="td-btn" id="btn-enlaces" onclick="toggleTool('enlaces')" title="Gestor rápido de enlaces y herramientas web">🔗 Mis enlaces</button>
+        <button class="td-btn" id="btn-horarios" onclick="toggleTool('horarios')" title="Turnos desde tu RUT en la web + alertas de breaks y firma">📅 Turnos Web</button>
         <button class="td-btn" id="btn-contingencias" onclick="toggleTool('contingencias')" title="Monitor en tiempo real de fallas masivas">📡 Radar Contingencias</button>
         <button class="td-btn" id="btn-trafico" onclick="toggleTool('trafico')" title="Analizador automático de consumos de datos y voz">📶 Tráfico PRO</button>
         <button class="td-btn" id="btn-calculadora-dias" onclick="toggleTool('calculadora-dias')" title="Calcula días entre fechas y verifica hitos de Plan Mandato">📅 Calculadora de Días</button>
@@ -1543,8 +1567,9 @@
     <!-- ============================================================
     BANNER
     ============================================================ -->
-    <div id="banner" onclick="dismissBanner()">
+<div id="banner" onclick="dismissBanner()">
         <span id="banner-text">⚡ Alerta</span>
+        <button id="banner-action" style="display:none;margin-left:8px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;">✍</button>
         <span style="margin-left:auto;opacity:0.8;">✕</span>
     </div>
 
@@ -1605,19 +1630,16 @@
         </div>
     </div>
 
-    <!-- ============================================================
-    TURNO
+<!-- ============================================================
+    TURNO (barra de cuenta regresiva del día)
     ============================================================ -->
     <div id="turno-fixed">
-        <div id="turno-hdr" onclick="toggleTurno()">
-            <span id="turno-label">⏱ Turno</span>
-            <span id="turno-next"></span>
-            <button id="btn-sync-turno" style="font-size: 10px; color: var(--faint); padding: 2px 6px; cursor: pointer; border: none; background: none;" onclick="syncTurno(event)" title="Actualizar turno y fecha manualmente">🔄</button>
-            <button id="btn-inter" class="on" onclick="toggleInter(event)" title="Mostrar/ocultar los cálculos de tiempos intermedios">💧</button>
+        <div id="turno-bar" onclick="toggleTurnoPanel(event)">
+            <span id="turno-countdown"></span>
             <span class="sec-chevron" id="chev-turno">▶</span>
         </div>
-        <div id="turno-body">
-            <div id="turno-list"></div>
+        <div id="turno-panel">
+            <div id="turno-hoy-list"></div>
         </div>
     </div>
 
@@ -1722,14 +1744,7 @@
         </div>
     </div>
 
-    <div id="easter-egg-overlay" onclick="closeEasterEgg(event)">
-        <div class="egg-container" onclick="event.stopPropagation()">
-            <button class="egg-btn-close" onclick="closeEasterEgg(event)">✕</button>
-            <img src="easteregg.jpg" alt="Secret" class="egg-img">
-        </div>
-    </div>
-
-    <!-- ============================================================
+<!-- ============================================================
     TOAST CONTAINER
     ============================================================ -->
     <div id="toast-container"></div>
@@ -1737,7 +1752,7 @@
     <!-- ============================================================
     SCRIPT
     ============================================================ -->
-    <script>
+<script>
         const { ipcRenderer } = require('electron');
 
         // ============================================================
@@ -1786,18 +1801,13 @@
                     '#modal-cb.show',
                     '#modal-agendar.show',
                     '#confirm-overlay.show',
-                    '#easter-egg-overlay',
                     '#modal-ajustes.show'
                 ];
                 for (const sel of overlays) {
                     const el = document.querySelector(sel);
                     if (!el) continue;
-                    // El easter egg se muestra con display inline, no con clase .show
-                    const visible = sel === '#easter-egg-overlay'
-                        ? (el.style.display === 'flex')
-                        : el.classList.contains('show');
-                    if (visible) {
-                        const closeBtn = el.querySelector('.close-modal, .mc-cancel, .m-cancel, .conf-cancel, .egg-btn-close, #modal-close, #modal-cancel');
+                    if (el.classList.contains('show')) {
+                        const closeBtn = el.querySelector('.close-modal, .mc-cancel, .m-cancel, .conf-cancel, #modal-close, #modal-cancel');
                         if (closeBtn) {
                             e.preventDefault();
                             closeBtn.click();
@@ -1860,6 +1870,7 @@
         // ============================================================
         const toolsDrawer = document.getElementById('tools-drawer');
         const openTools = new Set();
+        const hiddenTools = new Set();
         // ============================================================
         // FUNCIONES DE HERRAMIENTAS
         // ============================================================
@@ -1878,6 +1889,12 @@
         function toggleTool(id) {
             document.getElementById('tools-drawer').classList.remove('show');
             if (openTools.has(id)) {
+                if (hiddenTools.has(id)) {
+                    // Minimizada: reabrir (mostrar sin recargar)
+                    hiddenTools.delete(id);
+                    ipcRenderer.send('open-tool', id);
+                    return;
+                }
                 ipcRenderer.send('close-tool', id);
                 openTools.delete(id);
                 const btn = document.getElementById(`btn-${id}`);
@@ -1908,6 +1925,7 @@
 
         function toggleNotasVault() {
             const vault = document.getElementById('notas-vault');
+            document.getElementById('tools-drawer').classList.remove('show');
             if (!vault.classList.contains('show')) {
                 vault.classList.add('show');
                 document.getElementById('nv-search').value = '';
@@ -1989,6 +2007,7 @@
                                 <input type="checkbox" id="chk-autostart" />
                                 <label for="chk-autostart">Iniciar al encender el PC</label>
                             </div>
+                            <div class="about-link" onclick="ipcRenderer.send('open-acerca')">ℹ️ Acerca de</div>
                         </div>
                         <div class="modal-actions">
                             <button class="btn-cancel" onclick="cerrarAjustes()">Cancelar</button>
@@ -2012,7 +2031,7 @@
             if (overlay) overlay.classList.remove('show');
         }
 
-        function guardarAjustes() {
+function guardarAjustes() {
             const fuente = document.getElementById('sel-fuente').value;
             const alwaysOnTop = document.getElementById('chk-alwaysontop').checked;
             const autostart = document.getElementById('chk-autostart').checked;
@@ -2031,12 +2050,10 @@
         // ============================================================
         // ESTADO GLOBAL Y DATOS
         // ============================================================
-        let appData = { pending: [], history: [], notes: [], turno: {}, caseTemplate: [], draft: {}, contingencias: [], alertsMuted: false, cbTexts: {}, favNotes: [], attempts: {}, prefsApoyo: {} };
-        let pinnedNotes = new Set();
+        let appData = { pending: [], history: [], notes: [], turno: {}, caseTemplate: [], draft: {}, contingencias: [], alertsMuted: false, cbTexts: {}, favNotes: [], attempts: {}, prefsApoyo: {}, turnosWeb: null };
+let pinnedNotes = new Set();
         let dismissedAlerts = new Set();
-        let turnoData = [];
         let histFilter = '';
-        let showInter = true;
         let vaultFilter = '';
         let histLimit = 30;
         let confirmCb = null;
@@ -2074,9 +2091,8 @@
             appData.favNotes = data.favNotes || [];
             appData.attempts = data.attempts || {};
             Object.keys(appData.attempts).forEach(k => { callbackAttempts[k] = appData.attempts[k]; });
-            appData.alertsMuted = data.alertsMuted || false;
+appData.alertsMuted = data.alertsMuted || false;
             updateAlertsUI();
-            autoLoadTurno();
             renderActiveCase();
 
             if (appData.draft) {
@@ -2094,11 +2110,11 @@
                 if (hasActiveCase()) updateDraftBadge(true);
             }
             renderPending();
-            renderHistory();
-            renderTurnoList();
+renderHistory();
             renderNotes();
             updateCounter();
             updateSchedBtn();
+            renderTurnoBar();
 
             // Aplicar fuente guardada
             if (data.prefsApoyo && data.prefsApoyo.fuente) {
@@ -2116,9 +2132,12 @@
         ipcRenderer.on('note-limit-reached', () => { showToast('⚠️ Máximo de 10 notas alcanzado', 'warning', 3000); });
         ipcRenderer.on('tool-closed', (e, id) => {
             openTools.delete(id);
+            hiddenTools.delete(id);
             const menuBtn = document.getElementById(`btn-${id}`);
             if (menuBtn) menuBtn.classList.remove('active');
         });
+        ipcRenderer.on('tool-minimized', (e, id) => { hiddenTools.add(id); });
+        ipcRenderer.on('tool-restored', (e, id) => { hiddenTools.delete(id); });
         ipcRenderer.on('request-close-confirm', () => {
             showConfirm('Hay un borrador sin guardar. ¿Salir de todas formas?', () => { ipcRenderer.send('confirm-close'); });
         });
@@ -2269,17 +2288,32 @@
         }
         setInterval(updateTick, 5000);
 
-        // Banner de alertas
-        function showBanner(text) {
-            bannerQueue.push(text);
+// Banner de alertas
+        function showBanner(text, opts) {
+            bannerQueue.push({ text, opts: opts || null });
             processBanner();
         }
         function processBanner() {
             if (isBannerShowing) return;
             if (!bannerQueue.length) return;
             isBannerShowing = true;
+            const item = bannerQueue.shift();
             const b = document.getElementById('banner');
-            document.getElementById('banner-text').textContent = bannerQueue.shift();
+            document.getElementById('banner-text').textContent = item.text;
+            const act = document.getElementById('banner-action');
+            if (item.opts && item.opts.action) {
+                act.style.display = 'inline-block';
+                act.textContent = item.opts.action.label;
+                act.onclick = (e) => {
+                    e.stopPropagation();
+                    if (item.opts.action.firma) ipcRenderer.send('open-firma');
+                    else if (item.opts.action.onClick) item.opts.action.onClick();
+                    dismissBanner();
+                };
+            } else {
+                act.style.display = 'none';
+                act.onclick = null;
+            }
             b.classList.add('show');
             clearTimeout(bannerTimer);
             bannerTimer = setTimeout(() => { dismissBanner(); }, 8000);
@@ -2898,63 +2932,162 @@
             ipcRenderer.send('export-history', { content, defaultName: def });
         }
 
+// ============================================================
+        // ALARMAS DE TURNOS WEB (breaks, colación, firma entrada/salida)
         // ============================================================
-        // TURNO
-        // ============================================================
-        function autoLoadTurno() {
-            if (!appData.horario) return;
-            const hoyObj = new Date();
-            const hoyStr = `${hoyObj.getFullYear()}-${String(hoyObj.getMonth() + 1).padStart(2, '0')}-${String(hoyObj.getDate()).padStart(2, '0')}`;
-            const h = appData.horario[hoyStr];
-            if (h) {
-                const fixed = [
-                    { name: 'Entrada', icon: '🟢', start: h.inicio },
-                    { name: '1° Break', icon: '☕', start: h.b1 ? h.b1.split('–')[0] : '' },
-                    { name: 'Colación', icon: '🍽️', start: h.lunch ? h.lunch.split('–')[0] : '' },
-                    { name: '2° Break', icon: '☕', start: h.b2 ? h.b2.split('–')[0] : '' },
-                    { name: 'Salida', icon: '🔴', start: h.fin }
-                ];
-                turnoData = fixed;
-                appData.turno = { data: fixed };
-                renderTurnoList();
+        const ADELANTO_MIN = 3; // avisar minutos antes del inicio del bloque
+        const turnosNotificados = {};
+
+        function fechaISO(da) {
+            return `${da.getFullYear()}-${String(da.getMonth() + 1).padStart(2, '0')}-${String(da.getDate()).padStart(2, '0')}`;
+        }
+
+        function parseFechaTurno(f) {
+            if (!f) return null;
+            f = String(f).trim();
+            let y, m, dd;
+            let m1 = f.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (m1) { y = +m1[1]; m = +m1[2]; dd = +m1[3]; }
+            let m2 = f.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+            if (m2) { dd = +m2[1]; m = +m2[2]; y = +m2[3]; }
+            if (y == null || m < 1 || m > 12 || dd < 1 || dd > 31) return null;
+            return { y, m, dd, iso: `${y}-${String(m).padStart(2, '0')}-${String(dd).padStart(2, '0')}` };
+        }
+
+        function horasDeTurno(hhmm) {
+            const mm = String(hhmm || '').match(/(\d{1,2}):(\d{2})/);
+            if (!mm) return null;
+            return { h: +mm[1], min: +mm[2] };
+        }
+
+        function checkTurnosAlarmas() {
+            const tw = appData.turnosWeb;
+            if (!tw || !tw.dias || !tw.dias.length) return;
+            const now = new Date();
+            const hoyISO = fechaISO(now);
+
+            Object.keys(turnosNotificados).forEach(k => {
+                if (k.split('|')[0] < hoyISO) delete turnosNotificados[k];
+            });
+
+            tw.dias.forEach(d => {
+                if (d.descanso || !d.bloques) return;
+                const pf = parseFechaTurno(d.fecha);
+                if (!pf) return;
+                const diffDias = pf.iso.localeCompare(hoyISO);
+                if (diffDias < 0 || diffDias > 0) return; // solo hoy
+                const labelDia = 'Hoy';
+
+                d.bloques.forEach(b => {
+                    const t = horasDeTurno(b.ini);
+                    if (!t) return;
+                    const dt = new Date(pf.y, pf.m - 1, pf.dd, t.h, t.min);
+                    const inicioReal = dt.getTime();
+                    const aviso = inicioReal - ADELANTO_MIN * 60000;
+                    const key = `${pf.iso}|${b.tipo}`;
+
+                    if (now.getTime() >= aviso && now.getTime() <= inicioReal + 5 * 60000 && !turnosNotificados[key] && !appData.alertsMuted) {
+                        turnosNotificados[key] = true;
+                        const msg = `${labelDia} a las ${b.ini} · ${b.label}`;
+                        if (b.tipo === 'entrada') {
+                            showBanner(`🟢 ${msg} — ¡Firma tu entrada!`, { action: { label: '✍ Firmar entrada', firma: true } });
+                        } else if (b.tipo === 'salida') {
+                            showBanner(`🔴 ${msg} — ¡Firma tu salida!`, { action: { label: '✍ Firmar salida', firma: true } });
+                        } else {
+                            showBanner(`⏰ ${msg}`, null);
+                        }
+                    }
+                });
+            });
+        }
+        setInterval(checkTurnosAlarmas, 15000);
+
+        // Barra de turno (cuenta regresiva en tiempo real)
+        const TURNOS_LABEL = { entrada: 'Entrada', break1: '1° Break', colacion: 'Colación', break2: '2° Break', salida: 'Fin de turno' };
+        const TURNOS_ICON = { entrada: '🟢', break1: '☕', colacion: '🍽️', break2: '☕', salida: '🔴' };
+
+        function turnoHoy() {
+            const tw = appData.turnosWeb;
+            if (!tw || !tw.dias || !tw.dias.length) return null;
+            const hoy = fechaISO(new Date());
+            const d = tw.dias.find(x => parseFechaTurno(x.fecha) && parseFechaTurno(x.fecha).iso === hoy);
+            return d && !d.descanso ? d : null;
+        }
+
+        function dtDelDia(diaObj, hhmm) {
+            const t = horasDeTurno(hhmm);
+            if (!t) return null;
+            const pf = parseFechaTurno(diaObj.fecha);
+            if (!pf) return null;
+            return new Date(pf.y, pf.m - 1, pf.dd, t.h, t.min);
+        }
+
+        function renderTurnoBar() {
+            const el = document.getElementById('turno-countdown');
+            if (!el) return;
+            const d = turnoHoy();
+            if (!d || !d.bloques) {
+                el.textContent = '⏱ Sin turno cargado hoy · clic para ver y cargar en Turnos Web';
+                return;
+            }
+            const now = new Date();
+            let next = null;
+            for (const b of d.bloques) {
+                if (b.tipo === 'salida') break; // la salida siempre es el último hito
+                const dt = dtDelDia(d, b.ini);
+                if (dt && dt.getTime() >= now.getTime()) { next = b; break; }
+            }
+            if (!next) {
+                const sal = d.bloques.find(b => b.tipo === 'salida');
+                if (sal) { next = sal; } else { next = null; }
+            }
+            if (next) {
+                const dt = dtDelDia(d, next.ini);
+                if (!dt) { el.textContent = '⏱ Turno cargado · clic para ver detalles'; return; }
+                const min = Math.max(0, Math.round((dt.getTime() - now.getTime()) / 60000));
+                const lbl = TURNOS_LABEL[next.tipo] || next.label || next.tipo;
+                const icon = TURNOS_ICON[next.tipo] || '';
+                el.innerHTML = `<span class="muted">${icon} Faltan ${min} minuto${min === 1 ? '' : 's'} para ${lbl}</span>`;
+            } else {
+                el.innerHTML = '<span class="muted">⏱ Turno del día finalizado · clic para ver</span>';
             }
         }
-        function toggleTurno() {
-            const b = document.getElementById('turno-body');
-            const c = document.getElementById('chev-turno');
-            const o = b.classList.contains('open');
-            b.classList.toggle('open', !o);
-            c.classList.toggle('open', !o);
-        }
-        function renderTurno() {
-            if (appData.turno && appData.turno.data) {
-                turnoData = appData.turno.data;
-                renderTurnoList();
+
+        function renderTurnoPanel() {
+            const list = document.getElementById('turno-hoy-list');
+            if (!list) return;
+            const d = turnoHoy();
+            if (!d || !d.bloques) {
+                list.innerHTML = '<div class="trow"><span class="t-icon">💤</span><span class="t-name">No hay turno para hoy</span></div>';
+                return;
             }
-        }
-        function renderTurnoList() {
-            const list = document.getElementById('turno-list');
             list.innerHTML = '';
-            turnoData.forEach(ev => {
+            d.bloques.forEach(b => {
                 const row = document.createElement('div');
-                row.className = 't-row' + (ev.inter ? ' inter' : '') + ((!showInter && ev.inter) ? ' hide-inter' : '');
-                row.innerHTML = `<span class="t-icon">${ev.icon}</span><span class="t-name">${esc(ev.name)}</span><span class="t-time">${esc(ev.start)}</span>`;
+                row.className = 'trow';
+                row.innerHTML = `<span class="t-icon">${TURNOS_ICON[b.tipo] || ''}</span><span class="t-name">${TURNOS_LABEL[b.tipo] || b.label || b.tipo}</span><span class="t-time">${b.ini}${b.fin && b.fin !== b.ini ? ' – ' + b.fin : ''}</span>`;
                 list.appendChild(row);
             });
         }
-        function syncTurno(e) {
-            e.stopPropagation();
-            autoLoadTurno();
-            showToast('🔄 Turno actualizado', 'info');
+
+        function toggleTurnoPanel(e) {
+            if (e) e.stopPropagation();
+            const p = document.getElementById('turno-panel');
+            if (!p) return;
+            p.classList.toggle('open');
+            const c = document.getElementById('chev-turno');
+            if (c) c.classList.toggle('open');
+            renderTurnoBar();
+            renderTurnoPanel();
         }
-        function toggleInter(e) {
-            e.stopPropagation();
-            showInter = !showInter;
-            const btn = document.getElementById('btn-inter');
-            btn.classList.toggle('on', showInter);
-            renderTurnoList();
-        }
-        function cargarTurno() { autoLoadTurno(); }
+
+        setInterval(renderTurnoBar, 30000);
+
+        ipcRenderer.on('turnos-web-updated', (e, data) => {
+            appData.turnosWeb = data;
+            renderTurnoBar();
+            renderTurnoPanel();
+        });
 
         // ============================================================
         // NOTAS
@@ -3047,15 +3180,9 @@
             document.getElementById('footer-counter').textContent = `Casos: ${(appData.history || []).length} hist · ${(appData.pending || []).length} pend`;
         }
 
-        // Easter egg (huevo de pascua)
+// Easter egg (huevo de pascua): abre una ventana independiente 600×500 con imagen y música
         function openEasterEgg() {
-            const ov = document.getElementById('easter-egg-overlay');
-            if (ov) ov.style.display = 'flex';
-        }
-        function closeEasterEgg(e) {
-            e.stopPropagation();
-            const ov = document.getElementById('easter-egg-overlay');
-            if (ov) ov.style.display = 'none';
+            ipcRenderer.send('open-easter-egg');
         }
         // Activar con 5 clics rápidos en el contador del footer
         let eggClicks = 0;
@@ -3072,6 +3199,35 @@
                 }
             });
         }
+
+        // Activar con código Konami mientras el mouse está sobre el botón 🛠️ Herramientas
+        const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIdx = 0;
+        let konamiArmed = false;
+        let konamiTimer = null;
+        const drawerBtn = document.getElementById('btn-drawer');
+        if (drawerBtn) {
+            drawerBtn.addEventListener('mouseenter', () => { konamiArmed = true; konamiIdx = 0; clearTimeout(konamiTimer); });
+            drawerBtn.addEventListener('mouseleave', () => { konamiArmed = false; konamiIdx = 0; clearTimeout(konamiTimer); });
+        }
+        document.addEventListener('keydown', (e) => {
+            if (!konamiArmed) return;
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            if (key === KONAMI[konamiIdx]) {
+                konamiIdx++;
+                clearTimeout(konamiTimer);
+                if (konamiIdx >= KONAMI.length) {
+                    konamiIdx = 0;
+                    konamiArmed = false;
+                    openEasterEgg();
+                } else {
+                    konamiTimer = setTimeout(() => { konamiIdx = 0; }, 3000);
+                }
+            } else {
+                konamiIdx = key === KONAMI[0] ? 1 : 0;
+                clearTimeout(konamiTimer);
+            }
+        });
 
         // Toast de inicio
         setTimeout(() => {

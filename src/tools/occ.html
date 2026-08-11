@@ -108,6 +108,7 @@ body{display:flex;flex-direction:column;border:1px solid var(--border2);}
 <div id="hdr">
   <span id="hdr-title">🧮 Calculadora Comercial</span>
   <button class="hbtn danger" onclick="borrarTodo()" title="Restablecer">🗑</button>
+  <button class="hbtn" onclick="ipcRenderer.send('minimize-tool','occ')" title="Minimizar">—</button>
   <button class="hbtn" onclick="ipcRenderer.send('close-tool','occ')">✕</button>
 </div>
 
@@ -273,10 +274,11 @@ ipcRenderer.on('init-occ', (e, data) => {
       renderCards('occ'); renderCards('nc');
     } catch(err) {}
   }
-  const hoy = new Date().toISOString().split('T')[0];
+  const n = new Date();
+  const hoy = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
   document.getElementById('occ-fecha').value = (data && data.occFecha) || hoy;
   if (!document.getElementById('nc-mes').value) {
-    const n = new Date(); document.getElementById('nc-mes').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+    const n2 = new Date(); document.getElementById('nc-mes').value = `${n2.getFullYear()}-${String(n2.getMonth()+1).padStart(2,'0')}`;
   }
   switchTab(tabActual, false);
   calcularOCC(); calcularNC();
@@ -429,8 +431,9 @@ function guardarEstado() {
 function borrarTodo() {
   cicloSel = null; occCards = []; ncCards = [];
   document.querySelectorAll('.ciclo-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('occ-fecha').value = new Date().toISOString().split('T')[0];
-  const n = new Date(); document.getElementById('nc-mes').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
+  const n = new Date();
+  document.getElementById('occ-fecha').value = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+  const n2 = new Date(); document.getElementById('nc-mes').value = `${n2.getFullYear()}-${String(n2.getMonth()+1).padStart(2,'0')}`;
   document.getElementById('prep-excepcion').checked = false; togglePrepagoExc(); document.getElementById('prep-num').value = '';
   resetOCC(); resetNC(); renderCards('occ'); renderCards('nc'); guardarEstado();
 }

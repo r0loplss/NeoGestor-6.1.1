@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #161b27;
+            --surface2: #1c2333;
+            --surface3: #232c3f;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.12);
+            --text: #e2e8f0;
+            --muted: #8892a4;
+            --faint: #4a5568;
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font: 'Segoe UI', system-ui, sans-serif;
+            --radius: 5px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: var(--font);
+            font-size: 13px;
+            color: var(--text);
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+        }
+        #hdr {
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            height: 32px;
+            flex-shrink: 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            border-radius: 6px 6px 0 0;
+            -webkit-app-region: drag;
+            user-select: none;
+        }
+        #hdr-title {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hbtn {
+            -webkit-app-region: no-drag;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: var(--font);
+        }
+        .hbtn:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+        #main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        #main::-webkit-scrollbar { width: 4px; }
+        #main::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+        .box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 10px;
+        }
+        .box-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
+        .tabs { display: flex; gap: 6px; }
+        .tab {
+            flex: 1;
+            padding: 7px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            color: var(--muted);
+            cursor: pointer;
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .tab:hover { background: var(--surface3); }
+        .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .rut-row { display: flex; gap: 6px; }
+        .rut-row input {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 14px;
+            padding: 8px;
+            outline: none;
+            font-family: var(--font);
+            letter-spacing: 1px;
+        }
+        .rut-row input:focus { border-color: var(--primary); }
+        .box-hint {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: rgba(34,197,94,0.08);
+            border: 1px solid rgba(34,197,94,0.25);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--success);
+            line-height: 1.5;
+        }
+        .man-note { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+        .day-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px;
+        }
+        .day-card h4 {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 8px;
+        }
+        .te-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .te-grid label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 10px;
+            color: var(--muted);
+        }
+        .te-grid input {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 13px;
+            padding: 6px;
+            font-family: var(--font);
+        }
+        .te-grid input:focus { outline: none; border-color: var(--primary); }
+        .te-full { grid-column: 1 / -1; }
+        .day-card .m-save { grid-column: 1 / -1; width: 100%; }
+        .te-grid input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+        .b-100 { width: 100%; margin-top: 10px; }
+        .btn-proc {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: var(--font);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .btn-proc:hover { background: #2563eb; }
+        .btn-proc.secondary {
+            background: var(--surface3);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-proc.secondary:hover { background: var(--surface2); }
+        #info-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--muted);
+            flex-wrap: wrap;
+        }
+        #info-nombre { font-weight: 700; color: var(--success); font-size: 12px; }
+        #info-carga { opacity: 0.7; }
+        #info-bar .spacer { flex: 1; }
+        .next-box { border: 1px solid rgba(59,130,246,0.4); background: rgba(59,130,246,0.1); }
+        #next-block { font-size: 12px; color: var(--text); }
+        #next-block strong { color: #fff; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        th, td { border: 1px solid var(--border); padding: 6px 4px; text-align: center; }
+        th {
+            background: var(--surface2);
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9px;
+        }
+        .hoy { background: rgba(59,130,246,0.15); }
+        .d-descanso td { color: var(--faint); }
+        .badge {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .b-45 { background: var(--primary); }
+        .b-30 { background: var(--success); }
+        .b-desc { background: var(--surface3); color: var(--muted); }
+        .b-ext { background: var(--warning); color: #000; }
+        .empty-msg { text-align: center; color: var(--faint); padding: 16px 0; font-size: 12px; }
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s ease-out;
+            max-width: 320px;
+        }
+        .toast.success { background: var(--success); }
+        .toast.warning { background: var(--warning); color: #000; }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--primary); }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hdr">
+        <span id="hdr-title">📅 Turnos</span>
+        <button class="hbtn" onclick="ipcRenderer.send('minimize-tool','horarios')" title="Minimizar">—</button>
+        <button class="hbtn" onclick="ipcRenderer.send('close-tool','horarios')">✕</button>
+    </div>
+
+    <div id="main">
+        <div class="box">
+            <div class="tabs">
+                <button class="tab active" id="tab-web" onclick="showTab('web')">🌐 Web (RUT)</button>
+                <button class="tab" id="tab-manual" onclick="showTab('manual')">✍️ Manual · Apoyos</button>
+            </div>
+        </div>
+
+        <div id="panel-web">
+            <div class="box">
+                <div class="box-desc">Ingresa tu <b>RUT sin dígito verificador</b> (ej: 18858549) para traer tus turnos desde la web.</div>
+                <div class="rut-row">
+                    <input type="text" id="inp-rut" maxlength="10" placeholder="RUT sin DV" autocomplete="off">
+                    <button class="btn-proc" id="btn-traer">📥 Traer turnos</button>
+                </div>
+                <div class="box-hint">💡 <b>Solo con ingresar tu RUT</b> se activarán automáticamente las alertas de <b>entrada</b>, <b>salida</b>, <b>breaks</b> y <b>colación</b>.</div>
+            </div>
+        </div>
+
+        <div id="panel-manual" style="display:none">
+            <div class="box">
+                <div class="man-note">🧑‍🔧 <b>Para apoyos sin web de turnos:</b> carga aquí tus <b>entrada</b>, <b>colación</b> y <b>salida</b> de cada día. Las alertas se activarán igual que con la web (en los apoyos no hay breaks).</div>
+                <div id="manual-list"></div>
+                <button class="btn-proc b-100" id="btn-add-dia">➕ Agregar turno día siguiente</button>
+            </div>
+        </div>
+
+        <div class="box next-box" id="next-box" style="display:none">
+            <div id="next-block"></div>
+        </div>
+
+        <div class="box" id="info-box" style="display:none">
+            <div id="info-bar">
+                <span id="info-nombre"></span>
+                <span id="info-carga"></span>
+                <span class="spacer"></span>
+                <button class="btn-proc secondary" id="btn-limpiar">🗑 Limpiar</button>
+            </div>
+        </div>
+
+        <div class="box">
+            <div id="days-container">
+                <div class="empty-msg">Aún no hay turnos cargados.</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+        const inpRut = document.getElementById('inp-rut');
+        const btnTraer = document.getElementById('btn-traer');
+        const btnLimpiar = document.getElementById('btn-limpiar');
+        const nextBox = document.getElementById('next-box');
+        const nextBlock = document.getElementById('next-block');
+        const infoBox = document.getElementById('info-box');
+        const infoNombre = document.getElementById('info-nombre');
+        const infoCarga = document.getElementById('info-carga');
+        const daysContainer = document.getElementById('days-container');
+
+        let turnos = null;
+
+        function showToast(msg, tipo = 'success', duracion = 2500) {
+            const c = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + tipo;
+            el.textContent = msg;
+            c.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.3s, transform 0.3s';
+                setTimeout(() => el.remove(), 400);
+            }, duracion);
+        }
+
+        function showTab(t) {
+            document.getElementById('tab-web').classList.toggle('active', t === 'web');
+            document.getElementById('tab-manual').classList.toggle('active', t === 'manual');
+            document.getElementById('panel-web').style.display = t === 'web' ? '' : 'none';
+            document.getElementById('panel-manual').style.display = t === 'manual' ? '' : 'none';
+            if (t === 'manual') renderManual();
+        }
+
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function parseFecha(f) {
+            if (!f) return null;
+            f = String(f).trim();
+            let y, m, dd;
+            let m1 = f.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (m1) { y = +m1[1]; m = +m1[2]; dd = +m1[3]; }
+            let m2 = f.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+            if (m2) { dd = +m2[1]; m = +m2[2]; y = +m2[3]; }
+            if (y == null || m < 1 || m > 12 || dd < 1 || dd > 31) return null;
+            return { y, m, dd, iso: `${y}-${pad(m)}-${pad(dd)}`, dt: new Date(y, m - 1, dd, 12, 0, 0) };
+        }
+
+        function horasDe(hhmm) {
+            const mm = String(hhmm || '').match(/(\d{1,2}):(\d{2})/);
+            if (!mm) return null;
+            return { h: +mm[1], min: +mm[2] };
+        }
+
+        function isoHoy() {
+            const n = new Date();
+            return `${n.getFullYear()}-${pad(n.getMonth() + 1)}-${pad(n.getDate())}`;
+        }
+
+        const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        function labelDia(pf) {
+            return `${DIAS[pf.dt.getDay()]} ${pf.dd} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][pf.m - 1]}`;
+        }
+
+        function tipoDia(d) {
+            if (d.descanso) return { txt: 'Descanso', cls: 'b-desc' };
+            const manual = !!(turnos && turnos.fuente === 'manual');
+            const hasB1 = !!d.break1, hasB2 = !!d.break2, hasCol = !!d.colacion;
+            if (hasB1 && hasB2) return { txt: '45h', cls: 'b-45' };
+            if (hasCol) return manual ? { txt: 'Apoyo', cls: 'b-30' } : { txt: '30/20h', cls: 'b-30' };
+            return { txt: '—', cls: 'b-desc' };
+        }
+
+        function colText(d) {
+            if (!d.colacion) return d.ext ? `${esc(d.ext.ini)}–${esc(d.ext.fin)}` : '--';
+            const fin = d.ext && d.ext.fin ? d.ext.fin : d.colacion.fin;
+            return `${esc(d.colacion.ini)}–${esc(fin)}${d.ext ? ' <span class="badge b-ext">+ext</span>' : ''}`;
+        }
+
+        function diaHoyIdx(pf) {
+            return pf && isoHoy() === pf.iso;
+        }
+
+        function proximoBloque() {
+            if (!turnos || !turnos.dias) return null;
+            const now = new Date();
+            const sorted = [...turnos.dias].sort((a, b) => (parseFecha(a.fecha)?.iso || '').localeCompare(parseFecha(b.fecha)?.iso || ''));
+            for (const d of sorted) {
+                if (d.descanso) continue;
+                const pf = parseFecha(d.fecha);
+                if (!pf) continue;
+                for (const b of d.bloques) {
+                    const t = horasDe(b.ini);
+                    if (!t) continue;
+                    const dt = new Date(pf.y, pf.m - 1, pf.dd, t.h, t.min);
+                    if (dt >= now) return { dia: labelDia(pf), bloque: b, dt };
+                }
+            }
+            return null;
+        }
+
+        function renderNext() {
+            const n = proximoBloque();
+            if (!n) {
+                nextBox.style.display = 'none';
+                return;
+            }
+            const diffMin = Math.round((n.dt.getTime() - Date.now()) / 60000);
+            const en = diffMin <= 0 ? 'ya' : `en ${diffMin} min`;
+            nextBlock.innerHTML = `▶ <strong>Próximo:</strong> ${n.bloque.icon} ${n.bloque.label} · ${n.dia} a las <strong>${esc(n.bloque.ini)}</strong> (${en})`;
+            nextBox.style.display = 'block';
+        }
+
+        function renderDias() {
+            if (!turnos || !turnos.dias || !turnos.dias.length) {
+                daysContainer.innerHTML = '<div class="empty-msg">No hay turnos para mostrar.</div>';
+                nextBox.style.display = 'none';
+                return;
+            }
+            const sorted = [...turnos.dias].sort((a, b) => (parseFecha(a.fecha)?.iso || '').localeCompare(parseFecha(b.fecha)?.iso || ''));
+            let html = `<table>
+                <thead><tr><th>Día</th><th>Entrada</th><th>1° Break</th><th>Colación</th><th>2° Break</th><th>Salida</th><th>Tipo</th></tr></thead><tbody>`;
+            sorted.forEach(d => {
+                const pf = parseFecha(d.fecha);
+                const hoy = pf ? diaHoyIdx(pf) : false;
+                const tip = tipoDia(d);
+                if (d.descanso) {
+                    html += `<tr class="d-descanso${hoy ? ' hoy' : ''}"><td>${esc(pf ? labelDia(pf) : d.fecha)}</td><td colspan="6">🚫 ${esc(d.detalle || 'No trabajado')}</td></tr>`;
+                    return;
+                }
+                const br1 = d.break1 ? `${esc(d.break1.ini)}–${esc(d.break1.fin)}` : '--';
+                const br2 = d.break2 ? `${esc(d.break2.ini)}–${esc(d.break2.fin)}` : '--';
+                html += `<tr${hoy ? ' class="hoy"' : ''}>
+                    <td><b>${esc(pf ? labelDia(pf) : d.fecha)}</b>${hoy ? '<br><span class="badge b-45">HOY</span>' : ''}</td>
+                    <td>${esc(d.entrada || '--')}</td>
+                    <td>${br1}</td>
+                    <td>${colText(d)}</td>
+                    <td>${br2}</td>
+                    <td>${esc(d.salida || '--')}</td>
+                    <td><span class="badge ${tip.cls}">${tip.txt}</span></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            daysContainer.innerHTML = html;
+            renderNext();
+        }
+
+        function renderInfo() {
+            if (!turnos) return;
+            infoBox.style.display = 'flex';
+            infoNombre.textContent = `👤 ${esc(turnos.nombre)}`;
+            const carga = turnos.fuente === 'manual'
+                ? ' · carga manual' + (turnos.rut && turnos.rut !== 'MANUAL' ? ` (RUT ${esc(turnos.rut)})` : '')
+                : ` · RUT ${esc(turnos.rut)} · ${new Date(turnos.fechaCarga).toLocaleString('es-CL')}`;
+            infoCarga.textContent = carga;
+        }
+
+        async function traerTurnos() {
+            const rut = inpRut.value.replace(/\D/g, '');
+            if (!rut) {
+                showToast('⚠️ Ingresa tu RUT sin dígito verificador.', 'warning');
+                return;
+            }
+            btnTraer.disabled = true;
+            btnTraer.textContent = '⌛ Consultando...';
+            try {
+                const res = await ipcRenderer.invoke('fetch-turnos', rut);
+                if (!res || !res.ok) {
+                    showToast('❌ ' + ((res && res.error) || 'Error de red'), 'error');
+                    return;
+                }
+                if (res.nombre === 'USUARIO NO EXISTE' && (!res.dias || !res.dias.length)) {
+                    showToast('⚠️ RUT no encontrado en la web de turnos.', 'warning', 3000);
+                }
+                turnos = res;
+                ipcRenderer.send('save-turnos', res);
+                renderInfo();
+                renderDias();
+                showToast(`✅ ${res.dias.length} días cargados${res.nombre !== 'USUARIO NO EXISTE' ? ' · ' + res.nombre : ''}`, 'success');
+            } catch (err) {
+                showToast('❌ ' + (err.message || 'Error'), 'error');
+            } finally {
+                btnTraer.disabled = false;
+                btnTraer.textContent = '📥 Traer turnos';
+            }
+        }
+
+        // ============================================================
+        // CARGA MANUAL (apoyos) — hasta 10 días
+        // ============================================================
+        const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+        const MAX_DIAS = 10;
+        let manualDias = [];
+
+        function addDaysISO(fechaStr, n) {
+            const pf = parseFecha(fechaStr) || parseFecha(isoHoy());
+            const dt = new Date(pf.y, pf.m - 1, pf.dd);
+            dt.setDate(dt.getDate() + n);
+            return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+        }
+
+        function diaCompleto(d) {
+            return !!(d && (d.entrada || d.colacion || d.salida));
+        }
+
+        function renderManual() {
+            const list = document.getElementById('manual-list');
+            if (!list) return;
+            const hoy = isoHoy();
+            // eliminar días ya pasados (el primero desaparece al cumplirse el día)
+            manualDias = manualDias.filter(d => d.fecha >= hoy);
+            if (!manualDias.length) {
+                manualDias.push({ fecha: hoy, entrada: '', colacion: '', salida: '' });
+            }
+            manualDias.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+            list.innerHTML = '';
+            manualDias.forEach((d, idx) => {
+                const pf = parseFecha(d.fecha);
+                const esHoy = d.fecha === hoy;
+                const titulo = esHoy ? 'Hoy' : (DIAS[pf.dt.getDay()] + ' ' + pf.dd + ' ' + MESES[pf.m - 1]);
+                const card = document.createElement('div');
+                card.className = 'day-card';
+                card.innerHTML = `
+                    <h4>${esc(titulo)}${esHoy ? ' <span class="badge b-45">HOY</span>' : ''}</h4>
+                    <div class="te-grid">
+                        <label>🟢 Entrada<input type="time" class="m-entrada" data-fecha="${d.fecha}"></label>
+                        <label>🔴 Salida<input type="time" class="m-salida" data-fecha="${d.fecha}"></label>
+                        <label>🍽️ Colación<input type="time" class="m-colacion" data-fecha="${d.fecha}"></label>
+                        <span class="te-full"></span>
+                        <button class="btn-proc secondary m-save">💾 Guardar</button>
+                    </div>`;
+                card.querySelector('.m-entrada').value = d.entrada || '';
+                card.querySelector('.m-salida').value = d.salida || '';
+                card.querySelector('.m-colacion').value = d.colacion || '';
+                card.querySelector('.m-save').onclick = () => guardarDia(d.fecha, card);
+                list.appendChild(card);
+            });
+
+            // botón "Agregar día siguiente" solo tras guardar el último
+            const ultimo = manualDias[manualDias.length - 1];
+            const addBtn = document.getElementById('btn-add-dia');
+            addBtn.style.display = (manualDias.length < MAX_DIAS && diaCompleto(ultimo)) ? '' : 'none';
+        }
+
+        function guardarDia(fecha, card) {
+            const entrada = card.querySelector('.m-entrada').value;
+            const colacion = card.querySelector('.m-colacion').value;
+            const salida = card.querySelector('.m-salida').value;
+            if (!entrada && !colacion && !salida) {
+                showToast('⚠️ Completa al menos un horario (entrada, colación o salida).', 'warning');
+                return;
+            }
+            const d = manualDias.find(x => x.fecha === fecha);
+            if (d) { d.entrada = entrada; d.colacion = colacion; d.salida = salida; }
+            persistManual();
+            renderManual();
+            showToast('✅ Turno guardado. Alertas activadas para ese día.', 'success');
+        }
+
+        function addDia() {
+            if (manualDias.length >= MAX_DIAS) { showToast('⚠️ Máximo 10 turnos visibles.', 'warning'); return; }
+            const last = manualDias[manualDias.length - 1];
+            if (!diaCompleto(last)) { showToast('⚠️ Guarda primero el turno anterior.', 'warning'); return; }
+            manualDias.push({ fecha: addDaysISO(last.fecha, 1), entrada: '', colacion: '', salida: '' });
+            renderManual();
+            const cards = document.querySelectorAll('#manual-list .day-card');
+            const newCard = cards[cards.length - 1];
+            if (newCard) newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function persistManual() {
+            const dias = manualDias
+                .filter(d => diaCompleto(d))
+                .map(d => {
+                    const bloques = [];
+                    if (d.entrada) bloques.push({ tipo: 'entrada', icon: '🟢', label: 'Entrada', ini: d.entrada, fin: d.entrada });
+                    if (d.colacion) bloques.push({ tipo: 'colacion', icon: '🍽️', label: 'Colación', ini: d.colacion, fin: d.colacion });
+                    if (d.salida) bloques.push({ tipo: 'salida', icon: '🔴', label: 'Fin de turno', ini: d.salida, fin: d.salida });
+                    bloques.sort((a, b) => a.ini.localeCompare(b.ini));
+                    return {
+                        fecha: d.fecha, descanso: false,
+                        entrada: d.entrada || null,
+                        colacion: d.colacion ? { ini: d.colacion, fin: d.colacion } : null,
+                        break1: null, break2: null, ext: null,
+                        salida: d.salida || null,
+                        bloques
+                    };
+                });
+            turnos = { ok: true, fuente: 'manual', nombre: 'Apoyo (manual)', rut: 'MANUAL', fechaCarga: new Date().toISOString(), dias };
+            ipcRenderer.send('save-turnos', turnos);
+            renderInfo();
+            renderDias();
+        }
+
+        function limpiar() {
+            turnos = null;
+            manualDias = [];
+            inpRut.value = '';
+            infoBox.style.display = 'none';
+            nextBox.style.display = 'none';
+            daysContainer.innerHTML = '<div class="empty-msg">Aún no hay turnos cargados.</div>';
+            ipcRenderer.send('save-turnos', { ok: true, nombre: '', rut: '', dias: [], fechaCarga: new Date().toISOString() });
+            renderManual();
+            showToast('🗑 Turnos limpiados. Alertas desactivadas.', 'info');
+        }
+
+        btnTraer.addEventListener('click', traerTurnos);
+        btnLimpiar.addEventListener('click', limpiar);
+        document.getElementById('btn-add-dia').addEventListener('click', addDia);
+        inpRut.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') traerTurnos();
+            if (!/^\d$/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End' && !e.ctrlKey) {
+                e.preventDefault();
+            }
+        });
+
+        ipcRenderer.on('init-turnos', (e, data) => {
+            if (data && data.ok) {
+                turnos = data;
+                renderInfo();
+                renderDias();
+                if (data.fuente === 'manual') {
+                    manualDias = (data.dias || []).map(d => ({
+                        fecha: d.fecha,
+                        entrada: d.entrada || '',
+                        colacion: (d.colacion && d.colacion.ini) || '',
+                        salida: d.salida || ''
+                    }));
+                }
+                renderManual();
+            }
+        });
+
+        renderManual();
+
+        showToast('📅 Turnos. Carga tus turnos para activar las alertas.', 'info', 2500);
+    </script>
+</body>
+</html>

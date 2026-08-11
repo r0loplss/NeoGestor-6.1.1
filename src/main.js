@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, screen, globalShortcut } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, screen, globalShortcut, shell, net } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 
@@ -16,7 +16,6 @@ const HTML = {
   index:         path.join(SRC,   'index.html'),
   occ:           path.join(TOOLS, 'occ.html'),
   enlaces:       path.join(TOOLS, 'enlaces.html'),
-  horario:       path.join(TOOLS, 'horario.html'),
   note:          path.join(TOOLS, 'note.html'),
   contingencias: path.join(TOOLS, 'contingencias.html'),
   trafico:       path.join(TOOLS, 'trafico.html'),
@@ -27,7 +26,10 @@ const HTML = {
   tipificaciones:path.join(TOOLS, 'tipificaciones.html'),
   fast:          path.join(TOOLS, 'fast.html'),
   fastBtn:       path.join(TOOLS, 'fast-btn.html'),
-  vault:         path.join(TOOLS, 'vault.html')
+  vault:         path.join(TOOLS, 'vault.html'),
+  horarios:      path.join(TOOLS, 'horarios.html'),
+  acerca:        path.join(TOOLS, 'acerca.html'),
+  easter:        path.join(TOOLS, 'easter.html')
 };
 
 let mainWin = null;
@@ -44,15 +46,15 @@ let alertDataCache = null;
 const TOOLS_CONFIG = {
   'occ':           { file: HTML.occ,           w: 320, h: 650, resize: false, top: false },
   'enlaces':       { file: HTML.enlaces,       w: 320, h: 600, resize: true,  top: false },
-  'horario':       { file: HTML.horario,       w: 300, h: 500, resize: true,  top: false },
   'contingencias': { file: HTML.contingencias, w: 340, h: 500, resize: true,  top: true  },
   'trafico':       { file: HTML.trafico,       w: 450, h: 600, resize: true,  top: false },
   // NUEVAS HERRAMIENTAS
   'calculadora-dias': { file: HTML.calculadora, w: 380, h: 480, resize: true, top: false },
   'ciclos':           { file: HTML.ciclos,     w: 480, h: 580, resize: true, top: false },
-  'tipificaciones':   { file: HTML.tipificaciones, w: 580, h: 620, resize: true, top: false },
+  'tipificaciones':   { file: HTML.tipificaciones, w: 1000, h: 700, resize: true, top: false },
   'fast':             { file: HTML.fast,       w: 1000, h: 900, resize: true, top: false },
-  'notas-vault':      { file: HTML.vault,      w: 460, h: 560, resize: true,  top: false }
+  'notas-vault':      { file: HTML.vault,      w: 460, h: 560, resize: true,  top: false },
+  'horarios':         { file: HTML.horarios,   w: 460, h: 580, resize: true,  top: false }
 };
 
 // ── LÓGICA DE PERSISTENCIA SEGURA (COLA + BACKUP + ESCRITURA ATÓMICA) ──
@@ -525,6 +527,7 @@ app.whenReady().then(() => {
   const sizeOk = posOk && pos.width > 0 && pos.height > 0;
   mainWin = new BrowserWindow({ 
     width: sizeOk ? pos.width : 330, height: sizeOk ? pos.height : 720,
+    minWidth: 60, minHeight: 40,
     x: posOk ? pos.x : undefined, y: posOk ? pos.y : undefined,
     frame: false, resizable: true, movable: true, 
     alwaysOnTop: getAlwaysOnTopPreference(),
@@ -588,9 +591,79 @@ ipcMain.on('minimize-main', () => {
 ipcMain.on('save-data', (e, patch) => saveData(patch));
 ipcMain.on('save-occ', (e, state) => saveData({ occState: state }));
 ipcMain.on('save-enlaces', (e, data) => saveData({ enlaces: data.enlaces, tags: data.tags }));
-ipcMain.on('save-horario', (e, data) => saveData({ horario: data.horario }));
 ipcMain.on('save-contingencias', (e, data) => saveData({ contingencias: data }));
 ipcMain.on('save-pos', (e, patch) => savePos(patch));
+
+// ── IPC: TURNOS WEB (Extranet Entel) ──
+const TURNOS_BASE = 'http://192.168.223.158/turnos_agentesVer';
+const FIRMA_URL = 'https://movil.asisscad.cl/ingreso.aspx';
+
+function normalizarTurno(h) {
+  if (!h || typeof h !== 'object') return null;
+  const d = { fecha: h.fecha != null ? String(h.fecha) : '' };
+  if (h.segmento != null) {
+    d.descanso = true;
+    d.detalle = String(h.segmento);
+    return d;
+  }
+  const mk = (i, f) => (i != null && f != null) ? { ini: String(i).trim(), fin: String(f).trim() } : null;
+  d.entrada = h.inicio != null ? String(h.inicio).trim() : null;
+  d.salida = h.fin != null ? String(h.fin).trim() : null;
+  d.break1 = mk(h.break1_ini, h.break1_fin);   // 1° Break
+  d.colacion = mk(h.break2_ini, h.break2_fin); // Colación
+  d.ext = mk(h.break3_ini, h.break3_fin);      // Ext: se suma al bloque original
+  d.break2 = mk(h.break4_ini, h.break4_fin);   // 2° Break
+
+  // Bloques efectivos (ext suma al bloque base; por sí solo no genera alerta)
+  const bloques = [];
+  if (d.entrada) bloques.push({ tipo: 'entrada', icon: '🟢', ini: d.entrada, fin: d.entrada });
+  if (d.break1) bloques.push({ tipo: 'break1', icon: '☕', ini: d.break1.ini, fin: d.break1.fin });
+  let colIni = d.colacion ? d.colacion.ini : (d.ext ? d.ext.ini : null);
+  let colFin = d.colacion ? d.colacion.fin : (d.ext ? d.ext.fin : null);
+  if (d.colacion && d.ext && d.ext.fin) colFin = d.ext.fin;
+  if (colIni != null) bloques.push({ tipo: 'colacion', icon: '🍽️', ini: colIni, fin: colFin != null ? colFin : colIni, ext: !!d.ext });
+  if (d.break2) bloques.push({ tipo: 'break2', icon: '☕', ini: d.break2.ini, fin: d.break2.fin });
+  if (d.salida) bloques.push({ tipo: 'salida', icon: '🔴', ini: d.salida, fin: d.salida });
+  d.bloques = bloques;
+  return d;
+}
+
+async function consultarTurnos(rut) {
+  const rutLimpio = String(rut || '').replace(/\D/g, '');
+  if (!rutLimpio) throw new Error('RUT vacío');
+  await net.fetch(TURNOS_BASE + '/Main.aspx');
+  const res = await net.fetch(TURNOS_BASE + '/Main.aspx/ConsultaTurno', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify({ rut: rutLimpio })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const json = await res.json();
+  const d = json && json.d;
+  if (!d || d.ret !== 'OK') throw new Error((d && d.msg) || 'Respuesta inválida');
+  const tur = (d.values && d.values[0]) || [];
+  const nom = (d.values && d.values[1]) || null;
+  const nombre = (nom && nom.KeyValue) ? String(nom.KeyValue) : 'USUARIO NO EXISTE';
+  const dias = Array.isArray(tur) ? tur.map(normalizarTurno).filter(Boolean) : [];
+  return { ok: true, nombre, rut: rutLimpio, dias, fechaCarga: new Date().toISOString() };
+}
+
+ipcMain.handle('fetch-turnos', async (e, rut) => {
+  try {
+    return await consultarTurnos(rut);
+  } catch (err) {
+    return { ok: false, error: (err && err.message) || 'Error de red' };
+  }
+});
+
+ipcMain.on('save-turnos', (e, data) => {
+  saveData({ turnosWeb: data });
+  if (mainWin && !mainWin.isDestroyed()) mainWin.webContents.send('turnos-web-updated', data);
+});
+
+ipcMain.on('open-firma', () => {
+  shell.openExternal(FIRMA_URL);
+});
 
 // ── IPC: PREFERENCIA ALWAYS ON TOP ──
 ipcMain.on('set-always-on-top', (e, value) => {
@@ -721,9 +794,14 @@ ipcMain.on('open-tool', (e, id) => {
 
   if (toolWins.has(id)) {
     const win = toolWins.get(id);
-    if (!win.isDestroyed()) { 
-      win.focus(); 
-      return; 
+    if (!win.isDestroyed()) {
+      if (win.isMinimized()) win.restore();
+      win.show();
+      win.focus();
+      if (mainWin && !mainWin.isDestroyed()) {
+        mainWin.webContents.send('tool-restored', id);
+      }
+      return;
     }
   }
 
@@ -744,8 +822,8 @@ ipcMain.on('open-tool', (e, id) => {
         win.webContents.send('init-occ', d.occState || null);
       } else if (id === 'enlaces') {
         win.webContents.send('init-enlaces', d.enlaces || null, d.tags || null);
-      } else if (id === 'horario') {
-        win.webContents.send('init-horario', d.horario || null);
+      } else if (id === 'horarios') {
+        win.webContents.send('init-turnos', d.turnosWeb || null);
       } else if (id === 'contingencias') {
         win.webContents.send('init-contingencias', d.contingencias || null);
       } else if (id === 'notas-vault') {
@@ -758,6 +836,17 @@ ipcMain.on('open-tool', (e, id) => {
     if (win && !win.isDestroyed()) {
       const [x, y] = win.getPosition();
       savePos({ [id]: { x, y } });
+    }
+  });
+
+  win.on('minimize', () => {
+    if (mainWin && !mainWin.isDestroyed()) {
+      mainWin.webContents.send('tool-minimized', id);
+    }
+  });
+  win.on('restore', () => {
+    if (mainWin && !mainWin.isDestroyed()) {
+      mainWin.webContents.send('tool-restored', id);
     }
   });
 
@@ -788,6 +877,53 @@ ipcMain.on('close-tool', (e, id) => {
   }
   const win = toolWins.get(id);
   if (win && !win.isDestroyed()) win.close();
+});
+
+// ── IPC: MINIMIZAR HERRAMIENTA (a la barra de tareas; el clic restaura) ──
+ipcMain.on('minimize-tool', (e, id) => {
+  if (id === 'fast' || !TOOLS_CONFIG[id]) return; // Fast queda excluido
+  const win = toolWins.get(id);
+  if (win && !win.isDestroyed() && !win.isMinimized()) {
+    win.minimize();
+  }
+});
+
+// ── IPC: VENTANA INDEPENDIENTE "ACERCA DE" (450×350) ──
+let acercaWin = null;
+ipcMain.on('open-acerca', () => {
+  if (acercaWin && !acercaWin.isDestroyed()) {
+    if (acercaWin.isMinimized()) acercaWin.restore();
+    acercaWin.show();
+    acercaWin.focus();
+    return;
+  }
+  acercaWin = new BrowserWindow({
+    width: 450, height: 350,
+    frame: false, resizable: false, movable: true,
+    alwaysOnTop: false,
+    webPreferences: { nodeIntegration: true, contextIsolation: false }
+  });
+  acercaWin.loadFile(HTML.acerca);
+  acercaWin.on('closed', () => { acercaWin = null; });
+});
+
+// ── IPC: VENTANA INDEPENDIENTE "EASTER EGG" (600×500) ──
+let easterWin = null;
+ipcMain.on('open-easter-egg', () => {
+  if (easterWin && !easterWin.isDestroyed()) {
+    if (easterWin.isMinimized()) easterWin.restore();
+    easterWin.show();
+    easterWin.focus();
+    return;
+  }
+  easterWin = new BrowserWindow({
+    width: 600, height: 500,
+    frame: false, transparent: true, resizable: false, movable: true,
+    alwaysOnTop: false,
+    webPreferences: { nodeIntegration: true, contextIsolation: false }
+  });
+  easterWin.loadFile(HTML.easter);
+  easterWin.on('closed', () => { easterWin = null; });
 });
 
 // ── IPC: NOTAS ──

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Easter Egg</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+        width: 100%; height: 100%;
+        overflow: hidden;
+        background: transparent;
+        user-select: none;
+        -webkit-app-region: drag;
+        cursor: default;
+    }
+
+    #stage {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px;
+    }
+    .eggwrap {
+        position: relative;
+        line-height: 0;
+    }
+    .eggwrap img {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        animation: eggPop 0.6s cubic-bezier(0.22, 1.4, 0.36, 1);
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        border: none;
+        border-radius: 50%;
+        background: #ef4444;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.55);
+        -webkit-app-region: no-drag;
+        transition: background 0.15s, transform 0.15s;
+    }
+    .close-btn:hover { background: #dc2626; transform: scale(1.1); }
+
+    @keyframes eggPop {
+        from { transform: scale(0.55); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+    }
+</style>
+</head>
+<body>
+    <div id="stage">
+        <div class="eggwrap">
+            <img src="../easteregg.jpg" alt="Secret" />
+            <button class="close-btn" onclick="window.close()" title="Cerrar (Esc)">✕</button>
+        </div>
+    </div>
+<script>
+    window.addEventListener('load', () => {
+        const audio = new Audio('../Eastereggmusic.mp3');
+        audio.loop = true;
+        audio.volume = 0.2;
+        audio.play().catch(() => {});
+    });
+
+    // Cerrar con la tecla Escape
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') window.close();
+    });
+</script>
+</body>
+</html>

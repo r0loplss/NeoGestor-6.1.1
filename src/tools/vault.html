@@ -82,6 +82,7 @@ body{display:flex;flex-direction:column;border:1px solid var(--border2);border-r
 <div id="hdr">
   <span id="hdr-title">📚 Bóveda</span>
   <button class="hbtn" id="btn-new-note" onclick="crearNota()" title="Crear nueva nota">➕ Nueva</button>
+  <button class="hbtn" onclick="ipcRenderer.send('minimize-tool','notas-vault')" title="Minimizar">—</button>
   <button class="hbtn danger" onclick="window.close()" title="Cerrar">✕</button>
 </div>
 
