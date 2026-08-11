@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gestor de Casos — Manual de Usuario</title>
+<style>
+    :root {
+        --azul: #2563eb;
+        --azul-osc: #1e40af;
+        --verde: #059669;
+        --ambar: #d97706;
+        --rojo: #dc2626;
+        --violeta: #7c3aed;
+        --teal: #0d9488;
+        --gris: #64748b;
+        --linea: #e2e8f0;
+        --bg-soft: #f8fafc;
+        --tinta: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        color: var(--tinta);
+        line-height: 1.55;
+        font-size: 14px;
+        background: #fff;
+    }
+    .page { max-width: 900px; margin: 0 auto; padding: 24px 40px 80px; }
+
+    /* ---------- PORTADA ---------- */
+    .portada {
+        min-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        border-bottom: 4px solid var(--azul);
+    }
+    .portada .app-ico { font-size: 52px; }
+    .portada h1 {
+        font-size: 40px;
+        margin: 10px 0 4px;
+        letter-spacing: 0.5px;
+        color: var(--azul-osc);
+    }
+    .portada .sub { font-size: 18px; color: var(--gris); margin-bottom: 28px; }
+    .portada .tarjetas {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 18px 0 30px;
+    }
+    .portada .chip {
+        background: var(--bg-soft);
+        border: 1px solid var(--linea);
+        border-radius: 999px;
+        padding: 6px 16px;
+        font-size: 13px;
+        color: #334155;
+    }
+    .portada .chip b { color: var(--azul-osc); }
+    .portada .credito { font-size: 13px; color: var(--gris); }
+    .portada .credito b { color: var(--tinta); }
+
+    /* ---------- ESTRUCTURA ---------- */
+    h2 {
+        font-size: 24px;
+        color: var(--azul-osc);
+        border-bottom: 2px solid var(--azul);
+        padding-bottom: 6px;
+        margin: 0 0 14px;
+        page-break-after: avoid;
+    }
+    h3 {
+        font-size: 18px;
+        color: var(--azul);
+        margin: 26px 0 8px;
+        page-break-after: avoid;
+    }
+    h4 {
+        font-size: 15px;
+        color: #334155;
+        margin: 18px 0 6px;
+        page-break-after: avoid;
+    }
+    p { margin: 8px 0; }
+    ul, ol { margin: 6px 0 12px; padding-left: 22px; }
+    li { margin: 3px 0; }
+    b, strong { color: #1e293b; }
+    code, kbd {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 5px;
+        padding: 1px 6px;
+        font-size: 12px;
+        font-family: Consolas, monospace;
+        color: #4338ca;
+    }
+    kbd { background: #f1f5f9; border-color: #cbd5e1; color: #0f172a; }
+
+    .nota {
+        background: #ecfdf5;
+        border-left: 4px solid var(--verde);
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin: 12px 0;
+    }
+    .aviso {
+        background: #fffbeb;
+        border-left: 4px solid var(--ambar);
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin: 12px 0;
+    }
+    .peligro {
+        background: #fef2f2;
+        border-left: 4px solid var(--rojo);
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin: 12px 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0 16px;
+        font-size: 13px;
+        page-break-inside: avoid;
+    }
+    th {
+        background: var(--azul);
+        color: #fff;
+        text-align: left;
+        padding: 7px 10px;
+        font-weight: 600;
+    }
+    td {
+        border: 1px solid var(--linea);
+        padding: 6px 10px;
+        vertical-align: top;
+    }
+    tbody tr:nth-child(even) { background: var(--bg-soft); }
+
+    .seccion {
+        padding-top: 24px;
+        page-break-before: always;
+    }
+    .seccion:first-of-type { page-break-before: auto; }
+
+    /* ---------- INDICE ---------- */
+    .indice { background: var(--bg-soft); border: 1px solid var(--linea); border-radius: 10px; padding: 18px 22px; }
+    .indice ol { padding-left: 22px; }
+    .indice a { color: var(--azul-osc); text-decoration: none; }
+    .indice a:hover { text-decoration: underline; }
+    .indice .sub { color: var(--gris); font-size: 13px; }
+
+    /* ---------- PASOS ---------- */
+    .paso { display: flex; gap: 10px; margin: 6px 0; }
+    .paso .n {
+        flex-shrink: 0;
+        width: 24px; height: 24px;
+        background: var(--azul);
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700;
+    }
+
+    .iconos td:first-child { white-space: nowrap; }
+
+    /* ---------- IMPRESION ---------- */
+    @media print {
+        body { font-size: 12px; }
+        .page { max-width: none; padding: 0; }
+        h2 { font-size: 20px; }
+        h3 { font-size: 16px; }
+        .seccion { page-break-before: always; }
+        a { color: inherit; }
+        th, td { padding: 5px 8px; }
+        .portada { min-height: 70vh; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+
+    <!-- ==================== PORTADA ==================== -->
+    <div class="portada">
+        <div class="app-ico">🛠️</div>
+        <h1>Gestor de Casos</h1>
+        <div class="sub">Manual de Usuario · Herramienta de gestión integral para Call Center</div>
+        <div class="tarjetas">
+            <span class="chip">Versión <b>6.0.5</b></span>
+            <span class="chip">Entorno <b>Windows + Electron</b></span>
+            <span class="chip">Año <b>2026</b></span>
+        </div>
+        <div class="credito">Desarrollado por <b>Rolando Tapia</b><br/>Compilado y revisado vía <b>Open Code</b></div>
+    </div>
+
+    <!-- ==================== INDICE ==================== -->
+    <div class="seccion">
+        <h2>Contenido</h2>
+        <div class="indice">
+            <ol>
+                <li><a href="#intro">Introducción y requisitos</a></li>
+                <li><a href="#interfaz">La ventana principal</a>
+                    <ul class="sub">
+                        <li>Barra superior (cabecera)</li>
+                        <li>Panel de Herramientas (dropdown)</li>
+                    </ul>
+                </li>
+                <li><a href="#casos">Gestión de casos</a>
+                    <ul class="sub">
+                        <li>3.1 Caso activo</li>
+                        <li>3.2 Pendientes (llamadas y SMS)</li>
+                        <li>3.3 Historial</li>
+                    </ul>
+                </li>
+                <li><a href="#turnos">Turnos y alertas de firma</a></li>
+                <li><a href="#notas">Notas rápidas (Bóveda)</a></li>
+                <li><a href="#ajustes">Ajustes de la aplicación</a></li>
+                <li><a href="#herramientas">Herramientas satélite</a>
+                    <ul class="sub">
+                        <li>7.1 Calculadora OCC</li>
+                        <li>7.2 Mis Enlaces</li>
+                        <li>7.3 Turnos Web</li>
+                        <li>7.4 Calculadora de Días</li>
+                        <li>7.5 Cambio de Ciclo</li>
+                        <li>7.6 Radar de Contingencias</li>
+                        <li>7.7 Tráfico Móvil PRO</li>
+                        <li>7.8 Tipificaciones</li>
+                        <li>7.9 Fast 2.0</li>
+                    </ul>
+                </li>
+                <li><a href="#especiales">Ventanas especiales</a>
+                    <ul class="sub">
+                        <li>Ventana "Acerca de"</li>
+                        <li>La leyenda del botón de Herramientas</li>
+                    </ul>
+                </li>
+                <li><a href="#atajos">Atajos de teclado</a></li>
+                <li><a href="#datos">Datos, respaldos y privacidad</a></li>
+                <li><a href="#faq">Preguntas frecuentes</a></li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- ==================== 1. INTRO ==================== -->
+    <div class="seccion" id="intro">
+        <h2>1. Introducción y requisitos</h2>
+        <p><b>Gestor de Casos</b> es una herramienta de escritorio (Windows) creada para el trabajo diario de un ejecutivo de atención en call center de telefonía móvil. Reúne en una sola aplicación las tareas más frecuentes:</p>
+        <ul>
+            <li>Llevar el <b>caso en curso</b>, agendar gestiones (callback/SMS) y mantener un <b>historial</b> buscable.</li>
+            <li>Consultar los <b>turnos</b> y recibir alertas de entrada, breaks, colación y salida.</li>
+            <li>Guardar <b>notas rápidas</b> siempre a mano.</li>
+            <li>Disponer de <b>calculadoras comerciales</b> (OCC, días, cambio de ciclo) y analizadores (tráfico, contingencias).</li>
+            <li>Tener una <b>base de conocimiento</b> de tipificaciones y procesos, listos para copiar.</li>
+        </ul>
+
+        <h3>Formularios de distribución</h3>
+        <ul>
+            <li><b>Aplicación portable</b>: <code>GestorCasos-portable-6.0.5.exe</code> — no requiere instalación; se ejecuta directamente.</li>
+            <li><b>Instalador Windows</b>: "Gestor de Casos Setup" — instala con accesos directos (escritorio y menú inicio).</li>
+        </ul>
+
+        <h3>Primer vistazo</h3>
+        <p>Al abrir la aplicación verás una ventana <b>sin marco de sistema</b> (diseño propio, tema oscuro). En la parte superior hay una barra con el botón de <b>Herramientas</b> y los controles de ventana. En la parte inferior se fija una <b>barra de turnos</b> con cuenta regresiva. Entre ambas se organiza el trabajo: <b>Caso activo</b>, <b>Pendientes</b> e <b>Historial</b>.</p>
+
+        <div class="nota">
+            <b>Pista:</b> la ventana puede redimensionarse libremente. La interfaz se adapta automáticamente; con ventanas muy angostas los textos y botones se compactan para no deformarse.
+        </div>
+    </div>
+
+    <!-- ==================== 2. INTERFAZ ==================== -->
+    <div class="seccion" id="interfaz">
+        <h2>2. La ventana principal</h2>
+
+        <h3>2.1 Barra superior (cabecera)</h3>
+        <table>
+            <thead><tr><th>Control</th><th>Función</th></tr></thead>
+            <tbody>
+                <tr><td><b>🛠️ Herramientas</b></td><td>Abre/cierra el panel lateral con todas las aplicaciones satélite. Dicen que también guarda una leyenda de arcade (ver sección 8).</td></tr>
+                <tr><td><b>—</b></td><td>Minimiza la ventana principal a la barra de tareas.</td></tr>
+                <tr><td><b>✕</b></td><td>Cierra la aplicación. Si tienes un <b>borrador sin guardar</b>, pide confirmación antes de salir.</td></tr>
+            </tbody>
+        </table>
+
+        <h3>2.2 Panel de Herramientas (dropdown)</h3>
+        <p>Cada botón <b>abre o cierra</b> una ventana satélite (marcada con resaltado mientras está abierta). Si la herramientas está minimizada a la barra de tareas, un clic la <b>restaura</b>.</p>
+        <table>
+            <thead><tr><th>Botón</th><th>Qué abre</th><th>Ventana</th></tr></thead>
+            <tbody>
+                <tr><td>📚 <b>Mis Notas</b></td><td>Bóveda de notas <b>en línea</b> dentro de la ventana principal.</td><td>—</td></tr>
+                <tr><td>🧮 <b>Calculadora OCC</b></td><td>Descuentos y textos comerciales OCC / NC / Recargas.</td><td>320×650</td></tr>
+                <tr><td>🔗 <b>Mis Enlaces</b></td><td>Gestor de enlaces web e imágenes con etiquetas.</td><td>320×600</td></tr>
+                <tr><td>📅 <b>Turnos Web</b></td><td>Carga turnos por RUT o manual; activa alertas de breaks y firma.</td><td>460×580</td></tr>
+                <tr><td>📡 <b>Radar Contingencias</b></td><td>Monitor de fallas masivas (siempre visible sobre otras ventanas).</td><td>340×500</td></tr>
+                <tr><td>📶 <b>Tráfico PRO</b></td><td>Analizador de consumos de datos, voz y SMS.</td><td>450×600</td></tr>
+                <tr><td>📅 <b>Calculadora de Días</b></td><td>Días transcurridos e hitos de 120 días y 18 meses.</td><td>380×480</td></tr>
+                <tr><td>🔄 <b>Cambio de Ciclo</b></td><td>Impacto de un cambio de ciclo de facturación.</td><td>480×580</td></tr>
+                <tr><td>📋 <b>Tipificaciones</b></td><td>Base de motivos, plantillas y políticas para tickets.</td><td>1000×700</td></tr>
+                <tr><td>⚡ <b>Fast</b></td><td>Gestor de tarjetas con hojas, imágenes y modo hoja de cálculo.</td><td>1000×900</td></tr>
+                <tr><td>⚙️ <b>Ajustes</b></td><td>Configuración de la aplicación (sección 6).</td><td>—</td></tr>
+            </tbody>
+        </table>
+        <div class="nota">
+            Las ventanas satélite recuerdan su <b>posición</b>; se ubican al lado de la principal automáticamente. Todas tienen cabecera arrastrable, botón <b>—</b> (minimizar) y <b>✕</b> (cerrar).
+        </div>
+    </div>
+
+    <!-- ==================== 3. CASOS ==================== -->
+    <div class="seccion" id="casos">
+        <h2>3. Gestión de casos</h2>
+
+        <h3>3.1 Caso activo</h3>
+        <p>Es el caso en el que estás trabajando. El formulario está basado en una <b>plantilla configurable</b>. Por defecto tiene:</p>
+        <ul>
+            <li><b>Nombre del Cliente</b> (campo corto).</li>
+            <li><b>N° de contacto</b> (campo corto).</li>
+            <li><b>Detalle del problema</b> (campo grande con formato de texto: negrita, cursiva, subrayado vía clic derecho).</li>
+            <li><b>Comuna</b> (campo fijo e importante para el Radar de Contingencias).</li>
+        </ul>
+
+        <h4>Cómo usarlo</h4>
+        <div class="paso"><span class="n">1</span><span>Escribe los datos del cliente. Al escribir se <b>graba un borrador automático</b> (verás la insignia "borrador").</span></div>
+        <div class="paso"><span class="n">2</span><span>Si la comuna está en <b>contingencia</b>, aparece la alerta <i>⚠️ Zona en contingencia: 📋 &lt;ID&gt;</i>; haz clic en el ID para <b>copiarlo</b>.</span></div>
+        <div class="paso"><span class="n">3</span><span>Usa los botones de acción de la derecha.</span></div>
+
+        <table>
+            <thead><tr><th>Botón</th><th>Qué hace</th></tr></thead>
+            <tbody>
+                <tr><td>💾</td><td><b>Guardar</b>: cierra el caso y lo mueve al Historial con la etiqueta "Guardado".</td></tr>
+                <tr><td>📅</td><td><b>Agendar</b>: abre el modal para programarlo como <b>callback o SMS</b> (se va a Pendientes).</td></tr>
+                <tr><td>🗑</td><td><b>Limpiar</b>: borra el formulario (pide confirmación si hay datos).</td></tr>
+            </tbody>
+        </table>
+        <p>El botón <b>⚙️</b> (al lado del título) abre la configuración de la <b>plantilla de campos</b>: puedes agregar, quitar y elegir campo corto/grande (máximo 8 campos). La comuna siempre queda fija.</p>
+
+        <div class="aviso">
+            Si recuperas un caso antiguo cuyos campos ya no existen en la plantilla actual, esos datos aparecen en la caja <b>"⚠️ DATOS RESCATADOS"</b> y se conservan al guardar.
+        </div>
+
+        <h3>3.2 Pendientes (llamadas y SMS)</h3>
+        <p>Muestra las gestiones programadas. Cuando contratas una gestión desde el caso activo (📅) puedes elegir <b>📞 Callback</b> o <b>💬 SMS</b>, con fecha y hora. <b>La fecha/hora deben ser futuras.</b></p>
+        <ul>
+            <li>Cada tarjeta muestra el tipo (💬 SMS / 📞 llamada), nombre, número, hora programada y un <b>contador en vivo</b>:
+                <ul>
+                    <li><span style="color:var(--ambar)"><b>Ámbar</b></span>: quedan 15 minutos o menos.</li>
+                    <li><span style="color:#f97316"><b>Naranja</b></span>: quedan 5 minutos.</li>
+                    <li><span style="color:var(--rojo)"><b>Rojo y pulsante</b></span>: vencido ("Vencido Xh Xm").</li>
+                </ul>
+            </li>
+            <li>Al vencerse (o a 2 minutos) aparece una <b>ventana de alerta flotante</b> con opción de <b>posponer 5 minutos</b>.</li>
+            <li>El botón <b>🔔/🔕</b> del encabezado silencia o activa estas alertas (se recuerda la elección).</li>
+        </ul>
+        <p><b>Clic en la tarjeta</b> despliega las acciones: <b>✅ Finalizar</b> (al historial), <b>✏️ Editar/Recuperar</b>, <b>📄 Ver nota</b> y <b>🗑 Descartar</b>. Haz clic en el <b>número</b> para copiarlo.</p>
+
+        <h4>Bloque de Callback (intentos)</h4>
+        <p>Para los pendientes tipo llamada, al desplegar aparece el <b>contador de intentos (1, 2, 3)</b>:</p>
+        <ul>
+            <li><b>📝 Tipificar</b>: copia la plantilla de tipificación con el número de intento y el nombre del cliente.</li>
+            <li><b>💬 SMS</b>: copia el mensaje SMS correspondiente al intento actual.</li>
+            <li><b>Siguiente</b>: pasa al siguiente intento y <b>reprograma +5 minutos</b>.</li>
+        </ul>
+        <p>Los textos de tipificación y los 3 SMS se configuran en el menú contextual del encabezado de Pendientes (<b>⚙️ Editar tipificación y SMS</b>). La variable <code>{n}</code> se reemplaza por el número de intento automáticamente.</p>
+
+        <h3>3.3 Historial</h3>
+        <p>Registra todos los casos guardados o finalizados, con etiqueta de tipo (verde = Guardado, azul = Callback, púrpura = SMS) y fecha. Se muestran 30 registros a la vez (botón "Mostrar más").</p>
+        <ul>
+            <li><b>🔍</b>: mostrar/ocultar la barra de búsqueda (busca por nombre o número).</li>
+            <li><b>Clic derecho en el encabezado</b>: menú con <b>Exportar hoy</b>, <b>Exportar todo</b> (archivos <code>.txt</code>) y opciones de <b>borrado</b> (última hora, hoy, o todo el historial).</li>
+            <li><b>Clic en un registro</b>: despliega la nota completa con <b>↩ Recuperar</b> (lo vuelve a cargar en el caso activo) y <b>🗑 Eliminar</b>.</li>
+        </ul>
+        <p><b>Atajos:</b> <kbd>Ctrl+F</kbd> enfoca la búsqueda; <kbd>Ctrl+Shift+H</kbd> abre/cierra el Historial.</p>
+    </div>
+
+    <!-- ==================== 4. TURNOS ==================== -->
+    <div class="seccion" id="turnos">
+        <h2>4. Turnos y alertas de firma</h2>
+        <p>La barra inferior fija (📅) muestra la <b>cuenta regresiva</b> del próximo hito del día: <b>🟢 Entrada</b>, <b>☕ breaks</b>, <b>🍽️ Colación</b> o <b>🔴 Fin de turno</b> ("Faltan X minutos..."). Se actualiza sola cada 30 segundos.</p>
+        <p><b>Clic en la barra</b> despliega el panel del día con todos los bloques horarios.</p>
+
+        <h3>Alertas automáticas</h3>
+        <p>3 minutos antes de cada hito aparece un <b>banner rojo</b>. Para <b>entrada</b> y <b>salida</b> incluye el botón <b>✍ Firmar</b>, que abre el sitio de firma de asistencia. La alerta no se repite para el mismo hito y puede silenciarse desde el botón 🔔 de Pendientes.</p>
+
+        <div class="nota">
+            Los turnos se cargan desde la herramienta <b>📅 Turnos Web</b> (solo necesitas tu RUT) — ver sección 7.3. Sin turnos cargados, la barra lo indica y te invita a cargarlos.
+        </div>
+    </div>
+
+    <!-- ==================== 5. NOTAS ==================== -->
+    <div class="seccion" id="notas">
+        <h2>5. Notas rápidas (Bóveda)</h2>
+        <p>Es un gestor estilo <i>Google Keep</i>: notas breves que se guardan al instante. Máximo <b>10 notas</b>.</p>
+        <h4>Bóveda (dentro de la ventana principal)</h4>
+        <ul>
+            <li><b>➕ Nueva Nota</b>: crea y abre el editor de la nota.</li>
+            <li><b>Buscar nota...</b>: filtra en vivo por contenido.</li>
+            <li><b>Clic en una tarjeta</b>: abre la nota (queda fijada).</li>
+            <li><b>★</b>: marca/desmarca favorita. <b>✕</b>: elimina (con confirmación).</li>
+        </ul>
+        <h4>Puntos de nota (abajo, en el pie)</h4>
+        <p>En el pie de la ventana principal se muestran <b>pastillas numeradas</b> (1, 2, 3...):</p>
+        <ul>
+            <li><b>Clic</b>: abre la nota fijada (borde ámbar). Clic de nuevo la cierra.</li>
+            <li><b>Hover</b>: vista previa de la nota.</li>
+            <li><b>Clic derecho</b>: eliminar la nota (con confirmación).</li>
+        </ul>
+        <h4>Editor de nota (ventana flotante)</h4>
+        <ul>
+            <li><b>Autoguardado</b> mientras escribes (la primera línea es el título).</li>
+            <li><b>Clic derecho</b>: cortar, copiar, pegar, y formato <b>Negrita</b>, <b>Cursiva</b> y <b>Subrayado</b> (también <kbd>Ctrl+B</kbd>).</li>
+            <li>Botones: <b>—</b> minimizar (desfija), <b>🗑</b> eliminar, <b>✕</b> cerrar (guarda pendientes).</li>
+        </ul>
+    </div>
+
+    <!-- ==================== 6. AJUSTES ==================== -->
+    <div class="seccion" id="ajustes">
+        <h2>6. Ajustes de la aplicación</h2>
+        <p>Desde el botón <b>⚙️ Ajustes</b> del panel de herramientas se abren las opciones:</p>
+        <table>
+            <thead><tr><th>Opción</th><th>Función</th></tr></thead>
+            <tbody>
+                <tr><td><b>Fuente</b></td><td>Cambia la tipografía de toda la aplicación (Segoe UI, Arial, Courier New, Times New Roman, Open Sans, Roboto, Inter).</td></tr>
+                <tr><td><b>Siempre visible</b></td><td>Mantiene la ventana principal (y herramientas) por encima de otras aplicaciones. Activado por defecto.</td></tr>
+                <tr><td><b>Iniciar al encender el PC</b></td><td>Guarda la preferencia de inicio automático con Windows.</td></tr>
+                <tr><td><b>ℹ️ Acerca de</b></td><td>Abre la ventana de información del programa (ver sección 8).</td></tr>
+            </tbody>
+        </table>
+        <p>Recuerda pulsar <b>💾 Guardar</b> para aplicar los cambios. Los atajos <kbd>Ctrl+S</kbd> y <kbd>Ctrl+Enter</kbd> guardan desde el teclado; <kbd>Escape</kbd> cierra el modal. El panel se adapta a ventanas angostas (los botones se apilan automáticamente).</p>
+    </div>
+
+    <!-- ==================== 7. HERRAMIENTAS ==================== -->
+    <div class="seccion" id="herramientas">
+        <h2>7. Herramientas satélite</h2>
+
+        <!-- 7.1 OCC -->
+        <h3 id="occ">7.1 Calculadora OCC 🧮</h3>
+        <p>Calculadora comercial con <b>3 pestañas</b>.</p>
+
+        <h4>OCC Postpago</h4>
+        <div class="paso"><span class="n">1</span><span>Selecciona el <b>ciclo</b> (50, 51, 52, 53 o 54).</span></div>
+        <div class="paso"><span class="n">2</span><span>Indica la <b>fecha de aplicación</b> (pre-cargada con hoy).</span></div>
+        <div class="paso"><span class="n">3</span><span>Escribe el <b>cargo fijo</b> del plan. La herramienta calcula el <b>20%</b> de compensación por dificultad de navegación y te dice en qué <b>boleta impacta</b> según el ciclo.</span></div>
+        <div class="paso"><span class="n">4</span><span>Si el cliente es nuevo y <b>no tiene boletas emitidas</b>, marca esa casilla: se aplicará el cobro fijo de <b>$2.000</b> (no el 20%).</span></div>
+        <div class="paso"><span class="n">5</span><span>Pulsa <b>＋ Agregar línea OCC</b> y usa los botones para copiar <b>📋 Tipificación</b>, <b>📎 Complemento</b> y <b>💬 SMS</b>.</span></div>
+        <p>Cada línea agregada queda como tarjeta en la lista con sus botones de copiar/eliminar. El estado se guarda al cerrar.</p>
+
+        <h4>NC Excepción</h4>
+        <p>Para <b>notas de crédito excepcionales</b> autorizadas: cargo fijo + <b>descuento</b> a aplicar. Muestra el <b>% equivalente</b> del cargo, el mes de impacto y botones de copiar <b>Plantilla de tipificación</b> y <b>SMS</b>.</p>
+
+        <h4>Recargas Prepago</h4>
+        <p>Apoyo para el caso "Recarga Dificultad de Navegación" ($2.000): muestra la ruta del caso, el número de prepago y el monto/argumento. Si la recarga es <b>excepcional (autorizada)</b>, marca la casilla y podrás modificar monto y argumento. Botones para copiar <b>Tipificación</b> y <b>SMS</b> (con plazo de 2 horas).</p>
+
+        <div class="peligro">
+            En el prepago no puede haber <b>otra recarga similar dentro del mes</b> y se envía a JP en turno.
+        </div>
+
+        <!-- 7.2 ENLACES -->
+        <h3 id="enlaces">7.2 Mis Enlaces 🔗</h3>
+        <p>Gestor personal de <b>enlaces web</b> e <b>imágenes</b> (capturas de procesos), con etiquetas y búsqueda.</p>
+        <ul>
+            <li><b>➕ Nuevo recurso</b>: despliega el formulario. Título (*), descripción, y <b>URL o imagen</b> (*):
+                <ul>
+                    <li>Puedes pegar una imagen directamente con <kbd>Ctrl+V</kbd> en el campo URL (o usar <b>📁 Seleccionar archivo</b>).</li>
+                    <li>Las imágenes admiten un <b>texto asociado</b> que se muestra al abrirlas.</li>
+                </ul>
+            </li>
+            <li><b>Etiquetas</b>: elige una existente o crea una nueva. Clic derecho sobre un chip para eliminarlo.</li>
+            <li><b>Clic en la tarjeta</b>: abre el enlace en tu navegador, o el visor si es imagen (con botones <b>copiar imagen</b> y <b>copiar texto</b>).</li>
+            <li><b>Clic derecho</b>: editar, copiar URL o eliminar.</li>
+            <li><b>Arrastrar y soltar</b> para reordenar (solo sin filtros activos).</li>
+            <li><b>📥 Importar / 📤 Exportar</b>: guarda o restaura toda la colección en un archivo <code>mis_enlaces.json</code>.</li>
+        </ul>
+
+        <!-- 7.3 TURNOS WEB -->
+        <h3 id="turnosweb">7.3 Turnos Web 📅</h3>
+        <p>Trae tus turnos <b>desde la web de la empresa</b> o los cargas manualmente.</p>
+        <h4>🌐 Web (RUT)</h4>
+        <div class="paso"><span class="n">1</span><span>Ingresa tu <b>RUT sin dígito verificador</b> (solo números, ej. <code>18858549</code>).</span></div>
+        <div class="paso"><span class="n">2</span><span>Pulsa <b>📥 Traer turnos</b> (o <kbd>Enter</kbd>). La ventana muestra el nombre del agente y la tabla del mes.</span></div>
+        <div class="paso"><span class="n">3</span><span>👤 El nombre aparece en la barra de información. Las alertas de entrada, salida, breaks y colación quedan activas automáticamente.</span></div>
+        <h4>✍️ Manual · Apoyos</h4>
+        <p>Para personal de apoyo sin acceso a la web: cada tarjeta de día tiene <b>🟢 Entrada</b>, <b>🍽️ Colación</b> y <b>🔴 Salida</b>. Las alertas se activan igual (los apoyos <b>no</b> tienen breaks). Usa <b>➕ Agregar turno día siguiente</b> para completar hasta 10 días.</p>
+        <h4>Información que muestra</h4>
+        <ul>
+            <li><b>▶ Próximo:</b> bloque más cercano ("☕ Break · Lun 12 ago a las 10:15, en 25 min").</li>
+            <li>Tabla <b>Día | Entrada | 1° Break | Colación | 2° Break | Salida | Tipo</b>, con la fila de hoy resaltada (badge HOY) y días de descanso atenuados.</li>
+            <li><b>Tipo de día</b>: 45h (con 2 breaks), 30/20h (con colación), Apoyo, o +ext (colación con extensión).</li>
+            <li>Botón <b>🗑 Limpiar</b>: borra los turnos y desactiva las alertas.</li>
+        </ul>
+        <p>Los turnos se sincronizan con la cuenta regresiva de la ventana principal.</p>
+
+        <!-- 7.4 CALCULADORA DE DIAS -->
+        <h3 id="calc-dias">7.4 Calculadora de Días 📅</h3>
+        <p>Calcula los días transcurridos desde una <b>fecha de activación</b> y evalúa dos hitos de plazo:</p>
+        <ul>
+            <li><b>Total de días</b> y desglose en <b>meses y días</b>.</li>
+            <li>Hito <b>⏳ 120 días</b>: cumplido o "faltan X días".</li>
+            <li>Hito <b>📆 18 meses</b>: cumplido o "faltan X días".</li>
+        </ul>
+        <div class="paso"><span class="n">1</span><span>Selecciona la <b>fecha de activación</b> y la <b>fecha actual</b> (pre-cargada).</span></div>
+        <div class="paso"><span class="n">2</span><span>Pulsa <b>🔍 Calcular</b> (o <kbd>Enter</kbd>). Las fechas se recuerdan al volver a abrir.</span></div>
+        <div class="paso"><span class="n">3</span><span><b>📋 Copiar resultado</b> genera el texto listo para pegar en la gestión.</span></div>
+        <div class="aviso">La fecha actual debe ser posterior a la de activación.</div>
+
+        <!-- 7.5 CICLOS -->
+        <h3 id="ciclos">7.5 Cambio de Ciclo de Facturación 🔄</h3>
+        <p>Cuando un cliente pide cambiar su ciclo, calcula todos los datos que debes explicarle:</p>
+        <ul>
+            <li>Selecciona <b>Ciclo actual</b>, <b>Nuevo ciclo</b> (solo se ofrecen combinaciones válidas) y <b>fecha de la orden</b>.</li>
+            <li>Pulsa <b>🔍 Calcular</b>: entrega la <b>boleta anterior</b> y la <b>boleta nueva</b> (período, días a cobrar, emisión, vencimiento), la fecha de <b>reinicio del plan</b>.</li>
+            <li><b>💬 Speech sugerido</b>: texto listo para leerle al cliente; <b>📋 Copiar Speech</b> lo copia.</li>
+        </ul>
+        <table>
+            <thead><tr><th>Ciclo</th><th>Período</th><th>Reinicio</th><th>Emisión</th><th>Vencimiento</th></tr></thead>
+            <tbody>
+                <tr><td>50</td><td>1 al 31</td><td>día 1</td><td>día 5</td><td>21, 25 o 30</td></tr>
+                <tr><td>51</td><td>1 al 31</td><td>día 1</td><td>día 13</td><td>5, 8, 10 o 12</td></tr>
+                <tr><td>52</td><td>8 al 7 (siguiente)</td><td>día 8</td><td>día 17</td><td>28</td></tr>
+                <tr><td>53</td><td>16 al 15 (siguiente)</td><td>día 16</td><td>día 23</td><td>06</td></tr>
+                <tr><td>54</td><td>23 al 22 (siguiente)</td><td>día 26</td><td>día 27</td><td>13</td></tr>
+            </tbody>
+        </table>
+
+        <!-- 7.6 CONTINGENCIAS -->
+        <h3 id="contingencias">7.6 Radar de Contingencias PRO 📡</h3>
+        <p>Monitor de <b>fallas masivas</b>. Pegas el reporte tal como llega y la aplicación lo lee y arma el radar por ti.</p>
+        <div class="paso"><span class="n">1</span><span>Pega el texto del reporte en el área indicada (acepta varios formatos, con o sin "Nº de Contingencia").</span></div>
+        <div class="paso"><span class="n">2</span><span>Pulsa <b>⚡ Escanear y Reemplazar Radar</b>.</span></div>
+        <div class="paso"><span class="n">3</span><span>Se crean las tarjetas de contingencia: <b>zona (comuna)</b>, <b>ID</b> (clic para copiar), <b>fecha de inicio</b> y <b>POPs afectados</b>. Los más nuevos van arriba.</span></div>
+        <div class="paso"><span class="n">4</span><span>Copia los resúmenes para compartir en WhatsApp/Siebel: <b>📋 Copiar Detallado</b> (con antigüedad en días) o <b>📋 Copiar Breve</b>.</span></div>
+        <p>El estado queda sincronizado con la ventana principal: si la comuna del caso activo está en contingencia, lo verás indicado. Botón <b>🗑 Limpiar</b> borra todo el radar (con confirmación).</p>
+        <div class="nota">Todo lo pegado se considera caso <b>activo</b>; "cerrar" una contingencia equivale a eliminarla de la lista.</div>
+
+        <!-- 7.7 TRAFICO -->
+        <h3 id="trafico">7.7 Tráfico Móvil PRO 📶</h3>
+        <p>Analiza el <b>detalle de consumo</b> de una línea a partir del informe Excel (o pegar celdas) y redacta la explicación para el cliente.</p>
+        <div class="paso"><span class="n">1</span><span><b>📂 Carga de datos</b>: elige el Excel (<code>.xlsx/.xls</code>) o pega las celdas copiadas desde Excel (formato separado por tabulaciones).</span></div>
+        <div class="paso"><span class="n">2</span><span>Usa los <b>filtros</b> (fechas, tipo, registro, búsqueda) o los <b>filtros rápidos</b> (Últimos 7 días, Roaming Datos, SMS Nacional, Voz LDI, Saldo, etc.). También puedes elegir el <b>Ciclo Entel</b> (50–54).</span></div>
+        <div class="paso"><span class="n">3</span><span>Revisa los <b>KPIs</b> (registros, datos MB/GB, voz en minutos, saldo consumido) y los <b>insights</b>: ✈️ roaming, 🌙 uso nocturno (00:00–06:00), 📈 picos &gt;1 GB y 📊 desglose voz/SMS/saldo.</span></div>
+        <div class="paso"><span class="n">4</span><span>Pulsa <b>🔄 Generar explicación</b> (o <kbd>Ctrl+Shift+G</kbd>) y <b>📋 Copiar</b> el mensaje listo para el cliente.</span></div>
+        <div class="paso"><span class="n">5</span><span>Ordena cualquier columna de la tabla con un clic en su encabezado.</span></div>
+
+        <!-- 7.8 TIPIFICACIONES -->
+        <h3 id="tipificaciones">7.8 Tipificaciones 📋</h3>
+        <p>Base de conocimiento de <b>motivos de llamado</b> (tipificaciones) con plantilla de descripción y políticas. Tres paneles:</p>
+        <ul>
+            <li><b>📂 Procedimientos</b> (izquierda): busca por texto y filtra por Procedimiento. La lista muestra el motivo, la ruta <i>Área &gt; Subárea</i> y el tipo.</li>
+            <li><b>🖥 Datos del ticket</b> (centro): motivo, tipo de problema, área, subárea, <b>estado</b> (badge de color) y tiempo de respuesta. La <b>plantilla de descripción</b> es editable:
+                <ul>
+                    <li><b>📋 Copiar</b>: copia la descripción (limpia el HTML si la modificaste, para Siebel).</li>
+                    <li><b>📤 Copiar todo</b>: arma el mensaje completo tipo/área/subárea/estado/tiempo + descripción, listo para WhatsApp/Siebel.</li>
+                </ul>
+            </li>
+            <li><b>📖 Instrucciones y políticas</b> (derecha): el contenido "Importante" de la tipificación, con enlaces e imágenes.</li>
+        </ul>
+        <p>Navega la lista con <kbd>↑</kbd>/<kbd>↓</kbd> y <kbd>Enter</kbd>. Con <b>✏️ Editar base</b> puedes modificar permanentemente una tipificación (se respalda automáticamente). <b>📥 Importar / 📤 Exportar</b> manejan el archivo <code>.csv</code>.</p>
+
+        <!-- 7.9 FAST -->
+        <h3 id="fast">7.9 Fast 2.0 ⚡</h3>
+        <p>El gestor más completo: <b>hojas (colecciones)</b> de tarjetas para copiar rápido con formato WhatsApp, buscador de imágenes y hojas tipo <b>hoja de cálculo</b> para procesos.</p>
+
+        <h4>Abrir y cerrar Fast</h4>
+        <ul>
+            <li>Desde el panel de herramientas (<b>⚡ Fast</b>) o con el <b>botón flotante ⚡</b> junto a la ventana principal.</li>
+            <li>Atajo global de Windows: <kbd>Ctrl+Shift+F</kbd>.</li>
+            <li>El botón se ilumina en <b>ámbar</b> cuando Fast está abierto; aparece al enfocar la app y se oculta al perder el foco.</li>
+        </ul>
+
+        <h4>Hojas (pestañas tipo Excel)</h4>
+        <ul>
+            <li>Cada hoja tiene <b>color identificador</b>, nombre y contador de tarjetas.</li>
+            <li><b>＋</b> (o <kbd>Ctrl+T</kbd>): crea una hoja y elige su <b>modo</b>: 📇 Tarjetas, 🖼️ Buscador de imágenes o ⚙️ Procesos.</li>
+            <li><b>Doble clic</b> en el nombre lo renombra; <b>clic derecho</b> en la pestaña abre el menú: renombrar, 🎨 color (8 colores), ⧉ duplicar, mover, eliminar.</li>
+        </ul>
+
+        <h4>Modo Tarjetas 📇</h4>
+        <ul>
+            <li>Al pasar el mouse aparecen <b>📋 COPIAR</b> (copia el cuerpo crudo con formato WhatsApp) y <b>▾</b> (más formatos: texto plano, título+texto, primera imagen, enlaces).</li>
+            <li>Acciones rápidas: ✏️ editar, ⭐ fijar favorita, 🎨 color, ⧉ duplicar, 🗑 eliminar.</li>
+            <li><b>Clic</b> abre el panel de detalle; <b>doble clic</b> edita; <b>clic derecho</b> menú completo (incluye "Mover a hoja").</li>
+            <li><b>Arrastrar</b> para reordenar o mover a otra hoja (arrástrala sobre la pestaña de destino).</li>
+            <li><b>Teclado</b>: flechas mueven la selección y <kbd>Enter</kbd> copia el texto.</li>
+        </ul>
+
+        <h4>Modo Buscador de imágenes 🖼️</h4>
+        <p>Tarjetas horizontales: título, imagen grande (al pasar el mouse hay botón <b>🖼 Copiar imagen</b>), texto asociado y <b>📋 Copiar texto</b>.</p>
+
+        <h4>Modo Procesos (hoja de cálculo) ⚙️</h4>
+        <ul>
+            <li>Cuadrícula de <b>26 columnas (A–Z) × 100 filas</b>, con cabeceras de columna/fila, <b>＋ Fila / ＋ Columna</b> y ajuste de ancho/alto (arrastrando o doble clic autoajusta).</li>
+            <li>Clic/arrastre selecciona; <b>doble clic</b> edita la celda; solo teclear reemplaza; <kbd>F2</kbd> edita; <kbd>Enter</kbd> baja, <kbd>Tab</kbd> avanza.</li>
+            <li><kbd>Ctrl+C</kbd>/<kbd>Ctrl+V</kbd>: pegar texto de Excel amplía la cuadrícula sola.</li>
+            <li>Clic derecho en celdas/cabeceras: insertar, eliminar, autoajustar, copiar/pegar.</li>
+        </ul>
+
+        <h4>Editor de tarjeta</h4>
+        <ul>
+            <li>Campos: Hoja (destino), 🎨 Color, ⭐ Favorita, <b>Título</b>, <b>Cuerpo</b> (formato WhatsApp), <b>Imágenes</b> (hasta 10, se comprimen; también <kbd>Ctrl+V</kbd> para pegar imagen), <b>Enlaces</b> (hasta 10: texto visible + URL).</li>
+            <li>Barra de formato: <b>B</b> (negrita <code>*…*</code>), <b>I</b> (cursiva <code>_…_</code>), <b>S</b> (tachado <code>~…~</code>), <b>&lt;/&gt;</b> (código), listas • y numerada.</li>
+            <li><b>Vista previa</b> en vivo de cómo se verá el texto.</li>
+        </ul>
+
+        <h4>Panel de detalle (drawer)</h4>
+        <p>Muestra el <b>cuerpo con formato WhatsApp renderizado</b>, las <b>imágenes</b> (clic para ver en grande o copiar), los <b>enlaces</b> (clic para abrir) y una <b>📝 Nota personal</b> de la tarjeta. Botones finales: copiar, editar, duplicar, favorita, eliminar.</p>
+
+        <h4>Ajustes de hoja ⚙️</h4>
+        <ul>
+            <li><b>Color de la hoja</b>: 24 colores o uno personalizado.</li>
+            <li><b>Tamaño de tarjeta</b> (modos tarjetas/imágenes): ancho y alto ajustables con vista previa.</li>
+            <li><b>Opciones de cuadrícula</b> (modo procesos): ancho de columna y alto de fila.</li>
+        </ul>
+
+        <div class="nota">
+            <b>Datos de Fast:</b> se guardan en un archivo propio (<code>gestor-fast.json</code>) en la carpeta de datos de la app. Al actualizar desde una versión antigua, los datos se <b>migran solos</b> al nuevo formato de hojas.
+        </div>
+    </div>
+
+    <!-- ==================== 8. ESPECIALES ==================== -->
+    <div class="seccion" id="especiales">
+        <h2>8. Ventanas especiales</h2>
+
+        <h3>Ventana "Acerca de" ℹ️</h3>
+        <p>Se abre desde <b>⚙️ Ajustes → ℹ️ Acerca de</b>. Muestra en una ventana independiente (450×350):</p>
+        <ul>
+            <li>Nombre de la herramienta, desarrollador (<b>Rolando Tapia</b>) y mención a <b>Open Code</b>.</li>
+            <li><b>% de desarrollo con agentes basados en IA</b>: Gémini 6%, Open Code 30%, Desarrollo Humano 64%, con una <b>barra animada</b> dividida en esos porcentajes (se despliega una sola vez).</li>
+            <li>Logo de Open Code y enlace <b>⬇️ Descargar Open Code</b>.</li>
+        </ul>
+
+        <h3 id="easter">La leyenda del botón de Herramientas 🥚</h3>
+        <p>Cuentan, en voz baja, que dentro de esta herramienta se esconde un <b>ciclo infinito</b>: algo que se despierta solo si tu memoria llega de una época de arcades, monedas y pantallas de créditos. Se dice que el botón <b>🛠️ Herramientas</b> guarda un secreto para quien sepa <i>recordar</i> una secuencia que jamás se enseña — de esas que solo se pasan de boca en boca entre jugadores veteranos.</p>
+        <p>Quienes lo han visto aseguran que la escena es digna de un <b>CD de finales de los 90</b>: una figura que se repite sin fin contra el fondo, como una pesadilla pixelada, mientras suena una melodía que muchos llaman <i>"Majin"</i> y que se te queda pegada por días.</p>
+        <p>Otros juran haber alcanzado a leer, entre el pitido y el silencio, una reflexión existencial: <i>"al aprender a programar entendí que solo la nada sabe si mañana tendré ganas de trabajar"</i>. Y justo después, como burlándose de nosotros: <b>¿Ánimo?</b></p>
+        <p>Aquí no hay instrucciones: los secretos de verdad no se explican, se descubren. Solo un consejo: <b>pasa el cursor por el botón de Herramientas</b> y, si conoces el idioma de los arcades, deja que tus dedos hablen.</p>
+    </div>
+
+    <!-- ==================== 9. ATAJOS ==================== -->
+    <div class="seccion" id="atajos">
+        <h2>9. Atajos de teclado</h2>
+        <h3>Ventana principal</h3>
+        <table>
+            <thead><tr><th>Atajo</th><th>Acción</th></tr></thead>
+            <tbody>
+                <tr><td><kbd>Ctrl+S</kbd></td><td>Guarda en el modal abierto (Ajustes, Config de caso, Callback/SMS...).</td></tr>
+                <tr><td><kbd>Ctrl+F</kbd></td><td>Enfoca la primera búsqueda visible.</td></tr>
+                <tr><td><kbd>Ctrl+Shift+H</kbd></td><td>Abre/cierra el Historial.</td></tr>
+                <tr><td><kbd>Ctrl+Enter</kbd></td><td>Confirma/guarda en modales.</td></tr>
+                <tr><td><kbd>Escape</kbd></td><td>Cierra el modal abierto o limpia el buscador enfocado.</td></tr>
+            </tbody>
+        </table>
+        <h3>Fast</h3>
+        <table>
+            <thead><tr><th>Atajo</th><th>Acción</th></tr></thead>
+            <tbody>
+                <tr><td><kbd>Ctrl+Shift+F</kbd></td><td>Abrir/cerrar Fast (global de Windows).</td></tr>
+                <tr><td><kbd>Ctrl+N</kbd></td><td>Nueva tarjeta.</td></tr>
+                <tr><td><kbd>Ctrl+T</kbd></td><td>Nueva hoja.</td></tr>
+                <tr><td><kbd>Ctrl+F</kbd></td><td>Buscar tarjetas.</td></tr>
+                <tr><td><kbd>Ctrl+Shift+V</kbd></td><td>Alternar visión grilla/lista.</td></tr>
+                <tr><td><kbd>Ctrl+1…9</kbd></td><td>Cambiar a la hoja por índice.</td></tr>
+                <tr><td><kbd>Enter</kbd></td><td>Copia la tarjeta seleccionada.</td></tr>
+                <tr><td><kbd>Ctrl+V</kbd> (en editor)</td><td>Pega una imagen desde el portapapeles.</td></tr>
+            </tbody>
+        </table>
+        <h3>Otras herramientas</h3>
+        <table>
+            <thead><tr><th>Herramienta</th><th>Atajo</th><th>Acción</th></tr></thead>
+            <tbody>
+                <tr><td>Enlaces</td><td><kbd>Ctrl+F</kbd> · <kbd>Ctrl+S</kbd></td><td>Busca · guarda edición.</td></tr>
+                <tr><td>Turnos Web</td><td><kbd>Enter</kbd></td><td>Traer turnos (campo RUT).</td></tr>
+                <tr><td>Calculadora de Días</td><td><kbd>Enter</kbd></td><td>Calcular.</td></tr>
+                <tr><td>Calculadora de Días / Ciclos</td><td><kbd>Ctrl+S</kbd></td><td>Calcular (modal abierto).</td></tr>
+                <tr><td>Tráfico PRO</td><td><kbd>Ctrl+Shift+G</kbd></td><td>Generar explicación al cliente.</td></tr>
+                <tr><td>Tipificaciones</td><td><kbd>↑</kbd>/<kbd>↓</kbd> · <kbd>Enter</kbd> · <kbd>Esc</kbd></td><td>Navegar lista · ver detalle · cerrar editor.</td></tr>
+                <tr><td>Editor de nota</td><td><kbd>Ctrl+B</kbd></td><td>Negrita sobre la selección.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ==================== 10. DATOS ==================== -->
+    <div class="seccion" id="datos">
+        <h2>10. Datos, respaldos y privacidad</h2>
+        <h3>Dónde se guarda la información</h3>
+        <p>Todos los datos se almacenan en la carpeta de datos de la aplicación <code>%APPDATA%\gestor-casos\</code>:</p>
+        <table>
+            <thead><tr><th>Archivo</th><th>Contenido</th></tr></thead>
+            <tbody>
+                <tr><td><code>gestor-data.json</code></td><td>Casos, pendientes, historial, notas, favoritas, borradores, turnos, enlaces, OCC, contingencias, ajustes.</td></tr>
+                <tr><td><code>gestor-pos.json</code></td><td>Posición y tamaño de las ventanas.</td></tr>
+                <tr><td><code>gestor-fast.json</code></td><td>Hojas, tarjetas, imágenes y config de Fast.</td></tr>
+                <tr><td><code>backups\</code></td><td>Copias rotativas automáticas de <code>gestor-data.json</code> (máximo 20).</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Respaldo automático</h3>
+        <ul>
+            <li>La aplicación crea una <b>copia antes de cada guardado</b> y conserva las <b>20 más recientes</b>.</li>
+            <li>Si el archivo principal se corrompe, se <b>restaura automáticamente</b> la última copia válida.</li>
+            <li>La escritura es <b>atómica</b> (no se deja un archivo a medias).</li>
+        </ul>
+
+        <h3>Consejos</h3>
+        <ul>
+            <li>Para <b>respaldo manual completo</b>, copia la carpeta <code>%APPDATA%\gestor-casos</code> a otro lugar (nube, disco externo).</li>
+            <li>El código y las herramientas están versionados en GitHub; las <b>imágenes y música</b> del easter egg se incluyen con el proyecto.</li>
+            <li>Al pasar a otra PC: clona el repositorio, instala dependencias (<code>npm install</code>) y ejecuta <code>npm start</code>; o simplemente usa el <b>portable</b>. Recuerda copiar también tu carpeta de datos.</li>
+        </ul>
+    </div>
+
+    <!-- ==================== 11. FAQ ==================== -->
+    <div class="seccion" id="faq">
+        <h2>11. Preguntas frecuentes</h2>
+        <h4>¿Puedo tener más de una ventana abierta a la vez?</h4>
+        <p>Sí. Cada herramienta es una ventana independiente; la principal y varias satélites pueden convivir. Con "Siempre visible" activado, la aplicación permanece por encima de otras.</p>
+        <h4>¿Qué pasa si cierro la app con datos sin guardar?</h4>
+        <p>El caso activo se guarda como <b>borrador automático</b>; al cerrarte pide confirmación si hay un borrador pendiente. Al volver a abrir, recuperas todo.</p>
+        <h4>¿Cómo evito que las alertas de pendientes me molesten?</h4>
+        <p>Usa el botón <b>🔔/🔕</b> del encabezado de Pendientes para silenciarlas. Las de turnos se pueden desactivar limpiando los turnos desde Turnos Web.</p>
+        <h4>¿Cuántas notas puedo tener?</h4>
+        <p>Máximo <b>10</b>. Puedes eliminar las que ya no uses para crear nuevas.</p>
+        <h4>¿El historial tiene límite?</h4>
+        <p>No. Se muestran 30 registros por vez con "Mostrar más", pero no borra nada automáticamente. Puedes exportarlo o limpiarlo desde su menú contextual.</p>
+        <h4>¿Cómo actualizo las tipificaciones?</h4>
+        <p>Importa el nuevo <code>.csv</code> con <b>📥 Importar</b> (se copia a la carpeta de datos y queda como vigente). Las ediciones de base generan respaldos automáticos.</p>
+    </div>
+
+    <p style="text-align:center;color:var(--gris);font-size:12px;margin-top:40px;">— Fin del manual — · Gestor de Casos · v6.0 · Generado para uso interno del call center · © Rolando Tapia</p>
+
+</div>
+</body>
+</html>
