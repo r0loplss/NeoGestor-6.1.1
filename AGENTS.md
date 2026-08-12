@@ -23,6 +23,23 @@
 > 2. `git commit -m "mensaje descriptivo del cambio"`
 > 3. `git push`
 
+## Bitácora de modificaciones (BITACORA.html) (IMPORTANTE, 12/08/2026)
+
+> **Cada vez que el usuario pida subir cambios a GitHub ("carga/sube a GitHub"),
+> ANTES de hacer el commit se debe actualizar `BITACORA.html`:** agregar al INICIO
+> de la lista `#lista` una nueva anotación (sección `.entry`) con la fecha del día
+> y un contexto BREVE de los cambios realizados en esa sesión (qué se modificó,
+> funcionalidades nuevas, correcciones, versión si aplica).
+>
+> - El usuario trabaja desde 2 escritorios distintos; la bitácora permite saber
+>   qué se hizo en cada sesión.
+> - Las anotaciones van con la fecha más reciente al inicio (las nuevas se
+>   insertan ANTES de las existentes).
+> - Seguir el mismo formato de las anotaciones actuales:
+>   `<span class="fecha">DIA mes año</span>` y, si corresponde,
+>   `<span class="ver">vX.Y.Z</span>` + descripción breve (texto o lista `<ul>`).
+> - La bitácora se sube a GitHub junto con los cambios de la sesión.
+
 ## Workflow de compilación estandarizado
 
 > **IMPORTANTE (cambio de preferencia del usuario, 10/08/2026):**

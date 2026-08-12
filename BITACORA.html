@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bitácora de Modificaciones — Gestor de Casos</title>
+<style>
+    :root {
+        --bg: #0f1117;
+        --surface: #161b27;
+        --surface2: #1c2333;
+        --border: rgba(255,255,255,0.07);
+        --border2: rgba(255,255,255,0.12);
+        --text: #e2e8f0;
+        --muted: #8892a4;
+        --faint: #4a5568;
+        --primary: #3b82f6;
+        --accent: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        padding: 24px 20px 60px;
+    }
+    .page { max-width: 780px; margin: 0 auto; }
+    .top {
+        border: 1px solid var(--border2);
+        background: var(--surface);
+        border-radius: 10px;
+        padding: 20px 22px;
+        margin-bottom: 22px;
+    }
+    .top h1 { font-size: 22px; letter-spacing: 0.4px; }
+    .top .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .top .nota {
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--muted);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--primary);
+        border-radius: 6px;
+        padding: 8px 12px;
+    }
+    #busqueda {
+        width: 100%;
+        margin-top: 14px;
+        padding: 9px 12px;
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        border-radius: 6px;
+        color: var(--text);
+        font-size: 13px;
+    }
+    #busqueda:focus { outline: none; border-color: var(--primary); }
+    .entry {
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
+    .entry.oculta { display: none; }
+    .enc {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+    }
+    .fecha {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .ver {
+        font-size: 11px;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 1px 9px;
+        white-space: nowrap;
+    }
+    .desc { font-size: 13.5px; color: var(--text); }
+    .desc li { margin-left: 18px; }
+    .vacio { color: var(--faint); text-align: center; padding: 30px 0; }
+    @media print {
+        #busqueda { display: none; }
+        body { background: #fff; color: #000; }
+        .top, .entry { border-color: #ccc; background: #fff; }
+        .fecha, .sub, .nota { color: #555; }
+        .ver { color: #166534; border-color: #166534; }
+    }
+</style>
+</head>
+<body>
+<div class="page">
+
+    <div class="top">
+        <h1>Bitácora de Modificaciones</h1>
+        <div class="sub">Gestor de Casos (Neogestor V6.0) · Registro de cambios por sesión</div>
+        <div class="nota">Cada vez que se suben cambios a GitHub se agrega una anotación al inicio de esta lista, describiendo brevemente las modificaciones de esa sesión. Sirve para saber qué se hizo en cada equipo/PC.</div>
+        <input type="search" id="busqueda" placeholder="Filtrar por texto, versión o fecha..." oninput="filtrar()" />
+    </div>
+
+    <div id="lista">
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">12 ago 2026</span></div>
+            <div class="desc">
+                <ul>
+                    <li>Creación de esta bitácora (BITACORA.html) y de la política en AGENTS.md.</li>
+                    <li>Desde esta sesión, cada subida de cambios a GitHub incluirá una anotación en que se resumen las modificaciones realizadas.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">12 ago 2026</span><span class="ver">v6.0.5</span></div>
+            <div class="desc">
+                Mejoras en Fast: drawer con auto-cierre configurable, título siempre visible, botones sobre el texto,
+                contador de imágenes mostrado como número, botón "Detalles" en modo imágenes y gap de 3 px.
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">11 ago 2026</span><span class="ver">v6.0.5</span></div>
+            <div class="desc">
+                Versión 6.0.5 publicada y manual de usuario completo (MANUAL.html).
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">11 ago 2026</span></div>
+            <div class="desc">
+                <ul>
+                    <li>Ventana "Acerca de" independiente (450x350).</li>
+                    <li>Easter egg como ventana 600x500 con fondo transparente.</li>
+                    <li>Ajustes responsive y assets multimedia (imagen y música).</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">10 ago 2026</span></div>
+            <div class="desc">
+                Fix del menú contextual de Fast: abrir paleta de colores, evitar cierre por propagación y proteger ítems de submenú.
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">10 ago 2026</span></div>
+            <div class="desc">
+                <ul>
+                    <li>Modo procesos tipo hoja de cálculo.</li>
+                    <li>Ajustes de cuadrícula y color de hoja.</li>
+                    <li>Botón Fast inteligente y persistencia de ventana.</li>
+                    <li>Notas en drawer y respaldo Git.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">10 ago 2026</span></div>
+            <div class="desc">
+                Backup rotativo de datos, fixes de seguridad y botón Fast rediseñado.
+            </div>
+        </section>
+
+    </div>
+
+    <div class="vacio" id="vacio" style="display:none;">Sin resultados para esa búsqueda.</div>
+
+</div>
+
+<script>
+    function filtrar() {
+        const q = document.getElementById('busqueda').value.trim().toLowerCase();
+        const entries = document.querySelectorAll('.entry');
+        let visibles = 0;
+        entries.forEach(e => {
+            const match = !q || e.textContent.toLowerCase().includes(q);
+            e.classList.toggle('oculta', !match);
+            if (match) visibles++;
+        });
+        document.getElementById('vacio').style.display = visibles ? 'none' : 'block';
+    }
+</script>
+</body>
+</html>
