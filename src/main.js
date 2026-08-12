@@ -29,7 +29,8 @@ const HTML = {
   vault:         path.join(TOOLS, 'vault.html'),
   horarios:      path.join(TOOLS, 'horarios.html'),
   acerca:        path.join(TOOLS, 'acerca.html'),
-  easter:        path.join(TOOLS, 'easter.html')
+  easter:        path.join(TOOLS, 'easter.html'),
+  imgview:       path.join(TOOLS, 'imgview.html')
 };
 
 let mainWin = null;
@@ -504,6 +505,51 @@ app.on('browser-window-blur', () => {
 // IPC de Fast
 ipcMain.on('fast-toggle', () => toggleFast());
 ipcMain.on('fast-request-state', () => notifyFastState());
+
+// ── VISOR DE IMAGEN (frameless, sin marcos, X roja / Escape para cerrar) ──
+let imgViewWin = null;
+
+function openImgView(payload) {
+  if (imgViewWin && !imgViewWin.isDestroyed()) { imgViewWin.close(); imgViewWin = null; }
+  if (!payload || !payload.data) return;
+
+  const refBounds = (mainWin && !mainWin.isDestroyed()) ? mainWin.getBounds() : null;
+  const wa = refBounds
+    ? screen.getDisplayMatching(refBounds).workArea
+    : screen.getPrimaryDisplay().workArea;
+  let w = (payload.w && payload.w > 0) ? payload.w : 600;
+  let h = (payload.h && payload.h > 0) ? payload.h : 400;
+  // Tamaño real, sin superar el área de trabajo
+  const scale = Math.min(1, (wa.width - 40) / w, (wa.height - 40) / h);
+  w = Math.max(120, Math.round(w * scale));
+  h = Math.max(120, Math.round(h * scale));
+
+  imgViewWin = new BrowserWindow({
+    width: w, height: h,
+    x: wa.x + Math.round((wa.width - w) / 2),
+    y: wa.y + Math.round((wa.height - h) / 2),
+    frame: false, transparent: true, resizable: false, movable: true,
+    alwaysOnTop: getAlwaysOnTopPreference(),
+    skipTaskbar: true,
+    hasShadow: false,
+    show: false,
+    webPreferences: { nodeIntegration: true, contextIsolation: false }
+  });
+  imgViewWin.loadFile(HTML.imgview);
+  imgViewWin.once('ready-to-show', () => {
+    if (imgViewWin && !imgViewWin.isDestroyed()) {
+      imgViewWin.webContents.send('init-imgview', payload);
+      imgViewWin.showInactive();
+    }
+  });
+  imgViewWin.on('closed', () => { imgViewWin = null; });
+}
+
+ipcMain.on('fast-view-image', (e, payload) => openImgView(payload));
+ipcMain.on('imgview-close', () => {
+  if (imgViewWin && !imgViewWin.isDestroyed()) imgViewWin.close();
+  imgViewWin = null;
+});
 
 // ── INICIALIZACIÓN DE LA VENTANA PRINCIPAL ──
 let mainBoundsSaveTimer = null;

@@ -166,7 +166,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             grid-auto-rows: 190px;
-            gap: 12px;
+            gap: 3px;
             align-content: start;
             min-height: 100%;
         }
@@ -194,7 +194,7 @@
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 9px 10px;
+            padding: 8px 9px 4px;
             display: flex;
             flex-direction: column;
             cursor: pointer;
@@ -216,26 +216,26 @@
             display: flex;
             align-items: flex-start;
             gap: 4px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             flex-shrink: 0;
         }
         .card-star {
             font-size: 12px;
             line-height: 1.2;
             flex-shrink: 0;
-            opacity: 0;
+            display: none;
         }
-        .card-item.pinned .card-star { opacity: 1; }
+        .card-item.pinned .card-star { display: block; opacity: 1; }
         .card-title {
             flex: 1;
+            min-width: 0;
             font-size: 12px;
             font-weight: 700;
             overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            line-height: 1.3;
+            line-height: 1.2;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
         }
         .card-body-preview {
             font-size: 10px;
@@ -243,12 +243,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
-            -webkit-line-clamp: 4;
+            -webkit-line-clamp: 99;
             -webkit-box-orient: vertical;
             line-height: 1.4;
             flex: 1;
             word-break: break-word;
-            margin-bottom: 6px;
+            min-height: 0;
         }
         .card-meta {
             display: flex;
@@ -256,7 +256,7 @@
             gap: 6px;
             font-size: 10px;
             color: var(--faint);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             flex-shrink: 0;
             flex-wrap: wrap;
         }
@@ -272,52 +272,79 @@
             white-space: nowrap;
         }
         .card-copy-row {
+            position: absolute;
+            left: 9px;
+            right: 9px;
+            bottom: 4px;
             display: flex;
-            gap: 4px;
-            flex-shrink: 0;
+            align-items: center;
             justify-content: center;
+            gap: 4px;
             opacity: 0;
             transition: opacity 0.15s;
+            z-index: 4;
         }
         .card-item:hover .card-copy-row { opacity: 1; }
+        #content.list-view .card-copy-row {
+            position: static;
+            flex: 0 0 auto;
+            justify-content: flex-start;
+            opacity: 1;
+        }
+        .copy-ind {
+            flex: none;
+            height: 20px;
+            padding: 0 6px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
         .copy-main {
             flex: none;
-            width: 26px;
-            height: 24px;
-            padding: 0;
-            background: var(--primary);
-            border: none;
-            border-radius: 6px;
-            color: #fff;
+            height: 20px;
+            padding: 0 8px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--muted);
             font-weight: 700;
-            font-size: 13px;
+            font-size: 11px;
             cursor: pointer;
             font-family: var(--font);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.15s, transform 0.1s;
+            gap: 4px;
+            transition: background 0.15s, color 0.15s, transform 0.1s;
         }
         .copy-label { display: none; }
-        .copy-main:hover { background: #2563eb; }
+        .copy-main:hover { background: rgba(0,0,0,0.5); color: var(--text); }
         .copy-main:active { transform: scale(0.97); }
         .copy-more {
-            background: var(--surface3);
+            flex: none;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 4px;
+            background: rgba(0,0,0,0.3);
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 4px;
             color: var(--muted);
-            font-size: 12px;
+            font-size: 11px;
             line-height: 1;
-            min-width: 24px;
-            padding: 0 5px;
             cursor: pointer;
             font-family: var(--font);
-            flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .copy-more:hover { border-color: var(--primary); color: var(--text); }
+        .copy-more:hover { background: rgba(0,0,0,0.5); color: var(--text); }
         .card-actions {
             position: absolute;
             top: 0;
@@ -361,32 +388,34 @@
         #content.list-view .copy-label { display: inline; }
 
         /* ============================================================
-               MODO IMÁGENES: tarjeta horizontal a todo el ancho
-               Título (izq.) | preview (centro, mín. 500x350) | texto (der.)
+               MODO IMÁGENES: tarjeta horizontal que ocupa todo el ancho
+               Título (izq.) | preview (centro, elástico) | texto + copiar (der.)
                ============================================================ */
         .card-item.img-card {
             grid-column: 1 / -1;
             width: 100%;
             display: grid;
-            grid-template-columns: 220px minmax(500px, 1fr) minmax(240px, 30%);
-            gap: 18px;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
+            grid-template-columns: minmax(110px, 200px) minmax(0, 1fr) minmax(140px, 28%);
+            gap: 10px;
+            align-items: stretch;
+            justify-content: stretch;
             cursor: default;
-            padding: 12px 18px;
+            padding: 8px 10px;
             box-sizing: border-box;
-            flex: 1;
+        }
+        .card-item.img-card:hover {
+            transform: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
         }
         .img-card-left {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             min-width: 0;
-            height: 100%;
             text-align: center;
+            padding-right: 4px;
         }
         .img-card-title {
             font-size: 15px;
@@ -399,9 +428,9 @@
         }
         .img-card-media {
             width: 100%;
-            min-width: 500px;
-            min-height: 350px;
-            height: calc(var(--img-h, 420px) - 24px);
+            min-width: 0;
+            min-height: 260px;
+            height: calc(var(--img-h, 420px) - 16px);
             border-radius: 8px;
             overflow: hidden;
             background: rgba(0,0,0,0.3);
@@ -410,10 +439,10 @@
             justify-content: center;
             cursor: pointer;
             border: 1px solid var(--border);
-            transition: border-color 0.15s, transform 0.1s;
+            transition: border-color 0.15s;
             position: relative;
         }
-        .img-card-media:hover { border-color: var(--primary); transform: scale(1.01); }
+        .img-card-media:hover { border-color: var(--primary); }
         .img-card-media img {
             max-width: 100%;
             max-height: 100%;
@@ -425,7 +454,9 @@
             color: var(--faint);
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
+            text-align: center;
         }
         .img-card-media .img-copy-hint {
             position: absolute;
@@ -444,7 +475,6 @@
         .img-card-media:hover .img-copy-hint { opacity: 1; }
         .img-card-right {
             min-width: 0;
-            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -453,7 +483,7 @@
         }
         .img-card-text {
             width: 100%;
-            max-height: calc(var(--img-h, 420px) - 24px);
+            max-height: calc(var(--img-h, 420px) - 64px);
             overflow: auto;
             font-size: 12px;
             opacity: 0.9;
@@ -462,34 +492,64 @@
             text-align: center;
         }
         .img-card-btns {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 6px;
             width: 100%;
             flex-shrink: 0;
         }
         .img-card-btns button {
+            width: 100%;
+            min-width: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 8px 6px;
             background: var(--surface3);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
             color: var(--text);
             font-family: var(--font);
             font-size: 11px;
-            font-weight: 600;
-            padding: 7px 12px;
+            font-weight: 700;
+            line-height: 1.1;
             cursor: pointer;
-            transition: 0.15s;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
             white-space: nowrap;
+            text-align: center;
         }
         .img-card-btns button:hover { border-color: var(--primary); }
-        .img-card-btns button.copy-img-btn { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.4); }
+        .img-card-btns button:active { transform: scale(0.97); }
+        .img-card-btns button.copy-img-btn {
+            background: rgba(59,130,246,0.15);
+            border-color: rgba(59,130,246,0.45);
+            color: #93c5fd;
+        }
         .img-card-btns button.copy-img-btn:hover { background: rgba(59,130,246,0.3); }
-        .img-card-btns button.copy-text-btn { background: var(--primary); border-color: transparent; color: #fff; }
-        .img-card-btns button.copy-text-btn:hover { background: #2563eb; }
+        .img-card-btns button.copy-text-btn {
+            background: linear-gradient(180deg, #3b82f6, #2563eb);
+            border-color: transparent;
+            color: #fff;
+        }
+        .img-card-btns button.copy-text-btn:hover { filter: brightness(1.12); }
+        .img-card-btns button.details-btn {
+            background: var(--surface2);
+            border-color: var(--border);
+            color: var(--text);
+        }
+        .img-card-btns button.details-btn:hover { background: var(--surface3); border-color: var(--primary); }
         #content.list-view .card-item.img-card { flex-direction: row; }
         #content.list-view .img-card-media { display: flex; }
+
+        /* Modo imágenes: tarjetas pegadas a los bordes de la ventana */
+        #content[data-mode="images"] {
+            padding: 6px;
+        }
+        #content[data-mode="images"] #cards-container {
+            gap: 3px;
+            align-content: start;
+        }
 
         /* ============================================================
                MODO PROCESOS: cuadrícula tipo Excel (A-Z x 100 filas)
@@ -1964,10 +2024,6 @@
     <div id="toolbar">
         <div id="search-wrap">
             <input type="search" id="search-input" placeholder="🔍 Buscar tarjetas... (Ctrl+F)" />
-            <label>
-                <input type="checkbox" id="search-all" />
-                En todas
-            </label>
             <span id="search-result-count"></span>
         </div>
         <button class="tb-btn" id="btn-new-card" title="Nueva tarjeta (Ctrl+N)">➕ Tarjeta</button>
@@ -2039,7 +2095,7 @@
                     <div class="settings-color-row" id="settings-color-row"></div>
                 </div>
                 <div id="settings-size-fields">
-                    <div class="modal-field">
+                    <div class="modal-field" id="settings-w-field">
                         <label>Ancho de tarjeta: <span id="settings-w-val" class="px-val"></span> px</label>
                         <input type="range" id="settings-w-slider" min="110" max="420" step="5" />
                         <div class="settings-numrow">
@@ -2073,6 +2129,19 @@
                         <button class="btn-cancel" id="settings-cw-reset">Restablecer anchos</button>
                         <button class="btn-cancel" id="settings-rh-reset">Restablecer altos</button>
                     </div>
+                </div>
+                <div class="modal-field" id="settings-drawer-field">
+                    <label>⏱️ Cierre automático de la ventana lateral</label>
+                    <select id="settings-drawer-timeout">
+                        <option value="0">Queda abierta (no se cierra sola)</option>
+                        <option value="5">5 segundos</option>
+                        <option value="10">10 segundos</option>
+                        <option value="15">15 segundos</option>
+                        <option value="30">30 segundos</option>
+                        <option value="60">1 minuto</option>
+                        <option value="120">2 minutos</option>
+                    </select>
+                    <div class="field-hint">La ventana de detalle se cierra sola tras ese tiempo en reposo. También puedes cerrarla con ✕, Esc o haciendo clic fuera.</div>
                 </div>
                 <div class="modal-field">
                     <label>Vista previa en tiempo real</label>
@@ -2226,7 +2295,6 @@
         const cardsContainer = document.getElementById('cards-container');
         const sheetTabs = document.getElementById('sheet-tabs');
         const searchInput = document.getElementById('search-input');
-        const searchAllCheck = document.getElementById('search-all');
         const searchResultCount = document.getElementById('search-result-count');
         const btnNewCard = document.getElementById('btn-new-card');
         const btnFavFilter = document.getElementById('btn-fav-filter');
@@ -2390,6 +2458,7 @@
             if (!s) return s;
             if (!s.mode) s.mode = 'cards';
             if (!SHEET_MODES[s.mode]) s.mode = 'cards';
+            if (s.drawerTimeout == null) s.drawerTimeout = 10;
             if (!s.cardSize) s.cardSize = {};
             const defaultH = s.mode === 'images' ? 420 : 190;
             if (!s.cardSize.w) s.cardSize.w = 150;
@@ -2480,6 +2549,11 @@
         }
         function generateId() {
             return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        }
+        function numEmoji(n) {
+            const map = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+            n = Math.max(0, Math.min(10, parseInt(n, 10) || 0));
+            return map[n];
         }
         function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
         function getContrastColor(hexColor) {
@@ -2637,6 +2711,7 @@
                 color: SHEET_COLORS[idx % SHEET_COLORS.length],
                 mode: mode || 'cards',
                 cardSize: { w: 150, h: mode === 'images' ? 420 : 190 },
+                drawerTimeout: 10,
                 headers: DEFAULT_HEADERS.slice(),
                 col2Options: DEFAULT_COL2_OPTIONS.slice(),
                 cards: []
@@ -2715,6 +2790,32 @@
         }
 
         // ---------- MODO TARJETAS (actual, sin cambios) ----------
+        // Ajuste automático del título tipo "shrink to fit" (como Excel/Sheets):
+        // la fuente se reduce hasta que el título completo cabe en el alto reservado.
+        function autofitTitle(titleEl, cardH) {
+            if (!titleEl) return;
+            const text = (titleEl.textContent || '').trim();
+            if (!text) return;
+            // Presupuesto vertical: alto de tarjeta menos espacio del bloque de botones y paddings
+            const budget = Math.max(46, (cardH || 190) - 46);
+            titleEl.style.maxHeight = '';
+            titleEl.style.display = 'block';
+            titleEl.style.webkitLineClamp = '';
+            titleEl.style.webkitBoxOrient = '';
+            titleEl.style.overflow = 'hidden';
+            titleEl.style.textOverflow = '';
+            titleEl.style.whiteSpace = 'normal';
+            titleEl.style.wordBreak = 'break-word';
+            titleEl.style.overflowWrap = 'break-word';
+            titleEl.style.lineHeight = '1.2';
+            titleEl.style.fontSize = '12px';
+            // El título SIEMPRE se muestra completo: si sobrepasa, se achica la fuente (sin "...")
+            while (titleEl.scrollHeight > budget + 1 && parseFloat(titleEl.style.fontSize) > 8) {
+                const fs = parseFloat(titleEl.style.fontSize) - 0.5;
+                titleEl.style.fontSize = fs + 'px';
+            }
+        }
+
         function renderCardsMode(sheet) {
             btnNewCard.style.display = '';
             btnFavFilter.style.display = '';
@@ -2774,10 +2875,9 @@
                 if (sheet.cardSize && sheet.cardSize.h) el.style.height = sheet.cardSize.h + 'px';
                 el.style.gridRow = 'auto';
 
-                const bodyPlain = waToPlain(card.body).slice(0, 60);
-                const metaBits = [];
-                if (card.images && card.images.length) metaBits.push('🖼' + card.images.length);
-                if (card.links && card.links.length) metaBits.push('🔗' + card.links.length);
+                const bodyPlain = waToPlain(card.body);
+                const imgInd = (card.images && card.images.length) ? `<span class="copy-ind img-count" title="${card.images.length} imagen(es)">${numEmoji(card.images.length)}</span>` : '';
+                const linkInd = (card.links && card.links.length) ? `<span class="copy-ind" title="${card.links.length} enlace(s)">🔗${card.links.length}</span>` : '';
                 const badge = (query && state.searchAll && sheetId !== sheet.id) ? `<span class="card-tab-badge">${esc(getSheetById(sheetId)?.name || '')}</span>` : '';
 
                 el.innerHTML = `
@@ -2786,17 +2886,10 @@
                         <div class="card-title">${esc(card.title) || 'Sin título'}</div>
                     </div>
                     <div class="card-body-preview">${esc(bodyPlain)}</div>
-                    <div class="card-meta">${metaBits.join(' ')}${badge}</div>
                     <div class="card-copy-row">
                         <button class="copy-main" data-act="copy" title="Copiar texto para WhatsApp">📋<span class="copy-label"> COPIAR</span></button>
                         <button class="copy-more" data-act="copymore" title="Más opciones de copiado">▾</button>
-                    </div>
-                    <div class="card-actions">
-                        <button data-act="edit" title="Editar">✏️</button>
-                        <button data-act="pin" title="Fijar/desfijar favorita">⭐</button>
-                        <button data-act="color" title="Color">🎨</button>
-                        <button data-act="duplicate" title="Duplicar">⧉</button>
-                        <button data-act="delete" class="danger" title="Eliminar">🗑</button>
+                        ${imgInd}${linkInd}${badge}
                     </div>
                 `;
 
@@ -2804,40 +2897,17 @@
                 el.querySelector('[data-act="copy"]').addEventListener('click', (e) => {
                     e.stopPropagation();
                     copyCardBody(card);
+                    openDrawer(sheetId, card.id);
                 });
                 el.querySelector('[data-act="copymore"]').addEventListener('click', (e) => {
                     e.stopPropagation();
                     showCopyMenu(e, card, sheetId);
                 });
-                el.querySelector('[data-act="edit"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    openCardEditor(sheetId, card.id);
-                });
-                el.querySelector('[data-act="pin"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    card.pinned = !card.pinned;
-                    saveData();
-                    render();
-                    showToast(card.pinned ? '⭐ Tarjeta fijada.' : '☆ Tarjeta desfijada.', 'success', 1200);
-                });
-                el.querySelector('[data-act="color"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const rect = el.getBoundingClientRect();
-                    showColorPalette(rect.right - 210, rect.top + 10, sheetId, card.id);
-                });
-                el.querySelector('[data-act="duplicate"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    duplicateCard(sheetId, card.id);
-                });
-                el.querySelector('[data-act="delete"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    confirmDeleteCard(sheetId, card.id);
-                });
 
                 // Interacción clic vs arrastre (umbral 4px)
                 el.addEventListener('mousedown', (e) => {
                     if (e.button !== 0) return;
-                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
                     pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
                     document.addEventListener('mousemove', onGlobalMove);
                     document.addEventListener('mouseup', onGlobalUp);
@@ -2846,7 +2916,7 @@
 
                 // Doble clic: editar
                 el.addEventListener('dblclick', (e) => {
-                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
                     openCardEditor(sheetId, card.id);
                 });
 
@@ -2858,12 +2928,15 @@
                 });
 
                 cardsContainer.appendChild(el);
+                autofitTitle(el.querySelector('.card-title'), cs.h);
             });
 
             if (query) highlightMatches(query);
         }
 
         // ---------- MODO BUSCADOR DE IMÁGENES ----------
+        let imgClickTimer = null;
+
         function renderImagesMode(sheet) {
             btnNewCard.style.display = '';
             btnFavFilter.style.display = '';
@@ -2915,49 +2988,44 @@
                         <div class="img-card-title">${esc(card.title) || 'Sin título'}</div>
                         <span class="card-star" title="${card.pinned ? 'Favorita' : 'No favorita'}">${card.pinned ? '⭐' : '☆'}</span>
                         ${badge}
-                        <div class="card-actions">
-                            <button data-act="edit" title="Editar">✏️</button>
-                            <button data-act="pin" title="Fijar favorita">⭐</button>
-                            <button data-act="color" title="Color">🎨</button>
-                            <button data-act="duplicate" title="Duplicar">⧉</button>
-                            <button data-act="delete" class="danger" title="Eliminar">🗑</button>
-                        </div>
                     </div>
-                    <div class="img-card-media" data-act="copyimg" title="Copiar imagen (clic)">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" /><span class="img-copy-hint">🖼 Copiar imagen</span>` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
+                    <div class="img-card-media" title="Clic: copiar · Doble clic: copiar y ver ampliada">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" /><span class="img-copy-hint">🖼 Clic copiar · Doble clic ver</span>` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
                     <div class="img-card-right">
                         <div class="img-card-text">${esc(waToPlain(card.body)) || '<span class="img-card-noimg">Sin texto complementario</span>'}</div>
                         <div class="img-card-btns">
-                            <button class="copy-img-btn" data-act="copyimg" title="Copiar imagen al portapapeles">🖼 Copiar imagen</button>
                             <button class="copy-text-btn" data-act="copy" title="Copiar texto para WhatsApp">📋 Copiar texto</button>
+                            <button class="details-btn" data-act="details" title="Ver detalle de la tarjeta">📄 Detalles</button>
                         </div>
                     </div>
                 `;
 
                 el.querySelector('[data-act="copy"]').addEventListener('click', (e) => { e.stopPropagation(); copyCardBody(card); });
-                el.querySelectorAll('[data-act="copyimg"]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); copyCardFirstImage(card); }));
-                el.querySelector('[data-act="edit"]').addEventListener('click', (e) => { e.stopPropagation(); openCardEditor(sheetId, card.id); });
-                el.querySelector('[data-act="pin"]').addEventListener('click', (e) => {
-                    e.stopPropagation(); card.pinned = !card.pinned; saveData(); render();
-                    showToast(card.pinned ? '⭐ Fijada.' : '☆ Desfijada.', 'success', 1200);
-                });
-                el.querySelector('[data-act="color"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const rect = el.getBoundingClientRect();
-                    showColorPalette(rect.right - 210, rect.top + 10, sheetId, card.id);
-                });
-                el.querySelector('[data-act="duplicate"]').addEventListener('click', (e) => { e.stopPropagation(); duplicateCard(sheetId, card.id); });
-                el.querySelector('[data-act="delete"]').addEventListener('click', (e) => { e.stopPropagation(); confirmDeleteCard(sheetId, card.id); });
+                el.querySelector('[data-act="details"]').addEventListener('click', (e) => { e.stopPropagation(); openDrawer(sheetId, card.id); });
+                const mediaEl = el.querySelector('.img-card-media');
+                if (mediaEl && card.images && card.images.length) {
+                    mediaEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (imgClickTimer) clearTimeout(imgClickTimer);
+                        imgClickTimer = setTimeout(() => copyCardFirstImage(card), 220);
+                    });
+                    mediaEl.addEventListener('dblclick', (e) => {
+                        e.stopPropagation();
+                        if (imgClickTimer) clearTimeout(imgClickTimer);
+                        copyCardFirstImage(card);
+                        openImageBig(card.images[0]);
+                    });
+                }
 
                 el.addEventListener('mousedown', (e) => {
                     if (e.button !== 0) return;
-                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
                     pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
                     document.addEventListener('mousemove', onGlobalMove);
                     document.addEventListener('mouseup', onGlobalUp);
                     document.addEventListener('mouseleave', onGlobalLeave);
                 });
                 el.addEventListener('dblclick', (e) => {
-                    if (e.target.closest('.card-actions') || e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
                     openCardEditor(sheetId, card.id);
                 });
                 el.addEventListener('contextmenu', (e) => {
@@ -3729,15 +3797,34 @@
             copyText(text);
         }
 
+        // Convierte una data URL a Blob PNG (la API async de portapapeles solo acepta image/png)
+        function dataUrlToPngBlob(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.naturalWidth;
+                        canvas.height = img.naturalHeight;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) { reject(new Error('Sin soporte canvas')); return; }
+                        ctx.drawImage(img, 0, 0);
+                        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Fallo al convertir a PNG')), 'image/png');
+                    } catch (err) { reject(err); }
+                };
+                img.onerror = () => reject(new Error('Imagen inválida'));
+                img.src = dataUrl;
+            });
+        }
+
         async function copyCardFirstImage(card) {
             if (!card.images || !card.images.length) {
                 showToast('⚠️ Esta tarjeta no tiene imágenes.', 'warning');
                 return;
             }
             try {
-                const res = await fetch(card.images[0].data);
-                const blob = await res.blob();
-                await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                const blob = await dataUrlToPngBlob(card.images[0].data);
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
                 showToast('🖼️ Imagen copiada al portapapeles.', 'success');
             } catch (err) {
                 showToast('❌ Error al copiar imagen.', 'error');
@@ -3774,12 +3861,60 @@
             state.drawer = { sheetId, cardId };
             state.drawerNoteEdit = false;
             render();
+            armDrawerTimer();
         }
+
         function closeDrawer() {
+            cancelDrawerTimer();
             state.drawer = null;
             state.drawerNoteEdit = false;
             render();
         }
+
+        // ---- Auto-cierre del drawer (tiempo configurable por hoja) ----
+        let drawerTimer = null;
+        let drawerScrollTimer = null;
+
+        function getDrawerTimeout() {
+            const d = state.drawer;
+            if (!d) return 0;
+            const sheet = getSheetById(d.sheetId);
+            const v = sheet && sheet.drawerTimeout != null ? parseInt(sheet.drawerTimeout, 10) : 10;
+            return (isNaN(v) || v <= 0) ? 0 : v * 1000;
+        }
+
+        function cancelDrawerTimer() {
+            if (drawerTimer) { clearTimeout(drawerTimer); drawerTimer = null; }
+        }
+
+        function armDrawerTimer() {
+            cancelDrawerTimer();
+            if (!state.drawer || state.drawerNoteEdit) return;
+            const t = getDrawerTimeout();
+            if (!t) return;
+            drawerTimer = setTimeout(() => {
+                drawerTimer = null;
+                if (state.drawer && !state.drawerNoteEdit) closeDrawer();
+            }, t);
+        }
+
+        function resetDrawerTimer() {
+            if (state.drawer) armDrawerTimer();
+        }
+
+        // Cerrar al hacer clic fuera de la ventana lateral
+        document.addEventListener('mousedown', (e) => {
+            if (state.drawer && !e.target.closest('#drawer') && !state.drawerNoteEdit) closeDrawer();
+        });
+
+        // La actividad dentro del drawer renueva el tiempo de cierre
+        ['click', 'input', 'keydown', 'focusin'].forEach(ev => {
+            drawer.addEventListener(ev, resetDrawerTimer);
+        });
+        drawerScroll.addEventListener('scroll', () => {
+            if (drawerScrollTimer) clearTimeout(drawerScrollTimer);
+            drawerScrollTimer = setTimeout(resetDrawerTimer, 250);
+        });
 
         function renderDrawer() {
             if (!state.drawer) { drawer.classList.remove('open'); return; }
@@ -3952,6 +4087,10 @@
                 const d = state.drawer;
                 if (d) confirmDeleteCard(d.sheetId, d.cardId);
             });
+
+            // Sincroniza el auto-cierre: pausado mientras se edita la nota, activo en reposo
+            if (state.drawerNoteEdit) cancelDrawerTimer();
+            else armDrawerTimer();
         }
 
         drawerClose.addEventListener('click', closeDrawer);
@@ -3964,29 +4103,25 @@
         });
 
         function openImageBig(img) {
-            const win = window.open('', '_blank', 'width=600,height=400');
-            if (win) {
-                win.document.write(`
-                    <html><head><title>${esc(img.label || 'Imagen')}</title>
-                    <style>body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0f1117;color:#fff;font-family:sans-serif;}
-                    img{max-width:90%;max-height:80vh;border-radius:8px;border:1px solid rgba(255,255,255,0.1);}
-                    .btn{margin-top:16px;padding:8px 20px;background:#3b82f6;border:none;border-radius:4px;color:#fff;cursor:pointer;font-weight:bold;}</style></head>
-                    <body><img src="${img.data}" alt="${esc(img.label || '')}" />
-                    <button class="btn" onclick="navigator.clipboard.write([new ClipboardItem({['image/png']: this.previousElementSibling.src})]).then(()=>alert('Imagen copiada'))">📋 Copiar imagen</button>
-                    </body></html>
-                `);
-                win.document.close();
-            } else {
-                showToast('⚠️ No se pudo abrir la ventana. Permite pop-ups.', 'warning');
-            }
+            if (!img || !img.data) return;
+            const probe = new Image();
+            probe.onload = () => {
+                ipcRenderer.send('fast-view-image', {
+                    data: img.data,
+                    label: img.label || '',
+                    w: probe.naturalWidth,
+                    h: probe.naturalHeight
+                });
+            };
+            probe.src = img.data;
         }
 
         function copyImage(data) {
-            fetch(data).then(res => res.blob()).then(blob => {
-                navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]).then(() => {
-                    showToast('🖼️ Imagen copiada al portapapeles.', 'success');
-                }).catch(() => showToast('❌ Error al copiar imagen.', 'error'));
-            }).catch(() => showToast('❌ Error al cargar imagen.', 'error'));
+            dataUrlToPngBlob(data).then(blob => {
+                return navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+            }).then(() => {
+                showToast('🖼️ Imagen copiada al portapapeles.', 'success');
+            }).catch(() => showToast('❌ Error al copiar imagen.', 'error'));
         }
 
         // ============================================================
@@ -4002,7 +4137,7 @@
                     if (idx !== -1) {
                         sheet.cards.splice(idx, 1);
                         saveData();
-                        if (state.drawer && state.drawer.cardId === cardId) state.drawer = null;
+if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state.drawer = null; }
                         render();
                         showToast('🗑 Tarjeta eliminada.', 'success');
                     }
@@ -4715,8 +4850,10 @@
                 `<span class="sm-badge">${m.icon} ${m.label}</span><span>${m.desc}</span>`;
 
             const sizeFields = document.getElementById('settings-size-fields');
+            const settingsWField = document.getElementById('settings-w-field');
             if (sheet.mode === 'cards') {
                 sizeFields.style.display = '';
+                settingsWField.style.display = '';
                 settingsHSlider.min = 120; settingsHSlider.max = 620;
                 settingsHNum.min = 120; settingsHNum.max = 620;
                 settingsWSlider.value = sheet.cardSize.w;
@@ -4724,9 +4861,12 @@
                 settingsWNum.value = sheet.cardSize.w;
                 settingsHNum.value = sheet.cardSize.h;
             } else if (sheet.mode === 'images') {
-                sizeFields.style.display = 'none';
-                settingsHSlider.min = 380; settingsHSlider.max = 800;
-                settingsHNum.min = 380; settingsHNum.max = 800;
+                sizeFields.style.display = '';
+                settingsWField.style.display = 'none';
+                settingsHSlider.min = 300; settingsHSlider.max = 900;
+                settingsHNum.min = 300; settingsHNum.max = 900;
+                settingsWSlider.value = 150;
+                settingsWNum.value = 150;
                 settingsHSlider.value = sheet.cardSize.h;
                 settingsHNum.value = sheet.cardSize.h;
             } else {
@@ -4743,6 +4883,11 @@
             } else {
                 gridFields.style.display = 'none';
             }
+            // Tiempo de cierre automático de la ventana lateral (aplica a tarjetas e imágenes)
+            const drawerField = document.getElementById('settings-drawer-field');
+            const drawerSelect = document.getElementById('settings-drawer-timeout');
+            drawerField.style.display = sheet.mode === 'process' ? 'none' : '';
+            drawerSelect.value = String(sheet.drawerTimeout != null ? sheet.drawerTimeout : 10);
             syncSettingsSliders();
             settingsOverlay.classList.add('show');
         }
@@ -4811,6 +4956,9 @@
             const w = parseInt(settingsWSlider.value, 10);
             const h = parseInt(settingsHSlider.value, 10);
             sheet.cardSize = { w: w || 150, h: h || 190 };
+            const drawerSelect = document.getElementById('settings-drawer-timeout');
+            const dt = parseInt(drawerSelect.value, 10);
+            sheet.drawerTimeout = isNaN(dt) ? 10 : dt;
             if (sheet.mode === 'process' && sheet.grid && settingsGridDirty) {
                 const cw = parseInt(settingsCwSlider.value, 10) || EX_DEF_W;
                 const rh = parseInt(settingsRhSlider.value, 10) || EX_DEF_H;
@@ -4830,6 +4978,16 @@
         document.getElementById('settings-close').addEventListener('click', () => settingsOverlay.classList.remove('show'));
         settingsOverlay.addEventListener('click', (e) => {
             if (e.target === settingsOverlay) settingsOverlay.classList.remove('show');
+        });
+
+        document.getElementById('settings-drawer-timeout').addEventListener('change', () => {
+            const sheet = getSheetById(settingsSheetId);
+            if (!sheet) return;
+            const dt = parseInt(document.getElementById('settings-drawer-timeout').value, 10);
+            sheet.drawerTimeout = isNaN(dt) ? 10 : dt;
+            saveData();
+            resetDrawerTimer();
+            showToast('⏱️ Tiempo de cierre actualizado.', 'success', 1000);
         });
 
         // ============================================================
@@ -5013,11 +5171,6 @@
         // ============================================================
         searchInput.addEventListener('input', () => {
             state.searchQuery = searchInput.value;
-            render();
-        });
-        searchAllCheck.addEventListener('change', () => {
-            state.searchAll = searchAllCheck.checked;
-            saveData();
             render();
         });
         btnFavFilter.addEventListener('click', () => {
