@@ -212,10 +212,12 @@ function setAlwaysOnTopPreference(value) {
 function toolPos(key, toolWidth) {
   const saved = loadPos()[key];
   if (saved) {
+    const w = (saved.width > 0) ? saved.width : toolWidth;
+    const h = (saved.height > 0) ? saved.height : 0;
     const displays = screen.getAllDisplays();
     const isVisible = displays.some(d => {
-       return saved.x >= d.bounds.x && saved.x + toolWidth <= d.bounds.x + d.bounds.width &&
-              saved.y >= d.bounds.y && saved.y <= d.bounds.y + d.bounds.height;
+       return saved.x >= d.bounds.x && saved.x + w <= d.bounds.x + d.bounds.width &&
+              saved.y >= d.bounds.y && saved.y + h <= d.bounds.y + d.bounds.height;
     });
     if (isVisible) return saved;
   }
@@ -606,27 +608,18 @@ app.whenReady().then(() => {
   
   mainWin.on('close', e => { 
     if (isQuitting) return; 
-    const d = loadData(); 
-    if (d.draft && (d.draft.name || d.draft.content || d.draft.comuna || d.draft.huerfanos || (d.draft.customFields && d.draft.customFields.length > 0))) { 
-      e.preventDefault(); 
-      if (mainWin && !mainWin.isDestroyed()) {
-        mainWin.webContents.send('request-close-confirm'); 
-      }
-    } 
+    e.preventDefault(); 
+    if (mainWin && !mainWin.isDestroyed()) {
+      mainWin.webContents.send('request-close-confirm'); 
+    }
   });
 });
 
 // ── IPC: CIERRE Y MINIMIZAR ──
 ipcMain.on('confirm-close', () => { isQuitting = true; app.quit(); });
 ipcMain.on('close-main', () => { 
-  const d = loadData(); 
-  if (d.draft && (d.draft.name || d.draft.content || d.draft.comuna || d.draft.huerfanos || (d.draft.customFields && d.draft.customFields.length > 0))) { 
-    if (mainWin && !mainWin.isDestroyed()) {
-      mainWin.webContents.send('request-close-confirm'); 
-    }
-  } else { 
-    isQuitting = true; 
-    app.quit(); 
+  if (mainWin && !mainWin.isDestroyed()) {
+    mainWin.webContents.send('request-close-confirm'); 
   } 
 });
 ipcMain.on('minimize-main', () => { 
@@ -851,9 +844,12 @@ ipcMain.on('open-tool', (e, id) => {
     }
   }
 
-  const pos = toolPos(id, conf.w);
+  const saved = loadPos()[id];
+  const sw = (saved && saved.width > 0) ? saved.width : conf.w;
+  const sh = (saved && saved.height > 0) ? saved.height : conf.h;
+  const pos = toolPos(id, sw);
   const win = new BrowserWindow({
-    width: conf.w, height: conf.h, x: pos.x, y: pos.y,
+    width: sw, height: sh, x: pos.x, y: pos.y,
     frame: false, resizable: conf.resize, movable: true, 
     alwaysOnTop: conf.top || getAlwaysOnTopPreference(),
     webPreferences: { nodeIntegration: true, contextIsolation: false }
@@ -880,8 +876,22 @@ ipcMain.on('open-tool', (e, id) => {
 
   win.on('move', () => {
     if (win && !win.isDestroyed()) {
-      const [x, y] = win.getPosition();
-      savePos({ [id]: { x, y } });
+      const b = win.getBounds();
+      savePos({ [id]: { x: b.x, y: b.y, width: b.width, height: b.height } });
+    }
+  });
+
+  win.on('resize', () => {
+    if (win && !win.isDestroyed()) {
+      const b = win.getBounds();
+      savePos({ [id]: { x: b.x, y: b.y, width: b.width, height: b.height } });
+    }
+  });
+
+  win.on('close', () => {
+    if (win && !win.isDestroyed()) {
+      const b = win.getBounds();
+      savePos({ [id]: { x: b.x, y: b.y, width: b.width, height: b.height } });
     }
   });
 
@@ -1035,10 +1045,13 @@ function openNote(id, isPreview = false) {
     // Si la ventana guardada está destruida, recrearla (no retornar sin hacer nada)
     noteWins.delete(id);
   } 
-  const pos = toolPos(`note-${id}`, 260); 
-  const offset = noteWins.size * 24; 
+  const savedNote = loadPos()[`note-${id}`];
+  const noteW = (savedNote && savedNote.width > 0) ? savedNote.width : 260;
+  const noteH = (savedNote && savedNote.height > 0) ? savedNote.height : 300;
+  const pos = toolPos(`note-${id}`, noteW);
+  const offset = noteWins.size * 24;
   const win = new BrowserWindow({ 
-    width: 260, height: 300, 
+    width: noteW, height: noteH, 
     x: pos.x + offset, y: pos.y + offset, 
     frame: false, resizable: true, movable: true, 
     alwaysOnTop: getAlwaysOnTopPreference(),
@@ -1059,8 +1072,20 @@ function openNote(id, isPreview = false) {
   }); 
   win.on('move', () => { 
     if (win && !win.isDestroyed()) { 
-      const [x, y] = win.getPosition(); 
-      savePos({ [`note-${id}`]: { x, y } }); 
+      const b = win.getBounds(); 
+      savePos({ [`note-${id}`]: { x: b.x, y: b.y, width: b.width, height: b.height } }); 
+    }
+  }); 
+  win.on('resize', () => { 
+    if (win && !win.isDestroyed()) { 
+      const b = win.getBounds(); 
+      savePos({ [`note-${id}`]: { x: b.x, y: b.y, width: b.width, height: b.height } }); 
+    }
+  }); 
+  win.on('close', () => { 
+    if (win && !win.isDestroyed()) { 
+      const b = win.getBounds(); 
+      savePos({ [`note-${id}`]: { x: b.x, y: b.y, width: b.width, height: b.height } }); 
     }
   }); 
   win.on('closed', () => { 

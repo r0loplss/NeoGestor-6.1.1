@@ -112,17 +112,9 @@
             align-items: center;
             gap: 2px;
             min-width: 26px;
-            overflow: hidden;
         }
         #btn-drawer .dlbl {
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        @media (max-width: 560px) {
-            #btn-drawer .dlbl { display: none; }
-            #btn-drawer { padding: 2px 6px; }
         }
 
         /* ============================================================
@@ -1378,21 +1370,28 @@ font-family: var(--font);
         #confirm-overlay.show {
             display: flex;
         }
-        #confirm-box {
+#confirm-box {
             background: var(--surface);
             border: 1px solid var(--border2);
             border-radius: 8px;
             padding: 18px;
-            width: 270px;
+            width: min(270px, calc(100vw - 32px));
+            max-width: 90vw;
+            max-height: calc(100vh - 64px);
+            overflow-y: auto;
             text-align: center;
+            box-sizing: border-box;
         }
         .conf-btns {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
             margin-top: 15px;
         }
         .conf-btn {
+            flex: 1 1 auto;
+            min-width: 0;
             padding: 8px 16px;
             border: none;
             border-radius: 4px;
@@ -1528,7 +1527,7 @@ font-family: var(--font);
     HEADER CON TOGGLE
     ============================================================ -->
     <div id="hdr">
-        <button class="hdr-wbtn" onclick="toggleDrawer(event)" id="btn-drawer" title="Desplegar aplicaciones satélite">🛠️<span class="dlbl"> Herramientas</span></button>
+        <button class="hdr-wbtn" onclick="toggleDrawer(event)" id="btn-drawer" title="Desplegar aplicaciones satélite">🛠️<span class="dlbl"> tools</span></button>
         <div id="hdr-sep"></div>
         <button class="hdr-wbtn" onclick="ipcRenderer.send('minimize-main')">—</button>
         <button class="hdr-wbtn cls" onclick="closeApp()">✕</button>
@@ -1736,7 +1735,7 @@ font-family: var(--font);
 
     <div id="confirm-overlay">
         <div id="confirm-box">
-            <div id="confirm-msg" style="font-size:12px; line-height:1.5;"></div>
+            <div id="confirm-msg" style="font-size:12px; line-height:1.5; white-space:pre-line; word-break:break-word;"></div>
             <div class="conf-btns">
                 <button class="conf-btn conf-ok" id="conf-ok-btn">Confirmar</button>
                 <button class="conf-btn conf-cancel" onclick="closeConfirm()">Cancelar</button>
@@ -2138,8 +2137,12 @@ renderHistory();
         });
         ipcRenderer.on('tool-minimized', (e, id) => { hiddenTools.add(id); });
         ipcRenderer.on('tool-restored', (e, id) => { hiddenTools.delete(id); });
-        ipcRenderer.on('request-close-confirm', () => {
-            showConfirm('Hay un borrador sin guardar. ¿Salir de todas formas?', () => { ipcRenderer.send('confirm-close'); });
+ipcRenderer.on('request-close-confirm', () => {
+            const hasDraft = appData.draft && !!(appData.draft.name || appData.draft.content || appData.draft.comuna || appData.draft.huerfanos || (appData.draft.customFields && appData.draft.customFields.length > 0));
+            const msg = hasDraft
+                ? '⚠️ Hay un borrador sin guardar.\n¿Estás seguro de que quieres cerrar el programa?'
+                : '¿Estás seguro de que quieres cerrar el programa?';
+            showConfirm(msg, () => { ipcRenderer.send('confirm-close'); });
         });
 
         ipcRenderer.on('alerta-action', (e, data) => {

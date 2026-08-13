@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Guía de Usuario — Gestor de Casos</title>
+<style>
+    :root {
+        --azul: #2563eb;
+        --azul-osc: #1e40af;
+        --verde: #059669;
+        --ambar: #d97706;
+        --rojo: #dc2626;
+        --gris: #64748b;
+        --linea: #e2e8f0;
+        --bg-soft: #f8fafc;
+        --tinta: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+        color: var(--tinta);
+        line-height: 1.6;
+        font-size: 15px;
+        background: #fff;
+    }
+    .page { max-width: 800px; margin: 0 auto; padding: 20px 28px 70px; }
+
+    /* PORTADA */
+    .portada {
+        min-height: 78vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        border-bottom: 3px solid var(--azul);
+    }
+    .portada h1 { font-size: 38px; margin: 8px 0 2px; color: var(--azul-osc); }
+    .portada .sub { font-size: 17px; color: var(--gris); margin-bottom: 24px; }
+    .portada .chip {
+        display: inline-block;
+        background: var(--bg-soft);
+        border: 1px solid var(--linea);
+        border-radius: 999px;
+        padding: 5px 14px;
+        margin: 3px;
+        font-size: 13px;
+        color: #334155;
+    }
+    .portada .chip b { color: var(--azul-osc); }
+
+    h2 {
+        font-size: 22px;
+        color: var(--azul-osc);
+        border-bottom: 2px solid var(--azul);
+        padding-bottom: 5px;
+        margin: 28px 0 12px;
+    }
+    h3 { font-size: 17px; color: var(--azul); margin: 20px 0 6px; }
+    h4 { font-size: 15px; color: #334155; margin: 14px 0 4px; }
+    p { margin: 8px 0; }
+    ul, ol { margin: 6px 0 12px; padding-left: 22px; }
+    li { margin: 4px 0; }
+    b { color: #1e293b; }
+    code, kbd {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 5px;
+        padding: 1px 7px;
+        font-size: 13px;
+        font-family: Consolas, monospace;
+        color: #4338ca;
+    }
+
+    .nota { background: #ecfdf5; border-left: 4px solid var(--verde); padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+    .aviso { background: #fffbeb; border-left: 4px solid var(--ambar); padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 13.5px; }
+    th { background: var(--azul); color: #fff; text-align: left; padding: 7px 10px; font-weight: 600; }
+    td { border: 1px solid var(--linea); padding: 7px 10px; vertical-align: top; }
+    tbody tr:nth-child(even) { background: var(--bg-soft); }
+
+    .paso { display: flex; gap: 10px; margin: 6px 0; }
+    .paso .n {
+        flex-shrink: 0;
+        width: 24px; height: 24px;
+        background: var(--azul);
+        color: #fff;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700;
+    }
+
+    .seccion { padding-top: 14px; }
+    .volver a { color: var(--azul); font-size: 12px; text-decoration: none; }
+
+    @media print { .volver { display: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+    <!-- ==================== PORTADA ==================== -->
+    <div class="portada">
+        <h1>Guía de Usuario</h1>
+        <div class="sub">Gestor de Casos · El foco está en tus herramientas de trabajo</div>
+        <div>
+            <span class="chip">Herramientas explicadas paso a paso</span>
+            <span class="chip">Para todo el equipo</span>
+            <span class="chip">Windows</span>
+        </div>
+    </div>
+
+    <!-- ==================== 1. QUE ES ==================== -->
+    <div class="seccion" id="que-es">
+        <h2>1. ¿Qué es el Gestor de Casos?</h2>
+        <p>Es un <b>programa de escritorio</b> que reúne en una sola ventana las herramientas que necesitas a diario en el call center: calculadoras comerciales, buscadores, gestores de enlaces e imágenes, tus turnos y mucho más.</p>
+        <p>Esta guía se centra en <b>esas herramientas</b>, que son el corazón de la aplicación. Al final hay un resumen breve del sistema de llamadas.</p>
+        <div class="nota">Todo lo que escribas se <b>guarda automáticamente</b> en tu computador. No necesitas saber de computación para usarlo.</div>
+    </div>
+
+    <!-- ==================== 2. ABRIR ==================== -->
+    <div class="seccion" id="abrir">
+        <h2>2. Cómo abrir el programa</h2>
+        <ol>
+            <li>Busca el archivo <b>"Abrir Gestor"</b> en la carpeta del programa.</li>
+            <li>Haz <b>doble clic</b> en él y espera unos segundos.</li>
+            <li>Ya puedes trabajar: en la barra superior pulsa <b>🛠️ Herramientas</b> para ver todas las herramientas disponibles.</li>
+        </ol>
+        <div class="aviso">La ventana no tiene los botones normales de Windows. Arriba tienes <b>—</b> (minimizar) y <b>✕</b> (cerrar).</div>
+    </div>
+
+    <!-- ==================== 3. LAS HERRAMIENTAS ==================== -->
+    <div class="seccion" id="herramientas">
+        <h2>3. Las herramientas (tu caja de trabajo)</h2>
+        <p>Pulsa <b>🛠️ Herramientas</b> y elige la que necesites. Cada herramienta se abre en su propia ventana y <b>recuerda donde la dejaste</b>. A continuación se explica cada una:</p>
+
+        <h3>🧮 Calculadora OCC</h3>
+        <p>Calcula los <b>descuentos y textos comerciales</b> por dificultad de navegación y los deja listos para copiar y pegar.</p>
+        <h4>OCC Postpago</h4>
+        <div class="paso"><span class="n">1</span><span>Selecciona el <b>ciclo</b> (50 a 54).</span></div>
+        <div class="paso"><span class="n">2</span><span>Revisa la <b>fecha de aplicación</b> (ya viene con hoy).</span></div>
+        <div class="paso"><span class="n">3</span><span>Escribe el <b>cargo fijo</b> del plan: la herramienta calcula el 20% de compensación y te dice en qué boleta impacta.</span></div>
+        <div class="paso"><span class="n">4</span><span>Pulsa <b>＋ Agregar línea OCC</b>.</span></div>
+        <div class="paso"><span class="n">5</span><span>Copia con los botones: <b>📋 Tipificación</b>, <b>📎 Complemento</b> y <b>💬 SMS</b>.</span></div>
+        <h4>NC Excepción y Recargas Prepago</h4>
+        <p>Las otras dos pestañas ayudan con las <b>notas de crédito excepcionales</b> (cargo + descuento autorizado) y el caso de <b>Recarga Dificultad de Navegación</b> ($2.000), cada una con sus botones de copiar tipificación y SMS.</p>
+        <div class="aviso">En el prepago no puede haber otra recarga similar dentro del mismo mes y se envía a JP en turno.</div>
+
+        <h3>🔗 Mis Enlaces</h3>
+        <p>Tu colección personal de <b>páginas web</b> e <b>imágenes</b> (capturas de procesos) con etiquetas y buscador.</p>
+        <div class="paso"><span class="n">1</span><span>Pulsa <b>➕ Nuevo recurso</b>.</span></div>
+        <div class="paso"><span class="n">2</span><span>Escribe el título y pega la <b>URL</b> o la <b>imagen</b> directamente con <kbd>Ctrl+V</kbd> (o usa <b>📁 Seleccionar archivo</b>).</span></div>
+        <div class="paso"><span class="n">3</span><span>Elige o crea una <b>etiqueta</b> para encontrarlo fácil. Haz clic en la tarjeta para abrirlo.</span></div>
+        <p>Con <b>clic derecho</b> puedes editarlo, copiar la URL o eliminarlo. Las imágenes se abren en un visor con botones para <b>copiar imagen</b> y <b>copiar texto</b>.</p>
+
+        <h3>📅 Turnos Web</h3>
+        <p>Trae tus <b>turnos de la semana</b> con solo tu RUT y activa los avisos de entrada, descansos, colación y salida.</p>
+        <div class="paso"><span class="n">1</span><span>Escribe tu <b>RUT sin dígito verificador</b> (solo números, ejemplo <code>18858549</code>).</span></div>
+        <div class="paso"><span class="n">2</span><span>Pulsa <b>📥 Traer turnos</b> (o tecla <kbd>Enter</kbd>).</span></div>
+        <div class="paso"><span class="n">3</span><span>Verás tu nombre y la tabla del mes con la fila de hoy resaltada (<b>HOY</b>). Los días de descanso salen atenuados.</span></div>
+        <p>También puedes cargar los turnos <b>manualmente</b> (para personal de apoyo): cada día tiene 🟢 Entrada, 🍽️ Colación y 🔴 Salida. El botón <b>🗑 Limpiar</b> borra todo y apaga los avisos.</p>
+
+        <h3>📡 Radar Contingencias</h3>
+        <p>Monitor de <b>fallas masivas</b>: pega el reporte tal como te llega y el programa arma el radar solo.</p>
+        <div class="paso"><span class="n">1</span><span>Pega el texto del reporte en el área indicada.</span></div>
+        <div class="paso"><span class="n">2</span><span>Pulsa <b>⚡ Escanear y Reemplazar Radar</b>.</span></div>
+        <div class="paso"><span class="n">3</span><span>Se crean las tarjetas con la comuna, el <b>ID</b> (clic para copiar) y los POPs afectados. Lo más nuevo queda arriba.</span></div>
+        <div class="paso"><span class="n">4</span><span>Copia los resúmenes para compartir: <b>📋 Copiar Detallado</b> o <b>📋 Copiar Breve</b>.</span></div>
+        <div class="nota">Esta ventana queda <b>siempre visible</b> por encima de las demás, para que no se te escape una falla.</div>
+
+        <h3>📶 Tráfico PRO</h3>
+        <p>Analiza el <b>consumo de datos, voz y SMS</b> de una línea y redacta la explicación para el cliente.</p>
+        <div class="paso"><span class="n">1</span><span><b>📂 Carga los datos</b>: elige el Excel o pega las celdas copiadas del informe.</span></div>
+        <div class="paso"><span class="n">2</span><span>Usa los <b>filtros</b> (fechas, tipo, búsqueda) o los rápidos: Últimos 7 días, Roaming, SMS Nacional, Saldo, etc.</span></div>
+        <div class="paso"><span class="n">3</span><span>Revisa los <b>KPIs</b> e <b>insights</b> (roaming, uso nocturno, picos de datos).</span></div>
+        <div class="paso"><span class="n">4</span><span>Pulsa <b>🔄 Generar explicación</b> y <b>📋 Copiar</b> para pegar el mensaje al cliente.</span></div>
+
+        <h3>📅 Calculadora de Días</h3>
+        <p>Cuenta los días desde una <b>fecha de activación</b> y verifica los hitos de <b>120 días</b> y <b>18 meses</b>.</p>
+        <div class="paso"><span class="n">1</span><span>Elige la <b>fecha de activación</b> y la fecha actual (ya viene con hoy).</span></div>
+        <div class="paso"><span class="n">2</span><span>Pulsa <b>🔍 Calcular</b> (o <kbd>Enter</kbd>).</span></div>
+        <div class="paso"><span class="n">3</span><span>Pulsa <b>📋 Copiar resultado</b> para pegar el texto en la gestión.</span></div>
+
+        <h3>🔄 Cambio de Ciclo</h3>
+        <p>Cuando un cliente pide <b>cambiar su ciclo de facturación</b>, calcula todos los datos que debes explicarle.</p>
+        <div class="paso"><span class="n">1</span><span>Elige <b>ciclo actual</b>, <b>nuevo ciclo</b> y la <b>fecha de la orden</b>.</span></div>
+        <div class="paso"><span class="n">2</span><span>Pulsa <b>🔍 Calcular</b>: verás la boleta anterior, la nueva (período, días a cobrar, emisión, vencimiento) y la fecha de reinicio del plan.</span></div>
+        <div class="paso"><span class="n">3</span><span>Revisa el <b>💬 Speech sugerido</b> y pulsa <b>📋 Copiar Speech</b> para leérselo al cliente.</span></div>
+
+        <h3>📋 Tipificaciones</h3>
+        <p>Base de conocimiento de <b>motivos de llamado</b> con plantillas y políticas listas para copiar.</p>
+        <div class="paso"><span class="n">1</span><span>Busca el motivo: escribe en el buscador o usa las flechas <kbd>↑</kbd>/<kbd>↓</kbd> y <kbd>Enter</kbd>.</span></div>
+        <div class="paso"><span class="n">2</span><span>En el centro verás el tipo, área, subárea y estado del ticket.</span></div>
+        <div class="paso"><span class="n">3</span><span>Copia con <b>📋 Copiar</b> (solo la descripción) o <b>📤 Copiar todo</b> (mensaje completo) y pégalo donde lo necesites.</span></div>
+        <div class="paso"><span class="n">4</span><span>A la derecha lees las <b>instrucciones y políticas</b> "Importante".</span></div>
+
+        <h3>⚡ Fast (el más potente)</h3>
+        <p>Tu <b>caja de respuestas rápidas</b>: plantillas con formato WhatsApp, imágenes y procesos, organizadas en hojas tipo Excel.</p>
+        <h4>Cómo abrirlo</h4>
+        <ul>
+            <li>Desde el panel <b>⚡ Fast</b> del botón 🛠️.</li>
+            <li>Desde el <b>botón flotante ⚡</b> al lado de la ventana principal.</li>
+            <li>Con el atajo <kbd>Ctrl+Shift+F</kbd> desde cualquier lado.</li>
+        </ul>
+        <h4>Hojas (pestañas tipo Excel)</h4>
+        <p>Cada hoja tiene nombre, color y contador. Pulsa <b>＋</b> para crear una y elige su modo: <b>📇 Tarjetas</b>, <b>🖼️ Buscador de imágenes</b> o <b>⚙️ Procesos</b> (hoja de cálculo).</p>
+        <h4>Modo Tarjetas 📇</h4>
+        <ul>
+            <li>Pasa el mouse por una tarjeta: aparece <b>📋 COPIAR</b> (copia todo) y <b>▾</b> (más formatos).</li>
+            <li><b>Clic</b> abre el detalle, <b>doble clic</b> edita, <b>clic derecho</b> abre más opciones (duplicar, mover de hoja, eliminar).</li>
+            <li><b>Arrastra</b> para reordenar o mover a otra hoja.</li>
+        </ul>
+        <h4>Modo Buscador de imágenes 🖼️</h4>
+        <p>Tarjetas con imagen grande: al pasar el mouse tienes <b>🖼 Copiar imagen</b> y <b>📋 Copiar texto</b>.</p>
+        <h4>Modo Procesos ⚙️</h4>
+        <p>Una cuadrícula (A–Z × 100 filas) para anotar procesos. Doble clic edita la celda, <kbd>Tab</kbd> avanza a la derecha y <kbd>Enter</kbd> baja. Puedes pegar tablas de Excel con <kbd>Ctrl+V</kbd>.</p>
+        <div class="nota">En el editor de tarjeta también puedes pegar una <b>imagen con <kbd>Ctrl+V</kbd></b> y usar formato (negrita, cursiva, tachado, código) con la barra superior.</div>
+
+        <h3>📚 Mis Notas</h3>
+        <p>Libreta de notas estilo "post-it", con hasta <b>10 notas</b>.</p>
+        <ul>
+            <li>Abre <b>📚 Mis Notas</b> en el panel para ver todas tus notas en cuadrícula.</li>
+            <li>Pulsa <b>➕ Nueva Nota</b> y escribe: se guarda sola.</li>
+            <li>Marca <b>★</b> la que sea favorita. En el pie de la ventana principal, las notas aparecen como <b>puntos numerados</b>.</li>
+        </ul>
+
+        <h3>⚙️ Ajustes</h3>
+        <table>
+            <thead><tr><th>Opción</th><th>Qué hace</th></tr></thead>
+            <tbody>
+                <tr><td><b>Fuente</b></td><td>Cambia la letra de toda la aplicación.</td></tr>
+                <tr><td><b>Siempre visible</b></td><td>Mantiene el programa por encima de otras ventanas.</td></tr>
+                <tr><td><b>Iniciar con el PC</b></td><td>Abre el programa automáticamente al encender el computador.</td></tr>
+            </tbody>
+        </table>
+        <div class="nota">Recuerda pulsar <b>💾 Guardar</b> cuando cambies algo.</div>
+    </div>
+
+    <!-- ==================== 4. SISTEMA DE LLAMADAS (BREVE) ==================== -->
+    <div class="seccion" id="llamadas">
+        <h2>4. El sistema de casos (en resumen)</h2>
+        <p>La parte de atención de llamadas es simple. La ventana se divide en tres zonas:</p>
+        <h3>Caso activo</h3>
+        <p>Escribes los datos del cliente que estás atendiendo. Pulsa <b>💾</b> para guardarlo (pasa al historial) o <b>📅</b> para <b>programar un seguimiento</b> (llamada o SMS). Tu texto se va guardando solo como borrador.</p>
+        <h3>Pendientes</h3>
+        <p>Aquí aparecen los llamados o SMS que programaste, con un <b>contador de tiempo</b>: ámbar (≤15 min), naranja (≤5 min) o rojo (vencido). Haz clic en la tarjeta para finalizar, editar o descartar, y clic en el número para copiarlo.</p>
+        <h3>Historial</h3>
+        <p>Guardas de todos los casos atendidos. Busca con <kbd>Ctrl+F</kbd>, haz clic en un registro para verlo y usa <b>↩ Recuperar</b> para volver a trabajarlo en el Caso activo.</p>
+        <p>La <b>barra de abajo</b> de la ventana completa este sistema: te dice cuánto falta para tu entrada, descansos, colación o salida.</p>
+    </div>
+
+    <!-- ==================== 5. TRUCOS ==================== -->
+    <div class="seccion" id="trucos">
+        <h2>5. Trucos que te harán más rápido</h2>
+        <table>
+            <thead><tr><th>Atajo</th><th>Qué hace</th></tr></thead>
+            <tbody>
+                <tr><td><kbd>Ctrl+S</kbd></td><td>Guarda en la ventana o formulario abierto.</td></tr>
+                <tr><td><kbd>Ctrl+F</kbd></td><td>Busca (historial, enlaces, etc.).</td></tr>
+                <tr><td><kbd>Ctrl+Shift+F</kbd></td><td>Abre o cierra Fast desde cualquier lugar.</td></tr>
+                <tr><td><kbd>Ctrl+Shift+G</kbd></td><td>Genera la explicación en Tráfico PRO.</td></tr>
+                <tr><td><kbd>Escape</kbd></td><td>Cierra la ventana o limpia la búsqueda.</td></tr>
+                <tr><td><kbd>Ctrl+V</kbd> en editores</td><td>Pega imágenes directamente (Fast, Enlaces).</td></tr>
+            </tbody>
+        </table>
+        <div class="nota">Casi todas las tarjetas se copian con un clic: pasa el mouse y busca los botones <b>📋 COPIAR</b>.</div>
+    </div>
+
+    <!-- ==================== 6. FAQ ==================== -->
+    <div class="seccion" id="faq">
+        <h2>6. Preguntas frecuentes</h2>
+        <p><b>¿Mis datos se pierden si cierro el programa?</b><br/>No. Todo se guarda automáticamente, incluso un caso a medio escribir.</p>
+        <p><b>¿Puedo tener varias herramientas abiertas a la vez?</b><br/>Sí, la principal y varias satélites pueden convivir sin problema.</p>
+        <p><b>¿Para qué sirve el botón ⚡ al lado de la ventana?</b><br/>Es un acceso directo a Fast: aparece cuando pasas el mouse sobre la app y con un clic abre o cierra Fast.</p>
+        <p><b>¿Las alertas me van a molestar?</b><br/>Puedes silenciarlas con el botón <b>🔔/🔕</b> del encabezado de Pendientes.</p>
+        <p><b>¿Necesito internet?</b><br/>Solo para traer los turnos y para firmar la asistencia. El resto funciona sin internet.</p>
+    </div>
+
+    <!-- ==================== 7. ACERCA DE Y EASTER EGG ==================== -->
+    <div class="seccion" id="curiosidades">
+        <h2>7. Curiosidades y secretos</h2>
+
+        <h3>ℹ️ La ventana "Acerca de"</h3>
+        <p>En <b>⚙️ Herramientas → Ajustes</b> pulsa <b>ℹ️ Acerca de</b>. Se abre una ventana con los datos del programa: quien lo desarrolló (<b>Rolando Tapia</b>), la mención a <b>Open Code</b> y el porcentaje de desarrollo con agentes basados en IA (Gémini, Open Code y humano), con una barra animada.</p>
+
+        <h3>🥚 La leyenda del botón de Herramientas</h3>
+        <p>Cuentan, en voz baja, que dentro de esta herramienta se esconde un <b>ciclo infinito</b>: algo que se despierta solo si tu memoria llega de una época de arcades, monedas y pantallas de créditos. Se dice que el botón <b>🛠️ Herramientas</b> guarda un secreto para quien sepa <i>recordar</i> una secuencia que jamás se enseña — de esas que solo se pasan de boca en boca entre jugadores veteranos.</p>
+        <p>Quienes lo han visto aseguran que la escena es digna de un <b>CD de finales de los 90</b>: una figura que se repite sin fin contra el fondo, como una pesadilla pixelada, mientras suena una melodía que muchos llaman <i>"Majin"</i> y que se te queda pegada por días.</p>
+        <p>Otros juran haber alcanzado a leer, entre el pitido y el silencio, una reflexión existencial: <i>"al aprender a programar entendí que solo la nada sabe si mañana tendré ganas de trabajar"</i>. Y justo después, como burlándose de nosotros: <b>¿Ánimo?</b></p>
+        <p>Aquí no hay instrucciones: los secretos de verdad no se explican, se descubren. Solo un consejo: <b>pasa el cursor por el botón de Herramientas</b> y, si conoces el idioma de los arcades, deja que tus dedos hablen.</p>
+    </div>
+
+    <p style="text-align:center;color:var(--gris);font-size:12px;margin-top:34px;">— Guía de Usuario · Gestor de Casos · Uso interno del call center —</p>
+
+</div>
+</body>
+</html>

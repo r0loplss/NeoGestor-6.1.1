@@ -229,13 +229,15 @@
         .card-title {
             flex: 1;
             min-width: 0;
+            min-height: 0;
             font-size: 12px;
             font-weight: 700;
             overflow: hidden;
             line-height: 1.2;
-            word-break: break-word;
-            overflow-wrap: break-word;
+            word-break: normal;
+            overflow-wrap: normal;
             white-space: normal;
+            hyphens: none;
         }
         .card-body-preview {
             font-size: 10px;
@@ -420,7 +422,9 @@
         .img-card-title {
             font-size: 15px;
             font-weight: 800;
-            word-break: break-word;
+            word-break: normal;
+            overflow-wrap: normal;
+            hyphens: none;
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 3;
@@ -1343,6 +1347,18 @@
         }
         .d-link:hover { border-color: var(--primary); }
         .d-link .link-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--primary); }
+        .d-link .copy-url-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 13px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            line-height: 1;
+            opacity: 0.7;
+        }
+        .d-link .copy-url-btn:hover { opacity: 1; color: var(--primary); }
         #drawer-actions {
             display: flex;
             justify-content: space-around;
@@ -2271,6 +2287,7 @@
             searchAll: false,
             favOnly: false,
             view: 'grid',
+            lastCardColor: '#fef3c7',
             drawer: null,
             drawerNoteEdit: false,
             dataPath: null,
@@ -2417,7 +2434,7 @@
             saveQueue.push({
                 sheets: state.sheets,
                 activeSheetId: state.activeSheetId,
-                settings: { searchAll: state.searchAll, view: state.view }
+                settings: { searchAll: state.searchAll, view: state.view, lastCardColor: state.lastCardColor }
             });
             processSaveQueue();
         }
@@ -2507,6 +2524,7 @@
                     if (data.settings) {
                         state.searchAll = !!data.settings.searchAll;
                         state.view = data.settings.view === 'list' ? 'list' : 'grid';
+                        if (data.settings.lastCardColor) state.lastCardColor = data.settings.lastCardColor;
                     }
                 } else {
                     const migrated = migrateV1(data);
@@ -2588,6 +2606,64 @@
                 .replace(/\*([^*\n]+)\*/g, '$1')
                 .replace(/_([^_\n]+)_/g, '$1')
                 .replace(/~([^~\n]+)~/g, '$1');
+        }
+
+        // ============================================================
+        // BUSCADOR PRECISO
+        // Normaliza (sin tildes, minúsculas) y busca por palabra completa,
+        // priorizando título y cabecera de la tipificación (Tipo/Área/Subárea/Estado)
+        // para evitar falsos positivos del texto de plantilla.
+        // ============================================================
+        function normText(s) {
+            return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function searchTokens() {
+            return normText(state.searchQuery).split(/[^a-z0-9]+/).filter(t => t.length >= 2);
+        }
+
+        // Coincidencia de palabra completa (inicio de palabra), sensible a plurales:
+        // "reclamo" también coincide con "reclamos", "reclamación", etc.
+        function wordMatch(text, token) {
+            if (!text) return false;
+            const re = new RegExp('(^|[^a-z0-9])' + token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+            return re.test(text);
+        }
+
+        // Extrae la cabecera de la tipificación: líneas previas a la plantilla de
+        // campos (vacíos, "content_copy" o lista con guiones "-")
+        function tipHeader(body) {
+            const lines = body.split('\n');
+            const out = [];
+            for (const ln of lines) {
+                const t = ln.trim();
+                if (!t || /^content_copy/i.test(t) || /^-\s/.test(t)) break;
+                out.push(t);
+            }
+            return out.join(' ');
+        }
+
+        // Devuelve score de relevancia (0 = sin coincidencia). AND entre términos.
+        // Solo cuenta como resultado si al menos un término aparece en el título o en la
+        // cabecera (Tipo/Área/Subárea/Estado); las menciones únicamente en el cuerpo de
+        // plantilla (campos genéricos) no generan resultados para evitar ruido.
+        function cardSearchScore(card, tokens) {
+            if (!tokens.length) return 0;
+            const title = normText(card.title);
+            const plain = waToPlain(card.body);
+            const body = normText(plain);
+            const header = tipHeader(plain);
+            let score = 0;
+            let headHit = false;
+            for (const tok of tokens) {
+                const inTitle = wordMatch(title, tok);
+                const inHeader = wordMatch(header, tok);
+                const inBody = wordMatch(body, tok);
+                if (inTitle || inHeader) headHit = true;
+                if (!inTitle && !inHeader && !inBody) return 0; // AND: todos los términos
+                score += (inTitle ? 30 : 0) + (inHeader ? 15 : 0) + (inBody ? 2 : 0);
+            }
+            return headHit ? score : 0;
         }
 
         // Convierte HTML (v1) a texto con marcadores de WhatsApp
@@ -2805,12 +2881,20 @@
             titleEl.style.overflow = 'hidden';
             titleEl.style.textOverflow = '';
             titleEl.style.whiteSpace = 'normal';
-            titleEl.style.wordBreak = 'break-word';
-            titleEl.style.overflowWrap = 'break-word';
+            // Nunca partir una palabra a mitad: se quiebra solo por espacios.
+            titleEl.style.wordBreak = 'normal';
+            titleEl.style.overflowWrap = 'normal';
+            titleEl.style.hyphens = 'none';
             titleEl.style.lineHeight = '1.2';
             titleEl.style.fontSize = '12px';
-            // El título SIEMPRE se muestra completo: si sobrepasa, se achica la fuente (sin "...")
-            while (titleEl.scrollHeight > budget + 1 && parseFloat(titleEl.style.fontSize) > 8) {
+            // El título SIEMPRE se muestra completo: si sobrepasa, se achica la fuente (sin "...").
+            // Mínimo legible: no bajar de 9px. Si aún así no cabe, el excedente se recorta
+            // (deformación asumida por el usuario) en vez de partir palabras.
+            const MIN_TITLE_FS = 9;
+            while (parseFloat(titleEl.style.fontSize) > MIN_TITLE_FS) {
+                const overH = titleEl.scrollHeight > budget + 1;
+                const overW = titleEl.scrollWidth > titleEl.clientWidth + 1;
+                if (!overH && !overW) break;
                 const fs = parseFloat(titleEl.style.fontSize) - 0.5;
                 titleEl.style.fontSize = fs + 'px';
             }
@@ -2826,31 +2910,36 @@
             cardsContainer.style.gridAutoRows = cs.h + 'px';
             cardsContainer.classList.remove('images-mode');
 
-            const query = state.searchQuery.toLowerCase().trim();
+            const tokens = searchTokens();
+            const query = state.searchQuery.trim();
             let cards = [];
 
-            if (query && state.searchAll) {
+            if (tokens.length && state.searchAll) {
                 state.sheets.forEach(s => {
                     s.cards.forEach(c => {
-                        const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
-                        if (hay) cards.push({ card: c, sheetId: s.id });
+                        const sc = cardSearchScore(c, tokens);
+                        if (sc) cards.push({ card: c, sheetId: s.id, score: sc });
                     });
                 });
-            } else if (query) {
+            } else if (tokens.length) {
                 sheet.cards.forEach(c => {
-                    const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
-                    if (hay) cards.push({ card: c, sheetId: sheet.id });
+                    const sc = cardSearchScore(c, tokens);
+                    if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
                 });
             } else {
-                cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id }));
+                cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id, score: 0 }));
             }
 
             if (state.favOnly) {
                 cards = cards.filter(({ card }) => card.pinned);
             }
 
-            // Favoritas primero, luego orden original
-            cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
+            // Orden: relevancia (solo en búsqueda), luego favoritas, luego orden original
+            if (tokens.length) {
+                cards.sort((a, b) => (b.score - a.score) || ((b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0)));
+            } else {
+                cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
+            }
 
             if (!cards.length) {
                 if (query) {
@@ -2944,25 +3033,30 @@
             cardsContainer.classList.add('images-mode');
             const h = (sheet.cardSize && sheet.cardSize.h) || 420;
 
-            const query = state.searchQuery.toLowerCase().trim();
+            const tokens = searchTokens();
+            const query = state.searchQuery.trim();
             let cards = [];
-            if (query && state.searchAll) {
+            if (tokens.length && state.searchAll) {
                 state.sheets.forEach(s => {
                     s.cards.forEach(c => {
-                        const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
-                        if (hay) cards.push({ card: c, sheetId: s.id });
+                        const sc = cardSearchScore(c, tokens);
+                        if (sc) cards.push({ card: c, sheetId: s.id, score: sc });
                     });
                 });
-            } else if (query) {
+            } else if (tokens.length) {
                 sheet.cards.forEach(c => {
-                    const hay = c.title.toLowerCase().includes(query) || waToPlain(c.body).toLowerCase().includes(query);
-                    if (hay) cards.push({ card: c, sheetId: sheet.id });
+                    const sc = cardSearchScore(c, tokens);
+                    if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
                 });
             } else {
-                cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id }));
+                cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id, score: 0 }));
             }
             if (state.favOnly) cards = cards.filter(({ card }) => card.pinned);
-            cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
+            if (tokens.length) {
+                cards.sort((a, b) => (b.score - a.score) || ((b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0)));
+            } else {
+                cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
+            }
 
             if (!cards.length) {
                 cardsContainer.innerHTML = query
@@ -3540,7 +3634,8 @@
                 exGridEl.appendChild(h);
             }
 
-            const re = query ? new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi') : null;
+            const nq = normText(query);
+            const re = nq ? new RegExp('(' + nq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi') : null;
             for (let r = 0; r < rows; r++) {
                 const num = document.createElement('div');
                 num.className = 'ex-cell ex-hrow';
@@ -3581,7 +3676,7 @@
                     cell.dataset.r = r;
                     cell.dataset.c = c;
                     const v = grid.cells[r][c] || '';
-                    if (re && v && v.toLowerCase().includes(query)) {
+                    if (re && wordMatch(normText(v), nq)) {
                         cell.innerHTML = esc(v).replace(re, '<mark class="ex-mark">$1</mark>');
                     } else {
                         cell.textContent = v;
@@ -3748,16 +3843,20 @@
             let count;
             if (sheet.mode === 'process') {
                 const g = sheet.grid || { cells: [] };
+                const nq = normText(query);
                 count = 0;
                 g.cells.forEach(row => {
                     row.forEach(v => {
-                        if (String(v || '').toLowerCase().includes(query.toLowerCase())) count++;
+                        if (nq && wordMatch(normText(String(v || '')), nq)) count++;
                     });
                 });
             } else {
-                count = sheet.cards.filter(c =>
-                    (c.title || '').toLowerCase().includes(query.toLowerCase()) || waToPlain(c.body).toLowerCase().includes(query.toLowerCase())
-                ).length;
+                const tokens = searchTokens();
+                if (tokens.length) {
+                    count = sheet.cards.filter(c => cardSearchScore(c, tokens) > 0).length;
+                } else {
+                    count = 0;
+                }
             }
             searchResultCount.textContent = count > 0 ? `${count} resultado${count > 1 ? 's' : ''}` : '';
         }
@@ -3860,7 +3959,7 @@
         function openDrawer(sheetId, cardId) {
             state.drawer = { sheetId, cardId };
             state.drawerNoteEdit = false;
-            render();
+            renderDrawer();
             armDrawerTimer();
         }
 
@@ -3868,7 +3967,7 @@
             cancelDrawerTimer();
             state.drawer = null;
             state.drawerNoteEdit = false;
-            render();
+            renderDrawer();
         }
 
         // ---- Auto-cierre del drawer (tiempo configurable por hoja) ----
@@ -3904,7 +4003,8 @@
 
         // Cerrar al hacer clic fuera de la ventana lateral
         document.addEventListener('mousedown', (e) => {
-            if (state.drawer && !e.target.closest('#drawer') && !state.drawerNoteEdit) closeDrawer();
+            // No cerrar el drawer si el clic se hace dentro de un menú/paleta flotante
+            if (state.drawer && !e.target.closest('#drawer') && !e.target.closest('#ctx-menu') && !e.target.closest('.color-palette') && !state.drawerNoteEdit) closeDrawer();
         });
 
         // La actividad dentro del drawer renueva el tiempo de cierre
@@ -3962,7 +4062,22 @@
                 card.links.forEach(link => {
                     const box = document.createElement('div');
                     box.className = 'd-link';
-                    box.innerHTML = `<span class="link-text">${esc(link.text || link.url)}</span><span>🔗</span>`;
+                    const text = document.createElement('span');
+                    text.className = 'link-text';
+                    text.textContent = link.text || link.url;
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-url-btn';
+                    copyBtn.title = 'Copiar URL';
+                    copyBtn.textContent = '📋';
+                    copyBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (link.url) copyText(link.url);
+                    });
+                    const icon = document.createElement('span');
+                    icon.textContent = '🔗';
+                    box.appendChild(text);
+                    box.appendChild(copyBtn);
+                    box.appendChild(icon);
                     box.addEventListener('click', () => {
                         if (link.url) require('electron').shell.openExternal(link.url);
                     });
@@ -4000,7 +4115,7 @@
                     card.notes = ta.value;
                     state.drawerNoteEdit = false;
                     saveData();
-                    render();
+                    renderDrawer();
                     showToast('✅ Nota guardada.', 'success', 1200);
                 });
                 const btnCancel = document.createElement('button');
@@ -4008,7 +4123,7 @@
                 btnCancel.textContent = 'Cancelar';
                 btnCancel.addEventListener('click', () => {
                     state.drawerNoteEdit = false;
-                    render();
+                    renderDrawer();
                 });
                 ebtns.appendChild(btnSave);
                 ebtns.appendChild(btnCancel);
@@ -4036,7 +4151,7 @@
                 btnEdit.textContent = '✏️ Editar';
                 btnEdit.addEventListener('click', () => {
                     state.drawerNoteEdit = true;
-                    render();
+                    renderDrawer();
                 });
                 noteBtns.appendChild(btnCopy);
                 noteBtns.appendChild(btnEdit);
@@ -4048,7 +4163,7 @@
                 btnAdd.textContent = '➕ Agregar nota';
                 btnAdd.addEventListener('click', () => {
                     state.drawerNoteEdit = true;
-                    render();
+                    renderDrawer();
                 });
                 noteBox.appendChild(btnAdd);
             }
@@ -4257,6 +4372,14 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#ctx-menu')) hideContextMenu();
         });
+        // Cerrar el menú al presionar en cualquier zona (izquierdo o derecho) fuera del menú
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('#ctx-menu')) hideContextMenu();
+        }, true);
+        // Cerrar el menú si se hace scroll fuera de él (evita que quede flotando desanclado)
+        window.addEventListener('wheel', (e) => {
+            if (!e.target.closest('#ctx-menu')) hideContextMenu();
+        }, { passive: true });
 
         // ============================================================
         // MENÚ CONTEXTUAL DE HOJA
@@ -4379,6 +4502,14 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 colorPalette.classList.remove('show');
             }
         });
+        // Cerrar la paleta al presionar con cualquier botón fuera de ella (consistente con el menú)
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.color-palette')) colorPalette.classList.remove('show');
+        }, true);
+        // Cerrar la paleta al hacer scroll fuera de ella
+        window.addEventListener('wheel', (e) => {
+            if (!e.target.closest('.color-palette')) colorPalette.classList.remove('show');
+        }, { passive: true });
 
         // ============================================================
         // ARRASTRE: clic (abrir drawer) vs arrastre inmediato (mover)
@@ -4527,7 +4658,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             let isNew = false;
             if (cardId) card = sheet.cards.find(c => c.id === cardId);
             if (!card) {
-                card = { id: generateId(), title: '', body: '', color: '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
+                card = { id: generateId(), title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
                 isNew = true;
                 sheet.cards.push(card);
                 saveData();
@@ -5166,6 +5297,16 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             openCardEditor(sheet.id, null);
         });
 
+        // El color elegido en el editor se conserva como color por defecto
+        // para las siguientes tarjetas nuevas (se actualiza al cambiarlo).
+        editColor.addEventListener('input', () => {
+            state.lastCardColor = editColor.value;
+        });
+        editColor.addEventListener('change', () => {
+            state.lastCardColor = editColor.value;
+            saveData();
+        });
+
         // ============================================================
         // BÚSQUEDA
         // ============================================================
@@ -5297,7 +5438,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
                 if (colorPalette.classList.contains('show')) { colorPalette.classList.remove('show'); return; }
                 if (state.drawer) {
-                    if (state.drawerNoteEdit) { state.drawerNoteEdit = false; render(); }
+                    if (state.drawerNoteEdit) { state.drawerNoteEdit = false; renderDrawer(); }
                     else closeDrawer();
                 }
             }

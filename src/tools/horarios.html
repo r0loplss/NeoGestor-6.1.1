@@ -159,6 +159,52 @@
         .day-card .m-save { grid-column: 1 / -1; width: 100%; }
         .te-grid input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
         .b-100 { width: 100%; margin-top: 10px; }
+        .add-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+        .add-row input[type="date"] {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--font);
+            font-size: 12px;
+            padding: 8px;
+            outline: none;
+        }
+        .add-row input[type="date"]:focus { border-color: var(--primary); }
+        .add-row input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+        .add-hint { margin-top: 10px; }
+        .m-col-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            grid-column: 1 / -1;
+        }
+        .m-col-check {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text);
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .m-col-check input { accent-color: var(--success); width: 15px; height: 15px; cursor: pointer; }
+        .m-col-time {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 13px;
+            padding: 6px;
+            font-family: var(--font);
+        }
+        .m-col-time:focus { outline: none; border-color: var(--primary); }
+        .m-col-time.disabled { opacity: 0.35; pointer-events: none; }
         .btn-proc {
             background: var(--primary);
             color: #fff;
@@ -282,7 +328,11 @@
             <div class="box">
                 <div class="man-note">🧑‍🔧 <b>Para apoyos sin web de turnos:</b> carga aquí tus <b>entrada</b>, <b>colación</b> y <b>salida</b> de cada día. Las alertas se activarán igual que con la web (en los apoyos no hay breaks).</div>
                 <div id="manual-list"></div>
-                <button class="btn-proc b-100" id="btn-add-dia">➕ Agregar turno día siguiente</button>
+                <div class="add-row" id="add-row">
+                    <input type="date" id="inp-add-fecha" title="Fecha del turno (por defecto: día siguiente)">
+                    <button class="btn-proc" id="btn-add-dia">➕ Agregar turno</button>
+                </div>
+                <div class="box-hint add-hint">💡 Define la <b>fecha</b> del turno a cargar (por defecto sale el día siguiente). Si ese día es libre, cámbiala por el día en que realmente trabajas.</div>
             </div>
         </div>
 
@@ -541,29 +591,53 @@
                     <div class="te-grid">
                         <label>🟢 Entrada<input type="time" class="m-entrada" data-fecha="${d.fecha}"></label>
                         <label>🔴 Salida<input type="time" class="m-salida" data-fecha="${d.fecha}"></label>
-                        <label>🍽️ Colación<input type="time" class="m-colacion" data-fecha="${d.fecha}"></label>
-                        <span class="te-full"></span>
+                        <div class="m-col-row">
+                            <label class="m-col-check"><input type="checkbox" class="m-colcheck" data-fecha="${d.fecha}"> 🍽️ Colación</label>
+                            <input type="time" class="m-colacion" data-fecha="${d.fecha}">
+                        </div>
                         <button class="btn-proc secondary m-save">💾 Guardar</button>
                     </div>`;
                 card.querySelector('.m-entrada').value = d.entrada || '';
                 card.querySelector('.m-salida').value = d.salida || '';
-                card.querySelector('.m-colacion').value = d.colacion || '';
+                const colCheck = card.querySelector('.m-colcheck');
+                const colTime = card.querySelector('.m-colacion');
+                const hasCol = !!d.colacion;
+                colCheck.checked = hasCol;
+                colTime.value = d.colacion || '';
+                colTime.classList.toggle('disabled', !hasCol);
+                colCheck.onchange = () => {
+                    const on = colCheck.checked;
+                    colTime.classList.toggle('disabled', !on);
+                    if (!on) colTime.value = '';
+                };
                 card.querySelector('.m-save').onclick = () => guardarDia(d.fecha, card);
                 list.appendChild(card);
             });
 
-            // botón "Agregar día siguiente" solo tras guardar el último
+            // botón "Agregar turno" solo tras guardar el último
             const ultimo = manualDias[manualDias.length - 1];
-            const addBtn = document.getElementById('btn-add-dia');
-            addBtn.style.display = (manualDias.length < MAX_DIAS && diaCompleto(ultimo)) ? '' : 'none';
+            const addRowVisible = (manualDias.length < MAX_DIAS && diaCompleto(ultimo));
+            document.getElementById('add-row').style.display = addRowVisible ? '' : 'none';
+            if (addRowVisible) {
+                const inpFecha = document.getElementById('inp-add-fecha');
+                const cur = inpFecha.value;
+                const stale = !cur || cur < isoHoy() || manualDias.some(x => x.fecha === cur);
+                if (stale) inpFecha.value = addDaysISO(ultimo.fecha, 1);
+            }
         }
 
         function guardarDia(fecha, card) {
             const entrada = card.querySelector('.m-entrada').value;
-            const colacion = card.querySelector('.m-colacion').value;
+            const colCheck = card.querySelector('.m-colcheck');
+            const colMarked = !!(colCheck && colCheck.checked);
+            const colacion = colMarked ? card.querySelector('.m-colacion').value : '';
             const salida = card.querySelector('.m-salida').value;
             if (!entrada && !colacion && !salida) {
                 showToast('⚠️ Completa al menos un horario (entrada, colación o salida).', 'warning');
+                return;
+            }
+            if (colMarked && !colacion) {
+                showToast('⚠️ Marcaste colación: indica su hora (o desmárcala si ese día no hubo).', 'warning');
                 return;
             }
             const d = manualDias.find(x => x.fecha === fecha);
@@ -577,7 +651,11 @@
             if (manualDias.length >= MAX_DIAS) { showToast('⚠️ Máximo 10 turnos visibles.', 'warning'); return; }
             const last = manualDias[manualDias.length - 1];
             if (!diaCompleto(last)) { showToast('⚠️ Guarda primero el turno anterior.', 'warning'); return; }
-            manualDias.push({ fecha: addDaysISO(last.fecha, 1), entrada: '', colacion: '', salida: '' });
+            let fecha = document.getElementById('inp-add-fecha').value;
+            if (!fecha) fecha = addDaysISO(last.fecha, 1);
+            if (fecha < isoHoy()) { showToast('⚠️ La fecha ya pasó. Elige hoy o un día futuro.', 'warning'); return; }
+            if (manualDias.some(x => x.fecha === fecha)) { showToast('⚠️ Ese día ya está cargado.', 'warning'); return; }
+            manualDias.push({ fecha, entrada: '', colacion: '', salida: '' });
             renderManual();
             const cards = document.querySelectorAll('#manual-list .day-card');
             const newCard = cards[cards.length - 1];
