@@ -77,8 +77,8 @@
             width: 1px;
             height: 18px;
             background: var(--border);
-            margin: 0 2px;
             flex-shrink: 0;
+            margin: 0 28px 0 2px;
             margin-left: auto;
         }
 
@@ -1273,6 +1273,25 @@ font-family: var(--font);
         }
         #turno-countdown .muted {
             color: var(--faint);
+        }
+        #turno-countdown .mqu {
+            display: inline-block;
+            white-space: nowrap;
+            will-change: transform;
+        }
+        #turno-countdown .mqu-c {
+            display: inline-block;
+            padding-right: 60px;
+        }
+        #turno-bar:hover #turno-countdown .mqu {
+            animation: mqu-scroll 12s linear infinite;
+        }
+        #turno-fixed:has(#turno-panel.open) #turno-bar:hover #turno-countdown .mqu {
+            animation: none;
+        }
+        @keyframes mqu-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
         }
         #turno-panel {
             display: none;
@@ -3025,12 +3044,16 @@ ipcRenderer.on('request-close-confirm', () => {
             return new Date(pf.y, pf.m - 1, pf.dd, t.h, t.min);
         }
 
+        function mquHtml(inner) {
+            return `<span class="mqu"><span class="mqu-c">${inner}</span><span class="mqu-c">${inner}</span></span>`;
+        }
+
         function renderTurnoBar() {
             const el = document.getElementById('turno-countdown');
             if (!el) return;
             const d = turnoHoy();
             if (!d || !d.bloques) {
-                el.textContent = '⏱ Sin turno cargado hoy · clic para ver y cargar en Turnos Web';
+                el.innerHTML = mquHtml('⏱ Sin turno cargado hoy · clic para ver y cargar en Turnos Web');
                 return;
             }
             const now = new Date();
@@ -3046,13 +3069,13 @@ ipcRenderer.on('request-close-confirm', () => {
             }
             if (next) {
                 const dt = dtDelDia(d, next.ini);
-                if (!dt) { el.textContent = '⏱ Turno cargado · clic para ver detalles'; return; }
+                if (!dt) { el.innerHTML = mquHtml('⏱ Turno cargado · clic para ver detalles'); return; }
                 const min = Math.max(0, Math.round((dt.getTime() - now.getTime()) / 60000));
                 const lbl = TURNOS_LABEL[next.tipo] || next.label || next.tipo;
                 const icon = TURNOS_ICON[next.tipo] || '';
-                el.innerHTML = `<span class="muted">${icon} Faltan ${min} minuto${min === 1 ? '' : 's'} para ${lbl}</span>`;
+                el.innerHTML = mquHtml(`<span class="muted">${icon} Faltan ${min} minuto${min === 1 ? '' : 's'} para ${lbl}</span>`);
             } else {
-                el.innerHTML = '<span class="muted">⏱ Turno del día finalizado · clic para ver</span>';
+                el.innerHTML = mquHtml('<span class="muted">⏱ Turno del día finalizado · clic para ver</span>');
             }
         }
 

@@ -166,7 +166,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             grid-auto-rows: 190px;
-            gap: 3px;
+            gap: 10px;
             align-content: start;
             min-height: 100%;
         }
@@ -244,6 +244,7 @@
             opacity: 0.85;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: pre-wrap;
             display: -webkit-box;
             -webkit-line-clamp: 99;
             -webkit-box-orient: vertical;
@@ -551,7 +552,7 @@
             padding: 6px;
         }
         #content[data-mode="images"] #cards-container {
-            gap: 3px;
+            gap: 10px;
             align-content: start;
         }
 
@@ -3032,6 +3033,7 @@
             btnView.style.display = '';
             cardsContainer.classList.add('images-mode');
             const h = (sheet.cardSize && sheet.cardSize.h) || 420;
+            cardsContainer.style.gridAutoRows = h + 'px';
 
             const tokens = searchTokens();
             const query = state.searchQuery.trim();
@@ -4556,7 +4558,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const card = sheet.cards[index];
             if (!card) return;
 
-            dragState = { sheetId, cardId, fromIndex: index };
+            dragState = { sheetId, cardId, fromIndex: index, lastInsertIdx: index, guideShown: false };
 
             const ghost = document.createElement('div');
             ghost.className = 'card-item';
@@ -4593,33 +4595,73 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             e.preventDefault();
             updateGhostPosition(e.clientX, e.clientY);
 
-            const rect = cardsContainer.getBoundingClientRect();
+            const containerRect = cardsContainer.getBoundingClientRect();
             const threshold = 60;
-            if (e.clientY < rect.top + threshold) {
+            if (e.clientY < containerRect.top + threshold) {
                 if (!scrollInterval) scrollInterval = setInterval(() => cardsContainer.scrollTop -= SCROLL_SPEED, 16);
-            } else if (e.clientY > rect.bottom - threshold) {
+            } else if (e.clientY > containerRect.bottom - threshold) {
                 if (!scrollInterval) scrollInterval = setInterval(() => cardsContainer.scrollTop += SCROLL_SPEED, 16);
             } else {
                 if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; }
             }
 
-            // 1) Reorden dentro de la misma hoja
-            const target = document.elementsFromPoint(e.clientX, e.clientY).find(el =>
-                el.classList && el.classList.contains('card-item') && el.dataset.cardId
-            );
-            if (target) {
-                const sheet = getSheetById(dragState.sheetId);
-                if (sheet) {
-                    const fromIdx = sheet.cards.findIndex(c => c.id === dragState.cardId);
-                    const toIdx = sheet.cards.findIndex(c => c.id === target.dataset.cardId);
-                    if (fromIdx !== -1 && toIdx !== -1 && fromIdx !== toIdx) {
-                        const [moved] = sheet.cards.splice(fromIdx, 1);
-                        const newIdx = fromIdx < toIdx ? toIdx - 1 : toIdx;
-                        sheet.cards.splice(newIdx, 0, moved);
-                        dragState.fromIndex = newIdx;
-                        saveData();
-                        render();
+            // 1) Reorden dentro de la misma hoja (inserción libre "entre" tarjetas)
+            const sheet = getSheetById(dragState.sheetId);
+            if (sheet) {
+                const isList = contentEl.classList.contains('list-view');
+                let insertIdx;
+                let col = 0, row = 0;
+
+                if (isList) {
+                    // Vista lista: filas verticales de altura variable → insertar por centro de tarjeta
+                    const cards = Array.from(cardsContainer.querySelectorAll('.card-item'));
+                    insertIdx = cards.length;
+                    for (let i = 0; i < cards.length; i++) {
+                        const r = cards[i].getBoundingClientRect();
+                        if (e.clientY < r.top + r.height / 2) { insertIdx = i; break; }
                     }
+                } else {
+                    const cs = sheet.cardSize || { w: 150, h: 190 };
+                    const gap = 10;
+                    const cols = Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap)));
+                    col = Math.floor((e.clientX - containerRect.left) / (cs.w + gap));
+                    row = Math.floor((e.clientY - containerRect.top) / (cs.h + gap));
+                    insertIdx = Math.max(0, Math.min(row * cols + col, sheet.cards.length));
+                }
+
+                const fromIdx = sheet.cards.findIndex(c => c.id === dragState.cardId);
+                if (fromIdx !== -1 && insertIdx !== dragState.lastInsertIdx) {
+                    dragState.lastInsertIdx = insertIdx;
+                    const [moved] = sheet.cards.splice(fromIdx, 1);
+                    const targetIdx = fromIdx < insertIdx ? insertIdx - 1 : insertIdx;
+                    sheet.cards.splice(targetIdx, 0, moved);
+                    dragState.fromIndex = targetIdx;
+                    saveData();
+                    render();
+                }
+
+                // Indicador de posición de inserción (línea sobre el hueco)
+                if (dragGuide) {
+                    if (isList) {
+                        const cards = Array.from(cardsContainer.querySelectorAll('.card-item'));
+                        const r = cards[dragState.lastInsertIdx] ? cards[dragState.lastInsertIdx].getBoundingClientRect() : null;
+                        const top = r ? r.top - 1.5 : (cards.length ? cards[cards.length - 1].getBoundingClientRect().bottom - 1.5 : containerRect.top);
+                        dragGuide.style.left = (containerRect.left) + 'px';
+                        dragGuide.style.top = top + 'px';
+                        dragGuide.style.width = containerRect.width + 'px';
+                        dragGuide.style.height = '3px';
+                    } else {
+                        const cs = sheet.cardSize || { w: 150, h: 190 };
+                        const gap = 10;
+                        const insertCol = dragState.lastInsertIdx % Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap)));
+                        const insertRow = Math.floor(dragState.lastInsertIdx / Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap))));
+                        dragGuide.style.left = (containerRect.left + insertCol * (cs.w + gap) - Math.floor(cs.w / 2) - 1.5) + 'px';
+                        dragGuide.style.top = (containerRect.top + insertRow * (cs.h + gap) - 1.5) + 'px';
+                        dragGuide.style.width = (cs.w + gap) + 'px';
+                        dragGuide.style.height = '3px';
+                    }
+                    dragGuide.classList.add('show');
+                    dragState.guideShown = true;
                 }
                 return;
             }
@@ -4641,8 +4683,8 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         function onDragEnd() {
             if (dragState && dragState.ghost) dragState.ghost.remove();
             if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; }
+            if (dragGuide) { dragGuide.classList.remove('show'); }
             dragState = null;
-            dragGuide.classList.remove('show');
             document.body.style.userSelect = '';
         }
 
