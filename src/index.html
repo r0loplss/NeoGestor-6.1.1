@@ -1906,6 +1906,11 @@ font-family: var(--font);
 
         function toggleTool(id) {
             document.getElementById('tools-drawer').classList.remove('show');
+            if (id === 'fast') {
+                // Fast usa el toggle inteligente (abrir / traer al frente / cerrar)
+                ipcRenderer.send('fast-toggle');
+                return;
+            }
             if (openTools.has(id)) {
                 if (hiddenTools.has(id)) {
                     // Minimizada: reabrir (mostrar sin recargar)

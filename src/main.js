@@ -283,6 +283,7 @@ let fastBtnWin = null;
 let fastVisible = false;
 let fastBusy = false;
 let fastClosing = false;
+let fastLastFocusAt = 0;
 
 function getFastWin() {
   if (fastWin && !fastWin.isDestroyed()) return fastWin;
@@ -298,6 +299,7 @@ function getFastWin() {
   });
   fastWin.fastLoaded = false;
   fastWin.once('ready-to-show', () => { fastWin.fastLoaded = true; });
+  fastWin.on('focus', () => { fastLastFocusAt = Date.now(); });
   fastWin.loadFile(TOOLS_CONFIG.fast.file);
   fastWin.on('closed', () => {
     if (toolWins.get('fast') === fastWin) toolWins.delete('fast');
@@ -373,8 +375,44 @@ function closeFast() {
 
 function toggleFast() {
   if (fastBusy) return;
-  if (fastVisible || fastClosing) closeFast();
-  else openFast();
+  if (fastClosing) return;
+
+  // 1) Cerrada (o nunca abierta) → abrir
+  const win = fastWin;
+  if (!win || win.isDestroyed()) {
+    openFast();
+    return;
+  }
+
+  // 2) Minimizada → restaurar y traer al frente
+  if (win.isMinimized()) {
+    win.restore();
+    win.show();
+    win.focus();
+    fastVisible = true;
+    notifyFastState();
+    return;
+  }
+
+  // 3) Visible y con el foco (el usuario la está viendo/activa) → cerrar.
+  //    También cuenta como "visible" si estaba enfocada hace muy poco (caso del
+  //    botón del drawer, que al hacer clic roba el foco a Fast).
+  if (fastVisible && (win.isFocused() || (Date.now() - fastLastFocusAt) < 1500)) {
+    closeFast();
+    return;
+  }
+
+  // 4) Visible pero al fondo (sin foco) → traer al frente
+  if (fastVisible) {
+    win.show();
+    win.moveTop();
+    win.focus();
+    notifyFastState();
+    return;
+  }
+
+  // 5) Existe pero oculta → mostrar (equivale a abrir)
+  openFast();
 }
 
 function createFastBtn() {

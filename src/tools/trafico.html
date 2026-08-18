@@ -181,10 +181,17 @@
             min-width: 80px;
         }
 
-        .control-row input[type="date"]:focus,
-        .control-row select:focus,
         .control-row input[type="text"]:focus {
             border-color: var(--primary);
+        }
+
+        #filterDestino {
+            color: var(--danger);
+            font-weight: 600;
+        }
+        #filterDestino::placeholder {
+            color: var(--faint);
+            font-weight: 400;
         }
 
         .control-row input[type="file"] {
@@ -625,7 +632,9 @@
                     <textarea id="pasteInput" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas desde Excel..."></textarea>
                 </div>
                 <div class="control-row">
+                    <button class="btn" id="pasteBtn">📥 Ingresar</button>
                     <button class="btn secondary" id="clearBtn">🗑 Limpiar datos</button>
+                    <span id="pasteStatus" style="font-size:10px;color:var(--faint);"></span>
                 </div>
             </div>
 
@@ -796,6 +805,8 @@
         // ============================================================
         const fileInput = document.getElementById('fileInput');
         const pasteInput = document.getElementById('pasteInput');
+        const pasteBtn = document.getElementById('pasteBtn');
+        const pasteStatus = document.getElementById('pasteStatus');
         const filterFrom = document.getElementById('filterFrom');
         const filterTo = document.getElementById('filterTo');
         const filterTipo = document.getElementById('filterTipo');
@@ -1044,8 +1055,10 @@
                 allRows = json.map(transformRow);
                 aplicarFiltros();
                 showToast(`✅ Cargados ${allRows.length} registros.`, 'success');
+                return true;
             } catch (err) {
                 showToast(`❌ Error al procesar los datos: ${err.message}`, 'error');
+                return false;
             }
         }
 
@@ -1068,13 +1081,13 @@
         function processPastedText(text) {
             if (!text || !text.trim()) {
                 showToast('⚠️ No se detectaron datos.', 'warning');
-                return;
+                return false;
             }
             try {
                 const lines = text.trim().split(/\r?\n/);
                 if (lines.length < 2) {
                     showToast('⚠️ Se necesitan al menos encabezados y una fila de datos.', 'warning');
-                    return;
+                    return false;
                 }
                 const headers = lines[0].split('\t').map(h => h.trim());
                 const dataRows = lines.slice(1).map(line => line.split('\t'));
@@ -1089,11 +1102,13 @@
                     });
                 if (!json.length) {
                     showToast('⚠️ No se encontraron filas de datos.', 'warning');
-                    return;
+                    return false;
                 }
                 processData(json);
+                return true;
             } catch (err) {
                 showToast(`❌ Error al procesar el texto pegado: ${err.message}`, 'error');
+                return false;
             }
         }
 
@@ -1685,6 +1700,17 @@
                 const text = pasteInput.value;
                 if (text.trim()) processPastedText(text);
             }, 50);
+        });
+
+        pasteBtn.addEventListener('click', () => {
+            const ok = processPastedText(pasteInput.value);
+            if (ok) {
+                pasteStatus.textContent = `✅ ${allRows.length} registros ingresados`;
+                pasteStatus.style.color = 'var(--success)';
+            } else {
+                pasteStatus.textContent = '❌ No se pudo ingresar';
+                pasteStatus.style.color = 'var(--danger)';
+            }
         });
 
         filterFrom.addEventListener('change', aplicarFiltros);

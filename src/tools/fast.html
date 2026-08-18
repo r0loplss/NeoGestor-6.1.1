@@ -1750,6 +1750,82 @@
         }
         .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--primary); }
         .field-hint { font-size: 10px; color: var(--faint); margin-top: 2px; }
+        .font-size-row {
+            display: flex;
+            gap: 8px;
+            flex-direction: column;
+            margin-top: 4px;
+            min-width: 200px;
+        }
+        .font-size-field {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 4px 8px;
+            flex: 1;
+            min-width: 170px;
+        }
+        .font-size-field .fs-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+            min-width: 38px;
+        }
+        .font-size-field input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+            min-width: 50px;
+        }
+        .font-size-field input[type="number"] {
+            width: 46px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 12px;
+            padding: 2px 4px;
+            text-align: center;
+            outline: none;
+        }
+        .font-size-field input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+        .font-size-field .fs-unit {
+            font-size: 10px;
+            color: var(--faint);
+        }
+        .card-preview-layout {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .card-preview-wrap {
+            border: 1px dashed var(--border2);
+            border-radius: var(--radius);
+            padding: 12px;
+            background: rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-preview-static {
+            width: 150px;
+            height: 190px;
+            cursor: default;
+            user-select: text;
+            animation: none;
+        }
+        .card-preview-static:hover {
+            transform: none;
+        }
+        .card-preview-static .card-copy-row {
+            opacity: 0.9;
+        }
         .wa-toolbar {
             display: flex;
             gap: 4px;
@@ -2221,6 +2297,40 @@
                     <label>Vista previa (cómo lo verá el agente)</label>
                     <div class="wa-preview" id="edit-body-preview"></div>
                 </div>
+                <div class="modal-field" id="edit-card-preview-field" style="display:none">
+                    <label>Vista previa de la tarjeta</label>
+                    <div class="card-preview-layout">
+                        <div class="card-preview-wrap">
+                            <div class="card-item card-preview-static" id="edit-card-preview">
+                                <div class="card-top">
+                                    <span class="card-star">⭐</span>
+                                    <div class="card-title"></div>
+                                </div>
+                                <div class="card-body-preview"></div>
+                                <div class="card-copy-row">
+                                    <span class="copy-main">📋 COPIAR</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-field" id="edit-font-fields" style="display:none">
+                            <label>Tamaño de fuente</label>
+                            <div class="font-size-row">
+                                <div class="font-size-field">
+                                    <span class="fs-label">Título</span>
+                                    <input type="range" id="edit-title-fs" min="8" max="24" step="1" />
+                                    <input type="number" id="edit-title-fs-num" min="8" max="24" step="1" />
+                                    <span class="fs-unit">px</span>
+                                </div>
+                                <div class="font-size-field">
+                                    <span class="fs-label">Cuerpo</span>
+                                    <input type="range" id="edit-body-fs" min="8" max="20" step="1" />
+                                    <input type="number" id="edit-body-fs-num" min="8" max="20" step="1" />
+                                    <span class="fs-unit">px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="modal-field">
                     <label>Imágenes (máx. 10)</label>
                     <div id="edit-images-container"></div>
@@ -2291,9 +2401,9 @@
             lastCardColor: '#fef3c7',
             drawer: null,
             drawerNoteEdit: false,
+            drawerNoteDraft: '',
             dataPath: null,
-            dataPathReady: false,
-            tableFind: ''
+            dataPathReady: false
         };
 
         // Cola de guardado
@@ -2305,6 +2415,7 @@
         let pressInfo = null;
         let scrollInterval = null;
         const SCROLL_SPEED = 15;
+        let openDrawerTimer = null;
 
         // ============================================================
         // REFERENCIAS DOM
@@ -2340,6 +2451,13 @@
         const editTitle = document.getElementById('edit-title');
         const editBody = document.getElementById('edit-body');
         const editBodyPreview = document.getElementById('edit-body-preview');
+        const editFontFields = document.getElementById('edit-font-fields');
+        const editTitleFs = document.getElementById('edit-title-fs');
+        const editTitleFsNum = document.getElementById('edit-title-fs-num');
+        const editBodyFs = document.getElementById('edit-body-fs');
+        const editBodyFsNum = document.getElementById('edit-body-fs-num');
+        const editCardPreviewField = document.getElementById('edit-card-preview-field');
+        const editCardPreview = document.getElementById('edit-card-preview');
         const editImagesContainer = document.getElementById('edit-images-container');
         const editLinksContainer = document.getElementById('edit-links-container');
         const btnAddImage = document.getElementById('btn-add-image');
@@ -2696,12 +2814,6 @@
                 .trim();
         }
 
-        function stripHtml(html) {
-            const div = document.createElement('div');
-            div.innerHTML = html || '';
-            return div.textContent || '';
-        }
-
         // ============================================================
         // RENDERIZADO PRINCIPAL
         // ============================================================
@@ -2869,7 +2981,7 @@
         // ---------- MODO TARJETAS (actual, sin cambios) ----------
         // Ajuste automático del título tipo "shrink to fit" (como Excel/Sheets):
         // la fuente se reduce hasta que el título completo cabe en el alto reservado.
-        function autofitTitle(titleEl, cardH) {
+        function autofitTitle(titleEl, cardH, startFs) {
             if (!titleEl) return;
             const text = (titleEl.textContent || '').trim();
             if (!text) return;
@@ -2887,7 +2999,7 @@
             titleEl.style.overflowWrap = 'normal';
             titleEl.style.hyphens = 'none';
             titleEl.style.lineHeight = '1.2';
-            titleEl.style.fontSize = '12px';
+            titleEl.style.fontSize = (parseFloat(startFs) > 0 ? startFs : 12) + 'px';
             // El título SIEMPRE se muestra completo: si sobrepasa, se achica la fuente (sin "...").
             // Mínimo legible: no bajar de 9px. Si aún así no cabe, el excedente se recorta
             // (deformación asumida por el usuario) en vez de partir palabras.
@@ -2983,6 +3095,14 @@
                     </div>
                 `;
 
+                // Tamaños de fuente personalizados por tarjeta (solo modo tarjetas)
+                const titleFs = parseInt(card.titleFontSize, 10) || 12;
+                const bodyFs = parseInt(card.bodyFontSize, 10) || 10;
+                const tEl = el.querySelector('.card-title');
+                const bEl = el.querySelector('.card-body-preview');
+                if (tEl) tEl.style.fontSize = titleFs + 'px';
+                if (bEl) bEl.style.fontSize = bodyFs + 'px';
+
                 // Acciones rápidas
                 el.querySelector('[data-act="copy"]').addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -3007,6 +3127,7 @@
                 // Doble clic: editar
                 el.addEventListener('dblclick', (e) => {
                     if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (openDrawerTimer) { clearTimeout(openDrawerTimer); openDrawerTimer = null; }
                     openCardEditor(sheetId, card.id);
                 });
 
@@ -3018,7 +3139,7 @@
                 });
 
                 cardsContainer.appendChild(el);
-                autofitTitle(el.querySelector('.card-title'), cs.h);
+                autofitTitle(el.querySelector('.card-title'), cs.h, titleFs);
             });
 
             if (query) highlightMatches(query);
@@ -3122,6 +3243,7 @@
                 });
                 el.addEventListener('dblclick', (e) => {
                     if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (openDrawerTimer) { clearTimeout(openDrawerTimer); openDrawerTimer = null; }
                     openCardEditor(sheetId, card.id);
                 });
                 el.addEventListener('contextmenu', (e) => {
@@ -3426,9 +3548,9 @@
             exEditing = { r, c, inp };
             inp.addEventListener('keydown', (e) => {
                 e.stopPropagation();
-                if (e.key === 'Enter') { exCommitEdit(true); exMove(1, 0); }
-                else if (e.key === 'Escape') { exCommitEdit(false); }
-                else if (e.key === 'Tab') { e.preventDefault(); exCommitEdit(true); exMove(0, e.shiftKey ? -1 : 1); }
+                if (e.key === 'Enter') { exCommitEdit(true); exMove(1, 0); if (exScrollEl) exScrollEl.focus(); }
+                else if (e.key === 'Escape') { exCommitEdit(false); if (exScrollEl) exScrollEl.focus(); }
+                else if (e.key === 'Tab') { e.preventDefault(); exCommitEdit(true); exMove(0, e.shiftKey ? -1 : 1); if (exScrollEl) exScrollEl.focus(); }
             });
             inp.addEventListener('blur', () => exCommitEdit(true));
             inp.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -3637,7 +3759,6 @@
             }
 
             const nq = normText(query);
-            const re = nq ? new RegExp('(' + nq.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi') : null;
             for (let r = 0; r < rows; r++) {
                 const num = document.createElement('div');
                 num.className = 'ex-cell ex-hrow';
@@ -3678,8 +3799,8 @@
                     cell.dataset.r = r;
                     cell.dataset.c = c;
                     const v = grid.cells[r][c] || '';
-                    if (re && wordMatch(normText(v), nq)) {
-                        cell.innerHTML = esc(v).replace(re, '<mark class="ex-mark">$1</mark>');
+                    if (nq && wordMatch(normText(v), nq)) {
+                        cell.innerHTML = highlightHtml(v, query);
                     } else {
                         cell.textContent = v;
                     }
@@ -3825,16 +3946,41 @@
             cards.forEach(el => {
                 const title = el.querySelector('.card-title');
                 const preview = el.querySelector('.card-body-preview');
-                const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-                if (title) {
-                    const t = title.textContent;
-                    title.innerHTML = t.replace(re, '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">$1</mark>');
-                }
-                if (preview) {
-                    const t = preview.textContent;
-                    preview.innerHTML = t.replace(re, '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">$1</mark>');
-                }
+                if (title) title.innerHTML = highlightHtml(title.textContent, query);
+                if (preview) preview.innerHTML = highlightHtml(preview.textContent, query);
             });
+        }
+
+        // Construye un regex de resaltado insensible a tildes y mayúsculas
+        function buildHighlightRe(query) {
+            const acc = {
+                'a':'[aáàäâ]', 'e':'[eéèëê]', 'i':'[iíìïî]', 'o':'[oóòöô]', 'u':'[uúùüû]', 'n':'[nñ]',
+                'A':'[AÁÀÄÂ]', 'E':'[EÉÈËÊ]', 'I':'[IÍÌÏÎ]', 'O':'[OÓÒÖÔ]', 'U':'[UÚÙÜÛ]', 'N':'[NÑ]'
+            };
+            let pat = '';
+            for (const ch of query) {
+                pat += acc[ch] || ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+            return new RegExp('(' + pat + ')', 'gi');
+        }
+
+        // Resalta las coincidencias en texto crudo devolviendo HTML escapado y seguro
+        function highlightHtml(text, query) {
+            if (!text) return '';
+            if (!query) return esc(text);
+            const re = buildHighlightRe(query);
+            const mark = '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">';
+            let out = '';
+            let last = 0;
+            let m;
+            while ((m = re.exec(text)) !== null) {
+                out += esc(text.slice(last, m.index));
+                out += mark + esc(m[0]) + '</mark>';
+                last = m.index + m[0].length;
+                if (m.index === re.lastIndex) re.lastIndex++;
+            }
+            out += esc(text.slice(last));
+            return out;
         }
 
         function updateResultCount() {
@@ -3845,17 +3991,22 @@
             let count;
             if (sheet.mode === 'process') {
                 const g = sheet.grid || { cells: [] };
-                const nq = normText(query);
+                const tokens = query.toLowerCase().split(/[^a-z0-9]+/).filter(t => t.length >= 2);
                 count = 0;
-                g.cells.forEach(row => {
-                    row.forEach(v => {
-                        if (nq && wordMatch(normText(String(v || '')), nq)) count++;
+                if (tokens.length) {
+                    g.cells.forEach(row => {
+                        row.forEach(v => {
+                            const nv = normText(String(v || ''));
+                            if (tokens.every(t => wordMatch(nv, t))) count++;
+                        });
                     });
-                });
+                }
             } else {
                 const tokens = searchTokens();
                 if (tokens.length) {
-                    count = sheet.cards.filter(c => cardSearchScore(c, tokens) > 0).length;
+                    let cards = sheet.cards.filter(c => cardSearchScore(c, tokens) > 0);
+                    if (state.favOnly) cards = cards.filter(c => c.pinned);
+                    count = cards.length;
                 } else {
                     count = 0;
                 }
@@ -3961,6 +4112,7 @@
         function openDrawer(sheetId, cardId) {
             state.drawer = { sheetId, cardId };
             state.drawerNoteEdit = false;
+            state.drawerNoteDraft = '';
             renderDrawer();
             armDrawerTimer();
         }
@@ -3969,6 +4121,7 @@
             cancelDrawerTimer();
             state.drawer = null;
             state.drawerNoteEdit = false;
+            state.drawerNoteDraft = '';
             renderDrawer();
         }
 
@@ -4042,7 +4195,7 @@
                     const box = document.createElement('div');
                     box.className = 'd-img';
                     box.innerHTML = `
-                        <img src="${img.data}" alt="${img.label || 'Imagen'}" />
+                        <img src="${img.data}" alt="${esc(img.label || 'Imagen')}" />
                         <div class="d-img-actions">
                             <button title="Abrir grande">🔍</button>
                             <button title="Copiar">📋</button>
@@ -4105,7 +4258,7 @@
                 // Editor inline en el mismo bloque (sin popup)
                 const ta = document.createElement('textarea');
                 ta.className = 'd-note-input';
-                ta.value = card.notes || '';
+                ta.value = state.drawerNoteDraft;
                 ta.placeholder = 'Escribe aquí tu nota... (Ctrl+Enter para guardar)';
                 noteBox.appendChild(ta);
                 const ebtns = document.createElement('div');
@@ -4114,8 +4267,9 @@
                 btnSave.className = 'd-note-btn save';
                 btnSave.textContent = '💾 Guardar nota';
                 btnSave.addEventListener('click', () => {
-                    card.notes = ta.value;
+                    card.notes = state.drawerNoteDraft;
                     state.drawerNoteEdit = false;
+                    state.drawerNoteDraft = '';
                     saveData();
                     renderDrawer();
                     showToast('✅ Nota guardada.', 'success', 1200);
@@ -4125,11 +4279,15 @@
                 btnCancel.textContent = 'Cancelar';
                 btnCancel.addEventListener('click', () => {
                     state.drawerNoteEdit = false;
+                    state.drawerNoteDraft = '';
                     renderDrawer();
                 });
                 ebtns.appendChild(btnSave);
                 ebtns.appendChild(btnCancel);
                 noteBox.appendChild(ebtns);
+                ta.addEventListener('input', () => {
+                    state.drawerNoteDraft = ta.value;
+                });
                 ta.addEventListener('keydown', (e) => {
                     e.stopPropagation();
                     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -4152,6 +4310,7 @@
                 btnEdit.className = 'd-note-btn';
                 btnEdit.textContent = '✏️ Editar';
                 btnEdit.addEventListener('click', () => {
+                    state.drawerNoteDraft = card.notes || '';
                     state.drawerNoteEdit = true;
                     renderDrawer();
                 });
@@ -4164,6 +4323,7 @@
                 btnAdd.className = 'd-note-btn';
                 btnAdd.textContent = '➕ Agregar nota';
                 btnAdd.addEventListener('click', () => {
+                    state.drawerNoteDraft = card.notes || '';
                     state.drawerNoteEdit = true;
                     renderDrawer();
                 });
@@ -4314,7 +4474,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                             lbl.style.marginLeft = '6px';
                             sbtn.appendChild(lbl);
                         } else {
-                            sbtn.innerHTML = `${ch.icon || ''} ${ch.label}`;
+                            sbtn.textContent = (ch.icon || '') + ' ' + (ch.label || '');
                         }
                         sbtn.addEventListener('click', (e) => { e.stopPropagation(); hideContextMenu(); ch.fn(); });
                         sub.appendChild(sbtn);
@@ -4538,7 +4698,9 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             document.removeEventListener('mouseleave', onGlobalLeave);
             const wasDragged = pressInfo ? pressInfo.dragged : false;
             if (pressInfo && !wasDragged) {
-                openDrawer(pressInfo.sheetId, pressInfo.cardId);
+                const { sheetId, cardId } = pressInfo;
+                if (openDrawerTimer) clearTimeout(openDrawerTimer);
+                openDrawerTimer = setTimeout(() => { openDrawerTimer = null; openDrawer(sheetId, cardId); }, 260);
             }
             pressInfo = null;
             if (dragState) onDragEnd();
@@ -4609,31 +4771,41 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const sheet = getSheetById(dragState.sheetId);
             if (sheet) {
                 const isList = contentEl.classList.contains('list-view');
+                const isImages = cardsContainer.classList.contains('images-mode');
+                const visCards = Array.from(cardsContainer.querySelectorAll('.card-item'));
                 let insertIdx;
-                let col = 0, row = 0;
 
-                if (isList) {
-                    // Vista lista: filas verticales de altura variable → insertar por centro de tarjeta
-                    const cards = Array.from(cardsContainer.querySelectorAll('.card-item'));
-                    insertIdx = cards.length;
-                    for (let i = 0; i < cards.length; i++) {
-                        const r = cards[i].getBoundingClientRect();
+                if (isList || isImages) {
+                    // Vista lista/imágenes: tarjetas de ancho completo → insertar por centro vertical
+                    insertIdx = visCards.length;
+                    for (let i = 0; i < visCards.length; i++) {
+                        const r = visCards[i].getBoundingClientRect();
                         if (e.clientY < r.top + r.height / 2) { insertIdx = i; break; }
                     }
                 } else {
                     const cs = sheet.cardSize || { w: 150, h: 190 };
                     const gap = 10;
                     const cols = Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap)));
-                    col = Math.floor((e.clientX - containerRect.left) / (cs.w + gap));
-                    row = Math.floor((e.clientY - containerRect.top) / (cs.h + gap));
-                    insertIdx = Math.max(0, Math.min(row * cols + col, sheet.cards.length));
+                    const col = Math.floor((e.clientX - containerRect.left) / (cs.w + gap));
+                    const row = Math.floor((e.clientY - containerRect.top) / (cs.h + gap));
+                    insertIdx = Math.max(0, Math.min(row * cols + col, visCards.length));
+                }
+
+                // Mapear índice visual (grilla filtrada) al índice real del array completo
+                let realIdx;
+                if (insertIdx >= visCards.length) {
+                    realIdx = sheet.cards.length;
+                } else {
+                    const idAt = visCards[insertIdx].dataset.cardId;
+                    realIdx = sheet.cards.findIndex(c => c.id === idAt);
+                    if (realIdx === -1) realIdx = sheet.cards.length;
                 }
 
                 const fromIdx = sheet.cards.findIndex(c => c.id === dragState.cardId);
-                if (fromIdx !== -1 && insertIdx !== dragState.lastInsertIdx) {
-                    dragState.lastInsertIdx = insertIdx;
+                if (fromIdx !== -1 && realIdx !== dragState.lastInsertIdx) {
+                    dragState.lastInsertIdx = realIdx;
                     const [moved] = sheet.cards.splice(fromIdx, 1);
-                    const targetIdx = fromIdx < insertIdx ? insertIdx - 1 : insertIdx;
+                    const targetIdx = fromIdx < realIdx ? realIdx - 1 : realIdx;
                     sheet.cards.splice(targetIdx, 0, moved);
                     dragState.fromIndex = targetIdx;
                     saveData();
@@ -4642,10 +4814,9 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
                 // Indicador de posición de inserción (línea sobre el hueco)
                 if (dragGuide) {
-                    if (isList) {
-                        const cards = Array.from(cardsContainer.querySelectorAll('.card-item'));
-                        const r = cards[dragState.lastInsertIdx] ? cards[dragState.lastInsertIdx].getBoundingClientRect() : null;
-                        const top = r ? r.top - 1.5 : (cards.length ? cards[cards.length - 1].getBoundingClientRect().bottom - 1.5 : containerRect.top);
+                    if (isList || isImages) {
+                        const r = visCards[insertIdx] ? visCards[insertIdx].getBoundingClientRect() : null;
+                        const top = r ? r.top - 1.5 : (visCards.length ? visCards[visCards.length - 1].getBoundingClientRect().bottom - 1.5 : containerRect.top);
                         dragGuide.style.left = (containerRect.left) + 'px';
                         dragGuide.style.top = top + 'px';
                         dragGuide.style.width = containerRect.width + 'px';
@@ -4653,8 +4824,9 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                     } else {
                         const cs = sheet.cardSize || { w: 150, h: 190 };
                         const gap = 10;
-                        const insertCol = dragState.lastInsertIdx % Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap)));
-                        const insertRow = Math.floor(dragState.lastInsertIdx / Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap))));
+                        const cols = Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap)));
+                        const insertCol = insertIdx % cols;
+                        const insertRow = Math.floor(insertIdx / cols);
                         dragGuide.style.left = (containerRect.left + insertCol * (cs.w + gap) - Math.floor(cs.w / 2) - 1.5) + 'px';
                         dragGuide.style.top = (containerRect.top + insertRow * (cs.h + gap) - 1.5) + 'px';
                         dragGuide.style.width = (cs.w + gap) + 'px';
@@ -4713,13 +4885,28 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             editColor.value = card.color || '#fef3c7';
             editPinned.checked = !!card.pinned;
             editTitle.value = card.title || '';
-            editBody.value = waToPlain(card.body);
+            editBody.value = card.body || '';
+
+            // Controles de tamaño de fuente: solo en modo tarjetas
+            const isCardsMode = (sheet.mode || 'cards') === 'cards';
+            if (editFontFields) editFontFields.style.display = isCardsMode ? '' : 'none';
+            if (editCardPreviewField) editCardPreviewField.style.display = isCardsMode ? '' : 'none';
+            if (isCardsMode) {
+                const tf = parseInt(card.titleFontSize, 10) || 12;
+                const bf = parseInt(card.bodyFontSize, 10) || 10;
+                editTitleFs.value = tf;
+                editTitleFsNum.value = tf;
+                editBodyFs.value = bf;
+                editBodyFsNum.value = bf;
+            }
+
             updateBodyPreview();
             renderEditImages(card.images);
             renderEditLinks(card.links);
 
             modalTitleText.textContent = isNew ? '➕ Nueva tarjeta' : '✏️ Editar tarjeta';
             modalOverlay.classList.add('show');
+            updateCardPreview();
             editTitle.focus();
         }
 
@@ -4735,6 +4922,29 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
         function updateBodyPreview() {
             editBodyPreview.innerHTML = waToHtml(editBody.value);
+            updateCardPreview();
+        }
+
+        function updateCardPreview() {
+            if (!editCardPreview || editCardPreviewField.style.display === 'none') return;
+            const sheet = editingCard ? getSheetById(editingCard.sheetId) : null;
+            const cs = sheet && sheet.cardSize ? sheet.cardSize : { w: 150, h: 190 };
+            editCardPreview.style.width = cs.w + 'px';
+            editCardPreview.style.height = cs.h + 'px';
+            const titleEl = editCardPreview.querySelector('.card-title');
+            const bodyEl = editCardPreview.querySelector('.card-body-preview');
+            const color = editColor ? editColor.value : '#fef3c7';
+            editCardPreview.style.backgroundColor = color || 'var(--surface2)';
+            editCardPreview.style.color = color ? getContrastColor(color) : 'var(--text)';
+            if (titleEl) titleEl.textContent = (editTitle ? editTitle.value : '') || 'Sin título';
+            if (bodyEl) {
+                const b = editBody ? editBody.value : '';
+                bodyEl.textContent = waToPlain(b);
+            }
+            const tf = parseInt(editTitleFs && editTitleFs.value, 10) || 12;
+            const bf = parseInt(editBodyFs && editBodyFs.value, 10) || 10;
+            if (bodyEl) bodyEl.style.fontSize = bf + 'px';
+            if (titleEl) autofitTitle(titleEl, cs.h, tf);
         }
 
         // ---------- Imágenes ----------
@@ -4909,36 +5119,112 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 const ta = editBody;
                 const start = ta.selectionStart;
                 const end = ta.selectionEnd;
-                let insert = '', before = '', after = '';
-                if (marker === 'bold') { insert = '*'; before = '*'; after = '*'; }
-                else if (marker === 'italic') { insert = '_'; before = '_'; after = '_'; }
-                else if (marker === 'strike') { insert = '~'; before = '~'; after = '~'; }
-                else if (marker === 'code') { insert = '`'; before = '`'; after = '`'; }
-                else if (marker === 'list') { insert = '\n• '; }
-                else if (marker === 'num') { insert = '\n1. '; }
-
                 let value = ta.value;
-                if (start === end) {
-                    value = value.slice(0, start) + insert + value.slice(end);
-                    ta.value = value;
-                    const pos = start + insert.length;
-                    ta.focus();
-                    ta.setSelectionRange(pos, pos);
+                const sel = value.slice(start, end);
+                let newValue, posStart, posEnd;
+                if (marker === 'bold') {
+                    if (sel) { newValue = value.slice(0, start) + '*' + sel + '*' + value.slice(end); posStart = start + 1; posEnd = end + 1; }
+                    else { newValue = value.slice(0, start) + '**' + value.slice(end); posStart = start + 1; posEnd = start + 1; }
+                } else if (marker === 'italic') {
+                    if (sel) { newValue = value.slice(0, start) + '_' + sel + '_' + value.slice(end); posStart = start + 1; posEnd = end + 1; }
+                    else { newValue = value.slice(0, start) + '__' + value.slice(end); posStart = start + 1; posEnd = start + 1; }
+                } else if (marker === 'strike') {
+                    if (sel) { newValue = value.slice(0, start) + '~' + sel + '~' + value.slice(end); posStart = start + 1; posEnd = end + 1; }
+                    else { newValue = value.slice(0, start) + '~~' + value.slice(end); posStart = start + 1; posEnd = start + 1; }
+                } else if (marker === 'code') {
+                    if (sel) { newValue = value.slice(0, start) + '`' + sel + '`' + value.slice(end); posStart = start + 1; posEnd = end + 1; }
+                    else { newValue = value.slice(0, start) + '``' + value.slice(end); posStart = start + 1; posEnd = start + 1; }
+                } else if (marker === 'list') {
+                    if (sel) {
+                        const lines = sel.split('\n').map(l => '• ' + l);
+                        newValue = value.slice(0, start) + lines.join('\n') + value.slice(end);
+                        posStart = start;
+                        posEnd = start + lines.join('\n').length;
+                    } else {
+                        const ins = '\n• ';
+                        newValue = value.slice(0, start) + ins + value.slice(end);
+                        posStart = start + ins.length;
+                        posEnd = posStart;
+                    }
+                } else if (marker === 'num') {
+                    if (sel) {
+                        const lines = sel.split('\n').map((l, i) => (i + 1) + '. ' + l);
+                        newValue = value.slice(0, start) + lines.join('\n') + value.slice(end);
+                        posStart = start;
+                        posEnd = start + lines.join('\n').length;
+                    } else {
+                        const ins = '\n1. ';
+                        newValue = value.slice(0, start) + ins + value.slice(end);
+                        posStart = start + ins.length;
+                        posEnd = posStart;
+                    }
                 } else {
-                    const sel = value.slice(start, end);
-                    value = value.slice(0, start) + before + sel + after + value.slice(end);
-                    ta.value = value;
-                    ta.focus();
-                    ta.setSelectionRange(start + before.length, end + before.length);
+                    return;
                 }
+                ta.value = newValue;
+                ta.focus();
+                ta.setSelectionRange(posStart, posEnd);
                 updateBodyPreview();
+                autosaveCard();
             });
         });
 
-        editBody.addEventListener('input', updateBodyPreview);
+        function autosaveCard() {
+            if (!editingCard) return;
+            const card = getCardById(editingCard.sheetId, editingCard.cardId);
+            if (!card) return;
+            card.title = editTitle.value.trim();
+            card.body = editBody.value;
+            card.color = editColor.value;
+            card.pinned = !!editPinned.checked;
+            if (editFontFields && editFontFields.style.display !== 'none') {
+                card.titleFontSize = parseInt(editTitleFs.value, 10) || 12;
+                card.bodyFontSize = parseInt(editBodyFs.value, 10) || 10;
+            }
+            card.updated = Date.now();
+            saveData();
+        }
+
+        let autosaveTimer = null;
+        function scheduleAutosave() {
+            if (autosaveTimer) clearTimeout(autosaveTimer);
+            autosaveTimer = setTimeout(() => { autosaveTimer = null; autosaveCard(); }, 400);
+        }
+        function flushAutosave() {
+            if (autosaveTimer) { clearTimeout(autosaveTimer); autosaveTimer = null; autosaveCard(); }
+        }
+
+        editTitle.addEventListener('input', () => { updateCardPreview(); scheduleAutosave(); });
+        editBody.addEventListener('input', () => { updateBodyPreview(); scheduleAutosave(); });
+
+        function syncFontControl(slider, num) {
+            if (!slider || !num) return;
+            slider.addEventListener('input', () => { num.value = slider.value; updateCardPreview(); scheduleAutosave(); });
+            num.addEventListener('input', () => {
+                let v = parseInt(num.value, 10);
+                if (isNaN(v)) v = slider.value;
+                v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), v));
+                slider.value = v;
+                num.value = v;
+                updateCardPreview();
+                scheduleAutosave();
+            });
+            num.addEventListener('change', () => {
+                let v = parseInt(num.value, 10);
+                if (isNaN(v)) v = parseInt(slider.value, 10);
+                v = Math.max(parseInt(slider.min, 10), Math.min(parseInt(slider.max, 10), v));
+                slider.value = v;
+                num.value = v;
+                updateCardPreview();
+                scheduleAutosave();
+            });
+        }
+        syncFontControl(editTitleFs, editTitleFsNum);
+        syncFontControl(editBodyFs, editBodyFsNum);
 
         function saveCardEditor() {
             if (!editingCard) return;
+            flushAutosave();
             const card = getCardById(editingCard.sheetId, editingCard.cardId);
             if (!card) {
                 showToast('⚠️ Error: tarjeta no encontrada.', 'error');
@@ -4949,6 +5235,10 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             card.body = editBody.value;
             card.color = editColor.value;
             card.pinned = !!editPinned.checked;
+            if (editFontFields && editFontFields.style.display !== 'none') {
+                card.titleFontSize = parseInt(editTitleFs.value, 10) || 12;
+                card.bodyFontSize = parseInt(editBodyFs.value, 10) || 10;
+            }
             card.updated = Date.now();
 
             if (newSheetId && newSheetId !== editingCard.sheetId) {
@@ -4969,9 +5259,9 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
         function closeEditor() {
             modalOverlay.classList.remove('show');
+            flushAutosave();
             if (editingCard && editingCard.isNew) {
-                const sheet = getSheetById(editingCard.sheetId);
-                if (sheet) {
+                for (const sheet of state.sheets) {
                     const idx = sheet.cards.findIndex(c => c.id === editingCard.cardId);
                     if (idx !== -1) {
                         const card = sheet.cards[idx];
@@ -4979,6 +5269,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                             sheet.cards.splice(idx, 1);
                             saveData();
                         }
+                        break;
                     }
                 }
             }
@@ -4989,8 +5280,12 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         modalClose.addEventListener('click', closeEditor);
         modalCancel.addEventListener('click', closeEditor);
         modalSave.addEventListener('click', saveCardEditor);
+        let backdropDown = false;
+        modalOverlay.addEventListener('mousedown', (e) => {
+            backdropDown = (e.target === modalOverlay);
+        });
         modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeEditor();
+            if (e.target === modalOverlay && backdropDown) closeEditor();
         });
 
         // Cierre del selector de modo
@@ -5279,13 +5574,17 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             input.focus();
             input.select();
 
+            let done = false;
             const finish = (save) => {
+                if (done) return;
+                done = true;
                 if (save) {
                     const val = input.value.trim();
                     if (val) {
                         input.remove();
                         showModePicker(val);
                     } else {
+                        done = false;
                         showToast('⚠️ El nombre no puede estar vacío.', 'warning');
                     }
                 } else {
@@ -5294,12 +5593,13 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             };
 
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') finish(true);
-                else if (e.key === 'Escape') finish(false);
+                if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+                else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
             });
             input.addEventListener('blur', () => {
+                if (done) return;
                 if (input.value.trim()) finish(true);
-                else input.remove();
+                else { done = true; input.remove(); }
             });
         }
 
@@ -5334,6 +5634,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         });
         cardsContainer.addEventListener('dblclick', (e) => {
             if (e.target.closest('.card-item') || e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+            if (openDrawerTimer) { clearTimeout(openDrawerTimer); openDrawerTimer = null; }
             const sheet = getActiveSheet();
             if (!sheet || sheet.mode === 'process') return;
             openCardEditor(sheet.id, null);
@@ -5343,11 +5644,16 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // para las siguientes tarjetas nuevas (se actualiza al cambiarlo).
         editColor.addEventListener('input', () => {
             state.lastCardColor = editColor.value;
+            updateCardPreview();
+            autosaveCard();
         });
         editColor.addEventListener('change', () => {
             state.lastCardColor = editColor.value;
+            updateCardPreview();
             saveData();
         });
+        editPinned.addEventListener('change', autosaveCard);
+        editSheet.addEventListener('change', autosaveCard);
 
         // ============================================================
         // BÚSQUEDA
@@ -5405,8 +5711,10 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                         }
                         break;
                     case 't':
-                        e.preventDefault();
-                        abrirCrearHoja();
+                        if (!modalOverlay.classList.contains('show')) {
+                            e.preventDefault();
+                            abrirCrearHoja();
+                        }
                         break;
                     case 'f':
                         e.preventDefault();
@@ -5429,6 +5737,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                         break;
                     case '1': case '2': case '3': case '4': case '5':
                     case '6': case '7': case '8': case '9':
+                        if (modalOverlay.classList.contains('show')) break;
                         e.preventDefault();
                         const idx = parseInt(e.key, 10) - 1;
                         if (state.sheets[idx]) {
@@ -5480,7 +5789,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
                 if (colorPalette.classList.contains('show')) { colorPalette.classList.remove('show'); return; }
                 if (state.drawer) {
-                    if (state.drawerNoteEdit) { state.drawerNoteEdit = false; renderDrawer(); }
+                    if (state.drawerNoteEdit) { state.drawerNoteEdit = false; state.drawerNoteDraft = ''; renderDrawer(); }
                     else closeDrawer();
                 }
             }
