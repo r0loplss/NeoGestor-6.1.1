@@ -1,6 +1,6 @@
 {
   "name": "gestor-casos",
-  "version": "6.0.11",
+  "version": "6.0.12",
   "description": "Gestor de Casos Call Center v6",
   "main": "src/main.js",
   "scripts": {
@@ -20,8 +20,18 @@
     },
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "src/assets/icon.ico"
     },

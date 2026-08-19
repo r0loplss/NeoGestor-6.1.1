@@ -111,6 +111,18 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">19 ago 2026</span><span class="ver">v6.0.12</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Fast — buscador en modo procesos</b>: se corrigió la deformación de las celdas al buscar. El resaltado ahora usa un <code>&lt;mark&gt;</code> sin padding (no altera el ancho del texto) y se re-aplica en sitio sobre las celdas existentes sin reconstruir la cuadrícula: se mantienen scroll, selección, anchos y altos. El texto resaltado va envuelto en un <code>&lt;span&gt;</code> único para no romper el flujo dentro de la celda flex (se leía el texto "en columna").</li>
+                    <li><b>Fast — grilla de tarjetas al hacer scroll</b>: al llenar la ventana, la aparición del scrollbar reducía el ancho útil y hacía saltar la última columna de tarjetas (dejando un hueco). Se reserva siempre el espacio del scrollbar (<code>scrollbar-gutter: stable</code>) y se movieron los estilos del scrollbar al contenedor correcto (<code>#content</code>, scrollbar fino de 4 px).</li>
+                    <li><b>Always on top acotado</b>: la opción "siempre encima" ahora solo afecta a la ventana principal, la alerta y el botón flotante Fast. Las ventanas de herramientas (incluida la ventana grande de Fast), notas, visor de imagen y Acerca/Easter se crean siempre con <code>alwaysOnTop: false</code> y el toggle ya no las modifica (excepto Contingencias, que conserva su configuración explícita <code>top: true</code>).</li>
+                    <li><b>Botón Fast siempre visible</b>: con "always on top" activado el botón flotante de Fast ya no se desvanece al hacer clic fuera del programa; solo con la preferencia apagada se conserva el fade in/out al cambiar de ventana.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">18 ago 2026</span><span class="ver">v6.0.11</span></div>
             <div class="desc">
                 <ul>

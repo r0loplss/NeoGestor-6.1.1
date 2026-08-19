@@ -159,9 +159,12 @@
             flex: 1;
             min-height: 0;
             overflow-y: auto;
+            scrollbar-gutter: stable;
             padding: 14px 16px;
             position: relative;
         }
+        #content::-webkit-scrollbar { width: 4px; }
+        #content::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
         #cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -174,8 +177,6 @@
             grid-template-columns: 1fr;
             grid-auto-rows: auto;
         }
-        #cards-container::-webkit-scrollbar { width: 4px; }
-        #cards-container::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
 
         .empty-cards {
             grid-column: 1 / -1;
@@ -1945,27 +1946,76 @@
             background: var(--surface);
             border: 1px solid var(--border2);
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px;
             z-index: 400;
             display: none;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 6px;
+            min-width: 170px;
             max-width: 210px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.5);
         }
         .color-palette.show { display: flex; }
+        .color-palette-section {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--faint);
+        }
+        .color-swatches { display: flex; flex-wrap: wrap; gap: 5px; }
         .color-swatch {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 4px;
             border: 2px solid transparent;
             cursor: pointer;
             transition: 0.15s;
         }
         .color-swatch:hover { transform: scale(1.15); border-color: var(--text); }
-        .color-picker-input { width: 24px; height: 24px; border: none; padding: 0; cursor: pointer; background: none; }
+        .color-swatch.active { border-color: var(--text); box-shadow: 0 0 0 2px var(--primary); }
+        .color-palette-sep { height: 1px; background: var(--border); margin: 2px 0; }
+        .color-custom-row { display: flex; align-items: center; gap: 6px; }
+        .color-picker-input { width: 26px; height: 26px; border: none; padding: 0; cursor: pointer; background: none; flex: 0 0 auto; }
         .color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
         .color-picker-input::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 4px; }
+        .color-hex-input {
+            flex: 1;
+            min-width: 0;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 11px;
+            padding: 3px 5px;
+            outline: none;
+            font-family: var(--font);
+        }
+        .color-hex-input:focus { border-color: var(--primary); }
+        .color-apply-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font);
+            white-space: nowrap;
+        }
+        .color-apply-btn:hover { background: #2563eb; }
+        .edit-color-wrap { display: flex; align-items: center; gap: 4px; }
+        .edit-color-wrap #edit-color-btn {
+            width: 44px;
+            height: 30px;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            cursor: pointer;
+            padding: 0;
+            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.15);
+        }
+        .edit-color-wrap #edit-color-btn:hover { border-color: var(--primary); }
 
         /* ============================================================
                MENÚ CONTEXTUAL
@@ -2269,7 +2319,10 @@
                     </div>
                     <div class="modal-field" style="flex:0 0 auto;">
                         <label>Color</label>
-                        <input type="color" id="edit-color" value="#fef3c7" style="width:44px;height:30px;padding:2px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;" />
+                        <div class="edit-color-wrap">
+                            <button id="edit-color-btn" title="Elegir color (predefinido o personalizado)"></button>
+                            <input type="color" id="edit-color" value="#fef3c7" style="display:none;" />
+                        </div>
                     </div>
                     <div class="modal-field" style="flex:0 0 auto;">
                         <label>⭐ Favorita</label>
@@ -2447,6 +2500,7 @@
         const modalTitleText = document.getElementById('modal-title-text');
         const editSheet = document.getElementById('edit-sheet');
         const editColor = document.getElementById('edit-color');
+        const editColorBtn = document.getElementById('edit-color-btn');
         const editPinned = document.getElementById('edit-pinned');
         const editTitle = document.getElementById('edit-title');
         const editBody = document.getElementById('edit-body');
@@ -3799,11 +3853,7 @@
                     cell.dataset.r = r;
                     cell.dataset.c = c;
                     const v = grid.cells[r][c] || '';
-                    if (nq && wordMatch(normText(v), nq)) {
-                        cell.innerHTML = highlightHtml(v, query);
-                    } else {
-                        cell.textContent = v;
-                    }
+                    exSetCellContent(cell, v, query, nq);
                     exCellEls[r][c] = cell;
                     exGridEl.appendChild(cell);
                 }
@@ -3951,6 +4001,38 @@
             });
         }
 
+        // Re-resalta las celdas del grid de procesos en sitio (sin reconstruir el
+        // DOM): mantiene scroll, selección, anchos y altos, evitando deformaciones.
+        // El contenido resaltado va envuelto en un <span> único: como la celda es
+        // flex, los <mark> sueltos se convertirían en items flex y romperían el flujo.
+        function exSetCellContent(cell, v, query, nq) {
+            if (nq && wordMatch(normText(v), nq)) {
+                cell.innerHTML = '<span>' + highlightHtml(v, query, { pad: false }) + '</span>';
+            } else {
+                cell.textContent = v;
+            }
+        }
+
+        function exApplyHighlight() {
+            if (!exCellEls || !exCellEls.length) return;
+            const sheet = getActiveSheet();
+            if (!sheet || !sheet.grid) return;
+            const query = state.searchQuery;
+            const nq = normText(query);
+            const cells = sheet.grid.cells;
+            for (let r = 0; r < exCellEls.length; r++) {
+                const row = exCellEls[r];
+                if (!row) continue;
+                for (let c = 0; c < row.length; c++) {
+                    const cell = row[c];
+                    if (!cell) continue;
+                    // No tocar la celda que está en edición (input activo)
+                    if (exEditing && exEditing.r === r && exEditing.c === c) continue;
+                    exSetCellContent(cell, (cells[r] && cells[r][c]) || '', query, nq);
+                }
+            }
+        }
+
         // Construye un regex de resaltado insensible a tildes y mayúsculas
         function buildHighlightRe(query) {
             const acc = {
@@ -3964,12 +4046,13 @@
             return new RegExp('(' + pat + ')', 'gi');
         }
 
-        // Resalta las coincidencias en texto crudo devolviendo HTML escapado y seguro
-        function highlightHtml(text, query) {
+        // Resalta las coincidencias en texto crudo devolviendo HTML escapado y seguro.
+        // Con opts.pad=false el mark no añade padding para no alterar el layout (modo procesos).
+        function highlightHtml(text, query, opts) {
             if (!text) return '';
             if (!query) return esc(text);
             const re = buildHighlightRe(query);
-            const mark = '<mark style="background:#fbbf24;color:#191919;padding:0 2px;border-radius:2px;">';
+            const mark = '<mark style="background:#fbbf24;color:#191919;padding:' + ((opts && opts.pad === false) ? '0' : '0 2px') + ';border-radius:2px;">';
             let out = '';
             let last = 0;
             let m;
@@ -4586,7 +4669,10 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 }},
                 { icon: '✏️', label: 'Editar', fn: () => openCardEditor(sheetId, cardId) },
                 { icon: '⧉', label: 'Duplicar', fn: () => duplicateCard(sheetId, cardId) },
-                { icon: '🎨', label: 'Color', fn: () => showColorPalette(x - 100, y, sheetId, cardId) },
+                { icon: '🎨', label: 'Color', fn: () => showColorPalette(x - 100, y, (c) => {
+                    const card = getCardById(sheetId, cardId);
+                    if (card) { card.color = c; saveData(); render(); showToast('🎨 Color actualizado.', 'success'); }
+                }, card.color) },
                 moveTo.length ? { icon: '➡', label: 'Mover a hoja', children: moveTo } : null,
                 null,
                 { icon: '🗑', label: 'Eliminar', danger: true, fn: () => confirmDeleteCard(sheetId, cardId) }
@@ -4609,64 +4695,117 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         }
 
         // ============================================================
-        // PALETA DE COLORES
+        // PALETA DE COLORES UNIFICADA (predefinidos + personalizado)
         // ============================================================
-        let colorTarget = null;
+        let colorOnPick = null;
+        let colorPaletteBuilt = false;
 
-        function showColorPalette(x, y, sheetId, cardId) {
-            colorTarget = { sheetId, cardId };
-            colorPalette.style.left = Math.min(x, window.innerWidth - 220) + 'px';
-            colorPalette.style.top = Math.min(y, window.innerHeight - 160) + 'px';
-            colorPalette.classList.add('show');
+        function buildColorPalette() {
+            if (colorPaletteBuilt) return;
+            colorPaletteBuilt = true;
 
-            if (!colorPalette.children.length) {
-                PALETTE_COLORS.forEach(c => {
-                    const swatch = document.createElement('div');
-                    swatch.className = 'color-swatch';
-                    swatch.style.backgroundColor = c;
-                    swatch.dataset.color = c;
-                    swatch.addEventListener('click', () => {
-                        if (colorTarget) {
-                            const card = getCardById(colorTarget.sheetId, colorTarget.cardId);
-                            if (card) {
-                                card.color = c;
-                                saveData();
-                                render();
-                                showToast('🎨 Color actualizado.', 'success');
-                            }
-                        }
-                        colorPalette.classList.remove('show');
-                    });
-                    colorPalette.appendChild(swatch);
-                });
-                const picker = document.createElement('input');
-                picker.type = 'color';
-                picker.className = 'color-picker-input';
-                picker.addEventListener('input', (e) => {
-                    const c = e.target.value;
-                    if (colorTarget) {
-                        const card = getCardById(colorTarget.sheetId, colorTarget.cardId);
-                        if (card) {
-                            card.color = c;
-                            saveData();
-                            render();
-                            showToast('🎨 Color actualizado.', 'success');
-                        }
-                    }
+            const secPre = document.createElement('div');
+            secPre.className = 'color-palette-section';
+            secPre.textContent = 'Predefinidos';
+            colorPalette.appendChild(secPre);
+
+            const swWrap = document.createElement('div');
+            swWrap.className = 'color-swatches';
+            PALETTE_COLORS.forEach(c => {
+                const sw = document.createElement('div');
+                sw.className = 'color-swatch';
+                sw.style.backgroundColor = c;
+                sw.dataset.color = c;
+                sw.title = c;
+                sw.addEventListener('click', () => {
+                    if (colorOnPick) colorOnPick(c);
                     colorPalette.classList.remove('show');
                 });
-                colorPalette.appendChild(picker);
+                swWrap.appendChild(sw);
+            });
+            colorPalette.appendChild(swWrap);
+
+            const sep = document.createElement('div');
+            sep.className = 'color-palette-sep';
+            colorPalette.appendChild(sep);
+
+            const secCus = document.createElement('div');
+            secCus.className = 'color-palette-section';
+            secCus.textContent = 'Personalizado';
+            colorPalette.appendChild(secCus);
+
+            const row = document.createElement('div');
+            row.className = 'color-custom-row';
+
+            const picker = document.createElement('input');
+            picker.type = 'color';
+            picker.className = 'color-picker-input';
+            picker.value = '#fef3c7';
+            picker.addEventListener('input', (e) => {
+                hex.value = e.target.value;
+            });
+            picker.addEventListener('change', (e) => {
+                hex.value = e.target.value;
+                if (colorOnPick) colorOnPick(e.target.value);
+            });
+            row.appendChild(picker);
+
+            const hex = document.createElement('input');
+            hex.type = 'text';
+            hex.className = 'color-hex-input';
+            hex.maxLength = 7;
+            hex.placeholder = '#RRGGBB';
+            hex.value = picker.value;
+            hex.addEventListener('input', () => {
+                let v = hex.value.trim();
+                if (/^#[0-9a-fA-F]{6}$/.test(v)) picker.value = v;
+            });
+            hex.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') applyCustom();
+            });
+            row.appendChild(hex);
+
+            const applyBtn = document.createElement('button');
+            applyBtn.className = 'color-apply-btn';
+            applyBtn.textContent = 'Aplicar';
+            applyBtn.addEventListener('click', applyCustom);
+            row.appendChild(applyBtn);
+
+            function applyCustom() {
+                let v = hex.value.trim();
+                if (!/^#[0-9a-fA-F]{6}$/.test(v)) v = picker.value;
+                if (colorOnPick) colorOnPick(v);
+                colorPalette.classList.remove('show');
             }
+
+            colorPalette.appendChild(row);
+        }
+
+        function showColorPalette(x, y, onPick, currentColor) {
+            colorOnPick = onPick;
+            buildColorPalette();
+            colorPalette.querySelectorAll('.color-swatch').forEach(sw => {
+                sw.classList.toggle('active', sw.dataset.color.toLowerCase() === String(currentColor || '').toLowerCase());
+            });
+            const picker = colorPalette.querySelector('.color-picker-input');
+            const hex = colorPalette.querySelector('.color-hex-input');
+            if (/^#[0-9a-fA-F]{6}$/.test(String(currentColor || ''))) {
+                picker.value = currentColor;
+                hex.value = currentColor;
+            }
+            colorPalette.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+            colorPalette.style.top = Math.min(y, window.innerHeight - 250) + 'px';
+            colorPalette.classList.add('show');
         }
 
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.color-palette')) {
+            if (!e.target.closest('.color-palette') && !e.target.closest('#edit-color-btn')) {
                 colorPalette.classList.remove('show');
             }
         });
         // Cerrar la paleta al presionar con cualquier botón fuera de ella (consistente con el menú)
         document.addEventListener('mousedown', (e) => {
-            if (!e.target.closest('.color-palette')) colorPalette.classList.remove('show');
+            if (!e.target.closest('.color-palette') && !e.target.closest('#edit-color-btn')) colorPalette.classList.remove('show');
         }, true);
         // Cerrar la paleta al hacer scroll fuera de ella
         window.addEventListener('wheel', (e) => {
@@ -4883,6 +5022,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             renderSheetSelect();
             editSheet.value = sheetId;
             editColor.value = card.color || '#fef3c7';
+            if (editColorBtn) editColorBtn.style.background = editColor.value;
             editPinned.checked = !!card.pinned;
             editTitle.value = card.title || '';
             editBody.value = card.body || '';
@@ -5114,6 +5254,9 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
         // Barra de formato WhatsApp
         document.querySelectorAll('.wa-toolbar button').forEach(btn => {
+            // Mantener el foco y la selección en el textarea: si el botón roba el foco,
+            // Chromium reenfoca el textarea y el scroll salta al final.
+            btn.addEventListener('mousedown', (e) => e.preventDefault());
             btn.addEventListener('click', () => {
                 const marker = btn.dataset.m;
                 const ta = editBody;
@@ -5652,6 +5795,23 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             updateCardPreview();
             saveData();
         });
+
+        // Botón de color del editor: abre la misma paleta unificada
+        if (editColorBtn) {
+            editColorBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const rect = editColorBtn.getBoundingClientRect();
+                showColorPalette(rect.left, rect.bottom + 4, (c) => {
+                    editColor.value = c;
+                    editColorBtn.style.background = c;
+                    state.lastCardColor = c;
+                    updateCardPreview();
+                    autosaveCard();
+                    saveData();
+                }, editColor.value);
+            });
+        }
         editPinned.addEventListener('change', autosaveCard);
         editSheet.addEventListener('change', autosaveCard);
 
@@ -5660,6 +5820,14 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // ============================================================
         searchInput.addEventListener('input', () => {
             state.searchQuery = searchInput.value;
+            const sheet = getActiveSheet();
+            // En modo procesos re-resaltamos las celdas en sitio: mantiene scroll,
+            // selección y anchos de columna, sin reconstruir ni deformar la cuadrícula.
+            if (sheet && sheet.mode === 'process') {
+                exApplyHighlight();
+                updateResultCount();
+                return;
+            }
             render();
         });
         btnFavFilter.addEventListener('click', () => {

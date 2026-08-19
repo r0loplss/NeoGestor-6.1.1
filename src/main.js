@@ -175,34 +175,21 @@ function getAlwaysOnTopPreference() {
 function setAlwaysOnTopPreference(value) {
   saveData({ alwaysOnTop: value });
   
-  // Aplicar a todas las ventanas existentes (CORRECCIÓN: errores 8 y 32)
+  // Solo afecta a la ventana principal, la alerta y el botón flotante Fast.
+  // Las herramientas, notas y el visor de imagen NO participan de esta opción.
   try {
     // Ventana principal
     if (mainWin && !mainWin.isDestroyed()) {
       mainWin.setAlwaysOnTop(value);
     }
     
-    // Alerta
+    // Alerta (acompaña a la ventana principal)
     if (alertaWin && !alertaWin.isDestroyed()) {
       alertaWin.setAlwaysOnTop(value);
     }
 
     // Botón flotante Fast: visible solo con la app activa (fade in/out)
     refreshFastBtnVisibility();
-    
-    // Herramientas
-    for (const [id, win] of toolWins) {
-      if (win && !win.isDestroyed()) {
-        win.setAlwaysOnTop(value);
-      }
-    }
-    
-    // Notas
-    for (const [id, win] of noteWins) {
-      if (win && !win.isDestroyed()) {
-        win.setAlwaysOnTop(value);
-      }
-    }
   } catch (err) {
     console.warn('Error al aplicar AlwaysOnTop a ventanas:', err);
   }
@@ -293,7 +280,7 @@ function getFastWin() {
   fastWin = new BrowserWindow({
     width: w, height: h,
     frame: false, resizable: true, movable: true,
-    alwaysOnTop: getAlwaysOnTopPreference(),
+    alwaysOnTop: false,
     show: false,
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   });
@@ -344,7 +331,7 @@ function openFast() {
     const w = (saved.width && saved.width > 0) ? saved.width : FAST_WIN_W;
     const h = (saved.height && saved.height > 0) ? saved.height : FAST_WIN_H;
     win.setBounds({ x: pos.x, y: pos.y, width: w, height: h });
-    win.setAlwaysOnTop(getAlwaysOnTopPreference());
+    win.setAlwaysOnTop(false);
     win.show();
     win.focus();
     fastVisible = true;
@@ -421,7 +408,7 @@ function createFastBtn() {
     width: FAST_BTN_W, height: FAST_BTN_H,
     frame: false, resizable: false, movable: false,
     transparent: true,
-    alwaysOnTop: getAlwaysOnTopPreference(),
+    alwaysOnTop: true,
     show: false, skipTaskbar: true,
     focusable: false,
     webPreferences: { nodeIntegration: true, contextIsolation: false }
@@ -482,14 +469,16 @@ function notifyFastState() {
   }
 }
 
-// Botón flotante Fast: se muestra (fade-in) cuando la app está activa y se oculta
-// (fade-out) cuando el usuario hace clic fuera del programa, aunque "always on top" esté activado.
+// Botón flotante Fast: con "always on top" activado queda SIEMPRE visible
+// (no se desvanece al hacer clic fuera). Con la preferencia desactivada se
+// muestra (fade-in) cuando la app está activa y se oculta (fade-out) al
+// hacer clic fuera del programa.
 let appActive = false;
 let fastBtnFadeId = 0;
 
 function refreshFastBtnVisibility() {
   if (!fastBtnWin || fastBtnWin.isDestroyed()) return;
-  if (appActive) showFastBtn();
+  if (getAlwaysOnTopPreference() || appActive) showFastBtn();
   else hideFastBtn();
 }
 
@@ -569,7 +558,7 @@ function openImgView(payload) {
     x: wa.x + Math.round((wa.width - w) / 2),
     y: wa.y + Math.round((wa.height - h) / 2),
     frame: false, transparent: true, resizable: false, movable: true,
-    alwaysOnTop: getAlwaysOnTopPreference(),
+    alwaysOnTop: false,
     skipTaskbar: true,
     hasShadow: false,
     show: false,
@@ -889,7 +878,7 @@ ipcMain.on('open-tool', (e, id) => {
   const win = new BrowserWindow({
     width: sw, height: sh, x: pos.x, y: pos.y,
     frame: false, resizable: conf.resize, movable: true, 
-    alwaysOnTop: conf.top || getAlwaysOnTopPreference(),
+    alwaysOnTop: conf.top === true,
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   });
 
@@ -1092,7 +1081,7 @@ function openNote(id, isPreview = false) {
     width: noteW, height: noteH, 
     x: pos.x + offset, y: pos.y + offset, 
     frame: false, resizable: true, movable: true, 
-    alwaysOnTop: getAlwaysOnTopPreference(),
+    alwaysOnTop: false,
     show: false, skipTaskbar: true, 
     webPreferences: { nodeIntegration: true, contextIsolation: false } 
   }); 
