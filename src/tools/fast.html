@@ -3143,8 +3143,6 @@
                     </div>
                     <div class="card-body-preview">${esc(bodyPlain)}</div>
                     <div class="card-copy-row">
-                        <button class="copy-main" data-act="copy" title="Copiar texto para WhatsApp">📋<span class="copy-label"> COPIAR</span></button>
-                        <button class="copy-more" data-act="copymore" title="Más opciones de copiado">▾</button>
                         ${imgInd}${linkInd}${badge}
                     </div>
                 `;
@@ -3157,32 +3155,20 @@
                 if (tEl) tEl.style.fontSize = titleFs + 'px';
                 if (bEl) bEl.style.fontSize = bodyFs + 'px';
 
-                // Acciones rápidas
-                el.querySelector('[data-act="copy"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    copyCardBody(card);
-                    openDrawer(sheetId, card.id);
-                });
-                el.querySelector('[data-act="copymore"]').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showCopyMenu(e, card, sheetId);
-                });
-
                 // Interacción clic vs arrastre (umbral 4px)
                 el.addEventListener('mousedown', (e) => {
                     if (e.button !== 0) return;
-                    if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
                     pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
                     document.addEventListener('mousemove', onGlobalMove);
                     document.addEventListener('mouseup', onGlobalUp);
                     document.addEventListener('mouseleave', onGlobalLeave);
                 });
 
-                // Doble clic: editar
+                // Doble clic: sin acción (ya no abre el editor)
                 el.addEventListener('dblclick', (e) => {
-                    if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
-                    if (openDrawerTimer) { clearTimeout(openDrawerTimer); openDrawerTimer = null; }
-                    openCardEditor(sheetId, card.id);
+                    e.preventDefault();
+                    e.stopPropagation();
                 });
 
                 // Clic derecho: menú contextual
@@ -4838,6 +4824,12 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const wasDragged = pressInfo ? pressInfo.dragged : false;
             if (pressInfo && !wasDragged) {
                 const { sheetId, cardId } = pressInfo;
+                // Solo en modo tarjetas, el clic copia el cuerpo WhatsApp además de abrir el drawer
+                const sheet = getSheetById(sheetId);
+                const card = sheet ? sheet.cards.find(c => c.id === cardId) : null;
+                if (sheet && card && sheet.mode === 'cards') {
+                    copyCardBody(card);
+                }
                 if (openDrawerTimer) clearTimeout(openDrawerTimer);
                 openDrawerTimer = setTimeout(() => { openDrawerTimer = null; openDrawer(sheetId, cardId); }, 260);
             }
