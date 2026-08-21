@@ -1,12 +1,13 @@
-# Instrucciones del proyecto — Gestor de Casos (Neogestor V6.0)
+# Instrucciones del proyecto — Gestor de Casos (NeoGestor 6.1.1)
 
-## Fuente canónica del proyecto (Git) (IMPORTANTE, 10/08/2026)
+## Fuente canónica del proyecto (Git) (IMPORTANTE, 21/08/2026)
 
 > **Desde ahora la versión de referencia es el repositorio de GitHub:
-> `https://github.com/r0loplss/Neogestor-V6.0.git` (rama `main`).**
+> `https://github.com/r0loplss/NeoGestor-6.1.1.git` (rama `main`).**
+> - Repositorio anterior archivado: `https://github.com/r0loplss/Neogestor-V6.0.git` (se mantiene como está, sin nuevos cambios).
 > - El trabajo se hace sobre un clon local y los cambios se suben a ese repo
 >   (puede haber clones en varias PCs; el repo es la única fuente de verdad).
-> - Clonar en otra PC: `git clone https://github.com/r0loplss/Neogestor-V6.0.git`.
+> - Clonar en otra PC: `git clone https://github.com/r0loplss/NeoGestor-6.1.1.git`.
 > - Guardar credenciales en esa PC:
 >   `cmdkey /generic:git:https://github.com /user:r0loplss /pass:<token>`.
 > - El bat para abrir la app es `Abrir Gestor.bat` (dentro de la carpeta local).
