@@ -486,6 +486,9 @@
                 if (fechaActual.value) data.actual = fechaActual.value;
                 if (Object.keys(data).length > 0) {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    if (typeof ipcRenderer !== 'undefined') {
+                        ipcRenderer.send('save-calculadora-dias', data);
+                    }
                 }
             } catch (e) { /* silencio */ }
         }
@@ -498,6 +501,18 @@
                 if (data.activacion) fechaActivacion.value = data.activacion;
                 if (data.actual) fechaActual.value = data.actual;
             } catch (e) { /* silencio */ }
+        }
+
+        if (typeof ipcRenderer !== 'undefined') {
+            ipcRenderer.on('init-calculadora-dias', (e, state) => {
+                if (state) {
+                    if (state.activacion) fechaActivacion.value = state.activacion;
+                    if (state.actual) fechaActual.value = state.actual;
+                    if (fechaActivacion.value && fechaActual.value) {
+                        calcular();
+                    }
+                }
+            });
         }
 
         // Prellenar fecha actual con hoy si no hay guardado
@@ -570,9 +585,12 @@
             const cumplio120 = diffDias >= 120;
             const diff120 = diffDias - 120;
 
-            // 18 meses (usando meses exactos)
-            const fecha18m = new Date(fechaInicio);
-            fecha18m.setMonth(fecha18m.getMonth() + 18);
+            // 18 meses (usando meses exactos con control de tope de días por mes)
+            const targetYear = fechaInicio.getFullYear() + Math.floor((fechaInicio.getMonth() + 18) / 12);
+            const targetMonth = (fechaInicio.getMonth() + 18) % 12;
+            const maxDaysInTargetMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
+            const targetDay = Math.min(fechaInicio.getDate(), maxDaysInTargetMonth);
+            const fecha18m = new Date(targetYear, targetMonth, targetDay, 12, 0, 0);
             const cumplio18m = fechaFin >= fecha18m;
             const diff18m = cumplio18m ? 0 : Math.ceil((fecha18m - fechaFin) / (1000 * 60 * 60 * 24));
 

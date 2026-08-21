@@ -542,7 +542,7 @@
         }
 
         // ============================================================
-        // PERSISTENCIA (localStorage)
+        // PERSISTENCIA (localStorage + IPC central)
         // ============================================================
         const STORAGE_KEY = 'ciclos-estado';
 
@@ -554,6 +554,9 @@
                     fecha: fechaOrden.value
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                if (typeof ipcRenderer !== 'undefined') {
+                    ipcRenderer.send('save-ciclos', data);
+                }
             } catch (e) {}
         }
 
@@ -566,6 +569,20 @@
                 if (data.nuevo) cicloNuevo.value = data.nuevo;
                 if (data.fecha) fechaOrden.value = data.fecha;
             } catch (e) {}
+        }
+
+        if (typeof ipcRenderer !== 'undefined') {
+            ipcRenderer.on('init-ciclos', (e, state) => {
+                if (state) {
+                    if (state.actual) cicloActual.value = state.actual;
+                    if (state.nuevo) cicloNuevo.value = state.nuevo;
+                    if (state.fecha) fechaOrden.value = state.fecha;
+                    actualizarOpcionesNuevo();
+                    if (fechaOrden.value && cicloActual.value && cicloNuevo.value) {
+                        calcular();
+                    }
+                }
+            });
         }
 
         // Prellenar fecha de hoy
@@ -622,10 +639,9 @@
             // ============================================================
             // Período anterior
             // ============================================================
-            let fechaInicioAnt = new Date(fechaBase);
-            fechaInicioAnt.setDate(infoActual.inicio);
+            let fechaInicioAnt = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), infoActual.inicio);
             if (fechaInicioAnt > fechaBase) {
-                fechaInicioAnt.setMonth(fechaInicioAnt.getMonth() - 1);
+                fechaInicioAnt = new Date(fechaBase.getFullYear(), fechaBase.getMonth() - 1, infoActual.inicio);
             }
             const fechaFinAnt = new Date(fechaBase); // hasta el día de la orden
 
@@ -636,60 +652,18 @@
             // Período nuevo
             // ============================================================
             const fechaInicioNue = new Date(fechaEfectiva);
-            // El nuevo período termina el día anterior al día de inicio del nuevo ciclo
             const diaInicioNue = infoNuevo.inicio;
-            // Sumamos un mes a la fecha de inicio y luego restamos un día
-            let fechaFinNue = new Date(fechaInicioNue);
-            fechaFinNue.setMonth(fechaFinNue.getMonth() + 1);
-            fechaFinNue.setDate(0); // último día del mes anterior
-            // Si el día de inicio es 1, el último día del mes anterior es correcto.
-            // Si el día de inicio es >1, el último día del mes anterior es correcto.
-            // Pero si la fecha de inicio es el día 16, el período termina el 15 del mes siguiente.
-            // Con este método, sumamos un mes y luego ponemos el día 0 => último día del mes anterior.
-            // Para que sea el día 15, necesitamos sumar un mes y luego restar (diaInicioNue - 1) días.
-            // Mejor usar el método simple: sumar un mes y restar un día.
-            // Pero si el día de inicio es 1, sumar un mes y restar un día da el último día del mes anterior, que es correcto.
-            // Si el día de inicio es 16, sumar un mes y restar un día da el día 15 del mes siguiente.
-            // Esto funciona porque al sumar un mes, la fecha se ajusta al día correspondiente.
-            // Ejemplo: 23/10 + 1 mes = 23/11, -1 día = 22/11.
-            // Pero para ciclo 54, el período es 23 al 22 del mes siguiente. Si la fecha de inicio es 23, el período termina el 22 del mes siguiente.
-            // Así que con este método funciona.
-            // Sin embargo, si la fecha de inicio es mayor que el número de días del mes siguiente, el ajuste de fecha puede dar problemas.
-            // Por ejemplo, 31/01 + 1 mes = 31/02 (que se convierte en 03/03) y luego -1 día = 02/03. Eso no es correcto.
-            // Mejor usar la lógica de sumar un mes y luego poner el día 0, pero eso da el último día del mes anterior.
-            // Vamos a hacerlo más robusto:
 
-            // Calculamos el último día del nuevo período:
-            // Si la fecha de inicio es 16, el último día es 15 del mes siguiente.
-            // Si la fecha de inicio es 23, el último día es 22 del mes siguiente.
-            // Si la fecha de inicio es 1, el último día es el último día del mes.
-            // Así que: sumamos un mes a la fecha de inicio, luego restamos (diaInicioNue - 1) días.
-
-            fechaFinNue = new Date(fechaInicioNue);
-            fechaFinNue.setDate(1); // evitar desborde de mes (ej. 31 ene + 1 mes)
-            fechaFinNue.setMonth(fechaFinNue.getMonth() + 1);
+            let fechaFinNue;
             if (diaInicioNue <= 1) {
-                // Ciclo que inicia el día 1: termina el último día del mes de inicio
-                fechaFinNue.setDate(0);
+                // Ciclos que inician el 1: terminan el último día del mes actual
+                fechaFinNue = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth() + 1, 0);
             } else {
-                fechaFinNue.setDate(diaInicioNue - 1);
-            }
-            // Si el día resultante es 0, ajustamos al último día del mes anterior.
-            if (fechaFinNue.getDate() === 0) {
-                fechaFinNue.setDate(0);
-            }
-
-            // Si la fecha fin es anterior a la fecha de inicio (por ejemplo, si la fecha de inicio es 1 y se calcula el mes siguiente, el día 0 da el último día del mes, que puede ser mayor que la fecha de inicio)
-            // Pero con este método, si la fecha de inicio es 1, diaInicioNue - 1 = 0, fechaFinNue se queda en el último día del mes anterior.
-            // Eso es correcto para el ciclo 50 y 51 que van del 1 al 30/31.
-            // Para ciclo 52 (inicio 8), fechaFinNue sería el 7 del mes siguiente.
-            // Para ciclo 53 (inicio 16), fechaFinNue sería el 15 del mes siguiente.
-            // Para ciclo 54 (inicio 23), fechaFinNue sería el 22 del mes siguiente.
-            // Todo correcto.
-
-            // Si fechaFinNue es anterior a fechaInicioNue, sumamos un mes.
-            if (fechaFinNue < fechaInicioNue) {
-                fechaFinNue.setMonth(fechaFinNue.getMonth() + 1);
+                // Ciclos que inician después del día 1: terminan en (diaInicio - 1)
+                fechaFinNue = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth(), diaInicioNue - 1);
+                if (fechaFinNue < fechaInicioNue) {
+                    fechaFinNue = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth() + 1, diaInicioNue - 1);
+                }
             }
 
             const diffNue = Math.floor((fechaFinNue - fechaInicioNue) / (1000 * 60 * 60 * 24)) + 1;
@@ -697,41 +671,30 @@
             // ============================================================
             // Calcular fechas de emisión y vencimiento
             // ============================================================
-            // Para la boleta anterior: se emite según el ciclo actual, en el mes siguiente al período
-            const mesEmisionAnt = fechaFinAnt.getMonth() + 1;
-            const añoEmisionAnt = fechaFinAnt.getFullYear();
-            const diaEmisionAnt = infoActual.emision;
-            let fechaEmisionAnt = new Date(añoEmisionAnt, mesEmisionAnt, diaEmisionAnt);
+            // Para la boleta anterior: se emite según el ciclo actual
+            let fechaEmisionAnt = new Date(fechaFinAnt.getFullYear(), fechaFinAnt.getMonth(), infoActual.emision);
             if (fechaEmisionAnt < fechaFinAnt) {
-                fechaEmisionAnt.setMonth(fechaEmisionAnt.getMonth() + 1);
+                fechaEmisionAnt = new Date(fechaFinAnt.getFullYear(), fechaFinAnt.getMonth() + 1, infoActual.emision);
             }
 
-            // Vencimiento anterior: usar el primer día de vencimiento del ciclo actual
+            // Vencimiento anterior:
             const diaVencAnt = infoActual.vencimiento[0];
-            let fechaVencAnt = new Date(fechaEmisionAnt);
-            fechaVencAnt.setMonth(fechaVencAnt.getMonth() + infoActual.mesVenc);
-            fechaVencAnt.setDate(diaVencAnt);
+            let fechaVencAnt = new Date(fechaEmisionAnt.getFullYear(), fechaEmisionAnt.getMonth() + infoActual.mesVenc, diaVencAnt);
 
             // Para la boleta nueva: se emite según el nuevo ciclo
-            const mesEmisionNue = fechaFinNue.getMonth() + 1;
-            const añoEmisionNue = fechaFinNue.getFullYear();
-            const diaEmisionNue = infoNuevo.emision;
-            let fechaEmisionNue = new Date(añoEmisionNue, mesEmisionNue, diaEmisionNue);
+            let fechaEmisionNue = new Date(fechaFinNue.getFullYear(), fechaFinNue.getMonth(), infoNuevo.emision);
             if (fechaEmisionNue < fechaFinNue) {
-                fechaEmisionNue.setMonth(fechaEmisionNue.getMonth() + 1);
+                fechaEmisionNue = new Date(fechaFinNue.getFullYear(), fechaFinNue.getMonth() + 1, infoNuevo.emision);
             }
 
+            // Vencimiento nuevo:
             const diaVencNue = infoNuevo.vencimiento[0];
-            let fechaVencNue = new Date(fechaEmisionNue);
-            fechaVencNue.setMonth(fechaVencNue.getMonth() + infoNuevo.mesVenc);
-            fechaVencNue.setDate(diaVencNue);
+            let fechaVencNue = new Date(fechaEmisionNue.getFullYear(), fechaEmisionNue.getMonth() + infoNuevo.mesVenc, diaVencNue);
 
             // Reinicio del nuevo ciclo
-            const diaReinicio = infoNuevo.reinicio;
-            let fechaReinicio = new Date(fechaInicioNue);
-            fechaReinicio.setDate(diaReinicio);
+            let fechaReinicio = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth(), infoNuevo.reinicio);
             if (fechaReinicio < fechaInicioNue) {
-                fechaReinicio.setMonth(fechaReinicio.getMonth() + 1);
+                fechaReinicio = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth() + 1, infoNuevo.reinicio);
             }
 
             // ============================================================

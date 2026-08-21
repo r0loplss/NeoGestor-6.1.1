@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8"/>
@@ -1771,7 +1771,22 @@ font-family: var(--font);
     SCRIPT
     ============================================================ -->
 <script>
-        const { ipcRenderer } = require('electron');
+        const { ipcRenderer, webFrame } = require('electron');
+
+        // ============================================================
+        // CONTROL DE ZOOM Y ESCALADO DE INTERFAZ
+        // ============================================================
+        let currentZoom = parseFloat(localStorage.getItem('neogestor_zoom')) || 1.0;
+        function aplicarZoom(factor) {
+            currentZoom = Math.max(0.75, Math.min(1.6, Math.round(factor * 10) / 10));
+            try {
+                if (typeof webFrame !== 'undefined' && webFrame.setZoomFactor) {
+                    webFrame.setZoomFactor(currentZoom);
+                }
+            } catch (e) {}
+            localStorage.setItem('neogestor_zoom', String(currentZoom));
+        }
+        aplicarZoom(currentZoom);
 
         // ============================================================
         // TOAST GLOBAL
@@ -1799,6 +1814,26 @@ font-family: var(--font);
         // ATALOS DE TECLADO GLOBALES
         // ============================================================
         document.addEventListener('keydown', (e) => {
+            // Zoom: Ctrl + / Ctrl - / Ctrl 0
+            if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+                e.preventDefault();
+                aplicarZoom(currentZoom + 0.1);
+                showToast(`🔍 Zoom: ${Math.round(currentZoom * 100)}%`, 'info', 1200);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+                e.preventDefault();
+                aplicarZoom(currentZoom - 0.1);
+                showToast(`🔍 Zoom: ${Math.round(currentZoom * 100)}%`, 'info', 1200);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+                e.preventDefault();
+                aplicarZoom(1.0);
+                showToast('🔍 Zoom: 100%', 'info', 1200);
+                return;
+            }
+
             // Ctrl+S: Guardar en modales o en contexto activo
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 const modalEdit = document.querySelector('#modal-overlay.show, #modal-config.show, #modal-cb.show, #modal-ajustes.show');
@@ -2022,6 +2057,19 @@ font-family: var(--font);
                                     <option value="'Inter', sans-serif">Inter</option>
                                 </select>
                             </div>
+                            <div class="modal-field">
+                                <label>Escala de Interfaz (Zoom)</label>
+                                <select id="sel-zoom">
+                                    <option value="0.8">80% (Compacto)</option>
+                                    <option value="0.9">90%</option>
+                                    <option value="1.0">100% (Normal)</option>
+                                    <option value="1.1">110%</option>
+                                    <option value="1.2">120%</option>
+                                    <option value="1.3">130%</option>
+                                    <option value="1.4">140%</option>
+                                    <option value="1.5">150% (Grande)</option>
+                                </select>
+                            </div>
                             <div class="modal-field check-row">
                                 <input type="checkbox" id="chk-alwaysontop" />
                                 <label for="chk-alwaysontop">Siempre visible (AlwaysOnTop)</label>
@@ -2043,6 +2091,9 @@ font-family: var(--font);
 
             const prefs = appData.prefsApoyo || {};
             document.getElementById('sel-fuente').value = prefs.fuente || "'Segoe UI', system-ui, sans-serif";
+            const zVal = (Math.round(currentZoom * 10) / 10).toFixed(1);
+            const zEl = document.getElementById('sel-zoom');
+            if (zEl) zEl.value = zVal;
             document.getElementById('chk-alwaysontop').checked = prefs.alwaysOnTop !== undefined ? prefs.alwaysOnTop : true;
             document.getElementById('chk-autostart').checked = prefs.autostart || false;
 
@@ -2054,10 +2105,13 @@ font-family: var(--font);
             if (overlay) overlay.classList.remove('show');
         }
 
-function guardarAjustes() {
+        function guardarAjustes() {
             const fuente = document.getElementById('sel-fuente').value;
+            const zoomVal = parseFloat(document.getElementById('sel-zoom').value) || 1.0;
             const alwaysOnTop = document.getElementById('chk-alwaysontop').checked;
             const autostart = document.getElementById('chk-autostart').checked;
+
+            aplicarZoom(zoomVal);
 
             appData.prefsApoyo = { fuente, alwaysOnTop, autostart };
             ipcRenderer.send('save-data', { prefsApoyo: appData.prefsApoyo });
@@ -2886,7 +2940,7 @@ ipcRenderer.on('request-close-confirm', () => {
                         <span class="hcard-date">${ds}</span>
                     </div>
                     <div class="hcard-body">
-                        <div class="hcard-note">${h.content || 'Sin detalle'}</div>
+                        <div class="hcard-note">${esc(h.content || 'Sin detalle').replace(/\n/g, '<br>')}</div>
                         <div class="hcard-btns">
                             <button class="hb-btn hb-recover" onclick="recuperarHist(${h.id})">↩ Recuperar</button>
                             <button class="hb-btn hb-del" onclick="eliminarHist(${h.id})">🗑 Eliminar</button>

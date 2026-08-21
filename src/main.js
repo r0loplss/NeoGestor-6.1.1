@@ -658,6 +658,9 @@ ipcMain.on('save-data', (e, patch) => saveData(patch));
 ipcMain.on('save-occ', (e, state) => saveData({ occState: state }));
 ipcMain.on('save-enlaces', (e, data) => saveData({ enlaces: data.enlaces, tags: data.tags }));
 ipcMain.on('save-contingencias', (e, data) => saveData({ contingencias: data }));
+ipcMain.on('save-ciclos', (e, data) => saveData({ ciclosState: data }));
+ipcMain.on('save-calculadora-dias', (e, data) => saveData({ diasState: data }));
+ipcMain.on('save-trafico', (e, data) => saveData({ traficoState: data }));
 ipcMain.on('save-pos', (e, patch) => savePos(patch));
 
 // ── IPC: TURNOS WEB (Extranet Entel) ──
@@ -897,6 +900,12 @@ ipcMain.on('open-tool', (e, id) => {
         win.webContents.send('init-contingencias', d.contingencias || null);
       } else if (id === 'notas-vault') {
         win.webContents.send('init-vault', { notes: d.notes || [], favNotes: d.favNotes || [] });
+      } else if (id === 'ciclos') {
+        win.webContents.send('init-ciclos', d.ciclosState || null);
+      } else if (id === 'calculadora-dias') {
+        win.webContents.send('init-calculadora-dias', d.diasState || null);
+      } else if (id === 'trafico') {
+        win.webContents.send('init-trafico', d.traficoState || null);
       }
     }
   });

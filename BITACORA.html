@@ -86,6 +86,23 @@
         padding: 1px 9px;
         white-space: nowrap;
     }
+    .agente {
+        font-size: 11px;
+        border-radius: 999px;
+        padding: 1px 9px;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+    .agente.agy {
+        color: #60a5fa;
+        border: 1px solid #3b82f6;
+        background: rgba(59, 130, 246, 0.12);
+    }
+    .agente.oc {
+        color: #f59e0b;
+        border: 1px solid #f59e0b;
+        background: rgba(245, 158, 11, 0.12);
+    }
     .desc { font-size: 13.5px; color: var(--text); }
     .desc li { margin-left: 18px; }
     .vacio { color: var(--faint); text-align: center; padding: 30px 0; }
@@ -95,6 +112,7 @@
         .top, .entry { border-color: #ccc; background: #fff; }
         .fecha, .sub, .nota { color: #555; }
         .ver { color: #166534; border-color: #166534; }
+        .agente { border-color: #777; color: #333; }
     }
 </style>
 </head>
@@ -109,6 +127,23 @@
     </div>
 
     <div id="lista">
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">21 ago 2026</span><span class="ver">v6.0.13</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Auditoría general y reglas de agentes</b>: auditoría integral de código en todas las herramientas del proyecto; configuración en <code>AGENTS.md</code> y <code>BITACORA.html</code> de la identificación y prefijado para <b>Antigravity</b> y <b>Open Code</b>.</li>
+                    <li><b>Tráfico PRO (100% offline)</b>: empaquetado local de la librería SheetJS en <code>src/assets/vendor/xlsx.full.min.js</code>, eliminando la dependencia externa del CDN para permitir el análisis de planillas Excel sin conexión a internet.</li>
+                    <li><b>Ciclos — corrección de fechas</b>: reestructuración de los cálculos de emisión, vencimiento y reinicio de ciclo utilizando constructores de fecha seguros para evitar desbordes involuntarios en meses de 28, 30 y 31 días.</li>
+                    <li><b>Calculadora de días — hito 18 meses</b>: corrección del cálculo del hito a 18 meses ajustando el día al máximo del mes de destino (evitando saltos a meses posteriores en activaciones de fin de mes).</li>
+                    <li><b>Bóveda de Notas</b>: corrección en la extracción del título para tomar el primer renglón del texto limpio y estandarización del cierre mediante canal IPC.</li>
+                    <li><b>Enlaces</b>: captura de errores con <code>.catch()</code> en llamadas externas para prevenir promesas no controladas.</li>
+                    <li><b>Fast — descarte en editor</b>: implementación de snapshot al abrir el editor de tarjetas para que cancelar o presionar Escape restaure el estado previo sin guardar cambios no deseados.</li>
+                    <li><b>Ventana principal — Zoom y accesibilidad</b>: soporte de zoom/escalado de interfaz con atajos <code>Ctrl +</code>, <code>Ctrl -</code>, <code>Ctrl 0</code> y selector de 80% a 150% en Ajustes con persistencia. Sanitización de contenido en tarjetas de Historial.</li>
+                    <li><b>Proceso principal</b>: ampliación de canales IPC e inicialización centralizada en <code>ready-to-show</code> para herramientas satélite.</li>
+                </ul>
+            </div>
+        </section>
 
         <section class="entry">
             <div class="enc"><span class="fecha">20 ago 2026</span><span class="ver">v6.0.13</span></div>

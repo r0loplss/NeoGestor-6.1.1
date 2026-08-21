@@ -4995,16 +4995,21 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // EDITOR DE TARJETA
         // ============================================================
         let editingCard = null;
+        let cardSnapshot = null;
 
         function openCardEditor(sheetId, cardId) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
             let card;
             let isNew = false;
-            if (cardId) card = sheet.cards.find(c => c.id === cardId);
+            if (cardId) {
+                card = sheet.cards.find(c => c.id === cardId);
+                if (card) cardSnapshot = JSON.parse(JSON.stringify(card));
+            }
             if (!card) {
                 card = { id: generateId(), title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
                 isNew = true;
+                cardSnapshot = null;
                 sheet.cards.push(card);
                 saveData();
             }
@@ -5357,6 +5362,36 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         syncFontControl(editTitleFs, editTitleFsNum);
         syncFontControl(editBodyFs, editBodyFsNum);
 
+        function cancelCardEditor() {
+            if (autosaveTimer) { clearTimeout(autosaveTimer); autosaveTimer = null; }
+            modalOverlay.classList.remove('show');
+            if (editingCard) {
+                if (editingCard.isNew) {
+                    for (const sheet of state.sheets) {
+                        const idx = sheet.cards.findIndex(c => c.id === editingCard.cardId);
+                        if (idx !== -1) {
+                            sheet.cards.splice(idx, 1);
+                            saveData();
+                            break;
+                        }
+                    }
+                } else if (cardSnapshot) {
+                    const sheet = getSheetById(editingCard.sheetId);
+                    if (sheet) {
+                        const idx = sheet.cards.findIndex(c => c.id === editingCard.cardId);
+                        if (idx !== -1) {
+                            sheet.cards[idx] = cardSnapshot;
+                            saveData();
+                        }
+                    }
+                }
+            }
+            editingCard = null;
+            cardSnapshot = null;
+            render();
+            showToast('Edición cancelada.', 'info', 1800);
+        }
+
         function saveCardEditor() {
             if (!editingCard) return;
             flushAutosave();
@@ -5387,40 +5422,23 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             }
 
             const isNew = editingCard.isNew;
+            cardSnapshot = null;
+            editingCard = null;
+            modalOverlay.classList.remove('show');
             saveData();
-            closeEditor();
+            render();
             showToast(isNew ? '✅ Tarjeta creada.' : '✅ Cambios guardados.', 'success');
         }
 
-        function closeEditor() {
-            modalOverlay.classList.remove('show');
-            flushAutosave();
-            if (editingCard && editingCard.isNew) {
-                for (const sheet of state.sheets) {
-                    const idx = sheet.cards.findIndex(c => c.id === editingCard.cardId);
-                    if (idx !== -1) {
-                        const card = sheet.cards[idx];
-                        if (!card.title && !card.body && !card.images.length && !card.links.length) {
-                            sheet.cards.splice(idx, 1);
-                            saveData();
-                        }
-                        break;
-                    }
-                }
-            }
-            editingCard = null;
-            render();
-        }
-
-        modalClose.addEventListener('click', closeEditor);
-        modalCancel.addEventListener('click', closeEditor);
+        modalClose.addEventListener('click', cancelCardEditor);
+        modalCancel.addEventListener('click', cancelCardEditor);
         modalSave.addEventListener('click', saveCardEditor);
         let backdropDown = false;
         modalOverlay.addEventListener('mousedown', (e) => {
             backdropDown = (e.target === modalOverlay);
         });
         modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay && backdropDown) closeEditor();
+            if (e.target === modalOverlay && backdropDown) cancelCardEditor();
         });
 
         // Cierre del selector de modo
@@ -5916,7 +5934,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             if (typing || modalOverlay.classList.contains('show')) {
                 if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
                     e.preventDefault();
-                    closeEditor();
+                    cancelCardEditor();
                 }
                 return;
             }
@@ -5944,7 +5962,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // ============================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (modalOverlay.classList.contains('show')) { closeEditor(); return; }
+                if (modalOverlay.classList.contains('show')) { cancelCardEditor(); return; }
                 if (confirmOverlay.classList.contains('show')) { closeConfirm(); return; }
                 if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
                 if (colorPalette.classList.contains('show')) { colorPalette.classList.remove('show'); return; }

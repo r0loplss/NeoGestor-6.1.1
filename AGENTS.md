@@ -23,21 +23,35 @@
 > 2. `git commit -m "mensaje descriptivo del cambio"`
 > 3. `git push`
 
+## Identificación de Agentes IA (IMPORTANTE, 21/08/2026)
+
+> El proyecto cuenta con dos agentes IA para el desarrollo y mantenimiento:
+> - **Antigravity** (Google DeepMind)
+> - **Open Code**
+>
+> **Reglas de identificación para ambos agentes:**
+> 1. **En `BITACORA.html`:** Toda nueva entrada insertada debe incluir la etiqueta del agente responsable en la cabecera `.enc`:
+>    - Si la modificación la hace **Antigravity**: `<span class="agente agy">Antigravity</span>`
+>    - Si la modificación la hace **Open Code**: `<span class="agente oc">Open Code</span>`
+> 2. **En los mensajes de Commit:** Prefijar siempre el commit con el nombre del agente:
+>    - `git commit -m "[Antigravity] Descripción clara del cambio"`
+>    - `git commit -m "[Open Code] Descripción clara del cambio"`
+
 ## Bitácora de modificaciones (BITACORA.html) (IMPORTANTE, 12/08/2026)
 
 > **Cada vez que el usuario pida subir cambios a GitHub ("carga/sube a GitHub"),
 > ANTES de hacer el commit se debe actualizar `BITACORA.html`:** agregar al INICIO
-> de la lista `#lista` una nueva anotación (sección `.entry`) con la fecha del día
-> y un contexto BREVE de los cambios realizados en esa sesión (qué se modificó,
-> funcionalidades nuevas, correcciones, versión si aplica).
+> de la lista `#lista` una nueva anotación (sección `.entry`) con la fecha del día,
+> etiqueta del agente responsable, y un contexto BREVE de los cambios realizados
+> en esa sesión (qué se modificó, funcionalidades nuevas, correcciones, versión si aplica).
 >
 > - El usuario trabaja desde 2 escritorios distintos; la bitácora permite saber
->   qué se hizo en cada sesión.
+>   qué se hizo en cada sesión y qué agente lo realizó.
 > - Las anotaciones van con la fecha más reciente al inicio (las nuevas se
 >   insertan ANTES de las existentes).
-> - Seguir el mismo formato de las anotaciones actuales:
->   `<span class="fecha">DIA mes año</span>` y, si corresponde,
->   `<span class="ver">vX.Y.Z</span>` + descripción breve (texto o lista `<ul>`).
+> - Seguir el formato estándar:
+>   `<div class="enc"><span class="fecha">DIA mes año</span><span class="ver">vX.Y.Z</span><span class="agente agy">Antigravity</span></div>`
+>   (o `<span class="agente oc">Open Code</span>` según corresponda) + descripción breve (`<ul>` o texto).
 > - La bitácora se sube a GitHub junto con los cambios de la sesión.
 
 ## Workflow de compilación estandarizado
