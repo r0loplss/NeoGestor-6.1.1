@@ -129,6 +129,22 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">22 ago 2026</span><span class="ver">v6.1.1</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Radar de Contingencias PRO — Reordenamiento de Interfaz</b>: reorganización visual de la herramienta ubicando primero el bloque de carga de datos, luego la barra de control (conteo de casos y botones de acción) y finalmente la lista de contingencias activas.</li>
+                    <li><b>Extracción Inteligente de Contingencias No-Red</b>: nuevo parser con capacidad para extraer y estructurar automáticamente contingencias comerciales, de sistemas de atención y preventivas (sin relación con red física) a partir de reportes tabulares (TSV/Siebel/CRM/Web) o texto libre. Detección precisa de Ticket ID, Ámbito (*Nacional* o Comunas), fecha normalizada, cálculo dinámico de días transcurridos y Ticket INC.</li>
+                    <li><b>Filtrado inteligente de ruido</b>: omisión automática de textos de saludo (*"Hola Nombre de cliente..."*), roles de agentes (*"EJEC. CROSS SELLING..."*) y cabeceras genéricas, aislando la descripción puntual y sustancial de la contingencia.</li>
+                    <li><b>Editor visual de tarjetas</b>: incorporación de botón <code>✏️</code> en cada tarjeta con modal para editar ID, Zona, Fecha, Detalle, POPs y Ticket INC, con soporte de atajos (<code>Escape</code> / <code>Ctrl + S</code>) y sincronización con almacenamiento local vía IPC.</li>
+                    <li><b>Copiar Breve y Copiar Detallado Inteligentes</b>: optimización de <b>Copiar Breve</b> agrupando primero las contingencias de red/comuna en orden alfabético, insertando un salto de línea divisorio y apilando a continuación las contingencias no-red/sistemas ordenadas por fecha (<code>📍 *Detalle puntual* ID</code>). Soporte bidireccional para parsear listas pegadas en formato breve.</li>
+                    <li><b>Calculadora Comercial — OCC Postpago (Solicitud SS y Fecha Inteligente)</b>: incorporación del campo optativo <code>Solicitud (SS)</code> debajo de Cargo Fijo para añadir el encabezado <code>SS: &lt;Nro SS&gt;</code> en la tipificación. Se integró además detección y carga automática inicial de la fecha del día actual (local) con parseo a prueba de desfases horarios, manteniendo la posibilidad de modificación manual.</li>
+                    <li><b>Ventana Acerca de — Antigravity &amp; Open Code</b>: actualización de la distribución de desarrollo con <b>Antigravity 27%</b>, <b>Open Code 36%</b> y <b>Desarrollo Humano 37%</b>, inclusión de ambos logos vectoriales, mención de compilación conjunta y enlaces de descarga dedicados.</li>
+                    <li><b>Compatibilidad total de Red</b>: preservación íntegra de la detección de fallas de red tradicionales con POPs y comunas.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">21 ago 2026</span><span class="ver">v6.1.1</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

@@ -14,6 +14,8 @@
         --muted: #a8b3c7;
         --faint: #6b7790;
         --primary: #4d8dff;
+        --purple: #8b5cf6;
+        --teal: #10b981;
         --danger: #f87171;
         --radius: 10px;
     }
@@ -74,12 +76,13 @@
         line-height: 1.35;
         min-width: 0;
     }
-    .at-nombre { font-size: 13px; font-weight: 700; }
+    .at-nombre { font-size: 13px; font-weight: 700; color: #fff; }
     .at-dev { font-size: 11px; color: var(--muted); }
     .at-dev b { color: var(--text); }
-    .at-opencode { font-size: 11px; color: var(--muted); }
-    .at-opencode b { color: var(--primary); }
-    .at-pct { font-size: 11px; font-weight: 700; margin-top: 3px; }
+    .at-agentes { font-size: 11px; color: var(--muted); }
+    .at-agentes .tag-oc { color: #38bdf8; font-weight: 600; }
+    .at-agentes .tag-agy { color: #c084fc; font-weight: 600; }
+    .at-pct { font-size: 11px; font-weight: 700; margin-top: 2px; }
 
     .hab-leyenda {
         display: flex;
@@ -111,29 +114,61 @@
         margin-top: 2px;
     }
     .hab-seg { border-radius: 6px; width: 0; transition: width 1.2s cubic-bezier(0.25, 1, 0.4, 1); }
-    .hab-seg.gem  { background: linear-gradient(180deg, #a78bfa, #8b5cf6); }
-    .hab-seg.oc   { background: linear-gradient(180deg, #60a5fa, #3b82f6); }
+    .hab-seg.agy  { background: linear-gradient(180deg, #c084fc, #8b5cf6); }
+    .hab-seg.oc   { background: linear-gradient(180deg, #38bdf8, #3b82f6); }
     .hab-seg.hum  { background: linear-gradient(180deg, #34d399, #10b981); }
 
+    .at-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        margin-top: 4px;
+    }
     .at-descarga {
-        margin-top: 6px;
         font-size: 11px;
-        color: var(--primary);
+        color: #38bdf8;
         text-decoration: none;
         font-weight: 600;
         cursor: pointer;
-        align-self: flex-start;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: opacity 0.15s;
     }
-    .at-descarga:hover { text-decoration: underline; }
+    .at-descarga.agy-link {
+        color: #c084fc;
+    }
+    .at-descarga:hover { text-decoration: underline; opacity: 0.9; }
 
     #col-logo {
         flex-shrink: 0;
-        width: 92px;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 10px;
+        padding-left: 6px;
     }
-    #col-logo svg { width: 100%; height: auto; }
+    .logo-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        transition: transform 0.18s ease, filter 0.18s ease;
+    }
+    .logo-card:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.18);
+    }
+    .logo-name {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+    .logo-name.oc-txt { color: #38bdf8; }
+    .logo-name.agy-txt { color: #c084fc; }
 </style>
 </head>
 <body>
@@ -146,33 +181,74 @@
         <div id="col-texto">
             <span class="at-nombre">Herramienta de gestión integral Call Center</span>
             <span class="at-dev">Desarrollado por: <b>Rolando Tapia</b></span>
-            <span class="at-opencode">Compilado y revisado vía <b>Open Code</b></span>
+            <span class="at-agentes">Compilado y asistido vía <span class="tag-oc">Open Code</span> y <span class="tag-agy">Antigravity</span></span>
             <span class="at-pct">% de desarrollo con agentes basados en IA</span>
             <div class="hab-leyenda">
-                <span class="dot"><i style="background:#8b5cf6"></i>Gémini <b>6%</b></span>
-                <span class="dot"><i style="background:#3b82f6"></i>Open Code <b>30%</b></span>
-                <span class="dot"><i style="background:#10b981"></i>Desarrollo Humano <b>64%</b></span>
+                <span class="dot"><i style="background:#8b5cf6"></i>Antigravity <b>27%</b></span>
+                <span class="dot"><i style="background:#3b82f6"></i>Open Code <b>36%</b></span>
+                <span class="dot"><i style="background:#10b981"></i>Desarrollo Humano <b>37%</b></span>
             </div>
             <div class="hab-bar">
-                <div class="hab-seg gem" data-pct="6%"></div>
-                <div class="hab-seg oc" data-pct="30%"></div>
-                <div class="hab-seg hum" data-pct="64%"></div>
+                <div class="hab-seg agy" data-pct="27%"></div>
+                <div class="hab-seg oc" data-pct="36%"></div>
+                <div class="hab-seg hum" data-pct="37%"></div>
             </div>
-            <a class="at-descarga" onclick="carDownload()" href="javascript:void(0)">⬇️ Descargar Open Code</a>
+            <div class="at-links">
+                <a class="at-descarga" onclick="abrirEnlace('https://github.com/anomalyco/opencode')" href="javascript:void(0)">⬇️ Descargar Open Code</a>
+                <a class="at-descarga agy-link" onclick="abrirEnlace('https://github.com/google-deepmind')" href="javascript:void(0)">⬇️ Descargar Antigravity</a>
+            </div>
         </div>
         <div id="col-logo">
-            <svg viewBox="0 0 48 64" xmlns="http://www.w3.org/2000/svg">
-                <rect x="9" y="4" width="30" height="56" rx="15" fill="rgba(255,255,255,0.04)" />
-                <rect x="9" y="4" width="30" height="56" rx="15" fill="none" stroke="#5b6b8c" stroke-width="2" />
-                <rect x="15" y="10" width="18" height="44" rx="9" fill="none" stroke="#e8edf6" stroke-width="6" />
-            </svg>
+            <div class="logo-card" onclick="abrirEnlace('https://github.com/anomalyco/opencode')" title="Open Code">
+                <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="oc-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#1e293b"/>
+                            <stop offset="1" stop-color="#090d16"/>
+                        </linearGradient>
+                        <linearGradient id="oc-glow" x1="16" y1="8" x2="48" y2="56" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#38bdf8"/>
+                            <stop offset="1" stop-color="#3b82f6"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#oc-bg)" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1.5"/>
+                    <rect x="20" y="10" width="24" height="44" rx="12" stroke="url(#oc-glow)" stroke-width="4.5" fill="none"/>
+                    <rect x="27" y="22" width="10" height="20" rx="5" fill="url(#oc-glow)"/>
+                </svg>
+                <span class="logo-name oc-txt">Open Code</span>
+            </div>
+            <div class="logo-card" onclick="abrirEnlace('https://github.com/google-deepmind')" title="Google Antigravity">
+                <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="agy-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#241442"/>
+                            <stop offset="1" stop-color="#0b0816"/>
+                        </linearGradient>
+                        <linearGradient id="agy-sparkle" x1="12" y1="12" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#e879f9"/>
+                            <stop offset="0.45" stop-color="#a855f7"/>
+                            <stop offset="1" stop-color="#6366f1"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#agy-bg)" stroke="rgba(216, 180, 254, 0.35)" stroke-width="1.5"/>
+                    <path d="M32 10C32 22.15 22.15 32 10 32C22.15 32 32 41.85 32 54C32 41.85 41.85 32 54 32C41.85 32 32 22.15 32 10Z" fill="url(#agy-sparkle)"/>
+                    <circle cx="32" cy="32" r="4" fill="#ffffff"/>
+                </svg>
+                <span class="logo-name agy-txt">Antigravity</span>
+            </div>
         </div>
     </div>
 
 <script>
-    function carDownload() {
-        const { shell } = require('electron');
-        shell.openExternal('https://github.com/anomalyco/opencode');
+    function abrirEnlace(url) {
+        try {
+            const { shell } = require('electron');
+            if (shell && shell.openExternal) {
+                shell.openExternal(url).catch(e => console.error('Error abriendo enlace:', e));
+            }
+        } catch(e) {
+            console.error('Error shell:', e);
+        }
     }
 
     // Barra de porcentajes: una sola pasada (sin ciclo), se detiene en su valor

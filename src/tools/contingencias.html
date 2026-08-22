@@ -110,7 +110,8 @@
             gap: 6px;
             padding: 8px 12px;
             background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            border: 1px solid var(--border);
+            border-radius: 8px;
             flex-shrink: 0;
             align-items: center;
         }
@@ -351,6 +352,28 @@
             border-color: var(--primary);
         }
 
+        .c-card .c-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .c-card .c-btn-edit {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: 0.15s;
+        }
+
+        .c-card .c-btn-edit:hover {
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.15);
+        }
+
         .c-card .c-row .c-del {
             background: none;
             border: none;
@@ -367,12 +390,25 @@
             background: rgba(239, 68, 68, 0.12);
         }
 
+        .c-card .c-detalle {
+            font-size: 11.5px;
+            color: #f1f5f9;
+            line-height: 1.45;
+            background: rgba(0, 0, 0, 0.22);
+            border-left: 2px solid var(--primary);
+            padding: 5px 8px;
+            border-radius: 0 4px 4px 0;
+            margin-top: 2px;
+            word-break: break-word;
+        }
+
         .c-card .c-meta {
             font-size: 10px;
             color: var(--faint);
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .c-card .c-meta .c-pops {
@@ -386,6 +422,18 @@
             border: 1px solid rgba(34, 197, 94, 0.15);
         }
 
+        .c-card .c-meta .c-inc {
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid var(--border);
+            font-family: 'Consolas', monospace;
+        }
+
         .c-card .c-meta .c-contexto {
             color: var(--primary);
             font-style: italic;
@@ -393,6 +441,100 @@
             padding: 2px 8px;
             border-radius: 4px;
             border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        /* ============================================================
+               MODAL EDICIÓN CONTINGENCIA
+               ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 14px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            animation: modalIn 0.2s ease-out;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        .modal-title .close-modal {
+            background: none;
+            border: none;
+            color: var(--faint);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .modal-title .close-modal:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.12);
+        }
+        .modal-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .modal-field label {
+            font-size: 10.5px;
+            color: var(--muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .modal-field input, .modal-field textarea {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            padding: 6px 8px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .modal-field textarea {
+            min-height: 80px;
+            resize: vertical;
+            line-height: 1.4;
+        }
+        .modal-field input:focus, .modal-field textarea:focus {
+            border-color: var(--primary);
+            background: var(--surface3);
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 6px;
         }
 
         /* ============================================================
@@ -476,21 +618,11 @@
     </div>
 
     <!-- ============================================================
-    TOOLBAR
-    ============================================================ -->
-    <div id="toolbar">
-        <span class="status" id="status-bar">Casos en Radar: <b id="count-actives">0</b></span>
-        <button class="tb-btn copy-det" id="btn-copy-det">📋 Copiar Detallado</button>
-        <button class="tb-btn copy-breve" id="btn-copy-breve">📋 Copiar Breve</button>
-        <button class="tb-btn danger" id="btn-limpiar">🗑 Limpiar</button>
-    </div>
-
-    <!-- ============================================================
     CUERPO PRINCIPAL
     ============================================================ -->
     <div id="main">
 
-        <!-- Área de carga de texto -->
+        <!-- 1. Bloque de carga de datos -->
         <div class="input-area">
             <div class="input-hdr">
                 <div>
@@ -505,11 +637,59 @@
             </div>
         </div>
 
-        <!-- Lista de contingencias -->
+        <!-- 2. Casos en radar: / Copiar detallado / Copiar Breve / Limpiar -->
+        <div id="toolbar">
+            <span class="status" id="status-bar">Casos en Radar: <b id="count-actives">0</b></span>
+            <button class="tb-btn copy-det" id="btn-copy-det">📋 Copiar Detallado</button>
+            <button class="tb-btn copy-breve" id="btn-copy-breve">📋 Copiar Breve</button>
+            <button class="tb-btn danger" id="btn-limpiar">🗑 Limpiar</button>
+        </div>
+
+        <!-- 3. Lista de contingencias cargadas -->
         <div id="list-container">
             <div class="empty-state">Esperando datos...</div>
         </div>
 
+    </div>
+
+    <!-- ============================================================
+    MODAL EDICIÓN CONTINGENCIA
+    ============================================================ -->
+    <div class="modal-overlay" id="modal-edit-contingencia">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span>✏️ Editar Contingencia</span>
+                <button class="close-modal" id="modal-edit-close" title="Cerrar">✕</button>
+            </div>
+            <div class="modal-field">
+                <label>ID de Contingencia</label>
+                <input type="text" id="edit-c-id" placeholder="1-XXXXXXXXXXXX" />
+            </div>
+            <div class="modal-field">
+                <label>Zona / Comuna / Ámbito</label>
+                <input type="text" id="edit-c-zona" placeholder="Nacional, Santiago, etc." />
+            </div>
+            <div class="modal-field">
+                <label>Fecha y Hora de Apertura</label>
+                <input type="text" id="edit-c-fecha" placeholder="DD-MM-YYYY HH:mm" />
+            </div>
+            <div class="modal-field">
+                <label>Detalle / Descripción Puntual</label>
+                <textarea id="edit-c-detalle" placeholder="Descripción clara del problema o contingencia..."></textarea>
+            </div>
+            <div class="modal-field">
+                <label>POPs Afectados (opcional, separados por coma)</label>
+                <input type="text" id="edit-c-pops" placeholder="Ej: SCL01, SCL02" />
+            </div>
+            <div class="modal-field">
+                <label>Ticket INC (opcional)</label>
+                <input type="text" id="edit-c-inc" placeholder="Ej: INC000009377141" />
+            </div>
+            <div class="modal-actions">
+                <button class="tb-btn" id="modal-edit-cancel">Cancelar</button>
+                <button class="btn" id="modal-edit-save" style="background:var(--primary);color:#fff;border:none;border-radius:5px;padding:6px 16px;cursor:pointer;font-weight:600;">💾 Guardar Cambios</button>
+            </div>
+        </div>
     </div>
 
     <!-- ============================================================
@@ -564,38 +744,42 @@
         // FUNCIÓN ROBUSTA PARA PARSEAR FECHAS
         // ============================================================
         function parseFechaContingencia(fechaStr) {
-            if (!fechaStr) return null;
-            // Ejemplo de entrada: "07/08/2026 01:57:06" o "07/08/2026 01:57"
-            const partes = fechaStr.trim().split(' ');
-            if (partes.length === 0) return null;
+            if (!fechaStr || typeof fechaStr !== 'string') return null;
+            const match = fechaStr.trim().match(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+            if (!match) return null;
 
-            const fechaPart = partes[0].split('/');
-            if (fechaPart.length !== 3) return null;
-
-            const dia = parseInt(fechaPart[0], 10);
-            const mes = parseInt(fechaPart[1], 10) - 1; // 0-index
-            const anio = parseInt(fechaPart[2], 10);
-
-            let horas = 0,
-                minutos = 0,
-                segundos = 0;
-            if (partes.length > 1) {
-                const horaPart = partes[1].split(':');
-                if (horaPart.length >= 2) {
-                    horas = parseInt(horaPart[0], 10) || 0;
-                    minutos = parseInt(horaPart[1], 10) || 0;
-                    if (horaPart.length >= 3) {
-                        segundos = parseInt(horaPart[2], 10) || 0;
-                    }
-                }
-            }
+            const dia = parseInt(match[1], 10);
+            const mes = parseInt(match[2], 10) - 1;
+            const anio = parseInt(match[3], 10);
+            const horas = match[4] ? parseInt(match[4], 10) : 0;
+            const minutos = match[5] ? parseInt(match[5], 10) : 0;
+            const segundos = match[6] ? parseInt(match[6], 10) : 0;
 
             if (isNaN(dia) || isNaN(mes) || isNaN(anio)) return null;
             return new Date(anio, mes, dia, horas, minutos, segundos);
         }
 
+        function formatearFechaDisplay(fechaObj, originalStr) {
+            if (!fechaObj || isNaN(fechaObj.getTime())) return originalStr || 'Fecha no especificada';
+            const dia = String(fechaObj.getDate()).padStart(2, '0');
+            const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+            const anio = fechaObj.getFullYear();
+            const hora = String(fechaObj.getHours()).padStart(2, '0');
+            const min = String(fechaObj.getMinutes()).padStart(2, '0');
+            return `${dia}-${mes}-${anio} ${hora}:${min}`;
+        }
+
+        function calcularDiasTranscurridos(fechaObj) {
+            if (!fechaObj || isNaN(fechaObj.getTime())) return '00 días';
+            const ahora = new Date();
+            const diffMs = ahora.getTime() - fechaObj.getTime();
+            const dias = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+            if (dias === 1) return '01 día';
+            return String(dias).padStart(2, '0') + ' días';
+        }
+
         // ============================================================
-        // FUNCIONES DE PROCESAMIENTO
+        // FUNCIONES DE PROCESAMIENTO Y PARSER INTELIGENTE
         // ============================================================
 
         function extraerPOPs(texto) {
@@ -603,113 +787,66 @@
             const regex = /\b([A-Z]{2,3}[0-9]{1,4})\b/g;
             const matches = texto.match(regex);
             if (!matches) return [];
-            const stopWords = ['TEC', 'SITIO', 'NOMBRE', 'COMUNA', 'REGION', 'POP', 'LTE', '3G', '5G', 'INC', 'UID', 'ID'];
+            const stopWords = ['TEC', 'SITIO', 'NOMBRE', 'COMUNA', 'REGION', 'POP', 'LTE', '3G', '4G', '5G', 'INC', 'UID', 'ID', 'CRM', 'APP', 'OT', 'NC', 'OCC'];
             const pops = matches
                 .filter(p => !stopWords.includes(p))
                 .map(p => p.toUpperCase());
             return [...new Set(pops)].sort();
         }
 
-        function generarContexto(descripcion, infoAdicional) {
-            const textoCompleto = (descripcion || '') + ' ' + (infoAdicional || '');
-            if (!textoCompleto.trim()) {
-                return 'Contingencia operacional sin descripción específica';
+        function extraerDetallePuntual(chunk, id, zona, inc) {
+            if (!chunk) return 'Incidencia operacional en curso';
+            const lines = chunk.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            // 1. Alta prioridad: Líneas explícitas de contingencia preventiva o falla
+            for (const line of lines) {
+                if (/^CONTINGENCIA\s+PREVENTIVA\s*[-–:]/i.test(line)) return line.trim();
+                if (/^CONTINGENCIA\s*[-–:]/i.test(line)) return line.trim();
+                if (/^INCIDENCIA\s*[-–:]/i.test(line)) return line.trim();
+                if (/^FALLA\s*[-–:]/i.test(line)) return line.trim();
             }
 
-            const palabrasClave = {
-                lentitud: /lentitud|slow|lento/i,
-                caida: /caída|caida|falla|caído/i,
-                corte: /corte|interrupción|interrupcion/i,
-                intermitencia: /intermitencia|intermitente/i,
-                problemas: /problema|dificultad|inconveniente/i,
-                sistemas: /sistema|plataforma|aplicación|app|web|portal/i,
-                red: /red|señal|cobertura/i,
-                voz: /voz|llamada|telefonía/i,
-                datos: /datos|internet|navegación|navegacion/i,
-                facturacion: /facturación|facturacion|boleta|pago/i,
-                atencion: /atención|atencion|contacto|ejecutivo/i,
-                oneTouch: /onetouch|ot|siebel/i
-            };
+            // 2. Extraer candidatos examinando renglones y celdas tabuladas o separadas por pipes
+            const candidates = [];
+            for (const line of lines) {
+                const parts = (line.includes('\t') ? line.split('\t') : line.split('|')).map(p => p.trim()).filter(p => p.length > 0);
+                for (const part of parts) {
+                    if (part === id || part.includes(id)) continue;
+                    if (/^\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(part)) continue;
+                    if (/^INC\d+/i.test(part)) continue;
+                    if (/^POPs?:/i.test(part)) continue;
+                    if (/^\d{1,2}\s+d[íi]as?/i.test(part)) continue;
+                    if (/^(Abierto|Cerrado|En Proceso|Pendiente|Cancelado)$/i.test(part)) continue;
+                    if (/^(Movil|Hogar|Movil\/Hogar|Fija|Empresas|Pyme)$/i.test(part)) continue;
+                    if (/^(Nacional|RM|Santiago|Valparaíso|Concepción|Varias|Desconocida)$/i.test(part)) continue;
+                    if (/^EJEC\.\s+/i.test(part) || /^EJECUTIVO\b/i.test(part)) continue;
+                    if (/^Hola\s+\(/i.test(part) || /^Estimado\b/i.test(part) || /^Hola\s+[a-zA-Z]/i.test(part)) continue;
+                    if (/^Derivar\s+al\s+cliente/i.test(part)) continue;
+                    if (/^(Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion)$/i.test(part)) continue;
+                    if (/^Serv\.\s+Voz/i.test(part) || /^Trabajo\s+Programado/i.test(part)) continue;
 
-            let tipoProblema = '';
-            let areaAfectada = '';
-
-            for (const [key, regex] of Object.entries(palabrasClave)) {
-                if (regex.test(textoCompleto)) {
-                    if (['lentitud', 'caida', 'corte', 'intermitencia', 'problemas'].includes(key)) {
-                        tipoProblema = key;
-                    } else if (['sistemas', 'red', 'voz', 'datos', 'facturacion', 'atencion', 'oneTouch'].includes(key)) {
-                        areaAfectada = key;
+                    const clean = part.replace(/^[*#📍📌>–-]\s*/, '').trim();
+                    if (clean.length >= 8) {
+                        candidates.push(clean);
                     }
                 }
             }
 
-            const tipoMap = {
-                lentitud: 'problemas de lentitud',
-                caida: 'caída de servicio',
-                corte: 'corte de servicio',
-                intermitencia: 'intermitencia en el servicio',
-                problemas: 'problemas operacionales'
-            };
-
-            const areaMap = {
-                sistemas: 'en sistemas de atención',
-                red: 'en la red móvil',
-                voz: 'en servicios de voz',
-                datos: 'en servicios de datos',
-                facturacion: 'en facturación',
-                atencion: 'en atención al cliente',
-                oneTouch: 'en plataforma OneTouch'
-            };
-
-            let texto = '';
-            if (tipoProblema && tipoMap[tipoProblema]) {
-                texto += tipoMap[tipoProblema];
-            } else {
-                texto += 'incidencia operacional';
+            if (candidates.length > 0) {
+                return candidates[0];
             }
 
-            if (areaAfectada && areaMap[areaAfectada]) {
-                texto += ' ' + areaMap[areaAfectada];
-            } else {
-                const extra = textoCompleto.match(/(sistemas|red|voz|datos|facturación|atención|plataforma|aplicación)/i);
-                if (extra) {
-                    texto += ' en ' + extra[0].toLowerCase();
-                } else {
-                    texto += ' a nivel nacional';
-                }
+            // 3. Si hay categorías de CRM concatenadas
+            const catMatch = chunk.match(/(?:Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion)/gi);
+            if (catMatch && catMatch.length > 0) {
+                return [...new Set(catMatch)].join(' — ');
             }
 
-            const palabras = texto.split(' ');
-            while (palabras.length < 5) {
-                palabras.push('operacional');
-            }
+            // 4. Buscar descripciones técnicas de red
+            const redDesc = chunk.match(/(?:Lentitud en OT|Caída de Sitios|Corte Energía|Intermitencia|Corte de fibra)/i);
+            if (redDesc) return redDesc[0];
 
-            const resultado = palabras.join(' ');
-            return resultado.charAt(0).toUpperCase() + resultado.slice(1);
-        }
-
-        function esSinComuna(c) {
-            return !c.zona || ['Desconocida', 'Nacional', 'Varias'].includes(c.zona);
-        }
-
-        function limpiarTextoC(c) {
-            if (!c.textoCompleto) return '';
-            return String(c.textoCompleto)
-                .replace(/[*#📍📌]/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-        }
-
-        function obtenerProblema(c) {
-            const partes = [];
-            if (c.descripcion) partes.push(c.descripcion);
-            if (c.infoAdicional) partes.push(c.infoAdicional);
-            const texto = partes.join(' — ').trim();
-            if (texto) return texto;
-            const limpio = limpiarTextoC(c);
-            if (limpio) return limpio;
-            return '';
+            return 'Incidencia operacional en curso';
         }
 
         function procesarContingencias(raw) {
@@ -718,31 +855,62 @@
                 return false;
             }
 
-            const defaultDate = "Fecha de publicación en chat apoyo";
+            const defaultDate = "Fecha no especificada";
             const nuevasContingencias = [];
 
-            if (raw.includes('Nº de Contingencia') || raw.includes('INC0000')) {
-                const chunks = raw.split(/(?=1-\d{11,12})/);
+            // Dividir por ID 1-XXXXXXXXXXXX
+            const chunks = raw.split(/(?=(?:^|\n)\s*1-\d{11,12}\b)/).map(c => c.trim()).filter(c => c.length > 0);
+
+            if (chunks.length > 0 && chunks.some(c => /1-\d{11,12}/.test(c))) {
                 chunks.forEach(chunk => {
-                    const idMatch = chunk.match(/(1-\d{11,12})/);
+                    const idMatch = chunk.match(/\b(1-\d{11,12})\b/);
                     if (!idMatch) return;
                     const id = idMatch[1];
-                    const dateMatch = chunk.match(/(\d{2}\/\d{2}\/\d{4}(?:\s\d{2}:\d{2}:\d{2})?)/);
-                    const fecha = dateMatch ? dateMatch[1] : defaultDate;
-                    let zona = "Desconocida";
-                    if (dateMatch) {
+
+                    // Fecha
+                    const dateMatch = chunk.match(/(\d{1,2}[/-]\d{1,2}[/-]\d{4}(?:\s+\d{1,2}:\d{2}(?::\d{2})?)?)/);
+                    let fechaRaw = dateMatch ? dateMatch[1] : defaultDate;
+                    const dtObj = parseFechaContingencia(fechaRaw);
+                    const fechaDisplay = dtObj ? formatearFechaDisplay(dtObj, fechaRaw) : fechaRaw;
+
+                    // Zona
+                    let zona = "Nacional";
+                    const tabParts = chunk.split('\t').map(p => p.trim());
+                    if (tabParts.length >= 7) {
+                        const candidateZona = tabParts[6];
+                        if (candidateZona && !/^\d+$/.test(candidateZona) && candidateZona.length < 35) {
+                            zona = candidateZona;
+                        }
+                    } else if (chunk.includes('|')) {
+                        const pipeParts = chunk.split('|').map(p => p.replace(/[*#📍📌]/g, '').trim());
+                        if (pipeParts.length >= 2 && pipeParts[1]) {
+                            zona = pipeParts[1];
+                        }
+                    } else if (dateMatch) {
                         const textAfterDate = chunk.substring(chunk.indexOf(dateMatch[1]) + dateMatch[1].length).trim();
-                        const zonaMatch = textAfterDate.match(/^([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+?)(?=Serv\.|Trabajo|INC|En estos|$)/);
-                        if (zonaMatch) zona = zonaMatch[1].trim();
+                        const zonaMatch = textAfterDate.match(/^([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+?)(?=\t|Serv\.|Trabajo|INC|En estos|$)/);
+                        if (zonaMatch && zonaMatch[1].trim()) {
+                            zona = zonaMatch[1].trim();
+                        }
                     }
-                    const descripcion = chunk.match(/Serv\.\sVoz\sy\sdatos\sCongestión|Trabajo\sProgramado\sMóvil|Sistemas\sde\sAtencion/i);
-                    const infoAdicional = chunk.match(/(Lentitud en OT|Caída de Sitios|Corte Energía|Intermitencia|Sistemas de Atencion)/i);
+
+                    // POPs
+                    const pops = extraerPOPs(chunk);
+
+                    // INC
+                    const incMatch = chunk.match(/\b(INC\d{8,14})\b/i);
+                    const inc = incMatch ? incMatch[1].toUpperCase() : '';
+
+                    // Detalle puntual
+                    const detalle = extraerDetallePuntual(chunk, id, zona, inc);
+
                     nuevasContingencias.push({
                         id,
-                        zona,
-                        inicio: fecha,
-                        descripcion: descripcion ? descripcion[0] : '',
-                        infoAdicional: infoAdicional ? infoAdicional[0] : '',
+                        zona: zona || 'Nacional',
+                        inicio: fechaDisplay,
+                        detalle: detalle || '',
+                        pops: pops || [],
+                        inc: inc || '',
                         textoCompleto: chunk
                     });
                 });
@@ -750,39 +918,59 @@
                 const lineas = raw.split('\n');
                 lineas.forEach(linea => {
                     if (!linea.trim()) return;
-                    const idMatch = linea.match(/(1-\d{11,12})/);
+                    const idMatch = linea.match(/\b(1-\d{11,12})\b/);
                     if (!idMatch) return;
                     const id = idMatch[1];
-                    let zona = "Desconocida";
+                    let zona = "Nacional";
                     let fecha = defaultDate;
-                    let descripcion = '';
-                    let infoAdicional = '';
+                    let detalle = '';
 
                     if (linea.includes('|')) {
                         const partes = linea.split('|').map(p => p.replace(/[*#📍📌]/g, '').trim());
-                        if (partes.length >= 2) {
-                            zona = partes[1] || "Desconocida";
-                            if (partes[2]) {
-                                fecha = partes[2].split('|')[0].trim() || defaultDate;
+                        if (partes.length >= 2 && partes[1]) zona = partes[1];
+                        if (partes.length >= 3 && partes[2]) fecha = partes[2];
+                        if (partes.length >= 4 && partes[3]) detalle = partes[3];
+                    } else if (linea.includes('📍') || linea.includes('📌') || linea.includes('*')) {
+                        let texto = linea.replace(id, '').replace(/[📍📌]/g, '').trim();
+                        const starMatch = texto.match(/\*([^*]+)\*/);
+                        if (starMatch) {
+                            texto = starMatch[1].trim();
+                        }
+                        if (texto.includes('—')) {
+                            const parts = texto.split('—').map(p => p.trim());
+                            zona = parts[0] || 'Nacional';
+                            detalle = parts.slice(1).join(' — ');
+                        } else if (texto.includes('-') && !texto.toLowerCase().startsWith('contingencia')) {
+                            const parts = texto.split('-').map(p => p.trim());
+                            zona = parts[0] || 'Nacional';
+                            detalle = parts.slice(1).join(' - ');
+                        } else {
+                            const comunas = ['santiago', 'valparaíso', 'valparaiso', 'concepción', 'concepcion', 'antofagasta', 'temuco', 'rancagua', 'talca', 'arica', 'iquique', 'puerto montt', 'coquimbo', 'la serena', 'chillán', 'chillan', 'calama', 'copiapó', 'copiapo', 'osorno', 'quillota', 'curicó', 'curico', 'punta arenas', 'los ángeles', 'los angeles', 'coronel', 'san antonio', 'melipilla', 'linares', 'ovalle', 'quillota', 'quilpué', 'quilpue', 'villa alemana', 'maipú', 'maipu', 'puente alto', 'la florida', 'las condes', 'providencia', 'ñuñoa', 'nunoa', 'san bernardo'];
+                            const low = texto.toLowerCase();
+                            if (comunas.some(c => low === c || low.startsWith(c + ' '))) {
+                                zona = texto;
+                                detalle = '';
+                            } else if (low === 'nacional' || low === 'desconocida') {
+                                zona = 'Nacional';
+                                detalle = '';
+                            } else {
+                                zona = 'Nacional';
+                                detalle = texto;
                             }
                         }
-                        const descMatch = linea.match(/Serv\.\sVoz\sy\sdatos\sCongestión|Trabajo\sProgramado\sMóvil|Sistemas\sde\sAtencion/i);
-                        if (descMatch) descripcion = descMatch[0];
-                        const infoMatch = linea.match(/(Lentitud en OT|Caída de Sitios|Corte Energía|Intermitencia)/i);
-                        if (infoMatch) infoAdicional = infoMatch[0];
-                    } else if (linea.includes('📍') || linea.includes('📌')) {
-                        const textoLimpio = linea.replace(/[📍📌*]/g, '').replace(id, '').trim();
-                        zona = textoLimpio || "Desconocida";
-                    } else {
-                        zona = linea.replace(id, '').trim() || "Desconocida";
                     }
+
+                    if (!detalle) detalle = extraerDetallePuntual(linea, id, zona, '');
+                    const dtObj = parseFechaContingencia(fecha);
+                    const fechaDisplay = dtObj ? formatearFechaDisplay(dtObj, fecha) : fecha;
 
                     nuevasContingencias.push({
                         id,
                         zona,
-                        inicio: fecha,
-                        descripcion: descripcion || '',
-                        infoAdicional: infoAdicional || '',
+                        inicio: fechaDisplay,
+                        detalle,
+                        pops: extraerPOPs(linea),
+                        inc: (linea.match(/\b(INC\d{8,14})\b/i) || [])[1] || '',
                         textoCompleto: linea
                     });
                 });
@@ -795,14 +983,14 @@
 
             contingencias = nuevasContingencias;
 
-            // Ordenar por fecha usando el parseo robusto
+            // Ordenar por fecha descendente
             contingencias.sort((a, b) => {
-                const dateA = parseFechaContingencia(a.inicio);
-                const dateB = parseFechaContingencia(b.inicio);
-                if (!dateA && !dateB) return 0;
-                if (!dateA) return 1;
-                if (!dateB) return -1;
-                return dateB - dateA;
+                const da = parseFechaContingencia(a.inicio);
+                const db = parseFechaContingencia(b.inicio);
+                if (!da && !db) return 0;
+                if (!da) return 1;
+                if (!db) return -1;
+                return db - da;
             });
 
             guardarYNotificar();
@@ -825,34 +1013,40 @@
 
             let html = '';
             contingencias.forEach(c => {
-                const pops = extraerPOPs(c.textoCompleto || '');
-                const sinComuna = esSinComuna(c);
-                const contexto = sinComuna ? generarContexto(c.descripcion, c.infoAdicional) : null;
-                const problema = obtenerProblema(c);
-                let extra = '';
-                if (sinComuna) {
-                    extra = `<div class="c-meta"><span class="c-contexto">💬 ${esc(problema || contexto)}</span></div>`;
-                } else if (!pops.length && problema) {
-                    extra = `<div class="c-meta"><span class="c-contexto">💬 ${esc(problema)}</span></div>`;
-                }
+                const fechaObj = parseFechaContingencia(c.inicio);
+                const fechaDisplay = fechaObj ? formatearFechaDisplay(fechaObj, c.inicio) : (c.inicio || 'Sin fecha');
+                const diasStr = calcularDiasTranscurridos(fechaObj);
+                const pops = Array.isArray(c.pops) ? c.pops : extraerPOPs(c.textoCompleto || '');
+                const detalle = (c.detalle || '').trim();
 
                 html += `
                     <div class="c-card" data-id="${esc(c.id)}">
                         <div class="c-row">
-                            <span class="c-zona">📍 ${esc(c.zona)}</span>
-                            <button class="c-del" data-action="del" title="Eliminar">✕</button>
+                            <span class="c-zona">📍 ${esc(c.zona || 'Nacional')}</span>
+                            <div class="c-actions">
+                                <button class="c-btn-edit" data-action="edit" title="Editar contingencia">✏️</button>
+                                <button class="c-del" data-action="del" title="Eliminar">✕</button>
+                            </div>
                         </div>
                         <div class="c-row">
                             <span class="c-id" data-action="copy" title="Copiar ID">📋 ${esc(c.id)}</span>
-                            <span class="c-meta">${esc(c.inicio)}</span>
+                            <span class="c-meta">${esc(fechaDisplay)} | ${esc(diasStr)}</span>
                         </div>
-                        ${extra}
-                        ${pops.length ? `<div class="c-meta"><span class="c-pops">📡 POPs: ${esc(pops.join(', '))}</span></div>` : ''}
+                        ${detalle ? `<div class="c-detalle">${esc(detalle)}</div>` : ''}
+                        ${pops.length ? `<div class="c-meta" style="margin-top:2px;"><span class="c-pops">📡 POPs: ${esc(pops.join(', '))}</span></div>` : ''}
+                        ${c.inc ? `<div class="c-meta" style="margin-top:2px;"><span class="c-inc">🎫 ${esc(c.inc)}</span></div>` : ''}
                     </div>
                 `;
             });
             listContainer.innerHTML = html;
 
+            listContainer.querySelectorAll('[data-action="edit"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.closest('.c-card').dataset.id;
+                    abrirEditorContingencia(id);
+                });
+            });
             listContainer.querySelectorAll('[data-action="del"]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -865,6 +1059,63 @@
                     copiarId(span.closest('.c-card').dataset.id);
                 });
             });
+        }
+
+        // ============================================================
+        // EDITOR DE TARJETAS
+        // ============================================================
+        let editingIndex = -1;
+
+        function abrirEditorContingencia(id) {
+            const idx = contingencias.findIndex(c => c.id === id);
+            if (idx === -1) return;
+            editingIndex = idx;
+            const c = contingencias[idx];
+
+            document.getElementById('edit-c-id').value = c.id || '';
+            document.getElementById('edit-c-zona').value = c.zona || 'Nacional';
+            document.getElementById('edit-c-fecha').value = c.inicio || '';
+            document.getElementById('edit-c-detalle').value = c.detalle || '';
+            document.getElementById('edit-c-pops').value = (c.pops || []).join(', ');
+            document.getElementById('edit-c-inc').value = c.inc || '';
+
+            document.getElementById('modal-edit-contingencia').classList.add('show');
+            document.getElementById('edit-c-detalle').focus();
+        }
+
+        function cerrarEditorContingencia() {
+            document.getElementById('modal-edit-contingencia').classList.remove('show');
+            editingIndex = -1;
+        }
+
+        function guardarEdicionContingencia() {
+            if (editingIndex < 0 || !contingencias[editingIndex]) return;
+            const c = contingencias[editingIndex];
+
+            const newId = document.getElementById('edit-c-id').value.trim();
+            const newZona = document.getElementById('edit-c-zona').value.trim() || 'Nacional';
+            const newFecha = document.getElementById('edit-c-fecha').value.trim();
+            const newDetalle = document.getElementById('edit-c-detalle').value.trim();
+            const rawPops = document.getElementById('edit-c-pops').value;
+            const newPops = rawPops.split(',').map(p => p.trim().toUpperCase()).filter(p => p.length > 0);
+            const newInc = document.getElementById('edit-c-inc').value.trim().toUpperCase();
+
+            if (!newId) {
+                showToast('⚠️ El ID es obligatorio.', 'warning');
+                return;
+            }
+
+            c.id = newId;
+            c.zona = newZona;
+            c.inicio = newFecha || c.inicio;
+            c.detalle = newDetalle;
+            c.pops = newPops;
+            c.inc = newInc;
+
+            guardarYNotificar();
+            actualizarUI();
+            cerrarEditorContingencia();
+            showToast('✅ Contingencia modificada guardada.', 'success');
         }
 
         // ============================================================
@@ -914,10 +1165,6 @@
             const conComuna = contingencias.filter(c =>
                 c.zona && !['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
             );
-            const sinComuna = contingencias.filter(c =>
-                !c.zona || ['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
-            );
-
             const comunasUnicas = [...new Set(conComuna.map(c => c.zona))].sort();
             const totalComunas = comunasUnicas.length;
             const totalContingencias = contingencias.length;
@@ -929,7 +1176,11 @@
                 `🗺 *COMUNAS/DISTRITOS AFECTADOS (${totalComunas}) | CONTINGENCIAS ÚNICAS (${totalContingencias}) :*`
             );
             lines.push('');
-            lines.push(`> *${comunasUnicas.join(', ')}*`);
+            if (comunasUnicas.length > 0) {
+                lines.push(`> *${comunasUnicas.join(', ')}*`);
+            } else {
+                lines.push(`> *Nacional / Sistemas de Atención*`);
+            }
             lines.push('');
             lines.push('**Detalle ordenado de forma descendente por fecha de apertura** 👇🏻');
             lines.push('');
@@ -944,36 +1195,25 @@
                 return db - da;
             });
 
-            const ahora = new Date();
-
             sorted.forEach(c => {
-                const zona = c.zona && !['Desconocida', 'Nacional', 'Varias'].includes(c.zona) ?
-                    c.zona :
-                    generarContexto(c.descripcion, c.infoAdicional);
-
+                const zona = c.zona || 'Nacional';
                 const fechaObj = parseFechaContingencia(c.inicio);
-                let diasDiff = 0;
-                if (fechaObj) {
-                    const diffMs = ahora - fechaObj;
-                    diasDiff = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                }
-                const diasStr = String(diasDiff).padStart(2, '0') + ' días';
+                const fechaDisplay = fechaObj ? formatearFechaDisplay(fechaObj, c.inicio) : c.inicio;
+                const diasStr = calcularDiasTranscurridos(fechaObj);
+                const pops = Array.isArray(c.pops) ? c.pops : extraerPOPs(c.textoCompleto || '');
+                const detalle = (c.detalle || '').trim();
 
-                const pops = extraerPOPs(c.textoCompleto || '');
-                const sinComuna = esSinComuna(c);
-                const problema = obtenerProblema(c);
-                let popLine;
-                if (pops.length) {
-                    popLine = `> POP afectados: ${pops.join(', ')}`;
-                    if (sinComuna && problema) {
-                        popLine += `\n> Detalle: ${problema}`;
+                lines.push(`📍 ${c.id} | *${zona}* | ${fechaDisplay} | ${diasStr}`);
+                if (pops.length > 0) {
+                    lines.push(`> POP afectados: ${pops.join(', ')}`);
+                    if (detalle) {
+                        lines.push(`> Detalle: ${detalle}`);
                     }
+                } else if (detalle) {
+                    lines.push(`> ${detalle}`);
                 } else {
-                    popLine = problema ? `> Detalle: ${problema}` : '> (Sin POPs específicos)';
+                    lines.push(`> (Sin detalle adicional)`);
                 }
-
-                lines.push(`📍 *${c.id} | ${zona} | ${c.inicio}* | ${diasStr}`);
-                lines.push(popLine);
                 lines.push('');
             });
 
@@ -993,20 +1233,45 @@
                 !c.zona || ['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
             );
 
+            // Ordenar comunas alfabéticamente
             const sortedConComuna = [...conComuna].sort((a, b) => a.zona.localeCompare(b.zona));
+
+            // Ordenar no-red / sistemas por fecha descendente
+            const sortedSinComuna = [...sinComuna].sort((a, b) => {
+                const da = parseFechaContingencia(a.inicio);
+                const db = parseFechaContingencia(b.inicio);
+                if (!da && !db) return 0;
+                if (!da) return 1;
+                if (!db) return -1;
+                return db - da;
+            });
 
             let lines = [];
             lines.push('📌*CONTINGENCIAS*📌');
             lines.push('');
 
+            // 1. Contingencias de red / comuna
             sortedConComuna.forEach(c => {
-                lines.push(`📍 *${c.zona}* ${c.id}`);
+                const pops = Array.isArray(c.pops) ? c.pops : extraerPOPs(c.textoCompleto || '');
+                const detalleLimpio = (c.detalle || '').replace(/\s+/g, ' ').replace(/[*]/g, '').trim();
+
+                if (pops.length > 0 || !detalleLimpio) {
+                    lines.push(`📍 *${c.zona}* ${c.id}`);
+                } else {
+                    lines.push(`📍 *${c.zona} — ${detalleLimpio}* ${c.id}`);
+                }
             });
 
-            sinComuna.forEach(c => {
-                const problema = obtenerProblema(c);
-                const contexto = generarContexto(c.descripcion, c.infoAdicional);
-                lines.push(`📍 *${problema || contexto}* ${c.id}`);
+            // Salto de línea si existen contingencias de ambos tipos
+            if (sortedConComuna.length > 0 && sortedSinComuna.length > 0) {
+                lines.push('');
+            }
+
+            // 2. Contingencias que no son de red (sistemas / comerciales / nacional)
+            sortedSinComuna.forEach(c => {
+                const detalleLimpio = (c.detalle || '').replace(/\s+/g, ' ').replace(/[*]/g, '').trim();
+                const textoMostrar = detalleLimpio || c.zona || 'Nacional';
+                lines.push(`📍 *${textoMostrar}* ${c.id}`);
             });
 
             return lines.join('\n');
@@ -1056,6 +1321,26 @@
         btnLimpiar.addEventListener('click', limpiarTodo);
         btnCopyDet.addEventListener('click', copiarDetallado);
         btnCopyBreve.addEventListener('click', copiarBreve);
+
+        // Modal eventos
+        document.getElementById('modal-edit-close').addEventListener('click', cerrarEditorContingencia);
+        document.getElementById('modal-edit-cancel').addEventListener('click', cerrarEditorContingencia);
+        document.getElementById('modal-edit-save').addEventListener('click', guardarEdicionContingencia);
+        document.getElementById('modal-edit-contingencia').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal-edit-contingencia')) cerrarEditorContingencia();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('modal-edit-contingencia');
+            if (modal && modal.classList.contains('show')) {
+                if (e.key === 'Escape') {
+                    cerrarEditorContingencia();
+                } else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    guardarEdicionContingencia();
+                }
+            }
+        });
 
         // ============================================================
         // INIT (IPC)
