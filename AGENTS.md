@@ -24,19 +24,23 @@
 > 2. `git commit -m "mensaje descriptivo del cambio"`
 > 3. `git push`
 
-## Identificación de Agentes IA (IMPORTANTE, 21/08/2026)
+## Identificación y Roles de Agentes IA (IMPORTANTE, 24/08/2026)
 
-> El proyecto cuenta con dos agentes IA para el desarrollo y mantenimiento:
-> - **Antigravity** (Google DeepMind)
-> - **Open Code**
+> El proyecto cuenta con dos agentes IA con responsabilidades claramente delimitadas:
+> - **Antigravity** (Google DeepMind):
+>   - Programación y desarrollo de nuevas funciones, refactorizaciones y corrección de bugs en el código.
+>   - Registro y actualización de la bitácora (`BITACORA.html`).
+>   - **NO** realiza compilaciones de ejecutables portables ni operaciones Git (`commit`/`push`).
+> - **Open Code**:
+>   - Compilación del proyecto (`package.json`, borrado de portables antiguos en `dist/` y ejecución de `npm run build:portable`).
+>   - Gestión completa de Git (inicio con `git pull`, fin con `git add -A`, `git commit -m "[Open Code] ..."` y `git push`).
 >
-> **Reglas de identificación para ambos agentes:**
+> **Reglas de identificación:**
 > 1. **En `BITACORA.html`:** Toda nueva entrada insertada debe incluir la etiqueta del agente responsable en la cabecera `.enc`:
 >    - Si la modificación la hace **Antigravity**: `<span class="agente agy">Antigravity</span>`
 >    - Si la modificación la hace **Open Code**: `<span class="agente oc">Open Code</span>`
 > 2. **En los mensajes de Commit:** Prefijar siempre el commit con el nombre del agente:
->    - `git commit -m "[Antigravity] Descripción clara del cambio"`
->    - `git commit -m "[Open Code] Descripción clara del cambio"`
+>    - `git commit -m "[Open Code] Descripción clara del cambio"` (Open Code es el encargado exclusivo de Git).
 
 ## Bitácora de modificaciones (BITACORA.html) (IMPORTANTE, 12/08/2026)
 
@@ -55,18 +59,16 @@
 >   (o `<span class="agente oc">Open Code</span>` según corresponda) + descripción breve (`<ul>` o texto).
 > - La bitácora se sube a GitHub junto con los cambios de la sesión.
 
-## Workflow de compilación estandarizado
+## Workflow de compilación estandarizado (A cargo exclusivo de Open Code)
 
-> **IMPORTANTE (cambio de preferencia del usuario, 10/08/2026):**
-> NO compilar portables (`npm run build:portable`) por cada cambio de código.
-> Solo compilar cuando el usuario lo pida explícitamente ("compila", "arma el
-> portable", etc.). Mantener el resto de la rutina (subir versión, eliminar
-> portables antiguos, confirmar ruta) cuando sí se compile.
+> **IMPORTANTE (24/08/2026):**
+> La compilación y armado del ejecutable portable es responsabilidad exclusiva de **Open Code**.
+> NO compilar portables por cada cambio de código, solo cuando el usuario lo solicite explícitamente.
 
-Cuando el usuario solicite compilar:
+Rutina de compilación (a ejecutar por Open Code):
 
 1. Subir la versión en `package.json` (campo `version`), incrementando en 1 el patch
-   (ej.: 6.0.1 → 6.0.2).
+   (ej.: 6.1.1 → 6.1.2).
 2. Eliminar los archivos portables anteriores (`dist/GestorCasos-portable-*.exe`).
 3. Compilar uno nuevo con: `npm run build:portable`.
 4. Confirmar al usuario la ruta y la nueva versión del portable generado.

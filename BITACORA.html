@@ -129,7 +129,7 @@
     <div id="lista">
 
         <section class="entry">
-            <div class="enc"><span class="fecha">22 ago 2026</span><span class="ver">v6.1.1</span><span class="agente agy">Antigravity</span></div>
+            <div class="enc"><span class="fecha">24 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
             <div class="desc">
                 <ul>
                     <li><b>Radar de Contingencias PRO — Reordenamiento de Interfaz</b>: reorganización visual de la herramienta ubicando primero el bloque de carga de datos, luego la barra de control (conteo de casos y botones de acción) y finalmente la lista de contingencias activas.</li>
@@ -138,7 +138,8 @@
                     <li><b>Editor visual de tarjetas</b>: incorporación de botón <code>✏️</code> en cada tarjeta con modal para editar ID, Zona, Fecha, Detalle, POPs y Ticket INC, con soporte de atajos (<code>Escape</code> / <code>Ctrl + S</code>) y sincronización con almacenamiento local vía IPC.</li>
                     <li><b>Copiar Breve y Copiar Detallado Inteligentes</b>: optimización de <b>Copiar Breve</b> agrupando primero las contingencias de red/comuna en orden alfabético, insertando un salto de línea divisorio y apilando a continuación las contingencias no-red/sistemas ordenadas por fecha (<code>📍 *Detalle puntual* ID</code>). Soporte bidireccional para parsear listas pegadas en formato breve.</li>
                     <li><b>Calculadora Comercial — OCC Postpago (Solicitud SS y Fecha Inteligente)</b>: incorporación del campo optativo <code>Solicitud (SS)</code> debajo de Cargo Fijo para añadir el encabezado <code>SS: &lt;Nro SS&gt;</code> en la tipificación. Se integró además detección y carga automática inicial de la fecha del día actual (local) con parseo a prueba de desfases horarios, manteniendo la posibilidad de modificación manual.</li>
-                    <li><b>Ventana Acerca de — Antigravity &amp; Open Code</b>: actualización de la distribución de desarrollo con <b>Antigravity 27%</b>, <b>Open Code 36%</b> y <b>Desarrollo Humano 37%</b>, inclusión de ambos logos vectoriales, mención de compilación conjunta y enlaces de descarga dedicados.</li>
+                    <li><b>Ventana Acerca de — Antigravity &amp; Open Code</b>: actualización de la distribución de desarrollo con <b>Antigravity 27%</b>, <b>Open Code 36%</b> y <b>Desarrollo Humano 37%</b>, inclusión de ambos logos vectoriales en alta definición, mención de compilación conjunta y enlaces de descarga dedicados.</li>
+                    <li><b>FAST 2.0 — Drag &amp; Drop de Alto Rendimiento, Slots Vacíos y Scroll Suave</b>: refactorización integral del sistema de arrastre en modo tarjetas. Se eliminaron los re-renderizados en caliente que provocaban saltos y tosquedad en el scroll, reemplazándolos por un sistema de slots vacíos punteados (<code>isEmpty</code>) para posicionamiento libre, auto-scroll acelerado por proximidad con <code>requestAnimationFrame</code>, botón <code>🧹 Compactar</code> en toolbar y atajo <code>Ctrl + Shift + C</code> para alinear y limpiar huecos a demanda.</li>
                     <li><b>Compatibilidad total de Red</b>: preservación íntegra de la detección de fallas de red tradicionales con POPs y comunas.</li>
                 </ul>
             </div>

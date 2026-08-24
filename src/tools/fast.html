@@ -211,8 +211,56 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 18px rgba(0,0,0,0.35);
         }
-        .card-item.dragging { opacity: 0.3; transform: scale(0.95); transition: none; }
+        .card-item.dragging { opacity: 0.25; transform: scale(0.96); border-style: dashed; transition: none; }
         .card-item.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59,130,246,0.35); }
+        .card-item.empty-slot {
+            background: rgba(255,255,255,0.02) !important;
+            border: 2px dashed rgba(255,255,255,0.14) !important;
+            box-shadow: none !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--faint);
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .card-item.empty-slot:hover {
+            border-color: var(--primary) !important;
+            background: rgba(59,130,246,0.08) !important;
+            color: var(--primary);
+            transform: none !important;
+        }
+        .card-item.empty-slot .slot-plus {
+            font-size: 24px;
+            line-height: 1;
+            opacity: 0.45;
+            transition: opacity 0.15s, transform 0.15s;
+        }
+        .card-item.empty-slot:hover .slot-plus {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        .card-item.empty-slot .slot-hint {
+            font-size: 10px;
+            opacity: 0.55;
+            user-select: none;
+        }
+        .card-item.drag-target-over {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.4), 0 8px 24px rgba(0,0,0,0.5) !important;
+            background: rgba(59,130,246,0.15) !important;
+            transform: scale(1.02) !important;
+        }
+        .sheet-tab.drag-sheet-over {
+            background: var(--primary) !important;
+            color: #fff !important;
+            transform: translateY(-2px);
+        }
+        #content.list-view .card-item.empty-slot {
+            display: none !important;
+        }
         .card-top {
             display: flex;
             align-items: flex-start;
@@ -2170,6 +2218,7 @@
             <span id="search-result-count"></span>
         </div>
         <button class="tb-btn" id="btn-new-card" title="Nueva tarjeta (Ctrl+N)">➕ Tarjeta</button>
+        <button class="tb-btn" id="btn-compactar" title="Compactar y eliminar espacios vacíos">🧹</button>
         <button class="tb-btn" id="btn-fav-filter" title="Mostrar solo favoritos">⭐</button>
         <button class="tb-btn" id="btn-view" title="Alternar vista grilla/lista (Ctrl+Shift+V)">▦</button>
     </div>
@@ -2479,6 +2528,7 @@
         const searchInput = document.getElementById('search-input');
         const searchResultCount = document.getElementById('search-result-count');
         const btnNewCard = document.getElementById('btn-new-card');
+        const btnCompactar = document.getElementById('btn-compactar');
         const btnFavFilter = document.getElementById('btn-fav-filter');
         const btnView = document.getElementById('btn-view');
         const btnSheetAdd = document.getElementById('sheet-add-btn');
@@ -2741,6 +2791,9 @@
         function generateId() {
             return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
         }
+        function createEmptySlot() {
+            return { id: 'slot_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), isEmpty: true };
+        }
         function numEmoji(n) {
             const map = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
             n = Math.max(0, Math.min(10, parseInt(n, 10) || 0));
@@ -2821,7 +2874,7 @@
         // cabecera (Tipo/Área/Subárea/Estado); las menciones únicamente en el cuerpo de
         // plantilla (campos genéricos) no generan resultados para evitar ruido.
         function cardSearchScore(card, tokens) {
-            if (!tokens.length) return 0;
+            if (!card || card.isEmpty || !tokens.length) return 0;
             const title = normText(card.title);
             const plain = waToPlain(card.body);
             const body = normText(plain);
@@ -3069,6 +3122,7 @@
 
         function renderCardsMode(sheet) {
             btnNewCard.style.display = '';
+            btnCompactar.style.display = '';
             btnFavFilter.style.display = '';
             btnView.style.display = '';
             // Grid adaptado al tamaño configurado por hoja
@@ -3084,28 +3138,30 @@
             if (tokens.length && state.searchAll) {
                 state.sheets.forEach(s => {
                     s.cards.forEach(c => {
-                        const sc = cardSearchScore(c, tokens);
-                        if (sc) cards.push({ card: c, sheetId: s.id, score: sc });
+                        if (!c.isEmpty) {
+                            const sc = cardSearchScore(c, tokens);
+                            if (sc) cards.push({ card: c, sheetId: s.id, score: sc });
+                        }
                     });
                 });
             } else if (tokens.length) {
                 sheet.cards.forEach(c => {
-                    const sc = cardSearchScore(c, tokens);
-                    if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
+                    if (!c.isEmpty) {
+                        const sc = cardSearchScore(c, tokens);
+                        if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
+                    }
                 });
+            } else if (state.favOnly) {
+                cards = sheet.cards
+                    .filter(c => !c.isEmpty && c.pinned)
+                    .map(c => ({ card: c, sheetId: sheet.id, score: 0 }));
             } else {
                 cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id, score: 0 }));
             }
 
-            if (state.favOnly) {
-                cards = cards.filter(({ card }) => card.pinned);
-            }
-
-            // Orden: relevancia (solo en búsqueda), luego favoritas, luego orden original
+            // Solo ordenar por relevancia si hay búsqueda activa
             if (tokens.length) {
                 cards.sort((a, b) => (b.score - a.score) || ((b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0)));
-            } else {
-                cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
             }
 
             if (!cards.length) {
@@ -3120,6 +3176,32 @@
             }
 
             cards.forEach(({ card, sheetId }) => {
+                // Caso: Espacio vacío (slot)
+                if (card.isEmpty) {
+                    const el = document.createElement('div');
+                    el.className = 'card-item empty-slot';
+                    el.dataset.cardId = card.id;
+                    el.dataset.sheetId = sheetId;
+                    if (sheet.cardSize && sheet.cardSize.w) el.style.minWidth = sheet.cardSize.w + 'px';
+                    if (sheet.cardSize && sheet.cardSize.h) el.style.height = sheet.cardSize.h + 'px';
+                    el.style.gridRow = 'auto';
+                    el.innerHTML = '<span class="slot-plus" title="Crear tarjeta aquí">＋</span><span class="slot-hint">Espacio libre</span>';
+
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openCardEditor(sheetId, null, card.id);
+                    });
+
+                    el.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showEmptySlotContextMenu(e.clientX, e.clientY, sheetId, card.id);
+                    });
+
+                    cardsContainer.appendChild(el);
+                    return;
+                }
+
                 const el = document.createElement('div');
                 el.className = 'card-item' + (card.pinned ? ' pinned' : '');
                 el.dataset.cardId = card.id;
@@ -3190,6 +3272,7 @@
 
         function renderImagesMode(sheet) {
             btnNewCard.style.display = '';
+            btnCompactar.style.display = 'none';
             btnFavFilter.style.display = '';
             btnView.style.display = '';
             cardsContainer.classList.add('images-mode');
@@ -3702,6 +3785,7 @@
             cardsContainer.style.gridTemplateColumns = '1fr';
             cardsContainer.style.gridAutoRows = 'auto';
             btnNewCard.style.display = 'none';
+            btnCompactar.style.display = 'none';
             btnFavFilter.style.display = 'none';
             btnView.style.display = 'none';
 
@@ -4799,7 +4883,73 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         }, { passive: true });
 
         // ============================================================
-        // ARRASTRE: clic (abrir drawer) vs arrastre inmediato (mover)
+        // AUTO-SCROLL SUAVE CON ACELERACIÓN POR PROXIMIDAD (rAF)
+        // ============================================================
+        let smoothScrollAnim = null;
+        let smoothScrollVelocity = 0;
+
+        function smoothScrollStep() {
+            if (smoothScrollVelocity !== 0 && contentEl) {
+                contentEl.scrollTop += smoothScrollVelocity;
+                smoothScrollAnim = requestAnimationFrame(smoothScrollStep);
+            } else {
+                smoothScrollAnim = null;
+            }
+        }
+
+        function startSmoothScroll(vel) {
+            smoothScrollVelocity = vel;
+            if (!smoothScrollAnim) {
+                smoothScrollAnim = requestAnimationFrame(smoothScrollStep);
+            }
+        }
+
+        function stopSmoothScroll() {
+            smoothScrollVelocity = 0;
+            if (smoothScrollAnim) {
+                cancelAnimationFrame(smoothScrollAnim);
+                smoothScrollAnim = null;
+            }
+        }
+
+        // ============================================================
+        // COMPACTACIÓN DE ESPACIOS VACÍOS
+        // ============================================================
+        function compactarHoja(sheetId) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const prevCount = sheet.cards.length;
+            sheet.cards = sheet.cards.filter(c => !c.isEmpty);
+            const removed = prevCount - sheet.cards.length;
+            saveData();
+            render();
+            if (removed > 0) {
+                showToast(`🧹 Se compactaron ${removed} espacio(s) vacío(s).`, 'success', 1600);
+            } else {
+                showToast('✨ No hay espacios vacíos para compactar.', 'info', 1600);
+            }
+        }
+
+        function showEmptySlotContextMenu(x, y, sheetId, slotId) {
+            hideCardContextMenu();
+            const items = [
+                { icon: '➕', label: 'Crear tarjeta aquí', fn: () => openCardEditor(sheetId, null, slotId) },
+                null,
+                { icon: '🗑', label: 'Eliminar este espacio vacío', danger: true, fn: () => {
+                    const sheet = getSheetById(sheetId);
+                    if (sheet) {
+                        sheet.cards = sheet.cards.filter(c => c.id !== slotId);
+                        saveData();
+                        render();
+                    }
+                }},
+                { icon: '🧹', label: 'Compactar todos los espacios', fn: () => compactarHoja(sheetId) }
+            ].filter(Boolean);
+            showContextMenu(x, y, items);
+        }
+
+        // ============================================================
+        // ARRASTRE FLUIDO (SLOTS VACÍOS + DROPZONE + CERO RE-RENDER EN VIVO)
         // ============================================================
         function onGlobalMove(e) {
             if (!pressInfo) return;
@@ -4810,7 +4960,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                     pressInfo.dragged = true;
                     const sheet = getSheetById(pressInfo.sheetId);
                     const card = sheet ? sheet.cards.find(c => c.id === pressInfo.cardId) : null;
-                    if (card) startDrag(pressInfo.sheetId, pressInfo.cardId, sheet.cards.indexOf(card), e);
+                    if (card && !card.isEmpty) startDrag(pressInfo.sheetId, pressInfo.cardId, sheet.cards.indexOf(card), e);
                 }
                 return;
             }
@@ -4824,10 +4974,9 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const wasDragged = pressInfo ? pressInfo.dragged : false;
             if (pressInfo && !wasDragged) {
                 const { sheetId, cardId } = pressInfo;
-                // Solo en modo tarjetas, el clic copia el cuerpo WhatsApp además de abrir el drawer
                 const sheet = getSheetById(sheetId);
                 const card = sheet ? sheet.cards.find(c => c.id === cardId) : null;
-                if (sheet && card && sheet.mode === 'cards') {
+                if (sheet && card && !card.isEmpty && sheet.mode === 'cards') {
                     copyCardBody(card);
                 }
                 if (openDrawerTimer) clearTimeout(openDrawerTimer);
@@ -4849,38 +4998,50 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
             const card = sheet.cards[index];
-            if (!card) return;
+            if (!card || card.isEmpty) return;
 
-            dragState = { sheetId, cardId, fromIndex: index, lastInsertIdx: index, guideShown: false };
+            const origEl = cardsContainer.querySelector(`.card-item[data-card-id="${cardId}"]`);
+            if (origEl) origEl.classList.add('dragging');
 
+            dragState = {
+                sheetId,
+                cardId,
+                fromIndex: index,
+                targetCardId: null,
+                targetSheetTabId: null,
+                origEl
+            };
+
+            const cs = sheet.cardSize || { w: 150, h: 190 };
             const ghost = document.createElement('div');
-            ghost.className = 'card-item';
-            ghost.style.width = '150px';
-            ghost.style.height = '190px';
+            ghost.className = 'card-item ghost-card';
+            ghost.style.width = (cs.w || 150) + 'px';
+            ghost.style.height = (cs.h || 190) + 'px';
             ghost.style.position = 'fixed';
             ghost.style.pointerEvents = 'none';
-            ghost.style.zIndex = '1000';
-            ghost.style.opacity = '0.85';
-            ghost.style.boxShadow = '0 8px 30px rgba(0,0,0,0.6)';
-            ghost.style.border = '2px dashed var(--primary)';
-            ghost.style.transform = 'scale(1.05)';
+            ghost.style.zIndex = '10000';
+            ghost.style.opacity = '0.92';
+            ghost.style.boxShadow = '0 14px 40px rgba(0,0,0,0.65)';
+            ghost.style.border = '2px solid var(--primary)';
+            ghost.style.transform = 'scale(1.03)';
             ghost.style.backgroundColor = card.color || 'var(--surface2)';
             ghost.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
             ghost.innerHTML = `
                 <div class="card-top"><div class="card-title">${esc(card.title) || 'Sin título'}</div></div>
-                <div class="card-body-preview">${esc(waToPlain(card.body).slice(0, 60))}</div>
+                <div class="card-body-preview">${esc(waToPlain(card.body).slice(0, 80))}</div>
             `;
             document.body.appendChild(ghost);
             dragState.ghost = ghost;
             updateGhostPosition(e.clientX, e.clientY);
-            dragGuide.classList.add('show');
             document.body.style.userSelect = 'none';
         }
 
         function updateGhostPosition(x, y) {
             if (dragState && dragState.ghost) {
-                dragState.ghost.style.left = (x - 75) + 'px';
-                dragState.ghost.style.top = (y - 95) + 'px';
+                const w = parseInt(dragState.ghost.style.width, 10) || 150;
+                const h = parseInt(dragState.ghost.style.height, 10) || 190;
+                dragState.ghost.style.left = (x - w / 2) + 'px';
+                dragState.ghost.style.top = (y - h / 2) + 'px';
             }
         }
 
@@ -4888,107 +5049,137 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             e.preventDefault();
             updateGhostPosition(e.clientX, e.clientY);
 
-            const containerRect = cardsContainer.getBoundingClientRect();
-            const threshold = 60;
-            if (e.clientY < containerRect.top + threshold) {
-                if (!scrollInterval) scrollInterval = setInterval(() => cardsContainer.scrollTop -= SCROLL_SPEED, 16);
-            } else if (e.clientY > containerRect.bottom - threshold) {
-                if (!scrollInterval) scrollInterval = setInterval(() => cardsContainer.scrollTop += SCROLL_SPEED, 16);
+            // 1) Auto-scroll suave con aceleración por proximidad
+            const rect = contentEl.getBoundingClientRect();
+            const threshold = 75;
+            const maxSpeed = 16;
+            if (e.clientY < rect.top + threshold && e.clientY >= rect.top - 50) {
+                const ratio = Math.min(1, Math.max(0.12, (rect.top + threshold - e.clientY) / threshold));
+                startSmoothScroll(-ratio * maxSpeed);
+            } else if (e.clientY > rect.bottom - threshold && e.clientY <= rect.bottom + 50) {
+                const ratio = Math.min(1, Math.max(0.12, (e.clientY - (rect.bottom - threshold)) / threshold));
+                startSmoothScroll(ratio * maxSpeed);
             } else {
-                if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; }
+                stopSmoothScroll();
             }
 
-            // 1) Reorden dentro de la misma hoja (inserción libre "entre" tarjetas)
-            const sheet = getSheetById(dragState.sheetId);
-            if (sheet) {
-                const isList = contentEl.classList.contains('list-view');
-                const isImages = cardsContainer.classList.contains('images-mode');
-                const visCards = Array.from(cardsContainer.querySelectorAll('.card-item'));
-                let insertIdx;
+            // 2) Detectar elementos bajo el cursor
+            const elements = document.elementsFromPoint(e.clientX, e.clientY);
 
-                if (isList || isImages) {
-                    // Vista lista/imágenes: tarjetas de ancho completo → insertar por centro vertical
-                    insertIdx = visCards.length;
-                    for (let i = 0; i < visCards.length; i++) {
-                        const r = visCards[i].getBoundingClientRect();
-                        if (e.clientY < r.top + r.height / 2) { insertIdx = i; break; }
-                    }
-                } else {
-                    const cs = sheet.cardSize || { w: 150, h: 190 };
-                    const gap = 10;
-                    const cols = Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap)));
-                    const col = Math.floor((e.clientX - containerRect.left) / (cs.w + gap));
-                    const row = Math.floor((e.clientY - containerRect.top) / (cs.h + gap));
-                    insertIdx = Math.max(0, Math.min(row * cols + col, visCards.length));
-                }
-
-                // Mapear índice visual (grilla filtrada) al índice real del array completo
-                let realIdx;
-                if (insertIdx >= visCards.length) {
-                    realIdx = sheet.cards.length;
-                } else {
-                    const idAt = visCards[insertIdx].dataset.cardId;
-                    realIdx = sheet.cards.findIndex(c => c.id === idAt);
-                    if (realIdx === -1) realIdx = sheet.cards.length;
-                }
-
-                const fromIdx = sheet.cards.findIndex(c => c.id === dragState.cardId);
-                if (fromIdx !== -1 && realIdx !== dragState.lastInsertIdx) {
-                    dragState.lastInsertIdx = realIdx;
-                    const [moved] = sheet.cards.splice(fromIdx, 1);
-                    const targetIdx = fromIdx < realIdx ? realIdx - 1 : realIdx;
-                    sheet.cards.splice(targetIdx, 0, moved);
-                    dragState.fromIndex = targetIdx;
-                    saveData();
-                    render();
-                }
-
-                // Indicador de posición de inserción (línea sobre el hueco)
-                if (dragGuide) {
-                    if (isList || isImages) {
-                        const r = visCards[insertIdx] ? visCards[insertIdx].getBoundingClientRect() : null;
-                        const top = r ? r.top - 1.5 : (visCards.length ? visCards[visCards.length - 1].getBoundingClientRect().bottom - 1.5 : containerRect.top);
-                        dragGuide.style.left = (containerRect.left) + 'px';
-                        dragGuide.style.top = top + 'px';
-                        dragGuide.style.width = containerRect.width + 'px';
-                        dragGuide.style.height = '3px';
-                    } else {
-                        const cs = sheet.cardSize || { w: 150, h: 190 };
-                        const gap = 10;
-                        const cols = Math.max(1, Math.round((containerRect.width + gap) / (cs.w + gap)));
-                        const insertCol = insertIdx % cols;
-                        const insertRow = Math.floor(insertIdx / cols);
-                        dragGuide.style.left = (containerRect.left + insertCol * (cs.w + gap) - Math.floor(cs.w / 2) - 1.5) + 'px';
-                        dragGuide.style.top = (containerRect.top + insertRow * (cs.h + gap) - 1.5) + 'px';
-                        dragGuide.style.width = (cs.w + gap) + 'px';
-                        dragGuide.style.height = '3px';
-                    }
-                    dragGuide.classList.add('show');
-                    dragState.guideShown = true;
-                }
+            // Sheet tab para mover a otra hoja
+            const sideTab = elements.find(el => el.classList && el.classList.contains('sheet-tab') && el.dataset.sheetId);
+            document.querySelectorAll('.sheet-tab.drag-sheet-over').forEach(el => el.classList.remove('drag-sheet-over'));
+            if (sideTab && sideTab.dataset.sheetId !== dragState.sheetId) {
+                sideTab.classList.add('drag-sheet-over');
+                dragState.targetSheetTabId = sideTab.dataset.sheetId;
+                dragState.targetGridIdx = null;
+                document.querySelectorAll('.card-item.drag-target-over').forEach(el => el.classList.remove('drag-target-over'));
                 return;
+            } else {
+                dragState.targetSheetTabId = null;
             }
 
-            // 2) Mover a otra hoja (drop sobre sheet-tab)
-            const sideTab = document.elementsFromPoint(e.clientX, e.clientY).find(el =>
-                el.classList && el.classList.contains('sheet-tab') && el.dataset.sheetId
-            );
-            if (sideTab) {
-                const targetSheetId = sideTab.dataset.sheetId;
-                if (targetSheetId !== dragState.sheetId) {
-                    state.activeSheetId = targetSheetId;
-                    moveCardToSheet(dragState.sheetId, dragState.cardId, targetSheetId);
-                    dragState.sheetId = targetSheetId;
+            // 3) Identificar índice objetivo en la grilla
+            const sheet = getSheetById(dragState.sheetId);
+            if (!sheet) return;
+
+            // Prioridad A: Directamente sobre un elemento tarjeta/slot
+            const targetCardEl = elements.find(el => el.classList && el.classList.contains('card-item') && !el.classList.contains('ghost-card'));
+            document.querySelectorAll('.card-item.drag-target-over').forEach(el => el.classList.remove('drag-target-over'));
+
+            if (targetCardEl && targetCardEl.dataset.cardId) {
+                const foundIdx = sheet.cards.findIndex(c => c.id === targetCardEl.dataset.cardId);
+                if (foundIdx !== -1) {
+                    dragState.targetGridIdx = foundIdx;
+                    targetCardEl.classList.add('drag-target-over');
+                    return;
                 }
+            }
+
+            // Prioridad B: Área libre de la cuadrícula
+            const cs = sheet.cardSize || { w: 150, h: 190 };
+            const gap = 10;
+            const containerRect = cardsContainer.getBoundingClientRect();
+            const availableWidth = cardsContainer.clientWidth;
+            const cols = Math.max(1, Math.floor((availableWidth + gap) / (cs.w + gap)));
+
+            const relX = Math.max(0, e.clientX - containerRect.left);
+            const relY = Math.max(0, e.clientY - containerRect.top + cardsContainer.scrollTop);
+
+            const col = Math.max(0, Math.min(cols - 1, Math.floor(relX / (cs.w + gap))));
+            const row = Math.max(0, Math.floor(relY / (cs.h + gap)));
+            const targetGridIdx = Math.max(0, row * cols + col);
+
+            dragState.targetGridIdx = targetGridIdx;
+
+            const children = Array.from(cardsContainer.querySelectorAll('.card-item:not(.ghost-card)'));
+            if (children[targetGridIdx] && !children[targetGridIdx].classList.contains('dragging')) {
+                children[targetGridIdx].classList.add('drag-target-over');
             }
         }
 
         function onDragEnd() {
+            stopSmoothScroll();
             if (dragState && dragState.ghost) dragState.ghost.remove();
-            if (scrollInterval) { clearInterval(scrollInterval); scrollInterval = null; }
-            if (dragGuide) { dragGuide.classList.remove('show'); }
-            dragState = null;
+            document.querySelectorAll('.card-item.dragging').forEach(el => el.classList.remove('dragging'));
+            document.querySelectorAll('.card-item.drag-target-over').forEach(el => el.classList.remove('drag-target-over'));
+            document.querySelectorAll('.sheet-tab.drag-sheet-over').forEach(el => el.classList.remove('drag-sheet-over'));
             document.body.style.userSelect = '';
+
+            if (!dragState) return;
+
+            const { sheetId, cardId, targetSheetTabId, targetGridIdx } = dragState;
+            dragState = null;
+
+            // Caso A: Mover a otra hoja
+            if (targetSheetTabId && targetSheetTabId !== sheetId) {
+                const fromSheet = getSheetById(sheetId);
+                if (fromSheet && fromSheet.mode === 'cards') {
+                    const idx = fromSheet.cards.findIndex(c => c.id === cardId);
+                    if (idx !== -1) {
+                        fromSheet.cards[idx] = createEmptySlot();
+                    }
+                }
+                moveCardToSheet(sheetId, cardId, targetSheetTabId);
+                return;
+            }
+
+            // Caso B: Mover dentro de la misma hoja
+            const sheet = getSheetById(sheetId);
+            if (!sheet || targetGridIdx == null) {
+                render();
+                return;
+            }
+
+            const fromIdx = sheet.cards.findIndex(c => c.id === cardId);
+            if (fromIdx === -1 || fromIdx === targetGridIdx) {
+                render();
+                return;
+            }
+
+            const movedCard = sheet.cards[fromIdx];
+            const emptySlot = createEmptySlot();
+
+            // Si targetGridIdx está más allá de la longitud actual, rellenamos con slots vacíos
+            while (sheet.cards.length <= targetGridIdx) {
+                sheet.cards.push(createEmptySlot());
+            }
+
+            // El puesto original SIEMPRE queda como espacio vacío
+            sheet.cards[fromIdx] = emptySlot;
+
+            if (sheet.cards[targetGridIdx] && sheet.cards[targetGridIdx].isEmpty) {
+                // Si el destino es un espacio vacío, la tarjeta ocupa ese espacio
+                sheet.cards[targetGridIdx] = movedCard;
+            } else {
+                // Si en el destino había otra tarjeta, se intercambian de lugar
+                const displacedCard = sheet.cards[targetGridIdx];
+                sheet.cards[targetGridIdx] = movedCard;
+                sheet.cards[fromIdx] = displacedCard;
+            }
+
+            saveData();
+            render();
         }
 
         // ============================================================
@@ -4997,23 +5188,32 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         let editingCard = null;
         let cardSnapshot = null;
 
-        function openCardEditor(sheetId, cardId) {
+        function openCardEditor(sheetId, cardId, replaceSlotId = null) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
             let card;
             let isNew = false;
-            if (cardId) {
+            if (cardId && !replaceSlotId) {
                 card = sheet.cards.find(c => c.id === cardId);
-                if (card) cardSnapshot = JSON.parse(JSON.stringify(card));
+                if (card && !card.isEmpty) cardSnapshot = JSON.parse(JSON.stringify(card));
             }
-            if (!card) {
+            if (!card || replaceSlotId) {
                 card = { id: generateId(), title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
                 isNew = true;
                 cardSnapshot = null;
-                sheet.cards.push(card);
+                if (replaceSlotId) {
+                    const slotIdx = sheet.cards.findIndex(c => c.id === replaceSlotId);
+                    if (slotIdx !== -1) {
+                        sheet.cards[slotIdx] = card;
+                    } else {
+                        sheet.cards.push(card);
+                    }
+                } else {
+                    sheet.cards.push(card);
+                }
                 saveData();
             }
-            editingCard = { sheetId, cardId: card.id, isNew };
+            editingCard = { sheetId, cardId: card.id, isNew, replacedSlotId: replaceSlotId };
 
             // Select de hoja (permite mover)
             renderSheetSelect();
@@ -5370,7 +5570,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                     for (const sheet of state.sheets) {
                         const idx = sheet.cards.findIndex(c => c.id === editingCard.cardId);
                         if (idx !== -1) {
-                            sheet.cards.splice(idx, 1);
+                            if (editingCard.replacedSlotId) {
+                                sheet.cards[idx] = { id: editingCard.replacedSlotId, isEmpty: true };
+                            } else {
+                                sheet.cards.splice(idx, 1);
+                            }
                             saveData();
                             break;
                         }
@@ -5850,6 +6054,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             saveData();
             render();
         });
+        if (btnCompactar) {
+            btnCompactar.addEventListener('click', () => {
+                compactarHoja(state.activeSheetId);
+            });
+        }
 
         // ============================================================
         // NAVEGACIÓN CON TECLADO (flechas + Enter copia)
@@ -5859,7 +6068,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
         function collectVisibleCards() {
             visibleCards = [];
-            document.querySelectorAll('.card-item').forEach(el => {
+            document.querySelectorAll('.card-item:not(.empty-slot)').forEach(el => {
                 visibleCards.push({ sheetId: el.dataset.sheetId, cardId: el.dataset.cardId, el });
             });
             if (selectedIndex >= visibleCards.length) selectedIndex = -1;
@@ -5898,6 +6107,12 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                         e.preventDefault();
                         searchInput.focus();
                         searchInput.select();
+                        break;
+                    case 'c':
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            compactarHoja(state.activeSheetId);
+                        }
                         break;
                     case 's':
                         if (modalOverlay.classList.contains('show')) {
