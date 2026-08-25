@@ -129,7 +129,32 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">25 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tráfico Móvil PRO — Preservación Literal de Fecha y Hora de Origen</b>: eliminación de cualquier modificación o desplazamiento artificial de horas sobre el texto plano de tráfico. La herramienta ahora procesa y muestra la fecha y hora de cada registro <i>exactamente tal cual</i> ingresa desde el reporte de la empresa, asegurando fidelidad absoluta con el archivo fuente para visualización, filtros y ordenamiento.</li>
+                    <li><b>Tráfico Móvil PRO — Motor Inteligente de Clasificación (Tráfico Incluido vs. Saldo/Cobro)</b>: refactorización de la detección de registros. Los paquetes incluidos en el plan (<i>Redes Sociales</i>, <i>Datos incluidos</i>, <i>SMS incluidos</i>, <i>Minutos incluidos</i> con cobro $0) ahora se identifican y contabilizan correctamente como tráfico incluido del plan y no como saldo cobrado. Los cobros adicionales (<i>Mensaje Adicional</i>, <i>Llamadas adicionales con cobro</i>, o registros con <code>Monto &gt; 0</code>) se clasifican con total precisión como saldo debitado/adicional.</li>
+                    <li><b>Tráfico Móvil PRO — Filtros Avanzados y Filtros Dedicados (Datos y Redes Sociales)</b>: incorporación de selectores directos para <code>📶 Datos</code> y <code>📱 Redes Sociales</code> en el desplegable de tipo, junto con la opción dedicada <code>💬 SMS / Mensajes</code> y <code>📶 Datos (Todos)</code>. Soporte para búsqueda rápida multi-campo por número telefónico (<code>Msisdn</code>), destino, código de paquete <code>PO</code>, servicio <code>sp Des</code> / <code>sn Des</code>, tecnología y fechas. Integración y sincronización bidireccional de nuevos chips de filtro rápido (<i>📶 Datos</i>, <i>📱 Redes Sociales</i>, <i>Solo con Cobro</i>, <i>Uso Nocturno 00-06h</i>, <i>Picos &gt; 1 GB</i>).</li>
+                    <li><b>Tráfico Móvil PRO — Ciclos Entel Contextuales</b>: los botones de Ciclos Entel (50, 51, 52, 53, 54) ahora calculan inteligentemente el rango de facturación adaptándose al mes/año del reporte cargado en vez de limitarse exclusivamente a la fecha del reloj del sistema.</li>
+                    <li><b>Tráfico Móvil PRO — Tarjetas KPI, Insights y Generador de Explicaciones</b>: KPIs con formatos claros y legibles (GB/MB, minutos/horas, saldo consumido y monto total $). Tarjetas de Insights con desglose detallado de Redes Sociales vs. Datos del plan, minutos/SMS adicionales con cobro, sesiones masivas con timestamp exacto y porcentaje de tráfico en madrugada. Generador de explicaciones para el cliente actualizado para redactar resúmenes profesionales, empáticos, transparentes y exactos con atajo <code>Ctrl + Shift + G</code>.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">24 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Drag &amp; Drop de Alto Rendimiento, Slots Vacíos y Scroll Suave</b>: refactorización integral del sistema de arrastre en modo tarjetas. Se eliminaron los re-renderizados en caliente que provocaban saltos y tosquedad en el scroll, reemplazándolos por un sistema de slots vacíos punteados (<code>isEmpty</code>) para posicionamiento libre, auto-scroll acelerado por proximidad con <code>requestAnimationFrame</code>, botón <code>🧹 Compactar</code> en toolbar y atajo <code>Ctrl + Shift + C</code> para alinear y limpiar huecos a demanda.</li>
+                    <li><b>FAST 2.0 — Copiado y Pegado Completo de Tarjetas entre Ventanas</b>: incorporación de opción para copiar tarjetas con el 100% de sus datos (imágenes base64, enlaces, notas internas, color, estilos tipográficos, título y cuerpo con formato WhatsApp) vía clic derecho (<code>📑 Copiar tarjeta completa</code>) en <i>Modo Tarjetas</i> y <i>Modo Buscador de Imágenes</i>. Soporte para pegar entre ventanas independientes del Gestor, en espacios vacíos específicos, mediante el menú contextual, botón dinámico <code>📥 Pegar</code> en la barra superior o atajos de teclado (<code>Ctrl + C</code> / <code>Ctrl + V</code>).</li>
+                    <li><b>FAST 2.0 — Tamaño Mínimo de Tarjetas 80 × 80 px</b>: ampliación del rango de dimensiones permitidas en los ajustes de hoja para <i>Modo Tarjetas</i>, permitiendo reducir el ancho y alto hasta <b>80 × 80 px</b> con auto-escalado de fuentes, padding optimizado e iconos adaptables.</li>
+                    <li><b>FAST 2.0 — Tipografía Base por Pestaña y Vista Previa Real en Ajustes</b>: incorporación de controles en los ajustes de la hoja (debajo de color) para definir el tamaño de fuente base de título (9 a 28 px) y cuerpo (8 a 24 px). Modificaciones reflejadas de inmediato en la vista previa interactiva en tiempo real; las tarjetas heredan automáticamente estos valores salvo personalizaciones individuales en su propio editor.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">22 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
             <div class="desc">
                 <ul>
                     <li><b>Radar de Contingencias PRO — Reordenamiento de Interfaz</b>: reorganización visual de la herramienta ubicando primero el bloque de carga de datos, luego la barra de control (conteo de casos y botones de acción) y finalmente la lista de contingencias activas.</li>
@@ -139,7 +164,6 @@
                     <li><b>Copiar Breve y Copiar Detallado Inteligentes</b>: optimización de <b>Copiar Breve</b> agrupando primero las contingencias de red/comuna en orden alfabético, insertando un salto de línea divisorio y apilando a continuación las contingencias no-red/sistemas ordenadas por fecha (<code>📍 *Detalle puntual* ID</code>). Soporte bidireccional para parsear listas pegadas en formato breve.</li>
                     <li><b>Calculadora Comercial — OCC Postpago (Solicitud SS y Fecha Inteligente)</b>: incorporación del campo optativo <code>Solicitud (SS)</code> debajo de Cargo Fijo para añadir el encabezado <code>SS: &lt;Nro SS&gt;</code> en la tipificación. Se integró además detección y carga automática inicial de la fecha del día actual (local) con parseo a prueba de desfases horarios, manteniendo la posibilidad de modificación manual.</li>
                     <li><b>Ventana Acerca de — Antigravity &amp; Open Code</b>: actualización de la distribución de desarrollo con <b>Antigravity 27%</b>, <b>Open Code 36%</b> y <b>Desarrollo Humano 37%</b>, inclusión de ambos logos vectoriales en alta definición, mención de compilación conjunta y enlaces de descarga dedicados.</li>
-                    <li><b>FAST 2.0 — Drag &amp; Drop de Alto Rendimiento, Slots Vacíos y Scroll Suave</b>: refactorización integral del sistema de arrastre en modo tarjetas. Se eliminaron los re-renderizados en caliente que provocaban saltos y tosquedad en el scroll, reemplazándolos por un sistema de slots vacíos punteados (<code>isEmpty</code>) para posicionamiento libre, auto-scroll acelerado por proximidad con <code>requestAnimationFrame</code>, botón <code>🧹 Compactar</code> en toolbar y atajo <code>Ctrl + Shift + C</code> para alinear y limpiar huecos a demanda.</li>
                     <li><b>Compatibilidad total de Red</b>: preservación íntegra de la detección de fallas de red tradicionales con POPs y comunas.</li>
                 </ul>
             </div>

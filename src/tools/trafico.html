@@ -186,8 +186,8 @@
         }
 
         #filterDestino {
-            color: var(--danger);
-            font-weight: 600;
+            color: var(--text);
+            font-weight: 500;
         }
         #filterDestino::placeholder {
             color: var(--faint);
@@ -614,8 +614,7 @@
     </div>
 
     <!-- ============================================================
-    CUERPO PRINCIPAL
-    ============================================================ -->
+      ============================================================ -->
     <div id="main">
 
         <!-- CONTROLES -->
@@ -628,8 +627,8 @@
                     <input type="file" id="fileInput" accept=".xlsx,.xls" />
                 </div>
                 <div class="control-row">
-                    <label>📋 Pegar desde Excel (TSV)</label>
-                    <textarea id="pasteInput" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas desde Excel..."></textarea>
+                    <label>📋 Pegar desde Excel / Siebel (TSV)</label>
+                    <textarea id="pasteInput" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas de tráfico..."></textarea>
                 </div>
                 <div class="control-row">
                     <button class="btn" id="pasteBtn">📥 Ingresar</button>
@@ -660,20 +659,23 @@
                 <div class="control-row">
                     <label>Tipo</label>
                     <select id="filterTipo">
-                        <option value="todos">Todos</option>
-                        <option value="datos">Datos</option>
-                        <option value="voz">Voz</option>
+                        <option value="todos">Todos los tipos</option>
+                        <option value="datos">📶 Datos (Todos)</option>
+                        <option value="datosLibres">📶 Datos</option>
+                        <option value="rrss">📱 Redes Sociales</option>
+                        <option value="voz">📞 Voz</option>
+                        <option value="sms">💬 SMS / Mensajes</option>
                     </select>
                     <label>Registro</label>
                     <select id="filterRegistro">
-                        <option value="todos">Todos</option>
-                        <option value="saldo">Saldo (min/msg)</option>
-                        <option value="trafico">Tráfico (datos/voz)</option>
+                        <option value="todos">Todos los registros</option>
+                        <option value="saldo">💰 Con cobro / Saldo</option>
+                        <option value="trafico">📦 Tráfico incluido en plan</option>
                     </select>
                 </div>
                 <div class="control-row">
                     <label>🔎 Buscar</label>
-                    <input type="text" id="filterDestino" placeholder="Destino, roaming, etc." />
+                    <input type="text" id="filterDestino" placeholder="Buscar destino, número, PO, bolsa..." />
                 </div>
             </div>
         </div>
@@ -685,15 +687,20 @@
                 <span class="chip" data-qf="last30">📅 Últimos 30 días</span>
                 <span class="chip" data-qf="monthcurrent">📅 Mes actual</span>
                 <span class="chip" data-qf="monthprev">📅 Mes anterior</span>
-                <span class="chip" data-qf="soloDatos">📶 Datos Nacional</span>
+                <span class="chip" data-qf="datosLibres">📶 Datos</span>
+                <span class="chip" data-qf="redesSociales">📱 Redes Sociales</span>
+                <span class="chip" data-qf="soloDatos">📶 Datos (Todos)</span>
                 <span class="chip" data-qf="roamingDatos">✈️ Roaming Datos</span>
-                <span class="chip" data-qf="smsNacional">💬 SMS Nacional</span>
-                <span class="chip" data-qf="smsIntl">🌍 SMS Internacional</span>
-                <span class="chip" data-qf="soloVoz">📞 Voz Nacional</span>
+                <span class="chip" data-qf="soloVoz">📞 Voz</span>
                 <span class="chip" data-qf="roamingVoz">✈️ Voz Roaming</span>
                 <span class="chip" data-qf="vozLDI">🌍 Voz LDI</span>
-                <span class="chip" data-qf="saldoMin">⏱ Saldo (minutos)</span>
-                <span class="chip" data-qf="saldoMsg">💬 Saldo (SMS)</span>
+                <span class="chip" data-qf="smsNacional">💬 SMS Nacional</span>
+                <span class="chip" data-qf="smsIntl">🌍 SMS Internacional</span>
+                <span class="chip" data-qf="saldoMin">⏱ Minutos con cobro</span>
+                <span class="chip" data-qf="saldoMsg">💬 SMS con cobro</span>
+                <span class="chip" data-qf="conCobro">💰 Solo con Cobro</span>
+                <span class="chip" data-qf="nocturno">🌙 Uso Nocturno (00-06h)</span>
+                <span class="chip" data-qf="picos">📈 Picos &gt; 1 GB</span>
                 <span class="chip" id="clearFiltersBtn">✖ Quitar filtros</span>
             </div>
         </div>
@@ -713,8 +720,8 @@
                 <div class="kpi-label">Voz total</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-value saldo" id="kpiSaldo">0 min / 0 msg</div>
-                <div class="kpi-label">Saldo consumido</div>
+                <div class="kpi-value saldo" id="kpiSaldo">0 min / 0 msg / $0</div>
+                <div class="kpi-label">Saldo / Cobros</div>
             </div>
         </div>
 
@@ -733,8 +740,8 @@
                 <div class="insight-text" id="insightPicos">Sin picos de consumo altos.</div>
             </div>
             <div class="insight-item">
-                <div class="insight-title">📊 Voz / SMS / Saldo</div>
-                <div class="insight-text" id="insightVozSms">Sin actividad de voz, SMS o saldo.</div>
+                <div class="insight-title">📊 Desglose de Servicios &amp; Cobros</div>
+                <div class="insight-text" id="insightVozSms">Sin actividad registrada.</div>
             </div>
         </div>
 
@@ -744,7 +751,7 @@
                 <span style="font-weight:700;font-size:12px;color:var(--muted);">💬 Explicación para el cliente</span>
                 <span style="font-size:10px;color:var(--faint);" id="periodoChip">Período: —</span>
             </div>
-            <textarea id="explanationText" placeholder="Genera una explicación automática..."></textarea>
+            <textarea id="explanationText" placeholder="Haz clic en Generar explicación para obtener un resumen detallado para el cliente..."></textarea>
             <div class="exp-actions">
                 <button class="btn" id="generateExplanationBtn">🔄 Generar explicación</button>
                 <button class="btn secondary" id="copyExplanationBtn">📋 Copiar</button>
@@ -762,6 +769,7 @@
                     <thead>
                         <tr>
                             <th data-sort="FechaObj">Fecha</th>
+                            <th data-sort="Msisdn">Línea</th>
                             <th data-sort="Destino">Destino</th>
                             <th data-sort="Unidad">Unidad</th>
                             <th data-sort="Cantidad">Cantidad</th>
@@ -775,11 +783,11 @@
                             <th data-sort="snDes">sn Des</th>
                             <th data-sort="Tecnologia">Tecnología</th>
                             <th data-sort="CallType">Call Type</th>
-                            <th data-sort="Monto">Monto</th>
+                            <th data-sort="Monto">Monto ($)</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <tr><td colspan="15" class="empty-state">Sube un archivo Excel o pega datos desde Excel para comenzar.</td></tr>
+                        <tr><td colspan="16" class="empty-state">Sube un archivo Excel o pega datos desde Excel/Siebel para comenzar.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -834,7 +842,8 @@
         // ============================================================
         let allRows = [];
         let filteredRows = [];
-        let sortState = { key: null, dir: 'asc' };
+        let sortState = { key: 'FechaObj', dir: 'desc' };
+        let activeQuickFilter = null;
         let lastSummary = null;
 
         // ============================================================
@@ -866,7 +875,8 @@
                     to: filterTo.value,
                     tipo: filterTipo.value,
                     registro: filterRegistro.value,
-                    destino: filterDestino.value
+                    destino: filterDestino.value,
+                    activeQuickFilter: activeQuickFilter
                 }));
             } catch (e) {}
         }
@@ -881,14 +891,26 @@
                 if (data.tipo) filterTipo.value = data.tipo;
                 if (data.registro) filterRegistro.value = data.registro;
                 if (data.destino) filterDestino.value = data.destino;
+                if (data.activeQuickFilter) activeQuickFilter = data.activeQuickFilter;
             } catch (e) {}
         }
 
         // ============================================================
-        // TRANSFORMACIÓN DE FILAS (normalización mejorada)
+        // NORMALIZACIÓN DE TECNOLOGÍA
+        // ============================================================
+        function normalizeTecnologia(tec) {
+            const t = String(tec || '').trim();
+            if (t === '1') return '4G (LTE)';
+            if (t === '2') return '3G (HSPA)';
+            if (t === '3') return '2G (GSM)';
+            if (t === '4' || t === '5') return '5G';
+            return t;
+        }
+
+        // ============================================================
+        // TRANSFORMACIÓN DE FILAS (Normalización inteligente)
         // ============================================================
         function transformRow(row) {
-            // Detección flexible de columnas (case-insensitive)
             const getField = (key) => {
                 const lowerKey = key.toLowerCase();
                 const keys = Object.keys(row);
@@ -896,95 +918,95 @@
                 return found ? row[found] : '';
             };
 
-            const unidad = getField('unidad').toString();
+            const unidad = getField('unidad').toString().trim();
             const cantidad = Number(getField('cantidad')) || 0;
             const monto = Number(getField('monto')) || 0;
-            const destino = getField('destino').toString();
-            const spDes = getField('sp des').toString();
-            const snDes = getField('sn des').toString();
+            const destino = getField('destino').toString().trim();
+            const msisdn = getField('msisdn').toString().trim();
+            const spDes = getField('sp des').toString().trim();
+            const snDes = getField('sn des').toString().trim();
+            const po = getField('po').toString().trim();
             const tecnologia = getField('tecnologia') || getField('tecnología') || '';
             const callType = getField('call type') || '';
 
             const desLower = (destino + ' ' + spDes + ' ' + snDes).toLowerCase();
             const unidadLower = unidad.toLowerCase();
 
-            let mb = null,
-                gb = null,
-                segundos = null,
-                minutos = null;
-            let saldoMin = null,
-                saldoMsg = null;
+            let bytes = 0, mb = null, gb = null;
+            let segundos = null, minutos = null;
+            let saldoMin = null, saldoMsg = null;
+            let tipoTrafico = 'otro'; // 'datos', 'voz', 'sms', 'otro'
             let esSaldo = false;
 
-            const esSaldoKeyword = desLower.includes('saldo') ||
-                desLower.includes('prepago') ||
-                desLower.includes('controlado') ||
-                desLower.includes('bolsa') ||
-                desLower.includes('minutos') ||
-                desLower.includes('mensajes');
+            // Detección precisa de unidades
+            if (unidadLower.includes('byte') || unidadLower === 'b' || unidadLower === 'kb' || unidadLower === 'mb' || unidadLower === 'gb') {
+                tipoTrafico = 'datos';
+                if (unidadLower.includes('kb') || unidadLower === 'kbytes') bytes = cantidad * 1024;
+                else if (unidadLower.includes('gb') || unidadLower === 'gbytes') bytes = cantidad * 1024 * 1024 * 1024;
+                else if (unidadLower.includes('mb') || unidadLower === 'mbytes') bytes = cantidad * 1024 * 1024;
+                else bytes = cantidad;
 
-            if (unidadLower.includes('second')) {
-                segundos = cantidad;
-                minutos = cantidad / 60;
-                // Saldo también cuando el registro tiene monto (dinero consumido) aunque el destino no mencione bolsa
-                if (esSaldoKeyword || monto > 0) {
+                mb = bytes / (1024 * 1024);
+                gb = bytes / (1024 * 1024 * 1024);
+                if (monto > 0) esSaldo = true;
+            } else if (unidadLower.includes('second') || unidadLower.includes('segundo') || unidadLower === 's' || unidadLower === 'sec' || unidadLower === 'min') {
+                tipoTrafico = 'voz';
+                if (unidadLower.includes('min')) {
+                    minutos = cantidad;
+                    segundos = cantidad * 60;
+                } else {
+                    segundos = cantidad;
+                    minutos = cantidad / 60;
+                }
+
+                const esVozAdicional = monto > 0 || desLower.includes('llamadas adicionales') || desLower.includes('adicional') || desLower.includes('cargo') || desLower.includes('tarifa especial');
+                if (esVozAdicional && monto > 0) {
                     saldoMin = minutos;
                     esSaldo = true;
                 }
-            } else if (unidadLower.includes('msg') || (unidadLower.includes('message') && esSaldoKeyword)) {
-                saldoMsg = cantidad;
-                esSaldo = true;
+            } else if (unidadLower.includes('msg') || unidadLower.includes('sms') || unidadLower.includes('mensaje') || unidadLower.includes('event')) {
+                tipoTrafico = 'sms';
+                const esMsgAdicional = monto > 0 || desLower.includes('mensaje adicional') || desLower.includes('sms adicional') || desLower.includes('cargo');
+                if (esMsgAdicional && (monto > 0 || desLower.includes('adicional'))) {
+                    saldoMsg = cantidad;
+                    esSaldo = true;
+                }
             }
 
-            if (unidadLower.includes('byte') && !esSaldo) {
-                mb = cantidad / (1024 * 1024);
-                gb = cantidad / (1024 * 1024 * 1024);
-            }
-
-            // Parser de fechas robusto
+            // Parser de fechas robusto y exacto
             let fechaObj = null;
             const rawFecha = getField('fecha');
             if (rawFecha) {
                 if (rawFecha instanceof Date) {
                     fechaObj = new Date(rawFecha);
                 } else if (typeof rawFecha === 'number') {
-                    // Número de Excel (días desde 1899-12-30)
+                    // Número de serie de Excel (días desde 1899-12-30)
                     const ms = (rawFecha - 25569) * 86400 * 1000;
                     fechaObj = new Date(ms);
                 } else if (typeof rawFecha === 'string') {
-                    // Intentar varios formatos
                     let str = rawFecha.trim();
-                    // Formato YYYY-MM-DD o YYYY-MM-DD HH:MM:SS
                     let match = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s(\d{2}):(\d{2}):?(\d{2})?)?/);
                     if (match) {
-                        const y = parseInt(match[1]),
-                            m = parseInt(match[2]) - 1,
-                            d = parseInt(match[3]);
+                        const y = parseInt(match[1]), m = parseInt(match[2]) - 1, d = parseInt(match[3]);
                         const hh = match[4] ? parseInt(match[4]) : 0;
                         const mm = match[5] ? parseInt(match[5]) : 0;
                         const ss = match[6] ? parseInt(match[6]) : 0;
                         fechaObj = new Date(y, m, d, hh, mm, ss);
                     } else {
-                        // Formato DD/MM/YYYY o DD-MM-YYYY
                         match = str.match(/^(\d{2})[\/\-](\d{2})[\/\-](\d{4})(?:\s(\d{2}):(\d{2}):?(\d{2})?)?/);
                         if (match) {
-                            const d = parseInt(match[1]),
-                                m = parseInt(match[2]) - 1,
-                                y = parseInt(match[3]);
+                            const d = parseInt(match[1]), m = parseInt(match[2]) - 1, y = parseInt(match[3]);
                             const hh = match[4] ? parseInt(match[4]) : 0;
                             const mm = match[5] ? parseInt(match[5]) : 0;
                             const ss = match[6] ? parseInt(match[6]) : 0;
                             fechaObj = new Date(y, m, d, hh, mm, ss);
                         } else {
-                            // Último intento: Date nativo
                             const d = new Date(str);
                             if (!isNaN(d.getTime())) fechaObj = d;
                         }
                     }
                 }
             }
-            // Ajuste UTC-3 (Chile)
-            if (fechaObj) fechaObj.setHours(fechaObj.getHours() - 3);
 
             let fechaFormateada = '';
             if (fechaObj && !isNaN(fechaObj.getTime())) {
@@ -996,22 +1018,49 @@
                 fechaFormateada = `${d}-${m}-${y} ${hh}:${mm}`;
             }
 
-            // Detección de tipos especiales
+            // Detección precisa de tipos especiales
             let tipoSMS = null;
-            if (desLower.includes('sms') || desLower.includes('mensaje')) {
-                if (desLower.includes('internacional')) tipoSMS = 'SMS_Internacional';
-                else tipoSMS = 'SMS_Nacional';
+            if (tipoTrafico === 'sms' || desLower.includes('sms') || desLower.includes('mensaje')) {
+                if (desLower.includes('internacional') || desLower.includes('intl') || desLower.includes('ldi')) {
+                    tipoSMS = 'SMS_Internacional';
+                } else {
+                    tipoSMS = 'SMS_Nacional';
+                }
             }
+
             let tipoLDI = null;
-            if (desLower.includes('ldi') || desLower.includes('carrier') || desLower.includes('larga distancia')) {
+            if (desLower.includes('ldi') || desLower.includes('carrier') || desLower.includes('larga distancia') || desLower.includes('internacional')) {
                 tipoLDI = 'LDI';
             }
+
             let tipoRoaming = null;
-            if (desLower.includes('roam') || desLower.includes('roaming')) {
-                if (desLower.includes('tarifa especial')) tipoRoaming = 'RoamingVozTarifaEspecial';
-                else if (!isNaN(monto) && monto > 0) tipoRoaming = 'RoamingVozConCobro';
-                else if (monto === 0) tipoRoaming = 'RoamingVozConBolsa';
+            const esRoam = desLower.includes('roam') || desLower.includes('roaming');
+            if (esRoam) {
+                if (tipoTrafico === 'datos') tipoRoaming = 'RoamingDatos';
+                else if (tipoTrafico === 'sms') tipoRoaming = 'RoamingSMS';
+                else {
+                    if (desLower.includes('tarifa especial')) tipoRoaming = 'RoamingVozTarifaEspecial';
+                    else if (monto > 0) tipoRoaming = 'RoamingVozConCobro';
+                    else tipoRoaming = 'RoamingVozConBolsa';
+                }
             }
+
+            // Categoría de bolsa/servicio
+            let categoriaServicio = 'General';
+            const comboService = (spDes + ' ' + snDes + ' ' + destino).toLowerCase();
+            if (comboService.includes('redes sociales') || comboService.includes('rrss') || comboService.includes('social') || comboService.includes('whatsapp') || comboService.includes('instagram') || comboService.includes('facebook') || comboService.includes('twitter') || comboService.includes('tiktok') || comboService.includes('spotify') || comboService.includes('messenger') || comboService.includes('snapchat') || comboService.includes('pinterest') || comboService.includes('linkedin')) {
+                categoriaServicio = 'Redes Sociales';
+            } else if (comboService.includes('datos incluidos') || comboService.includes('navegacion') || comboService.includes('navegación') || comboService.includes('gigas') || comboService.includes('datos libres')) {
+                categoriaServicio = 'Datos Incluidos';
+            } else if (comboService.includes('sms incluidos')) {
+                categoriaServicio = 'SMS Incluidos';
+            } else if (comboService.includes('mensaje adicional') || comboService.includes('sms adicional')) {
+                categoriaServicio = 'SMS Adicional';
+            } else if (comboService.includes('buzon') || comboService.includes('adicionales')) {
+                categoriaServicio = 'Voz / Buzón';
+            }
+
+            const tecNorm = normalizeTecnologia(tecnologia);
 
             return {
                 ...row,
@@ -1024,24 +1073,30 @@
                 Minutos: minutos,
                 SaldoMin: saldoMin,
                 SaldoMsg: saldoMsg,
+                TipoTrafico: tipoTrafico,
                 EsSaldo: esSaldo,
                 FechaObj: fechaObj,
                 FechaFormateada: fechaFormateada,
                 DestinoNorm: destino.toLowerCase(),
+                MsisdnNorm: msisdn.toLowerCase(),
                 spDesNorm: spDes.toLowerCase(),
                 snDesNorm: snDes.toLowerCase(),
-                TecnologiaNorm: tecnologia.toLowerCase(),
+                PONorm: po.toLowerCase(),
+                TecnologiaNorm: (tecnologia + ' ' + tecNorm).toLowerCase(),
                 CallTypeNorm: callType.toLowerCase(),
                 tipoSMS,
                 tipoLDI,
                 tipoRoaming,
-                // Guardar originales para mostrar
+                categoriaServicio,
+                // Datos para vista
                 Destino: destino,
+                Msisdn: msisdn,
                 Unidad: unidad,
                 Cantidad: cantidad,
                 spDes: spDes,
                 snDes: snDes,
-                Tecnologia: tecnologia,
+                PO: po,
+                Tecnologia: tecNorm || tecnologia,
                 CallType: callType,
                 Monto: monto
             };
@@ -1052,9 +1107,20 @@
         // ============================================================
         function processData(json) {
             try {
-                allRows = json.map(transformRow);
+                allRows = json
+                    .filter(r => {
+                        const keys = Object.keys(r);
+                        return keys.some(k => r[k] != null && String(r[k]).trim() !== '');
+                    })
+                    .map(transformRow);
+
+                if (!allRows.length) {
+                    showToast('⚠️ No se encontraron registros válidos.', 'warning');
+                    return false;
+                }
+
                 aplicarFiltros();
-                showToast(`✅ Cargados ${allRows.length} registros.`, 'success');
+                showToast(`✅ Cargados ${allRows.length.toLocaleString('es-CL')} registros de tráfico.`, 'success');
                 return true;
             } catch (err) {
                 showToast(`❌ Error al procesar los datos: ${err.message}`, 'error');
@@ -1080,13 +1146,13 @@
 
         function processPastedText(text) {
             if (!text || !text.trim()) {
-                showToast('⚠️ No se detectaron datos.', 'warning');
+                showToast('⚠️ No se detectaron datos en el portapapeles.', 'warning');
                 return false;
             }
             try {
-                const lines = text.trim().split(/\r?\n/);
+                const lines = text.trim().split(/\r?\n/).filter(l => l.trim() && !l.includes('<truncated') && !l.includes('NOTE:'));
                 if (lines.length < 2) {
-                    showToast('⚠️ Se necesitan al menos encabezados y una fila de datos.', 'warning');
+                    showToast('⚠️ Se necesitan al menos los encabezados y una fila de datos.', 'warning');
                     return false;
                 }
                 const headers = lines[0].split('\t').map(h => h.trim());
@@ -1101,7 +1167,7 @@
                         return obj;
                     });
                 if (!json.length) {
-                    showToast('⚠️ No se encontraron filas de datos.', 'warning');
+                    showToast('⚠️ No se encontraron filas de datos válidas.', 'warning');
                     return false;
                 }
                 processData(json);
@@ -1113,7 +1179,29 @@
         }
 
         // ============================================================
-        // APLICAR FILTROS (unificado)
+        // BÚSQUEDA MULTI-CAMPO INTELIGENTE
+        // ============================================================
+        function multiFieldMatch(row, text) {
+            if (!text) return true;
+            const q = text.toLowerCase().trim();
+            const haystack = [
+                row.FechaFormateada || '',
+                row.Msisdn || '',
+                row.Destino || '',
+                row.Unidad || '',
+                String(row.Cantidad || ''),
+                row.spDes || '',
+                row.snDes || '',
+                row.PO || '',
+                row.Tecnologia || '',
+                row.CallType || '',
+                String(row.Monto || '')
+            ].join(' ').toLowerCase();
+            return haystack.includes(q);
+        }
+
+        // ============================================================
+        // APLICAR FILTROS (Unificado y reactivo)
         // ============================================================
         function aplicarFiltros() {
             if (!allRows.length) {
@@ -1127,7 +1215,7 @@
             const toStr = filterTo.value;
             const tipo = filterTipo.value;
             const registro = filterRegistro.value;
-            const destinoText = filterDestino.value.trim().toLowerCase();
+            const destinoText = filterDestino.value.trim();
 
             const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : null;
             const toDate = toStr ? new Date(toStr + 'T23:59:59') : null;
@@ -1136,28 +1224,35 @@
                 if (fromDate && row.FechaObj && row.FechaObj < fromDate) return false;
                 if (toDate && row.FechaObj && row.FechaObj > toDate) return false;
 
-                const unidadLower = (row.UnidadNorm || '').toLowerCase();
-                if (tipo === 'datos' && !unidadLower.includes('byte')) return false;
-                if (tipo === 'voz' && !unidadLower.includes('second')) return false;
+                if (tipo === 'datos' && row.TipoTrafico !== 'datos') return false;
+                if (tipo === 'rrss' && (row.TipoTrafico !== 'datos' || row.categoriaServicio !== 'Redes Sociales')) return false;
+                if (tipo === 'datosLibres' && (row.TipoTrafico !== 'datos' || row.categoriaServicio === 'Redes Sociales')) return false;
+                if (tipo === 'voz' && row.TipoTrafico !== 'voz') return false;
+                if (tipo === 'sms' && row.TipoTrafico !== 'sms') return false;
 
                 if (registro === 'saldo' && !row.EsSaldo) return false;
                 if (registro === 'trafico' && row.EsSaldo) return false;
 
-                if (destinoText) {
-                    // Códigos especiales usados por los chips de filtro rápido
-                    if (destinoText === 'sms_nac' && row.tipoSMS !== 'SMS_Nacional') return false;
-                    if (destinoText === 'sms_intl' && row.tipoSMS !== 'SMS_Internacional') return false;
-                    if (destinoText === 'ldi' && row.tipoLDI !== 'LDI') return false;
-                    if (destinoText === 'roamingvoz' && (!row.tipoRoaming || !row.tipoRoaming.startsWith('RoamingVoz'))) return false;
-                    if (destinoText === 'saldomin' && (row.SaldoMin == null)) return false;
-                    if (destinoText === 'saldomsg' && (row.SaldoMsg == null)) return false;
-
-                    const combo = (row.DestinoNorm || '') + ' ' +
-                        (row.spDesNorm || '') + ' ' +
-                        (row.snDesNorm || '') + ' ' +
-                        (row.TecnologiaNorm || '');
-                    if (!['sms_nac', 'sms_intl', 'ldi', 'roamingvoz', 'saldomin', 'saldomsg'].includes(destinoText) && !combo.includes(destinoText)) return false;
+                if (activeQuickFilter) {
+                    if (activeQuickFilter === 'redesSociales' && (row.TipoTrafico !== 'datos' || row.categoriaServicio !== 'Redes Sociales')) return false;
+                    if (activeQuickFilter === 'datosLibres' && (row.TipoTrafico !== 'datos' || row.categoriaServicio === 'Redes Sociales')) return false;
+                    if (activeQuickFilter === 'roamingDatos' && (row.TipoTrafico !== 'datos' || !row.tipoRoaming)) return false;
+                    if (activeQuickFilter === 'roamingVoz' && (row.TipoTrafico !== 'voz' || !row.tipoRoaming)) return false;
+                    if (activeQuickFilter === 'vozLDI' && row.tipoLDI !== 'LDI') return false;
+                    if (activeQuickFilter === 'smsNacional' && row.tipoSMS !== 'SMS_Nacional') return false;
+                    if (activeQuickFilter === 'smsIntl' && row.tipoSMS !== 'SMS_Internacional') return false;
+                    if (activeQuickFilter === 'saldoMin' && row.SaldoMin == null) return false;
+                    if (activeQuickFilter === 'saldoMsg' && row.SaldoMsg == null) return false;
+                    if (activeQuickFilter === 'conCobro' && (!row.MontoNum || row.MontoNum <= 0)) return false;
+                    if (activeQuickFilter === 'nocturno') {
+                        if (!row.FechaObj) return false;
+                        const h = row.FechaObj.getHours();
+                        if (h < 0 || h >= 6) return false;
+                    }
+                    if (activeQuickFilter === 'picos' && (!row.MB || row.MB <= 1024)) return false;
                 }
+
+                if (destinoText && !multiFieldMatch(row, destinoText)) return false;
 
                 return true;
             });
@@ -1174,7 +1269,7 @@
         }
 
         // ============================================================
-        // ORDENAMIENTO
+        // ORDENAMIENTO DE TABLA
         // ============================================================
         function sortRows(rows, key, dir) {
             const factor = dir === 'asc' ? 1 : -1;
@@ -1200,7 +1295,7 @@
         function renderTable() {
             if (!filteredRows.length) {
                 tableBody.innerHTML =
-                    `<tr><td colspan="15" class="empty-state">${allRows.length ? 'Sin resultados con los filtros actuales.' : 'Sube un archivo o pega datos para comenzar.'}</td></tr>`;
+                    `<tr><td colspan="16" class="empty-state">${allRows.length ? 'Sin resultados con los filtros actuales.' : 'Sube un archivo o pega datos para comenzar.'}</td></tr>`;
                 rowCount.textContent = '0 registros';
                 return;
             }
@@ -1208,9 +1303,10 @@
             let html = '';
             filteredRows.forEach(row => {
                 const fecha = row.FechaFormateada || '';
+                const msisdn = row.Msisdn || '';
                 const destino = row.Destino || '';
                 const unidad = row.Unidad || '';
-                const cantidad = row.CantidadNum || '';
+                const cantidad = row.CantidadNum != null ? row.CantidadNum.toLocaleString('es-CL') : '';
                 const mb = row.MB != null ? row.MB.toFixed(2) : '';
                 const gb = row.GB != null ? row.GB.toFixed(3) : '';
                 const seg = row.Segundos != null ? row.Segundos.toFixed(0) : '';
@@ -1221,10 +1317,11 @@
                 const snDes = row.snDes || '';
                 const tec = row.Tecnologia || '';
                 const callType = row.CallType || '';
-                const monto = row.MontoNum != null ? row.MontoNum.toLocaleString('es-CL') : '';
+                const monto = row.MontoNum != null ? (row.MontoNum > 0 ? '$' + row.MontoNum.toLocaleString('es-CL') : '0') : '';
 
                 html += `<tr>
                             <td>${esc(fecha)}</td>
+                            <td>${esc(msisdn)}</td>
                             <td>${esc(destino)}</td>
                             <td>${esc(unidad)}</td>
                             <td>${esc(cantidad)}</td>
@@ -1242,7 +1339,7 @@
                         </tr>`;
             });
             tableBody.innerHTML = html;
-            rowCount.textContent = filteredRows.length + ' registros';
+            rowCount.textContent = filteredRows.length.toLocaleString('es-CL') + ' registros';
         }
 
         // ============================================================
@@ -1253,88 +1350,88 @@
                 kpiRegistros.textContent = '0';
                 kpiDatos.textContent = '0 MB';
                 kpiVoz.textContent = '0 min';
-                kpiSaldo.textContent = '0 min / 0 msg';
+                kpiSaldo.textContent = '0 min / 0 msg / $0';
                 insightRoaming.textContent = 'Sin uso de roaming.';
                 insightNocturno.textContent = 'Sin actividad nocturna relevante.';
                 insightPicos.textContent = 'Sin picos de consumo altos.';
-                insightVozSms.textContent = 'Sin actividad de voz, SMS o saldo.';
+                insightVozSms.textContent = 'Sin actividad registrada.';
                 lastSummary = null;
                 return;
             }
 
-            let totalMB = 0,
-                totalGB = 0,
-                totalMin = 0;
-            let saldoMinTotal = 0,
-                saldoMsgTotal = 0,
-                saldoMontoTotal = 0;
-            let roamingDatosMB = 0,
-                roamingSMS = 0,
-                roamingVozSeg = 0;
-            let noctNacMB = 0,
-                noctRoamMB = 0;
+            let totalMB = 0, totalGB = 0, totalMin = 0;
+            let saldoMinTotal = 0, saldoMsgTotal = 0, saldoMontoTotal = 0;
+            let roamingDatosMB = 0, roamingSMS = 0, roamingVozSeg = 0, roamingMonto = 0;
+            let noctNacMB = 0, noctRoamMB = 0, noctCount = 0;
             let picos = [];
-            let vozNacSeg = 0,
-                vozLDISeg = 0,
-                vozRoamSeg = 0;
-            let smsNac = 0,
-                smsIntl = 0;
-            let minFecha = null,
-                maxFecha = null;
+            let vozNacSeg = 0, vozLDISeg = 0, vozRoamSeg = 0, vozCobroSeg = 0, vozCobroMonto = 0;
+            let smsNac = 0, smsIntl = 0, smsCobro = 0, smsCobroMonto = 0;
+            let redesSocialesMB = 0, datosIncluidosMB = 0;
+            let minFecha = null, maxFecha = null;
 
             filteredRows.forEach(row => {
                 if (row.MB && !isNaN(row.MB)) {
                     totalMB += row.MB;
                     totalGB += row.GB || 0;
+                    if (row.categoriaServicio === 'Redes Sociales') redesSocialesMB += row.MB;
+                    else datosIncluidosMB += row.MB;
                 }
                 if (row.Minutos && !isNaN(row.Minutos)) {
                     totalMin += row.Minutos;
                 }
                 if (row.SaldoMin && !isNaN(row.SaldoMin)) saldoMinTotal += row.SaldoMin;
                 if (row.SaldoMsg && !isNaN(row.SaldoMsg)) saldoMsgTotal += row.SaldoMsg;
-                if (row.EsSaldo && row.MontoNum && !isNaN(row.MontoNum)) saldoMontoTotal += row.MontoNum;
+                if (row.MontoNum && !isNaN(row.MontoNum)) saldoMontoTotal += row.MontoNum;
 
                 if (row.FechaObj && !isNaN(row.FechaObj.getTime())) {
                     if (!minFecha || row.FechaObj < minFecha) minFecha = row.FechaObj;
                     if (!maxFecha || row.FechaObj > maxFecha) maxFecha = row.FechaObj;
-                }
 
-                const combo = (row.DestinoNorm || '') + ' ' + (row.snDesNorm || '') + ' ' + (row.spDesNorm || '');
-                const esRoaming = combo.includes('roam') || combo.includes('roaming');
-                if (esRoaming && row.MB && !isNaN(row.MB)) {
-                    roamingDatosMB += row.MB;
-                }
-                if (esRoaming && row.tipoSMS) {
-                    if (row.tipoSMS === 'SMS_Nacional' || row.tipoSMS === 'SMS_Internacional') roamingSMS++;
-                }
-                if (esRoaming && row.Segundos && !isNaN(row.Segundos)) {
-                    roamingVozSeg += row.Segundos;
-                }
-
-                if (row.FechaObj && !isNaN(row.FechaObj.getTime())) {
                     const h = row.FechaObj.getHours();
                     if (h >= 0 && h < 6) {
+                        noctCount++;
                         if (row.MB && !isNaN(row.MB)) {
-                            if (esRoaming) noctRoamMB += row.MB;
+                            if (row.tipoRoaming) noctRoamMB += row.MB;
                             else noctNacMB += row.MB;
                         }
                     }
                 }
 
+                if (row.tipoRoaming) {
+                    if (row.MB && !isNaN(row.MB)) roamingDatosMB += row.MB;
+                    if (row.tipoSMS) roamingSMS += (row.CantidadNum || 1);
+                    if (row.Segundos && !isNaN(row.Segundos)) roamingVozSeg += row.Segundos;
+                    if (row.MontoNum > 0) roamingMonto += row.MontoNum;
+                }
+
                 if (row.MB && row.MB > 1024) {
-                    picos.push({ mb: row.MB, fecha: row.FechaObj, roaming: esRoaming });
+                    picos.push({ mb: row.MB, fecha: row.FechaObj, roaming: !!row.tipoRoaming, servicio: row.categoriaServicio });
                 }
 
                 if (row.Segundos && !isNaN(row.Segundos)) {
                     if (row.tipoLDI === 'LDI') vozLDISeg += row.Segundos;
-                    else if (esRoaming) vozRoamSeg += row.Segundos;
+                    else if (row.tipoRoaming) vozRoamSeg += row.Segundos;
                     else vozNacSeg += row.Segundos;
+
+                    if (row.MontoNum > 0) {
+                        vozCobroSeg += row.Segundos;
+                        vozCobroMonto += row.MontoNum;
+                    }
                 }
-                if (row.tipoSMS === 'SMS_Nacional') smsNac++;
-                if (row.tipoSMS === 'SMS_Internacional') smsIntl++;
+
+                if (row.TipoTrafico === 'sms') {
+                    if (row.tipoSMS === 'SMS_Internacional') smsIntl += row.CantidadNum;
+                    else smsNac += row.CantidadNum;
+
+                    if (row.MontoNum > 0) {
+                        smsCobro += row.CantidadNum;
+                        smsCobroMonto += row.MontoNum;
+                    }
+                }
             });
 
-            kpiRegistros.textContent = filteredRows.length;
+            // Tarjetas KPI
+            kpiRegistros.textContent = filteredRows.length.toLocaleString('es-CL');
 
             if (totalGB >= 1) {
                 kpiDatos.textContent = totalGB.toFixed(2) + ' GB';
@@ -1342,27 +1439,44 @@
                 kpiDatos.textContent = Math.round(totalMB).toLocaleString('es-CL') + ' MB';
             }
 
-            kpiVoz.textContent = Math.round(totalMin).toLocaleString('es-CL') + ' min';
-            let kpiSaldoTxt = Math.round(saldoMinTotal) + ' min / ' + Math.round(saldoMsgTotal) + ' msg';
-            if (saldoMontoTotal > 0) kpiSaldoTxt += ' / $' + Math.round(saldoMontoTotal).toLocaleString('es-CL');
-            kpiSaldo.textContent = kpiSaldoTxt;
+            if (totalMin >= 60) {
+                const hrs = (totalMin / 60).toFixed(1);
+                kpiVoz.textContent = `${Math.round(totalMin).toLocaleString('es-CL')} min (~${hrs}h)`;
+            } else {
+                kpiVoz.textContent = Math.round(totalMin).toLocaleString('es-CL') + ' min';
+            }
 
+            let kpiSaldoParts = [];
+            if (saldoMinTotal > 0) kpiSaldoParts.push(`${Math.round(saldoMinTotal)} min`);
+            if (saldoMsgTotal > 0) kpiSaldoParts.push(`${Math.round(saldoMsgTotal)} msg`);
+            if (saldoMontoTotal > 0) kpiSaldoParts.push(`$${Math.round(saldoMontoTotal).toLocaleString('es-CL')}`);
+            kpiSaldo.textContent = kpiSaldoParts.length ? kpiSaldoParts.join(' / ') : '0 min / 0 msg / $0';
+
+            // Insight 1: Roaming
             let roamParts = [];
             if (roamingDatosMB > 0) {
                 const roamGB = (roamingDatosMB / 1024).toFixed(2);
-                roamParts.push(`📶 ${Math.round(roamingDatosMB)} MB (${roamGB} GB) en datos`);
+                roamParts.push(`📶 ${Math.round(roamingDatosMB).toLocaleString('es-CL')} MB (${roamGB} GB)`);
             }
             if (roamingSMS > 0) roamParts.push(`💬 ${roamingSMS} SMS`);
-            if (roamingVozSeg > 0) roamParts.push(`📞 ${Math.round(roamingVozSeg/60)} min en llamadas`);
-            insightRoaming.textContent = roamParts.length ? 'Se detecta roaming: ' + roamParts.join('; ') :
-                'Sin uso de roaming.';
+            if (roamingVozSeg > 0) roamParts.push(`📞 ${Math.round(roamingVozSeg/60)} min`);
+            if (roamingMonto > 0) roamParts.push(`💰 $${Math.round(roamingMonto).toLocaleString('es-CL')}`);
+            insightRoaming.textContent = roamParts.length ? 'Actividad Roaming: ' + roamParts.join('; ') : 'Sin uso de roaming.';
 
+            // Insight 2: Uso nocturno
             let noctParts = [];
-            if (noctNacMB > 0) noctParts.push(`🇨🇱 ${Math.round(noctNacMB)} MB nacional`);
-            if (noctRoamMB > 0) noctParts.push(`✈️ ${Math.round(noctRoamMB)} MB roaming`);
-            insightNocturno.textContent = noctParts.length ? 'Uso nocturno (00:00–06:00): ' + noctParts.join('; ') :
-                'Sin actividad nocturna relevante.';
+            const totalNoctMB = noctNacMB + noctRoamMB;
+            if (totalNoctMB > 0) {
+                const pct = totalMB > 0 ? ((totalNoctMB / totalMB) * 100).toFixed(1) : '0';
+                if (totalNoctMB >= 1024) {
+                    noctParts.push(`🌙 ${(totalNoctMB/1024).toFixed(2)} GB (${pct}% del total)`);
+                } else {
+                    noctParts.push(`🌙 ${Math.round(totalNoctMB).toLocaleString('es-CL')} MB (${pct}% del total)`);
+                }
+            }
+            insightNocturno.textContent = noctParts.length ? `Uso 00:00–06:00: ${noctParts.join('; ')} (${noctCount} sesiones)` : 'Sin actividad nocturna relevante.';
 
+            // Insight 3: Picos
             if (picos.length) {
                 const maxPico = picos.reduce((a, b) => a.mb > b.mb ? a : b);
                 const maxGB = (maxPico.mb / 1024).toFixed(2);
@@ -1373,23 +1487,21 @@
                     const y = maxPico.fecha.getFullYear();
                     const hh = String(maxPico.fecha.getHours()).padStart(2, '0');
                     const mm = String(maxPico.fecha.getMinutes()).padStart(2, '0');
-                    fechaStr = ` (máximo el ${d}-${m}-${y} ${hh}:${mm})`;
+                    fechaStr = ` (${d}-${m}-${y} ${hh}:${mm} - ${maxPico.servicio})`;
                 }
-                insightPicos.textContent = `${picos.length} pico(s) >1 GB, máximo ${maxGB} GB${fechaStr}`;
+                insightPicos.textContent = `${picos.length} pico(s) >1 GB, mayor de ${maxGB} GB${fechaStr}`;
             } else {
                 insightPicos.textContent = 'Sin picos de consumo altos (>1 GB).';
             }
 
+            // Insight 4: Desglose de servicios
             let vsParts = [];
-            if (vozNacSeg > 0) vsParts.push(`📞 ${Math.round(vozNacSeg/60)} min nacional`);
-            if (vozLDISeg > 0) vsParts.push(`🌍 ${Math.round(vozLDISeg/60)} min LDI`);
-            if (vozRoamSeg > 0) vsParts.push(`✈️ ${Math.round(vozRoamSeg/60)} min roaming`);
-            if (smsNac > 0) vsParts.push(`💬 ${smsNac} SMS nacionales`);
-            if (smsIntl > 0) vsParts.push(`🌍 ${smsIntl} SMS internacionales`);
-            if (saldoMinTotal > 0) vsParts.push(`⏱ ${Math.round(saldoMinTotal)} min de saldo`);
-            if (saldoMsgTotal > 0) vsParts.push(`💬 ${Math.round(saldoMsgTotal)} msg de saldo`);
-            insightVozSms.textContent = vsParts.length ? vsParts.join('; ') :
-                'Sin actividad de voz, SMS o saldo.';
+            if (redesSocialesMB > 0) vsParts.push(`📱 RRSS: ${(redesSocialesMB/1024).toFixed(2)} GB`);
+            if (datosIncluidosMB > 0) vsParts.push(`📶 Datos: ${(datosIncluidosMB/1024).toFixed(2)} GB`);
+            if (vozCobroMonto > 0) vsParts.push(`📞 Voz Adicional: $${Math.round(vozCobroMonto).toLocaleString('es-CL')}`);
+            if (smsCobroMonto > 0) vsParts.push(`💬 SMS Adicional: $${Math.round(smsCobroMonto).toLocaleString('es-CL')}`);
+            if (saldoMontoTotal > 0 && !vsParts.length) vsParts.push(`💰 Cobros: $${Math.round(saldoMontoTotal).toLocaleString('es-CL')}`);
+            insightVozSms.textContent = vsParts.length ? vsParts.join(' | ') : 'Sin actividad registrada.';
 
             lastSummary = {
                 totalMB,
@@ -1403,12 +1515,19 @@
                 roamingVozSeg,
                 noctNacMB,
                 noctRoamMB,
+                noctCount,
                 picos,
                 vozNacSeg,
                 vozLDISeg,
                 vozRoamSeg,
+                vozCobroSeg,
+                vozCobroMonto,
                 smsNac,
                 smsIntl,
+                smsCobro,
+                smsCobroMonto,
+                redesSocialesMB,
+                datosIncluidosMB,
                 rowsCount: filteredRows.length,
                 minFecha,
                 maxFecha
@@ -1439,7 +1558,7 @@
         }
 
         // ============================================================
-        // GENERAR EXPLICACIÓN
+        // GENERAR EXPLICACIÓN PARA EL CLIENTE (Super Inteligente)
         // ============================================================
         function generateExplanation() {
             if (!lastSummary || !filteredRows.length) {
@@ -1448,73 +1567,82 @@
             }
 
             const s = lastSummary;
-            const f1 = s.minFecha ? `${String(s.minFecha.getDate()).padStart(2,'0')}-${String(s.minFecha.getMonth()+1).padStart(2,'0')}-${s.minFecha.getFullYear()}` :
-                '';
-            const f2 = s.maxFecha ? `${String(s.maxFecha.getDate()).padStart(2,'0')}-${String(s.maxFecha.getMonth()+1).padStart(2,'0')}-${s.maxFecha.getFullYear()}` :
-                '';
+            const f1 = s.minFecha ? `${String(s.minFecha.getDate()).padStart(2,'0')}-${String(s.minFecha.getMonth()+1).padStart(2,'0')}-${s.minFecha.getFullYear()}` : '';
+            const f2 = s.maxFecha ? `${String(s.maxFecha.getDate()).padStart(2,'0')}-${String(s.maxFecha.getMonth()+1).padStart(2,'0')}-${s.maxFecha.getFullYear()}` : '';
 
             let lines = [];
-            lines.push(`(Nombre del cliente), revisé el detalle de uso de tu línea para entregarte una explicación clara y sencilla:`);
+            lines.push(`(Nombre del cliente), revisé en detalle el tráfico y consumos de tu línea para entregarte un resumen claro y transparente:`);
             lines.push('');
-            lines.push(`• Entre el ${f1} y el ${f2}, se registraron ${s.rowsCount.toLocaleString('es-CL')} acciones entre uso de datos y llamadas.`);
+            lines.push(`📅 Período analizado: ${f1} al ${f2} (${s.rowsCount.toLocaleString('es-CL')} registros).`);
 
-            if (s.totalGB >= 1) {
-                lines.push(`• En ese período, tu línea utilizó aproximadamente ${s.totalGB.toFixed(2)} GB en datos móviles.`);
-            } else {
-                lines.push(
-                    `• En ese período, tu línea utilizó aproximadamente ${Math.round(s.totalMB).toLocaleString('es-CL')} MB en datos móviles.`
-                    );
+            // Datos
+            if (s.totalGB > 0 || s.totalMB > 0) {
+                let txtDatos = `📶 Datos móviles: Tu línea utilizó un total de `;
+                if (s.totalGB >= 1) txtDatos += `${s.totalGB.toFixed(2)} GB (${Math.round(s.totalMB).toLocaleString('es-CL')} MB).`;
+                else txtDatos += `${Math.round(s.totalMB).toLocaleString('es-CL')} MB.`;
+
+                if (s.redesSocialesMB > 0 && s.datosIncluidosMB > 0) {
+                    const rrGB = (s.redesSocialesMB / 1024).toFixed(2);
+                    const libGB = (s.datosIncluidosMB / 1024).toFixed(2);
+                    txtDatos += `\n   • ${rrGB} GB correspondieron a Redes Sociales incluidas.`;
+                    txtDatos += `\n   • ${libGB} GB correspondieron a datos del plan.`;
+                }
+                lines.push(txtDatos);
             }
 
+            // Voz
             if (s.totalMin > 0) {
-                lines.push(
-                    `• Además, se registraron aproximadamente ${Math.round(s.totalMin).toLocaleString('es-CL')} minutos en llamadas.`
-                    );
+                let txtVoz = `📞 Llamadas (Voz): Se registraron ${Math.round(s.totalMin).toLocaleString('es-CL')} minutos en total.`;
+                if (s.vozCobroMonto > 0) {
+                    txtVoz += `\n   • ${Math.round(s.vozCobroSeg/60)} minutos adicionales/con cargo a saldo (total: $${Math.round(s.vozCobroMonto).toLocaleString('es-CL')}).`;
+                }
+                lines.push(txtVoz);
             }
 
-            if (s.saldoMinTotal > 0 || s.saldoMsgTotal > 0 || s.saldoMontoTotal > 0) {
-                let saldoParts = [];
-                if (s.saldoMinTotal > 0) saldoParts.push(`${Math.round(s.saldoMinTotal)} minutos`);
-                if (s.saldoMsgTotal > 0) saldoParts.push(`${Math.round(s.saldoMsgTotal)} mensajes`);
-                if (s.saldoMontoTotal > 0) saldoParts.push(`$ ${Math.round(s.saldoMontoTotal).toLocaleString('es-CL')} en montos consumidos`);
-                lines.push(`• Se consumieron ${saldoParts.join(' y ')} de saldo desde tu plan/bolsa activa.`);
+            // SMS
+            if (s.smsNac > 0 || s.smsIntl > 0) {
+                const totalMsg = s.smsNac + s.smsIntl;
+                let txtSMS = `💬 Mensajes SMS: Se enviaron ${totalMsg.toLocaleString('es-CL')} SMS en total.`;
+                if (s.smsCobro > 0) {
+                    txtSMS += `\n   • ${s.smsCobro} mensajes adicionales con cobro de saldo (total: $${Math.round(s.smsCobroMonto).toLocaleString('es-CL')}).`;
+                    if (totalMsg - s.smsCobro > 0) {
+                        txtSMS += `\n   • ${(totalMsg - s.smsCobro).toLocaleString('es-CL')} mensajes incluidos en tu plan sin cobro adicional.`;
+                    }
+                }
+                lines.push(txtSMS);
             }
 
+            // Saldo / Monto consumido
+            if (s.saldoMontoTotal > 0) {
+                lines.push(`💰 Cobros adicionales / Saldo consumido: Se debitó un total de $${Math.round(s.saldoMontoTotal).toLocaleString('es-CL')} por consumos adicionales fuera del plan base.`);
+            }
+
+            // Roaming
             if (s.roamingDatosMB > 0 || s.roamingSMS > 0 || s.roamingVozSeg > 0) {
-                let roamParts = [];
-                if (s.roamingDatosMB > 0) roamParts.push(`${Math.round(s.roamingDatosMB)} MB en datos`);
-                if (s.roamingSMS > 0) roamParts.push(`${s.roamingSMS} SMS`);
-                if (s.roamingVozSeg > 0) roamParts.push(`${Math.round(s.roamingVozSeg/60)} min en llamadas`);
-                lines.push(`• Se detecta uso de roaming: ${roamParts.join(', ')}.`);
+                let rParts = [];
+                if (s.roamingDatosMB > 0) rParts.push(`${(s.roamingDatosMB/1024).toFixed(2)} GB en datos`);
+                if (s.roamingVozSeg > 0) rParts.push(`${Math.round(s.roamingVozSeg/60)} min en llamadas`);
+                if (s.roamingSMS > 0) rParts.push(`${s.roamingSMS} SMS`);
+                lines.push(`✈️ Roaming internacional: Se registró actividad en roaming (${rParts.join(', ')}).`);
             }
 
+            // Horario nocturno
             if (s.noctNacMB > 0 || s.noctRoamMB > 0) {
-                let noctParts = [];
-                if (s.noctNacMB > 0) noctParts.push(`${Math.round(s.noctNacMB)} MB nacional`);
-                if (s.noctRoamMB > 0) noctParts.push(`${Math.round(s.noctRoamMB)} MB roaming`);
-                lines.push(`• Parte del uso ocurrió durante la madrugada (00:00–06:00): ${noctParts.join(' y ')}.`);
+                const totalNoctMB = s.noctNacMB + noctRoamMB;
+                const pctNoct = s.totalMB > 0 ? ((totalNoctMB / s.totalMB) * 100).toFixed(1) : 0;
+                lines.push(`🌙 Tráfico en horario nocturno (00:00 a 06:00 hrs): Se consumieron ${(totalNoctMB/1024).toFixed(2)} GB (${pctNoct}% del total de datos consumidos).`);
             }
 
-            if (s.picos.length) {
+            // Picos de consumo
+            if (s.picos.length > 0) {
                 const maxPico = s.picos.reduce((a, b) => a.mb > b.mb ? a : b);
-                const maxGB = (maxPico.mb / 1024).toFixed(2);
-                lines.push(`• Se identificaron ${s.picos.length} sesión(es) de alto consumo (>1 GB), la mayor con ${maxGB} GB.`);
-            }
-
-            let vsParts = [];
-            if (s.vozNacSeg > 0) vsParts.push(`${Math.round(s.vozNacSeg/60)} min nacional`);
-            if (s.vozLDISeg > 0) vsParts.push(`${Math.round(s.vozLDISeg/60)} min LDI`);
-            if (s.vozRoamSeg > 0) vsParts.push(`${Math.round(s.vozRoamSeg/60)} min roaming`);
-            if (s.smsNac > 0) vsParts.push(`${s.smsNac} SMS nacionales`);
-            if (s.smsIntl > 0) vsParts.push(`${s.smsIntl} SMS internacionales`);
-            if (vsParts.length) {
-                lines.push(`• Detalle de llamadas y SMS: ${vsParts.join(', ')}.`);
+                const maxPicoGB = (maxPico.mb / 1024).toFixed(2);
+                const picoFecha = maxPico.fecha ? `${String(maxPico.fecha.getDate()).padStart(2,'0')}-${String(maxPico.fecha.getMonth()+1).padStart(2,'0')} ${String(maxPico.fecha.getHours()).padStart(2,'0')}:${String(maxPico.fecha.getMinutes()).padStart(2,'0')}` : '';
+                lines.push(`📈 Picos de tráfico: Se detectaron ${s.picos.length} sesiones de alto consumo (>1 GB), la mayor fue de ${maxPicoGB} GB el día ${picoFecha} (${maxPico.servicio}).`);
             }
 
             lines.push('');
-            lines.push(
-                `Si hay algo en este uso que no te calza o quieres revisar algún punto más a fondo, estoy aquí para ayudarte y aclararte todo lo que necesites. 💙`
-            );
+            lines.push(`Si hay algo en este uso que no te calza o quieres revisar algún punto más a fondo, estoy aquí para ayudarte y aclararte todo lo que necesites. 💙`);
 
             explanationText.value = lines.join('\n');
             showToast('✅ Explicación generada.', 'success');
@@ -1540,70 +1668,54 @@
         // FILTROS RÁPIDOS
         // ============================================================
         function applyQuickFilter(type) {
-            const now = new Date();
-            let from = null,
-                to = null;
+            // Referencia de fecha: Usar fecha del dataset o fecha actual
+            let refDate = new Date();
+            if (allRows.length > 0) {
+                const validDates = allRows.filter(r => r.FechaObj).map(r => r.FechaObj);
+                if (validDates.length > 0) {
+                    refDate = new Date(Math.max(...validDates.map(d => d.getTime())));
+                }
+            }
 
-            switch (type) {
-                case 'last7':
-                    from = new Date(now);
-                    from.setDate(from.getDate() - 6);
-                    to = new Date(now);
-                    break;
-                case 'last30':
-                    from = new Date(now);
-                    from.setDate(from.getDate() - 29);
-                    to = new Date(now);
-                    break;
-                case 'monthcurrent':
-                    from = new Date(now.getFullYear(), now.getMonth(), 1);
-                    to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                    break;
-                case 'monthprev':
-                    from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                    to = new Date(now.getFullYear(), now.getMonth(), 0);
-                    break;
-                case 'soloDatos':
-                    filterTipo.value = 'datos';
-                    break;
-                case 'roamingDatos':
-                    filterTipo.value = 'datos';
-                    filterDestino.value = 'roam';
-                    break;
-                case 'smsNacional':
-                    filterDestino.value = 'sms_nac';
-                    break;
-                case 'smsIntl':
-                    filterDestino.value = 'sms_intl';
-                    break;
-                case 'soloVoz':
-                    filterTipo.value = 'voz';
-                    break;
-                case 'roamingVoz':
-                    filterTipo.value = 'voz';
-                    filterDestino.value = 'roamingvoz';
-                    break;
-                case 'vozLDI':
-                    filterTipo.value = 'voz';
-                    filterDestino.value = 'ldi';
-                    break;
-                case 'saldoMin':
-                    filterRegistro.value = 'saldo';
-                    filterDestino.value = 'saldomin';
-                    break;
-                case 'saldoMsg':
-                    filterRegistro.value = 'saldo';
-                    filterDestino.value = 'saldomsg';
-                    break;
-                default:
-                    return;
+            let from = null, to = null;
+
+            if (type === 'last7') {
+                from = new Date(refDate);
+                from.setDate(from.getDate() - 6);
+                to = new Date(refDate);
+                activeQuickFilter = null;
+            } else if (type === 'last30') {
+                from = new Date(refDate);
+                from.setDate(from.getDate() - 29);
+                to = new Date(refDate);
+                activeQuickFilter = null;
+            } else if (type === 'monthcurrent') {
+                from = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
+                to = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0);
+                activeQuickFilter = null;
+            } else if (type === 'monthprev') {
+                from = new Date(refDate.getFullYear(), refDate.getMonth() - 1, 1);
+                to = new Date(refDate.getFullYear(), refDate.getMonth(), 0);
+                activeQuickFilter = null;
+            } else if (type === 'soloDatos') {
+                filterTipo.value = 'datos';
+                activeQuickFilter = null;
+            } else if (type === 'redesSociales') {
+                filterTipo.value = 'rrss';
+                activeQuickFilter = null;
+            } else if (type === 'datosLibres') {
+                filterTipo.value = 'datosLibres';
+                activeQuickFilter = null;
+            } else if (type === 'soloVoz') {
+                filterTipo.value = 'voz';
+                activeQuickFilter = null;
+            } else {
+                activeQuickFilter = type;
             }
 
             if (from && to) {
-                const f = from.getFullYear() + '-' + String(from.getMonth() + 1).padStart(2, '0') + '-' + String(from
-                .getDate()).padStart(2, '0');
-                const t = to.getFullYear() + '-' + String(to.getMonth() + 1).padStart(2, '0') + '-' + String(to.getDate())
-                    .padStart(2, '0');
+                const f = from.getFullYear() + '-' + String(from.getMonth() + 1).padStart(2, '0') + '-' + String(from.getDate()).padStart(2, '0');
+                const t = to.getFullYear() + '-' + String(to.getMonth() + 1).padStart(2, '0') + '-' + String(to.getDate()).padStart(2, '0');
                 filterFrom.value = f;
                 filterTo.value = t;
             }
@@ -1611,20 +1723,12 @@
             document.querySelectorAll('.chip[data-qf]').forEach(chip => {
                 chip.classList.toggle('active', chip.dataset.qf === type);
             });
-            if (['last7', 'last30', 'monthcurrent', 'monthprev'].includes(type)) {
-                document.querySelectorAll('.chip[data-qf]').forEach(chip => {
-                    if (!['last7', 'last30', 'monthcurrent', 'monthprev'].includes(chip.dataset.qf)) {
-                        chip.classList.remove('active');
-                    }
-                });
-            }
 
             aplicarFiltros();
         }
 
         // ============================================================
-        // CICLOS ENTEL (mismos períodos que la herramienta OCC)
-        // Formato por ciclo: 12 filas [díaInicio, mesInicio, díaFin, mesFin]
+        // CICLOS ENTEL (Períodos según dataset o fecha actual)
         // ============================================================
         const ENTEL_TABLA = {
             50: [[1,1,31,1],[1,2,29,2],[1,3,31,3],[1,4,30,4],[1,5,31,5],[1,6,30,6],[1,7,31,7],[1,8,31,8],[1,9,30,9],[1,10,31,10],[1,11,30,11],[1,12,31,12]],
@@ -1639,9 +1743,16 @@
         }
 
         function aplicarCicloEntel(n) {
-            const hoy = new Date();
-            const dia = hoy.getDate(),
-                mes = hoy.getMonth() + 1;
+            let refDate = new Date();
+            if (allRows.length > 0) {
+                const validDates = allRows.filter(r => r.FechaObj).map(r => r.FechaObj);
+                if (validDates.length > 0) {
+                    refDate = new Date(Math.max(...validDates.map(d => d.getTime())));
+                }
+            }
+
+            const dia = refDate.getDate(),
+                mes = refDate.getMonth() + 1;
             const filas = ENTEL_TABLA[n];
             let rango = null;
             for (const [dIni, mIni, dFin, mFin] of filas) {
@@ -1650,9 +1761,8 @@
                     e = mFin * 100 + dFin;
                 const dentro = i <= e ? (f >= i && f <= e) : (f >= i || f <= e);
                 if (dentro) {
-                    let yIni = hoy.getFullYear(),
-                        yFin = hoy.getFullYear();
-                    // Rango que cruza de año (ej. 23·12 → 22·01)
+                    let yIni = refDate.getFullYear(),
+                        yFin = refDate.getFullYear();
                     if (mIni > mFin) {
                         if (mes <= mFin) yIni -= 1;
                         else yFin += 1;
@@ -1681,6 +1791,7 @@
             filterTipo.value = 'todos';
             filterRegistro.value = 'todos';
             filterDestino.value = '';
+            activeQuickFilter = null;
             document.querySelectorAll('.chip[data-qf]').forEach(chip => chip.classList.remove('active'));
             document.querySelectorAll('#entelCiclos button').forEach(b => b.classList.remove('active'));
             aplicarFiltros();
@@ -1705,7 +1816,7 @@
         pasteBtn.addEventListener('click', () => {
             const ok = processPastedText(pasteInput.value);
             if (ok) {
-                pasteStatus.textContent = `✅ ${allRows.length} registros ingresados`;
+                pasteStatus.textContent = `✅ ${allRows.length.toLocaleString('es-CL')} registros ingresados`;
                 pasteStatus.style.color = 'var(--success)';
             } else {
                 pasteStatus.textContent = '❌ No se pudo ingresar';
@@ -1715,12 +1826,26 @@
 
         filterFrom.addEventListener('change', aplicarFiltros);
         filterTo.addEventListener('change', aplicarFiltros);
-        filterTipo.addEventListener('change', aplicarFiltros);
+        filterTipo.addEventListener('change', () => {
+            const val = filterTipo.value;
+            document.querySelectorAll('.chip[data-qf]').forEach(chip => {
+                const qf = chip.dataset.qf;
+                if ((val === 'datos' && qf === 'soloDatos') ||
+                    (val === 'rrss' && qf === 'redesSociales') ||
+                    (val === 'datosLibres' && qf === 'datosLibres') ||
+                    (val === 'voz' && qf === 'soloVoz')) {
+                    chip.classList.add('active');
+                } else if (['soloDatos', 'redesSociales', 'datosLibres', 'soloVoz'].includes(qf)) {
+                    chip.classList.remove('active');
+                }
+            });
+            aplicarFiltros();
+        });
         filterRegistro.addEventListener('change', aplicarFiltros);
         let destinoTimeout;
         filterDestino.addEventListener('input', () => {
             clearTimeout(destinoTimeout);
-            destinoTimeout = setTimeout(aplicarFiltros, 300);
+            destinoTimeout = setTimeout(aplicarFiltros, 250);
         });
 
         clearBtn.addEventListener('click', () => {
@@ -1728,6 +1853,7 @@
             filteredRows = [];
             fileInput.value = '';
             pasteInput.value = '';
+            pasteStatus.textContent = '';
             clearAllFilters();
             renderTable();
             updateSummary();
@@ -1747,20 +1873,13 @@
                 const type = chip.dataset.qf;
                 if (chip.classList.contains('active')) {
                     chip.classList.remove('active');
+                    activeQuickFilter = null;
                     if (['last7', 'last30', 'monthcurrent', 'monthprev'].includes(type)) {
                         filterFrom.value = '';
                         filterTo.value = '';
                     }
-                    if (['soloDatos', 'roamingDatos', 'soloVoz', 'roamingVoz', 'vozLDI'].includes(type)) {
+                    if (['soloDatos', 'redesSociales', 'datosLibres', 'soloVoz'].includes(type)) {
                         filterTipo.value = 'todos';
-                        filterDestino.value = '';
-                    }
-                    if (['smsNacional', 'smsIntl'].includes(type)) {
-                        filterDestino.value = '';
-                    }
-                    if (['saldoMin', 'saldoMsg'].includes(type)) {
-                        filterRegistro.value = 'todos';
-                        filterDestino.value = '';
                     }
                     aplicarFiltros();
                     return;
@@ -1799,7 +1918,7 @@
         showToast('📶 Sube un archivo Excel o pega datos desde Excel para comenzar.', 'success', 3000);
 
         document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'g') {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'g') {
                 e.preventDefault();
                 generateExplanation();
             }

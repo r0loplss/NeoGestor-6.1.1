@@ -42,16 +42,18 @@
 > 2. **En los mensajes de Commit:** Prefijar siempre el commit con el nombre del agente:
 >    - `git commit -m "[Open Code] Descripción clara del cambio"` (Open Code es el encargado exclusivo de Git).
 
-## Bitácora de modificaciones (BITACORA.html) (IMPORTANTE, 12/08/2026)
+## Bitácora de modificaciones (BITACORA.html) (IMPORTANTE, 12/08/2026 - Actualizado 24/08/2026)
 
-> **Cada vez que el usuario pida subir cambios a GitHub ("carga/sube a GitHub"),
-> ANTES de hacer el commit se debe actualizar `BITACORA.html`:** agregar al INICIO
+> **Cada vez que el usuario pida subir cambios a GitHub ("carga/sube a GitHub") o se registren avances de sesión:**
+> ANTES de hacer el commit se debe actualizar `BITACORA.html` agregando al INICIO
 > de la lista `#lista` una nueva anotación (sección `.entry`) con la fecha del día,
 > etiqueta del agente responsable, y un contexto BREVE de los cambios realizados
 > en esa sesión (qué se modificó, funcionalidades nuevas, correcciones, versión si aplica).
 >
 > - El usuario trabaja desde 2 escritorios distintos; la bitácora permite saber
 >   qué se hizo en cada sesión y qué agente lo realizó.
+> - **Separación estricta por fecha/día (OBLIGATORIO):** Cada día de trabajo DEBE tener su propio bloque `<section class="entry">` independiente.
+>   **NUNCA** fusionar ni anexar cambios de fechas distintas en una entrada previa existente, incluso si comparten la misma versión `vX.Y.Z`.
 > - Las anotaciones van con la fecha más reciente al inicio (las nuevas se
 >   insertan ANTES de las existentes).
 > - Seguir el formato estándar:

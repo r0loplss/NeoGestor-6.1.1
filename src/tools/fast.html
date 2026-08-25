@@ -195,7 +195,7 @@
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 8px 9px 4px;
+            padding: 6px 7px 4px;
             display: flex;
             flex-direction: column;
             cursor: pointer;
@@ -221,7 +221,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 2px;
             color: var(--faint);
             cursor: pointer;
             transition: all 0.18s ease;
@@ -233,19 +233,20 @@
             transform: none !important;
         }
         .card-item.empty-slot .slot-plus {
-            font-size: 24px;
+            font-size: 20px;
             line-height: 1;
             opacity: 0.45;
             transition: opacity 0.15s, transform 0.15s;
         }
         .card-item.empty-slot:hover .slot-plus {
             opacity: 1;
-            transform: scale(1.2);
+            transform: scale(1.18);
         }
         .card-item.empty-slot .slot-hint {
-            font-size: 10px;
+            font-size: 9px;
             opacity: 0.55;
             user-select: none;
+            text-align: center;
         }
         .card-item.drag-target-over {
             border-color: var(--primary) !important;
@@ -2218,6 +2219,7 @@
             <span id="search-result-count"></span>
         </div>
         <button class="tb-btn" id="btn-new-card" title="Nueva tarjeta (Ctrl+N)">➕ Tarjeta</button>
+        <button class="tb-btn" id="btn-paste-card" title="Pegar tarjeta copiada (Ctrl+V)" style="display:none;">📥 Pegar</button>
         <button class="tb-btn" id="btn-compactar" title="Compactar y eliminar espacios vacíos">🧹</button>
         <button class="tb-btn" id="btn-fav-filter" title="Mostrar solo favoritos">⭐</button>
         <button class="tb-btn" id="btn-view" title="Alternar vista grilla/lista (Ctrl+Shift+V)">▦</button>
@@ -2286,19 +2288,35 @@
                     <label>Color de la hoja</label>
                     <div class="settings-color-row" id="settings-color-row"></div>
                 </div>
+                <div id="settings-font-fields">
+                    <div class="modal-field" id="settings-title-fs-field">
+                        <label>Tamaño de fuente del título: <span id="settings-title-fs-val" class="px-val"></span> px</label>
+                        <input type="range" id="settings-title-fs-slider" min="9" max="28" step="1" />
+                        <div class="settings-numrow">
+                            <input type="number" id="settings-title-fs-num" min="9" max="28" step="1" /> <span>px</span>
+                        </div>
+                    </div>
+                    <div class="modal-field" id="settings-body-fs-field">
+                        <label>Tamaño de fuente del cuerpo: <span id="settings-body-fs-val" class="px-val"></span> px</label>
+                        <input type="range" id="settings-body-fs-slider" min="8" max="24" step="1" />
+                        <div class="settings-numrow">
+                            <input type="number" id="settings-body-fs-num" min="8" max="24" step="1" /> <span>px</span>
+                        </div>
+                    </div>
+                </div>
                 <div id="settings-size-fields">
                     <div class="modal-field" id="settings-w-field">
                         <label>Ancho de tarjeta: <span id="settings-w-val" class="px-val"></span> px</label>
-                        <input type="range" id="settings-w-slider" min="110" max="420" step="5" />
+                        <input type="range" id="settings-w-slider" min="80" max="420" step="5" />
                         <div class="settings-numrow">
-                            <input type="number" id="settings-w-num" min="110" max="420" step="5" /> <span>px</span>
+                            <input type="number" id="settings-w-num" min="80" max="420" step="5" /> <span>px</span>
                         </div>
                     </div>
                     <div class="modal-field">
                         <label>Alto de tarjeta: <span id="settings-h-val" class="px-val"></span> px</label>
-                        <input type="range" id="settings-h-slider" min="120" max="620" step="5" />
+                        <input type="range" id="settings-h-slider" min="80" max="620" step="5" />
                         <div class="settings-numrow">
-                            <input type="number" id="settings-h-num" min="120" max="620" step="5" /> <span>px</span>
+                            <input type="number" id="settings-h-num" min="80" max="620" step="5" /> <span>px</span>
                         </div>
                     </div>
                 </div>
@@ -2468,7 +2486,7 @@
     <div id="toast-container"></div>
 
     <script>
-        const { ipcRenderer } = require('electron');
+        const { ipcRenderer, clipboard } = require('electron');
         const fs = require('fs');
         const path = require('path');
         const os = require('os');
@@ -2528,6 +2546,7 @@
         const searchInput = document.getElementById('search-input');
         const searchResultCount = document.getElementById('search-result-count');
         const btnNewCard = document.getElementById('btn-new-card');
+        const btnPasteCard = document.getElementById('btn-paste-card');
         const btnCompactar = document.getElementById('btn-compactar');
         const btnFavFilter = document.getElementById('btn-fav-filter');
         const btnView = document.getElementById('btn-view');
@@ -2699,6 +2718,8 @@
             if (!s.mode) s.mode = 'cards';
             if (!SHEET_MODES[s.mode]) s.mode = 'cards';
             if (s.drawerTimeout == null) s.drawerTimeout = 10;
+            if (s.titleFontSize == null) s.titleFontSize = 12;
+            if (s.bodyFontSize == null) s.bodyFontSize = 10;
             if (!s.cardSize) s.cardSize = {};
             const defaultH = s.mode === 'images' ? 420 : 190;
             if (!s.cardSize.w) s.cardSize.w = 150;
@@ -2930,6 +2951,7 @@
             renderDrawer();
             updateResultCount();
             updateViewClass();
+            updatePasteButtonState();
             collectVisibleCards();
         }
         // ---------- SHEETBAR (pestañas estilo Excel) ----------
@@ -3007,6 +3029,8 @@
                 color: SHEET_COLORS[idx % SHEET_COLORS.length],
                 mode: mode || 'cards',
                 cardSize: { w: 150, h: mode === 'images' ? 420 : 190 },
+                titleFontSize: 12,
+                bodyFontSize: 10,
                 drawerTimeout: 10,
                 headers: DEFAULT_HEADERS.slice(),
                 col2Options: DEFAULT_COL2_OPTIONS.slice(),
@@ -3229,9 +3253,11 @@
                     </div>
                 `;
 
-                // Tamaños de fuente personalizados por tarjeta (solo modo tarjetas)
-                const titleFs = parseInt(card.titleFontSize, 10) || 12;
-                const bodyFs = parseInt(card.bodyFontSize, 10) || 10;
+                // Tamaños de fuente base de la hoja o personalizados por tarjeta
+                const defaultTitleFs = (sheet && parseInt(sheet.titleFontSize, 10)) || 12;
+                const defaultBodyFs = (sheet && parseInt(sheet.bodyFontSize, 10)) || 10;
+                const titleFs = parseInt(card.titleFontSize, 10) || defaultTitleFs;
+                const bodyFs = parseInt(card.bodyFontSize, 10) || defaultBodyFs;
                 const tEl = el.querySelector('.card-title');
                 const bEl = el.querySelector('.card-body-preview');
                 if (tEl) tEl.style.fontSize = titleFs + 'px';
@@ -4591,6 +4617,149 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         }
 
         // ============================================================
+        // COPIADO Y PEGADO COMPLETO DE TARJETAS (ENTRE VENTANAS)
+        // ============================================================
+        const FAST_CLIPBOARD_KEY = 'neogestor_fast_copied_card';
+
+        function copyFullCard(card) {
+            if (!card || card.isEmpty) return;
+            const fullCardData = {
+                __type: 'FAST_CARD',
+                version: 1,
+                title: card.title || '',
+                body: card.body || '',
+                color: card.color || '#fef3c7',
+                images: Array.isArray(card.images) ? JSON.parse(JSON.stringify(card.images)) : [],
+                links: Array.isArray(card.links) ? JSON.parse(JSON.stringify(card.links)) : [],
+                pinned: !!card.pinned,
+                notes: card.notes || '',
+                titleFontSize: card.titleFontSize || null,
+                bodyFontSize: card.bodyFontSize || null,
+                copiedAt: Date.now()
+            };
+
+            const jsonStr = JSON.stringify(fullCardData);
+
+            // 1. Guardar en localStorage (compartido entre todas las ventanas del Gestor)
+            try {
+                localStorage.setItem(FAST_CLIPBOARD_KEY, jsonStr);
+            } catch (e) {
+                console.warn('Error al guardar en localStorage:', e);
+            }
+
+            // 2. Guardar en el portapapeles del sistema (Electron clipboard / Web clipboard)
+            try {
+                if (clipboard && clipboard.writeText) {
+                    clipboard.writeText(jsonStr);
+                } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(jsonStr);
+                }
+            } catch (e) {
+                console.warn('Error al guardar en portapapeles:', e);
+            }
+
+            const previewTitle = card.title ? `"${card.title.slice(0, 24)}${card.title.length > 24 ? '...' : ''}"` : 'Tarjeta';
+            showToast(`📑 ${previewTitle} copiada al portapapeles (lista para pegar)`, 'success', 2200);
+            updatePasteButtonState();
+        }
+
+        function getCopiedCard() {
+            // 1. Intentar desde localStorage
+            try {
+                const stored = localStorage.getItem(FAST_CLIPBOARD_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && parsed.__type === 'FAST_CARD') return parsed;
+                }
+            } catch (e) {}
+
+            // 2. Intentar desde el portapapeles del sistema
+            try {
+                let clipText = '';
+                if (clipboard && clipboard.readText) {
+                    clipText = clipboard.readText();
+                }
+                if (clipText && clipText.includes('FAST_CARD')) {
+                    const parsed = JSON.parse(clipText);
+                    if (parsed && parsed.__type === 'FAST_CARD') return parsed;
+                }
+            } catch (e) {}
+
+            return null;
+        }
+
+        function hasCopiedCard() {
+            return !!getCopiedCard();
+        }
+
+        function updatePasteButtonState() {
+            if (!btnPasteCard) return;
+            const sheet = getActiveSheet();
+            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images');
+            if (isCardsOrImages && hasCopiedCard()) {
+                btnPasteCard.style.display = '';
+            } else {
+                btnPasteCard.style.display = 'none';
+            }
+        }
+
+        function pasteFullCard(targetSheetId, targetSlotOrCardId = null) {
+            const sheet = getSheetById(targetSheetId);
+            if (!sheet) return;
+            if (sheet.mode !== 'cards' && sheet.mode !== 'images') {
+                showToast('⚠️ Solo se pueden pegar tarjetas en modo Tarjetas o Buscador de imágenes.', 'info');
+                return;
+            }
+
+            const data = getCopiedCard();
+            if (!data) {
+                showToast('⚠️ No hay ninguna tarjeta copiada en el portapapeles.', 'info');
+                return;
+            }
+
+            const newCard = {
+                id: generateId(),
+                title: data.title || '',
+                body: data.body || '',
+                color: data.color || state.lastCardColor || '#fef3c7',
+                images: Array.isArray(data.images) ? JSON.parse(JSON.stringify(data.images)) : [],
+                links: Array.isArray(data.links) ? JSON.parse(JSON.stringify(data.links)) : [],
+                pinned: !!data.pinned,
+                notes: data.notes || '',
+                titleFontSize: data.titleFontSize || null,
+                bodyFontSize: data.bodyFontSize || null,
+                created: Date.now(),
+                updated: Date.now()
+            };
+
+            if (targetSlotOrCardId) {
+                const targetIdx = sheet.cards.findIndex(c => c.id === targetSlotOrCardId);
+                if (targetIdx !== -1) {
+                    if (sheet.cards[targetIdx].isEmpty) {
+                        sheet.cards[targetIdx] = newCard;
+                    } else {
+                        sheet.cards.splice(targetIdx + 1, 0, newCard);
+                    }
+                } else {
+                    sheet.cards.push(newCard);
+                }
+            } else {
+                const firstEmptyIdx = sheet.cards.findIndex(c => c.isEmpty);
+                if (firstEmptyIdx !== -1) {
+                    sheet.cards[firstEmptyIdx] = newCard;
+                } else {
+                    sheet.cards.push(newCard);
+                }
+            }
+
+            saveData();
+            render();
+
+            const titleDesc = newCard.title ? `"${newCard.title.slice(0, 24)}${newCard.title.length > 24 ? '...' : ''}"` : 'Tarjeta';
+            showToast(`📥 ${titleDesc} pegada con éxito.`, 'success', 2200);
+        }
+
+        // ============================================================
         // MENÚ CONTEXTUAL GENÉRICO
         // ============================================================
         function showContextMenu(x, y, items) {
@@ -4724,8 +4893,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // MENÚ CONTEXTUAL DE TARJETA
         // ============================================================
         function showCardContextMenu(x, y, sheetId, cardId) {
+            const sheet = getSheetById(sheetId);
             const card = getCardById(sheetId, cardId);
-            if (!card) return;
+            if (!card || card.isEmpty) return;
+            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images');
+
             const moveTo = state.sheets
                 .filter(s => s.id !== sheetId)
                 .map(s => ({ icon: '', label: s.name, fn: () => moveCardToSheet(sheetId, cardId, s.id) }));
@@ -4733,6 +4905,8 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 { icon: '📋', label: 'Copiar texto (WhatsApp)', fn: () => copyCardBody(card) },
                 { icon: '📄', label: 'Copiar texto plano', fn: () => copyCardPlain(card) },
                 { icon: '📝', label: 'Copiar título + texto', fn: () => copyCardTitleBody(card) },
+                isCardsOrImages ? { icon: '📑', label: 'Copiar tarjeta completa', fn: () => copyFullCard(card) } : null,
+                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta aquí', fn: () => pasteFullCard(sheetId, cardId) } : null,
                 null,
                 { icon: card.pinned ? '☆' : '⭐', label: card.pinned ? 'Quitar de favoritas' : 'Fijar como favorita', fn: () => {
                     card.pinned = !card.pinned; saveData(); render();
@@ -4931,9 +5105,12 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         }
 
         function showEmptySlotContextMenu(x, y, sheetId, slotId) {
-            hideCardContextMenu();
+            hideContextMenu();
+            const sheet = getSheetById(sheetId);
+            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images');
             const items = [
                 { icon: '➕', label: 'Crear tarjeta aquí', fn: () => openCardEditor(sheetId, null, slotId) },
+                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta aquí', fn: () => pasteFullCard(sheetId, slotId) } : null,
                 null,
                 { icon: '🗑', label: 'Eliminar este espacio vacío', danger: true, fn: () => {
                     const sheet = getSheetById(sheetId);
@@ -5229,8 +5406,10 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             if (editFontFields) editFontFields.style.display = isCardsMode ? '' : 'none';
             if (editCardPreviewField) editCardPreviewField.style.display = isCardsMode ? '' : 'none';
             if (isCardsMode) {
-                const tf = parseInt(card.titleFontSize, 10) || 12;
-                const bf = parseInt(card.bodyFontSize, 10) || 10;
+                const sheetTitleFs = parseInt(sheet.titleFontSize, 10) || 12;
+                const sheetBodyFs = parseInt(sheet.bodyFontSize, 10) || 10;
+                const tf = parseInt(card.titleFontSize, 10) || sheetTitleFs;
+                const bf = parseInt(card.bodyFontSize, 10) || sheetBodyFs;
                 editTitleFs.value = tf;
                 editTitleFsNum.value = tf;
                 editBodyFs.value = bf;
@@ -5278,8 +5457,10 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 const b = editBody ? editBody.value : '';
                 bodyEl.textContent = waToPlain(b);
             }
-            const tf = parseInt(editTitleFs && editTitleFs.value, 10) || 12;
-            const bf = parseInt(editBodyFs && editBodyFs.value, 10) || 10;
+            const sheetTitleFs = (sheet && parseInt(sheet.titleFontSize, 10)) || 12;
+            const sheetBodyFs = (sheet && parseInt(sheet.bodyFontSize, 10)) || 10;
+            const tf = parseInt(editTitleFs && editTitleFs.value, 10) || sheetTitleFs;
+            const bf = parseInt(editBodyFs && editBodyFs.value, 10) || sheetBodyFs;
             if (bodyEl) bodyEl.style.fontSize = bf + 'px';
             if (titleEl) autofitTitle(titleEl, cs.h, tf);
         }
@@ -5662,6 +5843,12 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         const settingsHNum = document.getElementById('settings-h-num');
         const settingsWVal = document.getElementById('settings-w-val');
         const settingsHVal = document.getElementById('settings-h-val');
+        const settingsTitleFsSlider = document.getElementById('settings-title-fs-slider');
+        const settingsTitleFsNum = document.getElementById('settings-title-fs-num');
+        const settingsTitleFsVal = document.getElementById('settings-title-fs-val');
+        const settingsBodyFsSlider = document.getElementById('settings-body-fs-slider');
+        const settingsBodyFsNum = document.getElementById('settings-body-fs-num');
+        const settingsBodyFsVal = document.getElementById('settings-body-fs-val');
         const settingsPreview = document.getElementById('settings-preview');
         let settingsSheetId = null;
 
@@ -5675,18 +5862,30 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 `<span class="sm-badge">${m.icon} ${m.label}</span><span>${m.desc}</span>`;
 
             const sizeFields = document.getElementById('settings-size-fields');
+            const fontFields = document.getElementById('settings-font-fields');
             const settingsWField = document.getElementById('settings-w-field');
             if (sheet.mode === 'cards') {
                 sizeFields.style.display = '';
+                if (fontFields) fontFields.style.display = '';
                 settingsWField.style.display = '';
-                settingsHSlider.min = 120; settingsHSlider.max = 620;
-                settingsHNum.min = 120; settingsHNum.max = 620;
-                settingsWSlider.value = sheet.cardSize.w;
-                settingsHSlider.value = sheet.cardSize.h;
-                settingsWNum.value = sheet.cardSize.w;
-                settingsHNum.value = sheet.cardSize.h;
+                settingsWSlider.min = 80; settingsWSlider.max = 420;
+                settingsWNum.min = 80; settingsWNum.max = 420;
+                settingsHSlider.min = 80; settingsHSlider.max = 620;
+                settingsHNum.min = 80; settingsHNum.max = 620;
+                settingsWSlider.value = sheet.cardSize.w || 150;
+                settingsHSlider.value = sheet.cardSize.h || 190;
+                settingsWNum.value = sheet.cardSize.w || 150;
+                settingsHNum.value = sheet.cardSize.h || 190;
+
+                const defaultTitleFs = parseInt(sheet.titleFontSize, 10) || 12;
+                const defaultBodyFs = parseInt(sheet.bodyFontSize, 10) || 10;
+                if (settingsTitleFsSlider) settingsTitleFsSlider.value = defaultTitleFs;
+                if (settingsTitleFsNum) settingsTitleFsNum.value = defaultTitleFs;
+                if (settingsBodyFsSlider) settingsBodyFsSlider.value = defaultBodyFs;
+                if (settingsBodyFsNum) settingsBodyFsNum.value = defaultBodyFs;
             } else if (sheet.mode === 'images') {
                 sizeFields.style.display = '';
+                if (fontFields) fontFields.style.display = 'none';
                 settingsWField.style.display = 'none';
                 settingsHSlider.min = 300; settingsHSlider.max = 900;
                 settingsHNum.min = 300; settingsHNum.max = 900;
@@ -5696,6 +5895,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 settingsHNum.value = sheet.cardSize.h;
             } else {
                 sizeFields.style.display = 'none';
+                if (fontFields) fontFields.style.display = 'none';
             }
             renderSettingsColors(sheet);
             const gridFields = document.getElementById('settings-grid-fields');
@@ -5722,9 +5922,19 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             if (!sheet) return;
             const w = parseInt(settingsWSlider.value, 10);
             const h = parseInt(settingsHSlider.value, 10);
-            if (document.getElementById('settings-w-val')) document.getElementById('settings-w-val').textContent = w;
-            if (document.getElementById('settings-h-val')) document.getElementById('settings-h-val').textContent = h;
-            if (sheet.mode === 'cards') settingsWNum.value = w;
+            const titleFs = (settingsTitleFsSlider && parseInt(settingsTitleFsSlider.value, 10)) || (parseInt(sheet.titleFontSize, 10) || 12);
+            const bodyFs = (settingsBodyFsSlider && parseInt(settingsBodyFsSlider.value, 10)) || (parseInt(sheet.bodyFontSize, 10) || 10);
+
+            if (settingsWVal) settingsWVal.textContent = w;
+            if (settingsHVal) settingsHVal.textContent = h;
+            if (settingsTitleFsVal) settingsTitleFsVal.textContent = titleFs;
+            if (settingsBodyFsVal) settingsBodyFsVal.textContent = bodyFs;
+
+            if (sheet.mode === 'cards') {
+                settingsWNum.value = w;
+                if (settingsTitleFsNum) settingsTitleFsNum.value = titleFs;
+                if (settingsBodyFsNum) settingsBodyFsNum.value = bodyFs;
+            }
             settingsHNum.value = h;
 
             // Vista previa en vivo
@@ -5732,6 +5942,10 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 settingsPreview.style.display = '';
                 settingsPreview.style.width = w + 'px';
                 settingsPreview.style.height = h + 'px';
+                const spTitle = settingsPreview.querySelector('.sp-title');
+                const spBody = settingsPreview.querySelector('.sp-body');
+                if (spTitle) spTitle.style.fontSize = titleFs + 'px';
+                if (spBody) spBody.style.fontSize = bodyFs + 'px';
             } else if (sheet.mode === 'images') {
                 settingsPreview.style.display = '';
                 settingsPreview.style.width = '100%';
@@ -5743,22 +5957,49 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
         settingsWSlider.addEventListener('input', syncSettingsSliders);
         settingsHSlider.addEventListener('input', syncSettingsSliders);
+        if (settingsTitleFsSlider) settingsTitleFsSlider.addEventListener('input', syncSettingsSliders);
+        if (settingsBodyFsSlider) settingsBodyFsSlider.addEventListener('input', syncSettingsSliders);
+
         settingsWNum.addEventListener('input', () => {
             let v = parseInt(settingsWNum.value, 10);
             if (isNaN(v)) v = 150;
-            v = Math.max(110, Math.min(420, v));
+            const min = parseInt(settingsWSlider.min, 10) || 80;
+            const max = parseInt(settingsWSlider.max, 10) || 420;
+            v = Math.max(min, Math.min(max, v));
             settingsWSlider.value = v;
             syncSettingsSliders();
         });
         settingsHNum.addEventListener('input', () => {
             let v = parseInt(settingsHNum.value, 10);
             if (isNaN(v)) v = 190;
-            const min = parseInt(settingsHSlider.min, 10);
-            const max = parseInt(settingsHSlider.max, 10);
+            const min = parseInt(settingsHSlider.min, 10) || 80;
+            const max = parseInt(settingsHSlider.max, 10) || 620;
             v = Math.max(min, Math.min(max, v));
             settingsHSlider.value = v;
             syncSettingsSliders();
         });
+        if (settingsTitleFsNum) {
+            settingsTitleFsNum.addEventListener('input', () => {
+                let v = parseInt(settingsTitleFsNum.value, 10);
+                if (isNaN(v)) v = 12;
+                const min = parseInt(settingsTitleFsSlider.min, 10) || 9;
+                const max = parseInt(settingsTitleFsSlider.max, 10) || 28;
+                v = Math.max(min, Math.min(max, v));
+                settingsTitleFsSlider.value = v;
+                syncSettingsSliders();
+            });
+        }
+        if (settingsBodyFsNum) {
+            settingsBodyFsNum.addEventListener('input', () => {
+                let v = parseInt(settingsBodyFsNum.value, 10);
+                if (isNaN(v)) v = 10;
+                const min = parseInt(settingsBodyFsSlider.min, 10) || 8;
+                const max = parseInt(settingsBodyFsSlider.max, 10) || 24;
+                v = Math.max(min, Math.min(max, v));
+                settingsBodyFsSlider.value = v;
+                syncSettingsSliders();
+            });
+        }
 
         document.getElementById('settings-reset').addEventListener('click', () => {
             const sheet = getSheetById(settingsSheetId);
@@ -5769,10 +6010,18 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             settingsHSlider.value = dh;
             settingsWNum.value = 150;
             settingsHNum.value = dh;
+            if (sheet.mode === 'cards') {
+                sheet.titleFontSize = 12;
+                sheet.bodyFontSize = 10;
+                if (settingsTitleFsSlider) settingsTitleFsSlider.value = 12;
+                if (settingsTitleFsNum) settingsTitleFsNum.value = 12;
+                if (settingsBodyFsSlider) settingsBodyFsSlider.value = 10;
+                if (settingsBodyFsNum) settingsBodyFsNum.value = 10;
+            }
             syncSettingsSliders();
             saveData();
             render();
-            showToast('🔄 Tamaño restablecido.', 'success', 1200);
+            showToast('🔄 Ajustes restablecidos.', 'success', 1200);
         });
 
         document.getElementById('settings-save').addEventListener('click', () => {
@@ -5781,6 +6030,12 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const w = parseInt(settingsWSlider.value, 10);
             const h = parseInt(settingsHSlider.value, 10);
             sheet.cardSize = { w: w || 150, h: h || 190 };
+            if (sheet.mode === 'cards') {
+                const titleFs = (settingsTitleFsSlider && parseInt(settingsTitleFsSlider.value, 10)) || 12;
+                const bodyFs = (settingsBodyFsSlider && parseInt(settingsBodyFsSlider.value, 10)) || 10;
+                sheet.titleFontSize = titleFs;
+                sheet.bodyFontSize = bodyFs;
+            }
             const drawerSelect = document.getElementById('settings-drawer-timeout');
             const dt = parseInt(drawerSelect.value, 10);
             sheet.drawerTimeout = isNaN(dt) ? 10 : dt;
@@ -5797,7 +6052,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             saveData();
             render();
             settingsOverlay.classList.remove('show');
-            showToast('✅ Tamaño aplicado.', 'success', 1200);
+            showToast('⚙️ Ajustes de hoja guardados.', 'success');
         });
 
         document.getElementById('settings-close').addEventListener('click', () => settingsOverlay.classList.remove('show'));
@@ -6054,11 +6309,34 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             saveData();
             render();
         });
+        if (btnPasteCard) {
+            btnPasteCard.addEventListener('click', () => {
+                const sheet = getActiveSheet();
+                if (sheet && (sheet.mode === 'cards' || sheet.mode === 'images')) {
+                    pasteFullCard(sheet.id, null);
+                }
+            });
+        }
         if (btnCompactar) {
             btnCompactar.addEventListener('click', () => {
                 compactarHoja(state.activeSheetId);
             });
         }
+
+        // Clic derecho en el fondo / canvas de tarjetas
+        cardsContainer.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.card-item') || e.target.closest('.ex-wrap')) return;
+            e.preventDefault();
+            const sheet = getActiveSheet();
+            if (!sheet || sheet.mode === 'process') return;
+            const isCardsOrImages = sheet.mode === 'cards' || sheet.mode === 'images';
+            const items = [
+                { icon: '➕', label: 'Nueva tarjeta', fn: () => openCardEditor(sheet.id, null) },
+                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta', fn: () => pasteFullCard(sheet.id, null) } : null,
+                sheet.mode === 'cards' ? { icon: '🧹', label: 'Compactar espacios vacíos', fn: () => compactarHoja(sheet.id) } : null
+            ].filter(Boolean);
+            if (items.length) showContextMenu(e.clientX, e.clientY, items);
+        });
 
         // ============================================================
         // NAVEGACIÓN CON TECLADO (flechas + Enter copia)
@@ -6112,6 +6390,16 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                         if (e.shiftKey) {
                             e.preventDefault();
                             compactarHoja(state.activeSheetId);
+                        } else {
+                            const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
+                            if (!typing && !modalOverlay.classList.contains('show') && selectedIndex >= 0 && visibleCards[selectedIndex]) {
+                                const sel = visibleCards[selectedIndex];
+                                const card = getCardById(sel.sheetId, sel.cardId);
+                                if (card) {
+                                    e.preventDefault();
+                                    copyFullCard(card);
+                                }
+                            }
                         }
                         break;
                     case 's':
@@ -6126,6 +6414,15 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                             state.view = state.view === 'list' ? 'grid' : 'list';
                             saveData();
                             render();
+                        } else {
+                            const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
+                            if (!typing && !modalOverlay.classList.contains('show')) {
+                                const sheet = getActiveSheet();
+                                if (sheet && (sheet.mode === 'cards' || sheet.mode === 'images') && hasCopiedCard()) {
+                                    e.preventDefault();
+                                    pasteFullCard(sheet.id, null);
+                                }
+                            }
                         }
                         break;
                     case '1': case '2': case '3': case '4': case '5':
