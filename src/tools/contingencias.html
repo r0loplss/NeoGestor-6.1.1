@@ -189,12 +189,31 @@
             gap: 8px;
         }
 
+        ::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
         #main::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         #main::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        #main::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         /* ============================================================
@@ -782,6 +801,54 @@
         // FUNCIONES DE PROCESAMIENTO Y PARSER INTELIGENTE
         // ============================================================
 
+        function limpiarZona(zonaRaw) {
+            if (!zonaRaw || typeof zonaRaw !== 'string') return 'Nacional';
+            let z = zonaRaw.trim();
+
+            // 1. Quitar prefijos como "Comuna:", "Sector:", "Zona:", "Localidad:", "Distrito:", "Ciudad:"
+            z = z.replace(/^(?:comuna|sector|zona|localidad|distrito|ciudad)\s*[:—–-]\s*/i, '');
+
+            // 2. Si es placeholder genérico "XX", "N/A", "Desconocida", "Sin comuna", "Varias", "Por definir" -> "Nacional"
+            if (/^(?:xx|n\/?a|desconocida|sin\s+comuna|por\s+definir|\?+)$/i.test(z)) {
+                return 'Nacional';
+            }
+
+            // 3. Quitar sufijos de región como ", XIV Región", ", RM", ", III R", ", V Región", ", Región Metropolitana", etc.
+            z = z.replace(/[,\s-]+(?:\b[IVXLCDM]+\b(?:\s*R\b|\s*Regi[oó]n\b)?|\bRM\b|\bRegi[oó]n\s+Metropolitana\b|\bR\.?M\.?\b|\bRegi[oó]n\b).*$/i, '');
+
+            // 4. Quitar códigos de POP/sitio pegados al final (ej: "Curanilahue GVB013" -> "Curanilahue")
+            z = z.replace(/\s+[A-Z]{2,3}[0-9]{1,4}\b.*$/i, '');
+
+            // 5. Quitar paréntesis o acotaciones secundarias
+            z = z.replace(/\s*\([^)]*\)/g, '');
+
+            // 6. Quitar caracteres extraños o puntuación sobrante
+            z = z.replace(/^[*#📍📌>–-]\s*/, '').replace(/[–—,;:\.\-]+$/, '').trim();
+
+            if (!z || z.length < 2) return 'Nacional';
+
+            // Capitalizar si viene todo en mayúsculas o minúsculas
+            if (z === z.toUpperCase() || z === z.toLowerCase()) {
+                z = z.toLowerCase().replace(/(?:^|\s|-)[a-záéíóúñ]/g, char => char.toUpperCase());
+            }
+
+            return z || 'Nacional';
+        }
+
+        function esDetalleGenerico(texto) {
+            if (!texto || typeof texto !== 'string') return true;
+            const t = texto.trim().toLowerCase();
+            if (!t || t === '(sin detalle adicional)' || t === 'sin detalle' || t === 'incidencia operacional en curso') return true;
+            const genericos = [
+                'comunicación voz', 'comunicacion voz', 'problemas de cobertura', 'serv. voz y datos congestión',
+                'serv. voz y datos congestion', 'servicio tv', 'canal premium no disponible', 'dificultad canal digital',
+                'gestionar mis recargas', 'no puede recargar', 'servicio de recarga', 'activación de móviles',
+                'activacion de moviles', 'sistemas de atencion', 'sistemas de atención', 'dificultad sistema de atención',
+                'escalamiento a sistema', 'trabajo programado', 'entel', 'integración', 'integracion'
+            ];
+            return genericos.includes(t);
+        }
+
         function extraerPOPs(texto) {
             if (!texto) return [];
             const regex = /\b([A-Z]{2,3}[0-9]{1,4})\b/g;
@@ -806,7 +873,36 @@
                 if (/^FALLA\s*[-–:]/i.test(line)) return line.trim();
             }
 
-            // 2. Extraer candidatos examinando renglones y celdas tabuladas o separadas por pipes
+            // 2. Líneas descriptivas independientes en renglones posteriores (ej: "Dificultad para visualizar TNT Sports en applicativo HBO MAX")
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (/^INC\d+/i.test(line) && line.includes(' - ')) {
+                    // Es una línea técnica de INC de red (ej: "INC000009408613 - Caída de Sitios...")
+                    const fallaMatch = line.match(/(?:-\s*)([A-Za-záéíóúÁÉÍÓÚñÑ\s]+?)(?=\s+en\s+Comuna|\s+en\s+[A-Z]|\s+Causa:|\s+Lista\s+de|\s*$)/i);
+                    const causaMatch = line.match(/Causa:\s*([^L\n]+?)(?=\s+Lista\s+de|\s+TEC|\s*$)/i);
+                    const tipoFalla = fallaMatch ? fallaMatch[1].trim() : '';
+                    let causa = causaMatch ? causaMatch[1].trim() : '';
+                    if (/^\(causa por definir\)$/i.test(causa) || /^por definir$/i.test(causa)) causa = '';
+                    if (tipoFalla && causa) return `${tipoFalla} — ${causa}`;
+                    if (tipoFalla) return tipoFalla;
+                    if (causa) return causa;
+                    continue;
+                }
+
+                // Descartar renglones de sólo ID, sólo INC, sólo fechas, scripts de atención o derivación
+                if (/^\s*INC\d+\s*$/i.test(line)) continue;
+                if (/^\s*\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(line)) continue;
+                if (/^Hola\s+\(/i.test(line) || /^Estimado\b/i.test(line) || /^Hola\s+[a-zA-Z]/i.test(line)) continue;
+                if (/^Derivar\s+al\s+cliente/i.test(line)) continue;
+
+                // Limpiar tabs y pipes
+                const cleanLine = line.replace(/[\t|]+/g, ' ').replace(/^[*#📍📌>–-]\s*/, '').trim();
+                if (cleanLine.length >= 8 && !cleanLine.startsWith('<') && !cleanLine.startsWith('INC000')) {
+                    return cleanLine;
+                }
+            }
+
+            // 3. Si sólo hay una línea (o no se encontró en renglones posteriores), examinar columnas tabuladas
             const candidates = [];
             for (const line of lines) {
                 const parts = (line.includes('\t') ? line.split('\t') : line.split('|')).map(p => p.trim()).filter(p => p.length > 0);
@@ -819,14 +915,15 @@
                     if (/^(Abierto|Cerrado|En Proceso|Pendiente|Cancelado)$/i.test(part)) continue;
                     if (/^(Movil|Hogar|Movil\/Hogar|Fija|Empresas|Pyme)$/i.test(part)) continue;
                     if (/^(Nacional|RM|Santiago|Valparaíso|Concepción|Varias|Desconocida)$/i.test(part)) continue;
-                    if (/^EJEC\.\s+/i.test(part) || /^EJECUTIVO\b/i.test(part)) continue;
+                    if (/^EJEC\.\s+/i.test(part) || /^EJECUTIVO\b/i.test(part) || /^INTEGRACI[ÓO]N\b/i.test(part)) continue;
                     if (/^Hola\s+\(/i.test(part) || /^Estimado\b/i.test(part) || /^Hola\s+[a-zA-Z]/i.test(part)) continue;
+                    if (/^En estos momentos el servicio/i.test(part)) continue;
                     if (/^Derivar\s+al\s+cliente/i.test(part)) continue;
-                    if (/^(Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion)$/i.test(part)) continue;
-                    if (/^Serv\.\s+Voz/i.test(part) || /^Trabajo\s+Programado/i.test(part)) continue;
+                    if (/^(Servicio TV|Comunicación Voz|Problemas de cobertura|Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion|No puede recargar|Canal premium no disponible|Dificultad Canal Digital)$/i.test(part)) continue;
+                    if (/^Serv\.\s+Voz/i.test(part) || /^Trabajo\s+Programado/i.test(part) || /^Entel$/i.test(part)) continue;
 
                     const clean = part.replace(/^[*#📍📌>–-]\s*/, '').trim();
-                    if (clean.length >= 8) {
+                    if (clean.length >= 6 && !clean.startsWith('<')) {
                         candidates.push(clean);
                     }
                 }
@@ -836,14 +933,14 @@
                 return candidates[0];
             }
 
-            // 3. Si hay categorías de CRM concatenadas
-            const catMatch = chunk.match(/(?:Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion)/gi);
+            // 4. Si hay categorías de CRM concatenadas
+            const catMatch = chunk.match(/(?:Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion|Servicio TV|Canal premium no disponible|Dificultad Canal Digital)/gi);
             if (catMatch && catMatch.length > 0) {
                 return [...new Set(catMatch)].join(' — ');
             }
 
-            // 4. Buscar descripciones técnicas de red
-            const redDesc = chunk.match(/(?:Lentitud en OT|Caída de Sitios|Corte Energía|Intermitencia|Corte de fibra)/i);
+            // 5. Buscar descripciones técnicas de red
+            const redDesc = chunk.match(/(?:Lentitud en OT|Caída de Sitios|Corte de Energía|Corte Energía|Intermitencia|Corte de fibra|Corte de Fibra|Falla HW)/i);
             if (redDesc) return redDesc[0];
 
             return 'Incidencia operacional en curso';
@@ -878,7 +975,7 @@
                     const tabParts = chunk.split('\t').map(p => p.trim());
                     if (tabParts.length >= 7) {
                         const candidateZona = tabParts[6];
-                        if (candidateZona && !/^\d+$/.test(candidateZona) && candidateZona.length < 35) {
+                        if (candidateZona && !/^\d+$/.test(candidateZona) && candidateZona.length < 45) {
                             zona = candidateZona;
                         }
                     } else if (chunk.includes('|')) {
@@ -893,6 +990,9 @@
                             zona = zonaMatch[1].trim();
                         }
                     }
+
+                    // Sanitizar zona (eliminar prefijos, sufijos de región, POPs pegados)
+                    zona = limpiarZona(zona);
 
                     // POPs
                     const pops = extraerPOPs(chunk);
@@ -960,6 +1060,7 @@
                         }
                     }
 
+                    zona = limpiarZona(zona);
                     if (!detalle) detalle = extraerDetallePuntual(linea, id, zona, '');
                     const dtObj = parseFechaContingencia(fecha);
                     const fechaDisplay = dtObj ? formatearFechaDisplay(dtObj, fecha) : fecha;
@@ -1018,6 +1119,7 @@
                 const diasStr = calcularDiasTranscurridos(fechaObj);
                 const pops = Array.isArray(c.pops) ? c.pops : extraerPOPs(c.textoCompleto || '');
                 const detalle = (c.detalle || '').trim();
+                const tieneDetalleRelevante = detalle && !esDetalleGenerico(detalle);
 
                 html += `
                     <div class="c-card" data-id="${esc(c.id)}">
@@ -1032,7 +1134,7 @@
                             <span class="c-id" data-action="copy" title="Copiar ID">📋 ${esc(c.id)}</span>
                             <span class="c-meta">${esc(fechaDisplay)} | ${esc(diasStr)}</span>
                         </div>
-                        ${detalle ? `<div class="c-detalle">${esc(detalle)}</div>` : ''}
+                        ${tieneDetalleRelevante ? `<div class="c-detalle">${esc(detalle)}</div>` : ''}
                         ${pops.length ? `<div class="c-meta" style="margin-top:2px;"><span class="c-pops">📡 POPs: ${esc(pops.join(', '))}</span></div>` : ''}
                         ${c.inc ? `<div class="c-meta" style="margin-top:2px;"><span class="c-inc">🎫 ${esc(c.inc)}</span></div>` : ''}
                     </div>
@@ -1202,14 +1304,15 @@
                 const diasStr = calcularDiasTranscurridos(fechaObj);
                 const pops = Array.isArray(c.pops) ? c.pops : extraerPOPs(c.textoCompleto || '');
                 const detalle = (c.detalle || '').trim();
+                const tieneDetalleRelevante = detalle && !esDetalleGenerico(detalle);
 
                 lines.push(`📍 ${c.id} | *${zona}* | ${fechaDisplay} | ${diasStr}`);
                 if (pops.length > 0) {
                     lines.push(`> POP afectados: ${pops.join(', ')}`);
-                    if (detalle) {
+                    if (tieneDetalleRelevante) {
                         lines.push(`> Detalle: ${detalle}`);
                     }
-                } else if (detalle) {
+                } else if (tieneDetalleRelevante) {
                     lines.push(`> ${detalle}`);
                 } else {
                     lines.push(`> (Sin detalle adicional)`);
@@ -1250,16 +1353,9 @@
             lines.push('📌*CONTINGENCIAS*📌');
             lines.push('');
 
-            // 1. Contingencias de red / comuna
+            // 1. Contingencias de red / comuna (formato breve estrictamente limpio: Comuna e ID)
             sortedConComuna.forEach(c => {
-                const pops = Array.isArray(c.pops) ? c.pops : extraerPOPs(c.textoCompleto || '');
-                const detalleLimpio = (c.detalle || '').replace(/\s+/g, ' ').replace(/[*]/g, '').trim();
-
-                if (pops.length > 0 || !detalleLimpio) {
-                    lines.push(`📍 *${c.zona}* ${c.id}`);
-                } else {
-                    lines.push(`📍 *${c.zona} — ${detalleLimpio}* ${c.id}`);
-                }
+                lines.push(`📍 *${c.zona}* ${c.id}`);
             });
 
             // Salto de línea si existen contingencias de ambos tipos

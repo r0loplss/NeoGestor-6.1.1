@@ -115,12 +115,31 @@
             gap: 12px;
         }
 
+        ::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
         #main::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         #main::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        #main::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         /* ============================================================
@@ -454,12 +473,15 @@
         }
 
         .table-scroll::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
+            width: 9px;
+            height: 9px;
         }
         .table-scroll::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         table {
@@ -575,6 +597,209 @@
         }
 
         /* ============================================================
+           PESTAÑAS (TABS)
+           ============================================================ */
+        #tabs-bar {
+            display: flex;
+            gap: 4px;
+            padding: 4px 12px 0;
+            background: #0d1220;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .tab-nav-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--muted);
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .tab-nav-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab-nav-btn.active {
+            color: #60a5fa;
+            border-bottom-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ============================================================
+           VISTA SIMPLE: CARDS Y DESGLOSES
+           ============================================================ */
+        .simple-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .simple-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.15s, transform 0.15s;
+        }
+
+        .simple-card:hover {
+            border-color: var(--border2);
+            transform: translateY(-1px);
+        }
+
+        .simple-card-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .simple-card-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .simple-card-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .simple-card-main-val {
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .simple-card-main-val.datos { color: #f59e0b; }
+        .simple-card-main-val.voz { color: #22c55e; }
+        .simple-card-main-val.sms { color: #38bdf8; }
+        .simple-card-main-val.saldo { color: #f43f5e; }
+
+        .simple-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+        }
+
+        .simple-breakdown-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+        }
+
+        .simple-breakdown-row .lbl {
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .simple-breakdown-row .val {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .simple-breakdown-row .val.highlight {
+            color: #f43f5e;
+            font-weight: 700;
+        }
+
+        /* Tabla resumen sintética */
+        .simple-summary-table-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .simple-summary-table-hdr {
+            padding: 8px 12px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .simple-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .simple-table th {
+            background: var(--surface3);
+            color: var(--muted);
+            padding: 6px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .simple-table td {
+            padding: 7px 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .simple-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .simple-table tr.total-row td {
+            background: rgba(59, 130, 246, 0.08);
+            font-weight: 700;
+            border-top: 1px solid var(--border2);
+        }
+
+        /* ============================================================
                RESPONSIVE
                ============================================================ */
         @media (max-width: 700px) {
@@ -585,6 +810,9 @@
                 grid-template-columns: 1fr 1fr;
             }
             .insights-grid {
+                grid-template-columns: 1fr;
+            }
+            .simple-cards-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -614,180 +842,388 @@
     </div>
 
     <!-- ============================================================
-      ============================================================ -->
+    PESTAÑAS (TABS)
+    ============================================================ -->
+    <div id="tabs-bar">
+        <button class="tab-nav-btn active" data-tab="detalle">📊 Tráfico en Detalle</button>
+        <button class="tab-nav-btn" data-tab="simple">⚡ Vista Resumida Simple</button>
+    </div>
+
+    <!-- ============================================================
+    CUERPO PRINCIPAL (scroll)
+    ============================================================ -->
     <div id="main">
 
-        <!-- CONTROLES -->
-        <div class="controls-grid">
-            <!-- Columna izquierda: Carga de datos -->
-            <div class="control-group">
-                <div class="group-title">📂 Carga de datos</div>
-                <div class="control-row">
-                    <label>📄 Excel</label>
-                    <input type="file" id="fileInput" accept=".xlsx,.xls" />
+        <!-- ============================================================
+        PESTAÑA 1: TRÁFICO EN DETALLE
+        ============================================================ -->
+        <div id="tabViewDetalle" class="tab-pane active">
+            <!-- CONTROLES -->
+            <div class="controls-grid">
+                <!-- Columna izquierda: Carga de datos -->
+                <div class="control-group">
+                    <div class="group-title">📂 Carga de datos</div>
+                    <div class="control-row">
+                        <label>📄 Excel</label>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls" />
+                    </div>
+                    <div class="control-row">
+                        <label>📋 Pegar desde Excel / Siebel (TSV)</label>
+                        <textarea id="pasteInput" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas de tráfico..."></textarea>
+                    </div>
+                    <div class="control-row">
+                        <button class="btn" id="pasteBtn">📥 Ingresar</button>
+                        <button class="btn secondary" id="clearBtn">🗑 Limpiar datos</button>
+                        <span id="pasteStatus" style="font-size:10px;color:var(--faint);"></span>
+                    </div>
                 </div>
-                <div class="control-row">
-                    <label>📋 Pegar desde Excel / Siebel (TSV)</label>
-                    <textarea id="pasteInput" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas de tráfico..."></textarea>
-                </div>
-                <div class="control-row">
-                    <button class="btn" id="pasteBtn">📥 Ingresar</button>
-                    <button class="btn secondary" id="clearBtn">🗑 Limpiar datos</button>
-                    <span id="pasteStatus" style="font-size:10px;color:var(--faint);"></span>
+
+                <!-- Columna derecha: Filtros -->
+                <div class="control-group">
+                    <div class="group-title">🔍 Filtros</div>
+                    <div class="control-row">
+                        <label>Desde</label>
+                        <input type="date" id="filterFrom" />
+                        <label>Hasta</label>
+                        <input type="date" id="filterTo" />
+                    </div>
+                    <div class="control-row">
+                        <label>Ciclo Entel</label>
+                        <span class="entel-ciclos" id="entelCiclos">
+                            <button data-ciclo="50" title="Ciclo 50 (01 → 31)">50</button>
+                            <button data-ciclo="51" title="Ciclo 51 (01 → 31)">51</button>
+                            <button data-ciclo="52" title="Ciclo 52 (08 → 07)">52</button>
+                            <button data-ciclo="53" title="Ciclo 53 (16 → 15)">53</button>
+                            <button data-ciclo="54" title="Ciclo 54 (23 → 22)">54</button>
+                        </span>
+                    </div>
+                    <div class="control-row">
+                        <label>Tipo</label>
+                        <select id="filterTipo">
+                            <option value="todos">Todos los tipos</option>
+                            <option value="datos">📶 Datos (Todos)</option>
+                            <option value="datosLibres">📶 Datos</option>
+                            <option value="rrss">📱 Redes Sociales</option>
+                            <option value="voz">📞 Voz</option>
+                            <option value="sms">💬 SMS / Mensajes</option>
+                        </select>
+                        <label>Registro</label>
+                        <select id="filterRegistro">
+                            <option value="todos">Todos los registros</option>
+                            <option value="saldo">💰 Con cobro / Saldo</option>
+                            <option value="trafico">📦 Tráfico incluido en plan</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label>🔎 Buscar</label>
+                        <input type="text" id="filterDestino" placeholder="Buscar destino, número, PO, bolsa..." />
+                    </div>
                 </div>
             </div>
 
-            <!-- Columna derecha: Filtros -->
-            <div class="control-group">
-                <div class="group-title">🔍 Filtros</div>
-                <div class="control-row">
-                    <label>Desde</label>
-                    <input type="date" id="filterFrom" />
-                    <label>Hasta</label>
-                    <input type="date" id="filterTo" />
+            <!-- FILTROS RÁPIDOS -->
+            <div>
+                <div class="quick-filters" id="quickFilters">
+                    <span class="chip" data-qf="last7">📅 Últimos 7 días</span>
+                    <span class="chip" data-qf="last30">📅 Últimos 30 días</span>
+                    <span class="chip" data-qf="monthcurrent">📅 Mes actual</span>
+                    <span class="chip" data-qf="monthprev">📅 Mes anterior</span>
+                    <span class="chip" data-qf="datosLibres">📶 Datos</span>
+                    <span class="chip" data-qf="redesSociales">📱 Redes Sociales</span>
+                    <span class="chip" data-qf="soloDatos">📶 Datos (Todos)</span>
+                    <span class="chip" data-qf="roamingDatos">✈️ Roaming Datos</span>
+                    <span class="chip" data-qf="soloVoz">📞 Voz</span>
+                    <span class="chip" data-qf="roamingVoz">✈️ Voz Roaming</span>
+                    <span class="chip" data-qf="vozLDI">🌍 Voz LDI</span>
+                    <span class="chip" data-qf="smsNacional">💬 SMS Nacional</span>
+                    <span class="chip" data-qf="smsIntl">🌍 SMS Internacional</span>
+                    <span class="chip" data-qf="saldoMin">⏱ Minutos con cobro</span>
+                    <span class="chip" data-qf="saldoMsg">💬 SMS con cobro</span>
+                    <span class="chip" data-qf="conCobro">💰 Solo con Cobro</span>
+                    <span class="chip" data-qf="nocturno">🌙 Uso Nocturno (00-06h)</span>
+                    <span class="chip" data-qf="picos">📈 Picos &gt; 1 GB</span>
+                    <span class="chip" id="clearFiltersBtn">✖ Quitar filtros</span>
                 </div>
-                <div class="control-row">
-                    <label>Ciclo Entel</label>
-                    <span class="entel-ciclos" id="entelCiclos">
-                        <button data-ciclo="50" title="Ciclo 50 (01 → 31)">50</button>
-                        <button data-ciclo="51" title="Ciclo 51 (01 → 31)">51</button>
-                        <button data-ciclo="52" title="Ciclo 52 (08 → 07)">52</button>
-                        <button data-ciclo="53" title="Ciclo 53 (16 → 15)">53</button>
-                        <button data-ciclo="54" title="Ciclo 54 (23 → 22)">54</button>
-                    </span>
+            </div>
+
+            <!-- KPIS -->
+            <div class="kpi-grid" id="kpiGrid">
+                <div class="kpi-card">
+                    <div class="kpi-value registros" id="kpiRegistros">0</div>
+                    <div class="kpi-label">Registros visibles</div>
                 </div>
-                <div class="control-row">
-                    <label>Tipo</label>
-                    <select id="filterTipo">
-                        <option value="todos">Todos los tipos</option>
-                        <option value="datos">📶 Datos (Todos)</option>
-                        <option value="datosLibres">📶 Datos</option>
-                        <option value="rrss">📱 Redes Sociales</option>
-                        <option value="voz">📞 Voz</option>
-                        <option value="sms">💬 SMS / Mensajes</option>
-                    </select>
-                    <label>Registro</label>
-                    <select id="filterRegistro">
-                        <option value="todos">Todos los registros</option>
-                        <option value="saldo">💰 Con cobro / Saldo</option>
-                        <option value="trafico">📦 Tráfico incluido en plan</option>
-                    </select>
+                <div class="kpi-card">
+                    <div class="kpi-value datos" id="kpiDatos">0 MB</div>
+                    <div class="kpi-label">Datos totales</div>
                 </div>
-                <div class="control-row">
-                    <label>🔎 Buscar</label>
-                    <input type="text" id="filterDestino" placeholder="Buscar destino, número, PO, bolsa..." />
+                <div class="kpi-card">
+                    <div class="kpi-value voz" id="kpiVoz">0 min</div>
+                    <div class="kpi-label">Voz total</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value saldo" id="kpiSaldo">0 min / 0 msg / $0</div>
+                    <div class="kpi-label">Saldo / Cobros</div>
+                </div>
+            </div>
+
+            <!-- INSIGHTS -->
+            <div class="insights-grid" id="insightsGrid">
+                <div class="insight-item">
+                    <div class="insight-title">✈️ Roaming</div>
+                    <div class="insight-text" id="insightRoaming">Sin uso de roaming.</div>
+                </div>
+                <div class="insight-item">
+                    <div class="insight-title">🌙 Uso nocturno (00:00–06:00)</div>
+                    <div class="insight-text" id="insightNocturno">Sin actividad nocturna relevante.</div>
+                </div>
+                <div class="insight-item">
+                    <div class="insight-title">📈 Picos de consumo (&gt;1 GB)</div>
+                    <div class="insight-text" id="insightPicos">Sin picos de consumo altos.</div>
+                </div>
+                <div class="insight-item">
+                    <div class="insight-title">📊 Desglose de Servicios &amp; Cobros</div>
+                    <div class="insight-text" id="insightVozSms">Sin actividad registrada.</div>
+                </div>
+            </div>
+
+            <!-- EXPLICACIÓN -->
+            <div class="explanation-box">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-weight:700;font-size:12px;color:var(--muted);">💬 Explicación para el cliente</span>
+                    <span style="font-size:10px;color:var(--faint);" id="periodoChip">Período: —</span>
+                </div>
+                <textarea id="explanationText" placeholder="Haz clic en Generar explicación para obtener un resumen detallado para el cliente..."></textarea>
+                <div class="exp-actions">
+                    <button class="btn" id="generateExplanationBtn">🔄 Generar explicación</button>
+                    <button class="btn secondary" id="copyExplanationBtn">📋 Copiar</button>
+                </div>
+            </div>
+
+            <!-- TABLA -->
+            <div class="table-wrapper">
+                <div class="table-header">
+                    <span>📋 Detalle de tráfico</span>
+                    <span id="rowCount">0 registros</span>
+                </div>
+                <div class="table-scroll" id="tableScroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-sort="FechaObj">Fecha</th>
+                                <th data-sort="Msisdn">Línea</th>
+                                <th data-sort="Destino">Destino</th>
+                                <th data-sort="Unidad">Unidad</th>
+                                <th data-sort="Cantidad">Cantidad</th>
+                                <th data-sort="MB">MB</th>
+                                <th data-sort="GB">GB</th>
+                                <th data-sort="Segundos">Segundos</th>
+                                <th data-sort="Minutos">Minutos</th>
+                                <th data-sort="SaldoMin">Saldo (min)</th>
+                                <th data-sort="SaldoMsg">Saldo (msg)</th>
+                                <th data-sort="spDes">sp Des</th>
+                                <th data-sort="snDes">sn Des</th>
+                                <th data-sort="Tecnologia">Tecnología</th>
+                                <th data-sort="CallType">Call Type</th>
+                                <th data-sort="Monto">Monto ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr><td colspan="16" class="empty-state">Sube un archivo Excel o pega datos desde Excel/Siebel para comenzar.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- FILTROS RÁPIDOS -->
-        <div>
-            <div class="quick-filters" id="quickFilters">
-                <span class="chip" data-qf="last7">📅 Últimos 7 días</span>
-                <span class="chip" data-qf="last30">📅 Últimos 30 días</span>
-                <span class="chip" data-qf="monthcurrent">📅 Mes actual</span>
-                <span class="chip" data-qf="monthprev">📅 Mes anterior</span>
-                <span class="chip" data-qf="datosLibres">📶 Datos</span>
-                <span class="chip" data-qf="redesSociales">📱 Redes Sociales</span>
-                <span class="chip" data-qf="soloDatos">📶 Datos (Todos)</span>
-                <span class="chip" data-qf="roamingDatos">✈️ Roaming Datos</span>
-                <span class="chip" data-qf="soloVoz">📞 Voz</span>
-                <span class="chip" data-qf="roamingVoz">✈️ Voz Roaming</span>
-                <span class="chip" data-qf="vozLDI">🌍 Voz LDI</span>
-                <span class="chip" data-qf="smsNacional">💬 SMS Nacional</span>
-                <span class="chip" data-qf="smsIntl">🌍 SMS Internacional</span>
-                <span class="chip" data-qf="saldoMin">⏱ Minutos con cobro</span>
-                <span class="chip" data-qf="saldoMsg">💬 SMS con cobro</span>
-                <span class="chip" data-qf="conCobro">💰 Solo con Cobro</span>
-                <span class="chip" data-qf="nocturno">🌙 Uso Nocturno (00-06h)</span>
-                <span class="chip" data-qf="picos">📈 Picos &gt; 1 GB</span>
-                <span class="chip" id="clearFiltersBtn">✖ Quitar filtros</span>
-            </div>
-        </div>
+        <!-- ============================================================
+        PESTAÑA 2: VISTA RESUMIDA SIMPLE (Sin filtros complejos ni scripts)
+        ============================================================ -->
+        <div id="tabViewSimple" class="tab-pane" style="display:none;">
+            <!-- CONTROLES -->
+            <div class="controls-grid">
+                <!-- Columna izquierda: Carga de datos -->
+                <div class="control-group">
+                    <div class="group-title">📂 Carga de datos</div>
+                    <div class="control-row">
+                        <label>📄 Excel</label>
+                        <input type="file" id="fileInputSimple" accept=".xlsx,.xls" />
+                    </div>
+                    <div class="control-row">
+                        <label>📋 Pegar desde Excel / Siebel (TSV)</label>
+                        <textarea id="pasteInputSimple" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas de tráfico..."></textarea>
+                    </div>
+                    <div class="control-row">
+                        <button class="btn" id="pasteBtnSimple">📥 Ingresar</button>
+                        <button class="btn secondary" id="clearBtnSimple">🗑 Limpiar datos</button>
+                        <span id="pasteStatusSimple" style="font-size:10px;color:var(--faint);"></span>
+                    </div>
+                </div>
 
-        <!-- KPIS -->
-        <div class="kpi-grid" id="kpiGrid">
-            <div class="kpi-card">
-                <div class="kpi-value registros" id="kpiRegistros">0</div>
-                <div class="kpi-label">Registros visibles</div>
+                <!-- Columna derecha: Filtros (Filtro de fecha con ciclos solamente, idéntico a versión Detalle) -->
+                <div class="control-group">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="group-title">🔍 Filtros</div>
+                        <span id="periodoChipSimple" style="font-size:10px;color:var(--faint);">Período: —</span>
+                    </div>
+                    <div class="control-row">
+                        <label>Desde</label>
+                        <input type="date" id="filterFromSimple" />
+                        <label>Hasta</label>
+                        <input type="date" id="filterToSimple" />
+                    </div>
+                    <div class="control-row">
+                        <label>Ciclo Entel</label>
+                        <span class="entel-ciclos" id="entelCiclosSimple">
+                            <button data-ciclo="50" title="Ciclo 50 (01 → 31)">50</button>
+                            <button data-ciclo="51" title="Ciclo 51 (01 → 31)">51</button>
+                            <button data-ciclo="52" title="Ciclo 52 (08 → 07)">52</button>
+                            <button data-ciclo="53" title="Ciclo 53 (16 → 15)">53</button>
+                            <button data-ciclo="54" title="Ciclo 54 (23 → 22)">54</button>
+                        </span>
+                    </div>
+                    <div class="control-row" style="margin-top:4px;">
+                        <button class="btn secondary" id="clearDatesBtnSimple" style="font-size:11px;padding:3px 8px;">✖ Quitar filtros de fecha</button>
+                    </div>
+                </div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-value datos" id="kpiDatos">0 MB</div>
-                <div class="kpi-label">Datos totales</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value voz" id="kpiVoz">0 min</div>
-                <div class="kpi-label">Voz total</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value saldo" id="kpiSaldo">0 min / 0 msg / $0</div>
-                <div class="kpi-label">Saldo / Cobros</div>
-            </div>
-        </div>
 
-        <!-- INSIGHTS -->
-        <div class="insights-grid" id="insightsGrid">
-            <div class="insight-item">
-                <div class="insight-title">✈️ Roaming</div>
-                <div class="insight-text" id="insightRoaming">Sin uso de roaming.</div>
-            </div>
-            <div class="insight-item">
-                <div class="insight-title">🌙 Uso nocturno (00:00–06:00)</div>
-                <div class="insight-text" id="insightNocturno">Sin actividad nocturna relevante.</div>
-            </div>
-            <div class="insight-item">
-                <div class="insight-title">📈 Picos de consumo (&gt;1 GB)</div>
-                <div class="insight-text" id="insightPicos">Sin picos de consumo altos.</div>
-            </div>
-            <div class="insight-item">
-                <div class="insight-title">📊 Desglose de Servicios &amp; Cobros</div>
-                <div class="insight-text" id="insightVozSms">Sin actividad registrada.</div>
-            </div>
-        </div>
+            <!-- Tarjetas de métricas directas (4 cuadrantes: Datos, Minutos, SMS, Saldo Consumido) -->
+            <div class="simple-cards-grid">
+                <!-- 1. DATOS -->
+                <div class="simple-card">
+                    <div class="simple-card-hdr">
+                        <span class="simple-card-title">📶 Consumo de Datos</span>
+                        <span class="simple-card-badge" id="simpleBadgeDatos">Internet Móvil</span>
+                    </div>
+                    <div class="simple-card-main-val datos" id="simpleValDatos">0 MB</div>
+                    <div class="simple-breakdown">
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">🌐 Navegación / Datos libres</span>
+                            <span class="val" id="simpleSubDatosLibres">0 MB</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">📱 Redes Sociales incluidas</span>
+                            <span class="val" id="simpleSubDatosRRSS">0 MB</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">✈️ Roaming Datos internacional</span>
+                            <span class="val" id="simpleSubDatosRoam">0 MB</span>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- EXPLICACIÓN -->
-        <div class="explanation-box">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-weight:700;font-size:12px;color:var(--muted);">💬 Explicación para el cliente</span>
-                <span style="font-size:10px;color:var(--faint);" id="periodoChip">Período: —</span>
-            </div>
-            <textarea id="explanationText" placeholder="Haz clic en Generar explicación para obtener un resumen detallado para el cliente..."></textarea>
-            <div class="exp-actions">
-                <button class="btn" id="generateExplanationBtn">🔄 Generar explicación</button>
-                <button class="btn secondary" id="copyExplanationBtn">📋 Copiar</button>
-            </div>
-        </div>
+                <!-- 2. VOZ / MINUTOS -->
+                <div class="simple-card">
+                    <div class="simple-card-hdr">
+                        <span class="simple-card-title">📞 Minutos / Llamadas</span>
+                        <span class="simple-card-badge" id="simpleBadgeVoz">Voz</span>
+                    </div>
+                    <div class="simple-card-main-val voz" id="simpleValVoz">0 min</div>
+                    <div class="simple-breakdown">
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">🇨🇱 Llamadas Nacionales</span>
+                            <span class="val" id="simpleSubVozNac">0 min</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">🌍 Larga Distancia (LDI)</span>
+                            <span class="val" id="simpleSubVozLDI">0 min</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">✈️ Llamadas en Roaming</span>
+                            <span class="val" id="simpleSubVozRoam">0 min</span>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- TABLA -->
-        <div class="table-wrapper">
-            <div class="table-header">
-                <span>📋 Detalle de tráfico</span>
-                <span id="rowCount">0 registros</span>
+                <!-- 3. SMS / MENSAJES -->
+                <div class="simple-card">
+                    <div class="simple-card-hdr">
+                        <span class="simple-card-title">💬 SMS / Mensajería</span>
+                        <span class="simple-card-badge" id="simpleBadgeSMS">Mensajes</span>
+                    </div>
+                    <div class="simple-card-main-val sms" id="simpleValSMS">0 SMS</div>
+                    <div class="simple-breakdown">
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">✉️ SMS Nacionales</span>
+                            <span class="val" id="simpleSubSMSNac">0 SMS</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">🌐 SMS Internacionales</span>
+                            <span class="val" id="simpleSubSMSIntl">0 SMS</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">✈️ SMS en Roaming</span>
+                            <span class="val" id="simpleSubSMSRoam">0 SMS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. SALDO CONSUMIDO (SEPARADO EN VOZ Y SMS) -->
+                <div class="simple-card" style="border-color: rgba(244, 63, 94, 0.3);">
+                    <div class="simple-card-hdr">
+                        <span class="simple-card-title" style="color: #fb7185;">💰 Saldo Consumido</span>
+                        <span class="simple-card-badge" style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border-color: rgba(244, 63, 94, 0.3);">Cobros Adicionales</span>
+                    </div>
+                    <div class="simple-card-main-val saldo" id="simpleValSaldo">$0</div>
+                    <div class="simple-breakdown">
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">📞 Saldo en Llamadas / Minutos</span>
+                            <span class="val highlight" id="simpleSubSaldoMin">$0 (0 min)</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">💬 Saldo en SMS / Mensajes</span>
+                            <span class="val highlight" id="simpleSubSaldoMsg">$0 (0 msg)</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">📶 Saldo en Datos / Otros</span>
+                            <span class="val highlight" id="simpleSubSaldoDatos">$0</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="table-scroll" id="tableScroll">
-                <table>
+
+            <!-- Tabla de resumen global consolidada -->
+            <div class="simple-summary-table-box">
+                <div class="simple-summary-table-hdr">
+                    <span>📊 Resumen General de Servicios</span>
+                    <span id="simpleRowCount">0 registros analizados</span>
+                </div>
+                <table class="simple-table">
                     <thead>
                         <tr>
-                            <th data-sort="FechaObj">Fecha</th>
-                            <th data-sort="Msisdn">Línea</th>
-                            <th data-sort="Destino">Destino</th>
-                            <th data-sort="Unidad">Unidad</th>
-                            <th data-sort="Cantidad">Cantidad</th>
-                            <th data-sort="MB">MB</th>
-                            <th data-sort="GB">GB</th>
-                            <th data-sort="Segundos">Segundos</th>
-                            <th data-sort="Minutos">Minutos</th>
-                            <th data-sort="SaldoMin">Saldo (min)</th>
-                            <th data-sort="SaldoMsg">Saldo (msg)</th>
-                            <th data-sort="spDes">sp Des</th>
-                            <th data-sort="snDes">sn Des</th>
-                            <th data-sort="Tecnologia">Tecnología</th>
-                            <th data-sort="CallType">Call Type</th>
-                            <th data-sort="Monto">Monto ($)</th>
+                            <th>Servicio</th>
+                            <th>Consumo Total</th>
+                            <th>Incluido en Plan</th>
+                            <th>Con Cobro / Saldo</th>
+                            <th>Monto Cobrado ($)</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
-                        <tr><td colspan="16" class="empty-state">Sube un archivo Excel o pega datos desde Excel/Siebel para comenzar.</td></tr>
+                    <tbody id="simpleTableBody">
+                        <tr>
+                            <td>📶 Datos Móviles</td>
+                            <td id="stDatosTotal">0 MB</td>
+                            <td id="stDatosPlan">0 MB</td>
+                            <td id="stDatosCobro">0 MB</td>
+                            <td id="stDatosMonto">$0</td>
+                        </tr>
+                        <tr>
+                            <td>📞 Llamadas (Voz)</td>
+                            <td id="stVozTotal">0 min</td>
+                            <td id="stVozPlan">0 min</td>
+                            <td id="stVozCobro">0 min</td>
+                            <td id="stVozMonto">$0</td>
+                        </tr>
+                        <tr>
+                            <td>💬 SMS / Mensajes</td>
+                            <td id="stSMSTotal">0 SMS</td>
+                            <td id="stSMSPlan">0 SMS</td>
+                            <td id="stSMSCobro">0 SMS</td>
+                            <td id="stSMSMonto">$0</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="4" style="text-align: right; color: var(--text);">TOTAL SALDO / COBROS ADICIONALES:</td>
+                            <td id="stTotalMonto" style="color: #f43f5e; font-size: 13px;">$0</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -811,16 +1247,31 @@
         // ============================================================
         // REFERENCIAS DOM
         // ============================================================
+        // Pestañas
+        const tabBtns = document.querySelectorAll('.tab-nav-btn');
+        const tabViewDetalle = document.getElementById('tabViewDetalle');
+        const tabViewSimple = document.getElementById('tabViewSimple');
+
+        // Carga en Detalle
         const fileInput = document.getElementById('fileInput');
         const pasteInput = document.getElementById('pasteInput');
         const pasteBtn = document.getElementById('pasteBtn');
         const pasteStatus = document.getElementById('pasteStatus');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Carga en Simple
+        const fileInputSimple = document.getElementById('fileInputSimple');
+        const pasteInputSimple = document.getElementById('pasteInputSimple');
+        const pasteBtnSimple = document.getElementById('pasteBtnSimple');
+        const pasteStatusSimple = document.getElementById('pasteStatusSimple');
+        const clearBtnSimple = document.getElementById('clearBtnSimple');
+
+        // Filtros en Detalle
         const filterFrom = document.getElementById('filterFrom');
         const filterTo = document.getElementById('filterTo');
         const filterTipo = document.getElementById('filterTipo');
         const filterRegistro = document.getElementById('filterRegistro');
         const filterDestino = document.getElementById('filterDestino');
-        const clearBtn = document.getElementById('clearBtn');
         const clearFiltersBtn = document.getElementById('clearFiltersBtn');
         const kpiRegistros = document.getElementById('kpiRegistros');
         const kpiDatos = document.getElementById('kpiDatos');
@@ -836,6 +1287,47 @@
         const tableBody = document.getElementById('tableBody');
         const rowCount = document.getElementById('rowCount');
         const periodoChip = document.getElementById('periodoChip');
+
+        // Referencias de Vista Simple
+        const filterFromSimple = document.getElementById('filterFromSimple');
+        const filterToSimple = document.getElementById('filterToSimple');
+        const periodoChipSimple = document.getElementById('periodoChipSimple');
+        const clearDatesBtnSimple = document.getElementById('clearDatesBtnSimple');
+
+        const simpleValDatos = document.getElementById('simpleValDatos');
+        const simpleSubDatosLibres = document.getElementById('simpleSubDatosLibres');
+        const simpleSubDatosRRSS = document.getElementById('simpleSubDatosRRSS');
+        const simpleSubDatosRoam = document.getElementById('simpleSubDatosRoam');
+
+        const simpleValVoz = document.getElementById('simpleValVoz');
+        const simpleSubVozNac = document.getElementById('simpleSubVozNac');
+        const simpleSubVozLDI = document.getElementById('simpleSubVozLDI');
+        const simpleSubVozRoam = document.getElementById('simpleSubVozRoam');
+
+        const simpleValSMS = document.getElementById('simpleValSMS');
+        const simpleSubSMSNac = document.getElementById('simpleSubSMSNac');
+        const simpleSubSMSIntl = document.getElementById('simpleSubSMSIntl');
+        const simpleSubSMSRoam = document.getElementById('simpleSubSMSRoam');
+
+        const simpleValSaldo = document.getElementById('simpleValSaldo');
+        const simpleSubSaldoMin = document.getElementById('simpleSubSaldoMin');
+        const simpleSubSaldoMsg = document.getElementById('simpleSubSaldoMsg');
+        const simpleSubSaldoDatos = document.getElementById('simpleSubSaldoDatos');
+
+        const simpleRowCount = document.getElementById('simpleRowCount');
+        const stDatosTotal = document.getElementById('stDatosTotal');
+        const stDatosPlan = document.getElementById('stDatosPlan');
+        const stDatosCobro = document.getElementById('stDatosCobro');
+        const stDatosMonto = document.getElementById('stDatosMonto');
+        const stVozTotal = document.getElementById('stVozTotal');
+        const stVozPlan = document.getElementById('stVozPlan');
+        const stVozCobro = document.getElementById('stVozCobro');
+        const stVozMonto = document.getElementById('stVozMonto');
+        const stSMSTotal = document.getElementById('stSMSTotal');
+        const stSMSPlan = document.getElementById('stSMSPlan');
+        const stSMSCobro = document.getElementById('stSMSCobro');
+        const stSMSMonto = document.getElementById('stSMSMonto');
+        const stTotalMonto = document.getElementById('stTotalMonto');
 
         // ============================================================
         // ESTADO
@@ -1120,6 +1612,12 @@
                 }
 
                 aplicarFiltros();
+                aplicarFiltrosSimple();
+
+                const countStr = `✅ ${allRows.length.toLocaleString('es-CL')} registros ingresados`;
+                if (pasteStatus) { pasteStatus.textContent = countStr; pasteStatus.style.color = 'var(--success)'; }
+                if (pasteStatusSimple) { pasteStatusSimple.textContent = countStr; pasteStatusSimple.style.color = 'var(--success)'; }
+
                 showToast(`✅ Cargados ${allRows.length.toLocaleString('es-CL')} registros de tráfico.`, 'success');
                 return true;
             } catch (err) {
@@ -1777,30 +2275,306 @@
             }
             filterFrom.value = fmtCicloDate(rango.inicio);
             filterTo.value = fmtCicloDate(rango.fin);
+            filterFromSimple.value = fmtCicloDate(rango.inicio);
+            filterToSimple.value = fmtCicloDate(rango.fin);
             document.querySelectorAll('.chip[data-qf]').forEach(chip => chip.classList.remove('active'));
-            document.querySelectorAll('#entelCiclos button').forEach(b => {
+            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => {
                 b.classList.toggle('active', parseInt(b.dataset.ciclo) === n);
             });
             aplicarFiltros();
+            aplicarFiltrosSimple();
             showToast('✅ Ciclo Entel ' + n + ' aplicado: ' + fmtCicloDate(rango.inicio) + ' → ' + fmtCicloDate(rango.fin), 'success', 2600);
+        }
+
+        function aplicarCicloEntelSimple(n) {
+            let refDate = new Date();
+            if (allRows.length > 0) {
+                const validDates = allRows.filter(r => r.FechaObj).map(r => r.FechaObj);
+                if (validDates.length > 0) {
+                    refDate = new Date(Math.max(...validDates.map(d => d.getTime())));
+                }
+            }
+
+            const dia = refDate.getDate(),
+                mes = refDate.getMonth() + 1;
+            const filas = ENTEL_TABLA[n];
+            let rango = null;
+            for (const [dIni, mIni, dFin, mFin] of filas) {
+                const f = mes * 100 + dia,
+                    i = mIni * 100 + dIni,
+                    e = mFin * 100 + dFin;
+                const dentro = i <= e ? (f >= i && f <= e) : (f >= i || f <= e);
+                if (dentro) {
+                    let yIni = refDate.getFullYear(),
+                        yFin = refDate.getFullYear();
+                    if (mIni > mFin) {
+                        if (mes <= mFin) yIni -= 1;
+                        else yFin += 1;
+                    }
+                    rango = { inicio: new Date(yIni, mIni - 1, dIni), fin: new Date(yFin, mFin - 1, dFin) };
+                    break;
+                }
+            }
+            if (!rango) {
+                showToast('⚠️ No se pudo determinar el período del ciclo ' + n + '.', 'warning');
+                return;
+            }
+            filterFrom.value = fmtCicloDate(rango.inicio);
+            filterTo.value = fmtCicloDate(rango.fin);
+            filterFromSimple.value = fmtCicloDate(rango.inicio);
+            filterToSimple.value = fmtCicloDate(rango.fin);
+            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => {
+                b.classList.toggle('active', parseInt(b.dataset.ciclo) === n);
+            });
+            aplicarFiltros();
+            aplicarFiltrosSimple();
+            showToast('✅ Ciclo Entel ' + n + ' aplicado: ' + fmtCicloDate(rango.inicio) + ' → ' + fmtCicloDate(rango.fin), 'success', 2600);
+        }
+
+        // ============================================================
+        // PESTAÑAS (SWITCH TAB)
+        // ============================================================
+        function switchTab(tabName) {
+            tabBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+            if (tabName === 'detalle') {
+                tabViewDetalle.style.display = 'flex';
+                tabViewDetalle.classList.add('active');
+                tabViewSimple.style.display = 'none';
+                tabViewSimple.classList.remove('active');
+            } else {
+                tabViewDetalle.style.display = 'none';
+                tabViewDetalle.classList.remove('active');
+                tabViewSimple.style.display = 'flex';
+                tabViewSimple.classList.add('active');
+                aplicarFiltrosSimple();
+            }
+        }
+
+        // ============================================================
+        // VISTA SIMPLE: APLICAR FILTROS Y RESUMEN DIRECTO
+        // ============================================================
+        function aplicarFiltrosSimple() {
+            const fromStr = filterFromSimple.value;
+            const toStr = filterToSimple.value;
+
+            const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : null;
+            const toDate = toStr ? new Date(toStr + 'T23:59:59') : null;
+
+            let rows = allRows;
+            if (fromDate || toDate) {
+                rows = allRows.filter(row => {
+                    if (fromDate && row.FechaObj && row.FechaObj < fromDate) return false;
+                    if (toDate && row.FechaObj && row.FechaObj > toDate) return false;
+                    return true;
+                });
+            }
+
+            if (!rows.length) {
+                simpleValDatos.textContent = '0 MB';
+                simpleSubDatosLibres.textContent = '0 MB';
+                simpleSubDatosRRSS.textContent = '0 MB';
+                simpleSubDatosRoam.textContent = '0 MB';
+
+                simpleValVoz.textContent = '0 min';
+                simpleSubVozNac.textContent = '0 min';
+                simpleSubVozLDI.textContent = '0 min';
+                simpleSubVozRoam.textContent = '0 min';
+
+                simpleValSMS.textContent = '0 SMS';
+                simpleSubSMSNac.textContent = '0 SMS';
+                simpleSubSMSIntl.textContent = '0 SMS';
+                simpleSubSMSRoam.textContent = '0 SMS';
+
+                simpleValSaldo.textContent = '$0';
+                simpleSubSaldoMin.textContent = '$0 (0 min)';
+                simpleSubSaldoMsg.textContent = '$0 (0 msg)';
+                simpleSubSaldoDatos.textContent = '$0';
+
+                stDatosTotal.textContent = '0 MB';
+                stDatosPlan.textContent = '0 MB';
+                stDatosCobro.textContent = '0 MB';
+                stDatosMonto.textContent = '$0';
+
+                stVozTotal.textContent = '0 min';
+                stVozPlan.textContent = '0 min';
+                stVozCobro.textContent = '0 min';
+                stVozMonto.textContent = '$0';
+
+                stSMSTotal.textContent = '0 SMS';
+                stSMSPlan.textContent = '0 SMS';
+                stSMSCobro.textContent = '0 SMS';
+                stSMSMonto.textContent = '$0';
+
+                stTotalMonto.textContent = '$0';
+                simpleRowCount.textContent = '0 registros analizados';
+                periodoChipSimple.textContent = 'Período: —';
+                return;
+            }
+
+            let totalMB = 0, totalGB = 0;
+            let datosLibresMB = 0, redesSocialesMB = 0, roamingDatosMB = 0;
+            let datosCobroMB = 0, datosCobroMonto = 0;
+
+            let totalMin = 0, totalSeg = 0;
+            let vozNacSeg = 0, vozLDISeg = 0, vozRoamSeg = 0;
+            let vozCobroSeg = 0, vozCobroMonto = 0, vozCobroMin = 0;
+
+            let totalSMS = 0;
+            let smsNac = 0, smsIntl = 0, roamingSMS = 0;
+            let smsCobro = 0, smsCobroMonto = 0;
+
+            let minFecha = null, maxFecha = null;
+
+            rows.forEach(row => {
+                if (row.FechaObj && !isNaN(row.FechaObj.getTime())) {
+                    if (!minFecha || row.FechaObj < minFecha) minFecha = row.FechaObj;
+                    if (!maxFecha || row.FechaObj > maxFecha) maxFecha = row.FechaObj;
+                }
+
+                // Datos
+                if (row.MB && !isNaN(row.MB)) {
+                    totalMB += row.MB;
+                    totalGB += row.GB || 0;
+                    if (row.tipoRoaming) {
+                        roamingDatosMB += row.MB;
+                    } else if (row.categoriaServicio === 'Redes Sociales') {
+                        redesSocialesMB += row.MB;
+                    } else {
+                        datosLibresMB += row.MB;
+                    }
+                    if (row.MontoNum > 0 && row.TipoTrafico === 'datos') {
+                        datosCobroMB += row.MB;
+                        datosCobroMonto += row.MontoNum;
+                    }
+                }
+
+                // Voz
+                if (row.Minutos && !isNaN(row.Minutos)) {
+                    totalMin += row.Minutos;
+                }
+                if (row.Segundos && !isNaN(row.Segundos)) {
+                    totalSeg += row.Segundos;
+                    if (row.tipoLDI === 'LDI') vozLDISeg += row.Segundos;
+                    else if (row.tipoRoaming) vozRoamSeg += row.Segundos;
+                    else vozNacSeg += row.Segundos;
+
+                    if (row.MontoNum > 0 || (row.SaldoMin && row.SaldoMin > 0)) {
+                        vozCobroSeg += row.Segundos;
+                        vozCobroMin += (row.SaldoMin || row.Minutos || (row.Segundos / 60));
+                        vozCobroMonto += row.MontoNum;
+                    }
+                }
+
+                // SMS
+                if (row.TipoTrafico === 'sms') {
+                    const qty = row.CantidadNum || 1;
+                    totalSMS += qty;
+                    if (row.tipoSMS === 'SMS_Internacional') smsIntl += qty;
+                    else if (row.tipoRoaming) roamingSMS += qty;
+                    else smsNac += qty;
+
+                    if (row.MontoNum > 0 || (row.SaldoMsg && row.SaldoMsg > 0)) {
+                        smsCobro += (row.SaldoMsg || qty);
+                        smsCobroMonto += row.MontoNum;
+                    }
+                }
+            });
+
+            const totalSaldoMonto = vozCobroMonto + smsCobroMonto + datosCobroMonto;
+
+            // 1. Tarjeta Datos
+            if (totalGB >= 1) {
+                simpleValDatos.textContent = totalGB.toFixed(2) + ' GB';
+            } else {
+                simpleValDatos.textContent = Math.round(totalMB).toLocaleString('es-CL') + ' MB';
+            }
+            simpleSubDatosLibres.textContent = (datosLibresMB >= 1024 ? (datosLibresMB / 1024).toFixed(2) + ' GB' : Math.round(datosLibresMB).toLocaleString('es-CL') + ' MB');
+            simpleSubDatosRRSS.textContent = (redesSocialesMB >= 1024 ? (redesSocialesMB / 1024).toFixed(2) + ' GB' : Math.round(redesSocialesMB).toLocaleString('es-CL') + ' MB');
+            simpleSubDatosRoam.textContent = (roamingDatosMB >= 1024 ? (roamingDatosMB / 1024).toFixed(2) + ' GB' : Math.round(roamingDatosMB).toLocaleString('es-CL') + ' MB');
+
+            // 2. Tarjeta Voz
+            if (totalMin >= 60) {
+                const hrs = (totalMin / 60).toFixed(1);
+                simpleValVoz.textContent = `${Math.round(totalMin).toLocaleString('es-CL')} min (~${hrs}h)`;
+            } else {
+                simpleValVoz.textContent = Math.round(totalMin).toLocaleString('es-CL') + ' min';
+            }
+            simpleSubVozNac.textContent = Math.round(vozNacSeg / 60).toLocaleString('es-CL') + ' min';
+            simpleSubVozLDI.textContent = Math.round(vozLDISeg / 60).toLocaleString('es-CL') + ' min';
+            simpleSubVozRoam.textContent = Math.round(vozRoamSeg / 60).toLocaleString('es-CL') + ' min';
+
+            // 3. Tarjeta SMS
+            simpleValSMS.textContent = totalSMS.toLocaleString('es-CL') + ' SMS';
+            simpleSubSMSNac.textContent = smsNac.toLocaleString('es-CL') + ' SMS';
+            simpleSubSMSIntl.textContent = smsIntl.toLocaleString('es-CL') + ' SMS';
+            simpleSubSMSRoam.textContent = roamingSMS.toLocaleString('es-CL') + ' SMS';
+
+            // 4. Tarjeta Saldo Consumido (Separado por Voz y SMS)
+            simpleValSaldo.textContent = '$' + Math.round(totalSaldoMonto).toLocaleString('es-CL');
+            simpleSubSaldoMin.textContent = `$${Math.round(vozCobroMonto).toLocaleString('es-CL')} (${Math.round(vozCobroMin)} min)`;
+            simpleSubSaldoMsg.textContent = `$${Math.round(smsCobroMonto).toLocaleString('es-CL')} (${smsCobro} SMS)`;
+            simpleSubSaldoDatos.textContent = datosCobroMonto > 0 ? `$${Math.round(datosCobroMonto).toLocaleString('es-CL')} (${(datosCobroMB/1024).toFixed(2)} GB)` : '$0';
+
+            // Tabla consolidada
+            stDatosTotal.textContent = totalGB >= 1 ? totalGB.toFixed(2) + ' GB' : Math.round(totalMB).toLocaleString('es-CL') + ' MB';
+            stDatosPlan.textContent = (totalMB - datosCobroMB) >= 1024 ? ((totalMB - datosCobroMB)/1024).toFixed(2) + ' GB' : Math.round(totalMB - datosCobroMB).toLocaleString('es-CL') + ' MB';
+            stDatosCobro.textContent = datosCobroMB >= 1024 ? (datosCobroMB/1024).toFixed(2) + ' GB' : Math.round(datosCobroMB).toLocaleString('es-CL') + ' MB';
+            stDatosMonto.textContent = '$' + Math.round(datosCobroMonto).toLocaleString('es-CL');
+
+            stVozTotal.textContent = Math.round(totalMin).toLocaleString('es-CL') + ' min';
+            stVozPlan.textContent = Math.round(Math.max(0, totalMin - vozCobroMin)).toLocaleString('es-CL') + ' min';
+            stVozCobro.textContent = Math.round(vozCobroMin).toLocaleString('es-CL') + ' min';
+            stVozMonto.textContent = '$' + Math.round(vozCobroMonto).toLocaleString('es-CL');
+
+            stSMSTotal.textContent = totalSMS.toLocaleString('es-CL') + ' SMS';
+            stSMSPlan.textContent = Math.max(0, totalSMS - smsCobro).toLocaleString('es-CL') + ' SMS';
+            stSMSCobro.textContent = smsCobro.toLocaleString('es-CL') + ' SMS';
+            stSMSMonto.textContent = '$' + Math.round(smsCobroMonto).toLocaleString('es-CL');
+
+            stTotalMonto.textContent = '$' + Math.round(totalSaldoMonto).toLocaleString('es-CL');
+            simpleRowCount.textContent = rows.length.toLocaleString('es-CL') + ' registros analizados';
+
+            // Periodo chip
+            if (minFecha && maxFecha) {
+                const d1 = String(minFecha.getDate()).padStart(2, '0');
+                const m1 = String(minFecha.getMonth() + 1).padStart(2, '0');
+                const y1 = minFecha.getFullYear();
+                const d2 = String(maxFecha.getDate()).padStart(2, '0');
+                const m2 = String(maxFecha.getMonth() + 1).padStart(2, '0');
+                const y2 = maxFecha.getFullYear();
+                periodoChipSimple.textContent = (d1 === d2 && m1 === m2 && y1 === y2) ? `📅 ${d1}-${m1}-${y1}` : `📅 ${d1}-${m1}-${y1} → ${d2}-${m2}-${y2}`;
+            } else {
+                periodoChipSimple.textContent = 'Período: —';
+            }
         }
 
         function clearAllFilters() {
             filterFrom.value = '';
             filterTo.value = '';
+            filterFromSimple.value = '';
+            filterToSimple.value = '';
             filterTipo.value = 'todos';
             filterRegistro.value = 'todos';
             filterDestino.value = '';
             activeQuickFilter = null;
             document.querySelectorAll('.chip[data-qf]').forEach(chip => chip.classList.remove('active'));
-            document.querySelectorAll('#entelCiclos button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => b.classList.remove('active'));
             aplicarFiltros();
+            aplicarFiltrosSimple();
             showToast('✅ Filtros eliminados.', 'success');
         }
 
         // ============================================================
         // EVENTOS
         // ============================================================
+        // Pestañas
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+
+        // Eventos Carga Detalle
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length) loadFromExcel(e.target.files[0]);
             e.target.value = '';
@@ -1816,16 +2590,55 @@
         pasteBtn.addEventListener('click', () => {
             const ok = processPastedText(pasteInput.value);
             if (ok) {
-                pasteStatus.textContent = `✅ ${allRows.length.toLocaleString('es-CL')} registros ingresados`;
+                const countStr = `✅ ${allRows.length.toLocaleString('es-CL')} registros ingresados`;
+                pasteStatus.textContent = countStr;
                 pasteStatus.style.color = 'var(--success)';
+                pasteStatusSimple.textContent = countStr;
+                pasteStatusSimple.style.color = 'var(--success)';
             } else {
                 pasteStatus.textContent = '❌ No se pudo ingresar';
                 pasteStatus.style.color = 'var(--danger)';
             }
         });
 
-        filterFrom.addEventListener('change', aplicarFiltros);
-        filterTo.addEventListener('change', aplicarFiltros);
+        // Eventos Carga Simple
+        fileInputSimple.addEventListener('change', (e) => {
+            if (e.target.files.length) loadFromExcel(e.target.files[0]);
+            e.target.value = '';
+        });
+
+        pasteInputSimple.addEventListener('paste', () => {
+            setTimeout(() => {
+                const text = pasteInputSimple.value;
+                if (text.trim()) processPastedText(text);
+            }, 50);
+        });
+
+        pasteBtnSimple.addEventListener('click', () => {
+            const ok = processPastedText(pasteInputSimple.value);
+            if (ok) {
+                const countStr = `✅ ${allRows.length.toLocaleString('es-CL')} registros ingresados`;
+                pasteStatus.textContent = countStr;
+                pasteStatus.style.color = 'var(--success)';
+                pasteStatusSimple.textContent = countStr;
+                pasteStatusSimple.style.color = 'var(--success)';
+            } else {
+                pasteStatusSimple.textContent = '❌ No se pudo ingresar';
+                pasteStatusSimple.style.color = 'var(--danger)';
+            }
+        });
+
+        // Filtros Detalle
+        filterFrom.addEventListener('change', () => {
+            filterFromSimple.value = filterFrom.value;
+            aplicarFiltros();
+            aplicarFiltrosSimple();
+        });
+        filterTo.addEventListener('change', () => {
+            filterToSimple.value = filterTo.value;
+            aplicarFiltros();
+            aplicarFiltrosSimple();
+        });
         filterTipo.addEventListener('change', () => {
             const val = filterTipo.value;
             document.querySelectorAll('.chip[data-qf]').forEach(chip => {
@@ -1848,19 +2661,57 @@
             destinoTimeout = setTimeout(aplicarFiltros, 250);
         });
 
-        clearBtn.addEventListener('click', () => {
+        // Filtros Simple
+        filterFromSimple.addEventListener('change', () => {
+            filterFrom.value = filterFromSimple.value;
+            aplicarFiltros();
+            aplicarFiltrosSimple();
+        });
+        filterToSimple.addEventListener('change', () => {
+            filterTo.value = filterToSimple.value;
+            aplicarFiltros();
+            aplicarFiltrosSimple();
+        });
+
+        clearDatesBtnSimple.addEventListener('click', () => {
+            filterFrom.value = '';
+            filterTo.value = '';
+            filterFromSimple.value = '';
+            filterToSimple.value = '';
+            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => b.classList.remove('active'));
+            aplicarFiltros();
+            aplicarFiltrosSimple();
+            showToast('✅ Fechas eliminadas.', 'success');
+        });
+
+        document.querySelectorAll('#entelCiclosSimple button').forEach(b => {
+            b.addEventListener('click', () => aplicarCicloEntelSimple(parseInt(b.dataset.ciclo)));
+        });
+
+        // Limpiar Datos (Sincronizado)
+        function limpiarTodo() {
             allRows = [];
             filteredRows = [];
             fileInput.value = '';
+            fileInputSimple.value = '';
             pasteInput.value = '';
+            pasteInputSimple.value = '';
             pasteStatus.textContent = '';
+            pasteStatusSimple.textContent = '';
             clearAllFilters();
+            filterFromSimple.value = '';
+            filterToSimple.value = '';
+            document.querySelectorAll('#entelCiclosSimple button').forEach(b => b.classList.remove('active'));
             renderTable();
             updateSummary();
             updatePeriodoChip();
+            aplicarFiltrosSimple();
             explanationText.value = '';
             showToast('🗑 Datos limpiados.', 'success');
-        });
+        }
+
+        clearBtn.addEventListener('click', limpiarTodo);
+        clearBtnSimple.addEventListener('click', limpiarTodo);
 
         clearFiltersBtn.addEventListener('click', clearAllFilters);
 
@@ -1914,6 +2765,7 @@
         renderTable();
         updateSummary();
         updatePeriodoChip();
+        aplicarFiltrosSimple();
 
         showToast('📶 Sube un archivo Excel o pega datos desde Excel para comenzar.', 'success', 3000);
 

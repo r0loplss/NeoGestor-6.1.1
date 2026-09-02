@@ -113,12 +113,31 @@
             gap: 12px;
         }
 
+        ::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
         #main::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         #main::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        #main::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         /* ============================================================
@@ -267,11 +286,15 @@
         }
 
         .speech-box::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         .speech-box::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        .speech-box::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         .btn-copy {

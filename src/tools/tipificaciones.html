@@ -205,12 +205,31 @@
             gap: 4px;
         }
 
+        ::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
         #lista::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         #lista::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        #lista::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         .motivo-item {
@@ -348,11 +367,15 @@
         }
 
         #center-scroll::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         #center-scroll::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        #center-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         .meta-grid {
@@ -480,11 +503,15 @@
         }
 
         #right-scroll::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         #right-scroll::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        #right-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         #right-title {
@@ -616,11 +643,15 @@
         }
 
         .modal-scroll::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         .modal-scroll::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         .modal-field {
@@ -1467,7 +1498,11 @@
         document.getElementById('modal-close').addEventListener('click', closeBaseEditor);
         document.getElementById('modal-cancel').addEventListener('click', closeBaseEditor);
         document.getElementById('modal-save').addEventListener('click', saveBaseEditor);
-        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeBaseEditor(); });
+        let backdropDown = false;
+        modalOverlay.addEventListener('mousedown', (e) => {
+            backdropDown = (e.target === modalOverlay);
+        });
+        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay && backdropDown) closeBaseEditor(); });
 
         document.addEventListener('keydown', (e) => {
             if (!modalOverlay.classList.contains('show')) return;

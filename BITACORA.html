@@ -18,6 +18,10 @@
         --accent: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
     body {
         background: var(--bg);
         color: var(--text);
@@ -127,6 +131,174 @@
     </div>
 
     <div id="lista">
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">02 sep 2026</span><span class="ver">v6.1.5</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Compilación v6.1.5</b>: portable <code>GestorCasos-portable-6.1.5.exe</code> (73,2 MB) con cambios pendientes de Antigravity (FAST, tráfico, contingencias, ciclos, calculadora, enlaces, tipificaciones, horarios, vault) empaquetados. <code>package.json</code> 6.1.4 → 6.1.5.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">01 sep 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tráfico Móvil PRO — Arquitectura de Dos Pestañas («Tráfico en Detalle» y «Vista Simple Resumida»)</b>:
+                        <ul>
+                            <li><b>Pestaña «📊 Tráfico en Detalle»</b>: vista analítica completa con filtros avanzados (tipo, registro, búsqueda de texto), filtros rápidos por chip (últimos 7/30 días, meses, picos, uso nocturno), KPIs consolidados, 4 insights inteligentes (Roaming, Nocturno, Picos, Desglose), generador de explicaciones/scripts para clientes y tabla interactiva de 16 columnas ordenables.</li>
+                            <li><b>Pestaña «⚡ Vista Resumida Simple» (Sin scripts ni saturación de filtros)</b>:
+                                <ul>
+                                    <li><b>4 Cuadrantes de Métricas Directas</b>:
+                                        <ul>
+                                            <li>📶 <b>Consumo de Datos</b>: Total en GB/MB con desglose inmediato de navegación libre, redes sociales y roaming de datos.</li>
+                                            <li>📞 <b>Minutos / Llamadas</b>: Total de minutos y horas con desglose de llamadas nacionales, Larga Distancia Internacional (LDI) y llamadas en roaming.</li>
+                                            <li>💬 <b>SMS / Mensajería</b>: Total de mensajes SMS con desglose de SMS nacionales, SMS internacionales y SMS en roaming.</li>
+                                            <li>💰 <b>Saldo Consumido (Separado por Servicio)</b>: Total en dinero (<code>$</code>) con desglose explícito de <b>Cobro en Llamadas / Minutos (<code>$X (X min)</code>)</b>, <b>Cobro en SMS / Mensajes (<code>$Y (Y msg)</code>)</b> y Saldo en Datos/Otros.</li>
+                                        </ul>
+                                    </li>
+                                    <li><b>Tabla Resumen General Consolidada</b>: resumen claro por servicio mostrando consumo total, volumen incluido en plan, volumen facturado/con cobro y monto final cobrado en pesos (<code>$</code>).</li>
+                                    <li><b>Filtros de Fecha y Ciclos Entel (50 al 54)</b>: recuadro de filtros idéntico en estructura, estilo y alineación al de la versión de detalle (en cuadrícula de dos columnas junto a la carga de datos), con selector de fechas Desde / Hasta, botones rápidos de ciclos Entel (50 al 54), botón para quitar fechas y sincronización instantánea entre pestañas.</li>
+                                </ul>
+                            </li>
+                            <li><b>Carga de Datos Universal y Sincronizada</b>: ambas pestañas cuentan con recuadros idénticos para cargar archivos Excel (<code>.xlsx</code> / <code>.xls</code>) o pegar celdas TSV (Excel / Siebel), procesando sobre el mismo dataset unificado y manteniendo actualizados los estados en tiempo real.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Modo Contenedor: Selección Múltiple con Ctrl+Click, Floating Action Bar, Cuadratura Proporcional y Cabecera Optimizada</b>:
+                        <ul>
+                            <li><b>Selección Múltiple (Ctrl+Click) y Creación Flotante de Contenedores</b>: selección de múltiples tarjetas simultáneas con halo azul y badge numérico secuencial, desplegando la barra de acción flotante (FAB) <i>«📦 Crear contenedor con X tarjetas seleccionadas»</i> con asignación automática de tarjetas y apertura del editor.</li>
+                            <li><b>Cuadratura Proporcional Exacta de Contenedores ($N$ Tarjetas = $N$ Slots)</b>: dimensionamiento matemático del ancho de cada contenedor como \(N \times \text{ancho\_tarjeta} + (N-1) \times 10\text{px}\). Un contenedor de 2 tarjetas ocupa exactamente el ancho de 2 tarjetas libres más su espacio de separación (310px), integrándose milimétricamente en la cuadrícula horizontal y alineando las tarjetas contiguas a la perfección sin desbordes.</li>
+                            <li><b>Cabecera Simplificada y Priorización del Título</b>: eliminación del badge de cantidad de tarjetas, lápiz de edición (✏️) y escoba de limpieza (🧹) de la barra superior para maximizar el espacio útil del nombre del contenedor; reubicación de las acciones en el menú <code>•••</code> y reposición del manipulador de arrastre <code>⠿</code> al extremo izquierdo.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Modo Contenedor + Tarjetas: Copia/Pegado Bidireccional, Transformación de Hojas y Flexibilidad Total</b>:
+                        <ul>
+                            <li><b>Copia y Pegado Flexible Dentro y Fuera de Contenedores</b>:
+                                <ul>
+                                    <li>Soporte completo para copiar tarjetas desde cualquier modo (Modo Tarjetas Estándar, Modo Contenedor o Buscador de Imágenes) y pegarlas directamente tanto <b>dentro</b> de un contenedor específico (mediante el menú <code>•••</code> del contenedor con <i>«📥 Pegar tarjeta en este contenedor»</i> o en slots/tarjetas internas) como <b>fuera</b> de él como tarjeta libre en el lienzo compartido (mediante el botón superior <code>📥 Pegar</code>, menú contextual del fondo o atajo <code>Ctrl+V</code>).</li>
+                                    <li>Soporte inverso: las tarjetas copiadas desde el interior de un contenedor pueden pegarse de vuelta en hojas en Modo Tarjetas estándar sin residuos de <code>containerId</code>.</li>
+                                </ul>
+                            </li>
+                            <li><b>Transformación Inteligente de Hojas sin Pérdida de Datos (<code>transformSheetMode</code>)</b>:
+                                <ul>
+                                    <li><b>De Modo Tarjetas a Modo Contenedor</b>: permite transformar hojas de tarjetas existentes a Modo Contenedor + Tarjetas preservando el 100% de las tarjetas como tarjetas libres en su orden exacto original (<code>rootOrder</code>), listas para ser agrupadas o convivir con nuevos contenedores.</li>
+                                    <li><b>De Modo Contenedor a Modo Tarjetas</b>: desenvuelve todas las tarjetas alojadas dentro de los contenedores y las concatena de forma secuencial y limpia en una cuadrícula continua de tarjetas estándar, sin perder contenido, imágenes ni notas.</li>
+                                    <li>Integración de acción visual de transformación tanto en la ventana de <b>⚙️ Ajustes de Hoja</b> (<code>#settings-transform-area</code>) con hints explicativos como en el <b>menú contextual de la pestaña</b> de la hoja.</li>
+                                </ul>
+                            </li>
+                            <li><b>Flexibilidad Total sin Contenedor Obligatorio</b>:
+                                <ul>
+                                    <li>Se eliminó la creación forzosa de un <code>CONTENEDOR 1</code> por defecto al crear o iniciar hojas en este modo. Las hojas pueden nacer y operar únicamente con tarjetas libres si el usuario lo prefiere.</li>
+                                    <li>Se permite eliminar libremente cualquier contenedor existente (incluso si es el único en la hoja), conservando de forma segura sus tarjetas como tarjetas libres en el lienzo horizontal.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><b>Radar de Contingencias Pro — Sanitización de Comunas y Formato «Copiar Breve» Limpio</b>:
+                        <ul>
+                            <li><b>Eliminación de Texto Adicional en Comunas</b>: corrección del parser de <i>Copiar Breve</i> (<code>generarBreve</code>), garantizando que las contingencias de red/comuna presenten estrictamente el formato <code>📍 *Comuna* ID</code>, sin concatenar categorías genéricas de CRM como <i>— Comunicación Voz</i> cuando no hay POPs explícitos en el ticket.</li>
+                            <li><b>Omisión de Detalles Genéricos Irrelevantes en «Copiar Detalle» (<code>esDetalleGenerico</code>)</b>: filtrado automático de etiquetas irrelevantes de CRM (como <i>Comunicación Voz</i>, <i>Problemas de cobertura</i>, <i>Servicio TV</i>, etc.) para que no se muestren bajo <code>> Detalle: ...</code> cuando ya existen POPs afectados o no aportan valor descriptivo.</li>
+                            <li><b>Captura Completa de Descripciones en Contingencias No-Comuna / Sistemas</b>: optimización de <code>extraerDetallePuntual</code> para priorizar renglones descriptivos secundarios operativos (ej. <i>Dificultad para visualizar TNT Sports en applicativo HBO MAX</i> o contingencias preventivas completas de Subtel), descartando columnas genéricas de Siebel/CRM (<i>Servicio TV</i>, <i>Canal premium no disponible</i>, etc.).</li>
+                            <li><b>Sanitizador Universal de Zonas (<code>limpiarZona</code>)</b>: depuración automática de prefijos (<i>Comuna:</i>, <i>Sector:</i>), sufijos de región (<i>, XIV Región</i>, <i>, RM</i>, <i>, III R</i>) y nemónicos de sitio o POPs adyacentes (<i>GVB013</i>), normalizando además mayúsculas y acentos.</li>
+                            <li><b>Extracción de Causa Técnica Real</b>: mejora del parser de detalle para capturar automáticamente la causa y tipo de falla del ticket de red (ej. <i>Caída de Sitios — Corte de Fibra</i>, <i>Corte Energía</i>, <i>Falla HW</i>) para la vista detallada.</li>
+                        </ul>
+                    </li>
+                    <li><b>Corrección de Cierre Involuntario de Ventanas Modales al Seleccionar Texto (Backdrop Drag & Drop)</b>:
+                        <ul>
+                            <li><b>Modal de Contenedor (FAST 2.0)</b>: corrección del evento de clic en <code>#container-modal-overlay</code> implementando la validación <code>containerBackdropDown</code>. Se evita que la ventana modal se cierre cuando el usuario arrastra una selección de texto dentro de la caja de nombre (<code>#cont-edit-name</code>) y suelta el cursor sobre el fondo oscuro exterior.</li>
+                            <li><b>Generalización en Todas las Modales</b>: aplicación de la misma protección en el selector de modo (<code>#mode-picker-overlay</code>), ajustes de hoja (<code>#settings-overlay</code>), confirmación (<code>#confirm-overlay</code>) y en los módulos de <b>Enlaces</b> y <b>Tipificaciones</b>, garantizando que el fondo solo cierre la ventana cuando el clic (mousedown + mouseup) se origina e inicia deliberadamente sobre el propio fondo backdrop.</li>
+                        </ul>
+                    </li>
+                    <li><b>Mejora de Accesibilidad y Usabilidad: Barras de Desplazamiento (Scrollbar) Ampliadas a 9px</b>:
+                        <ul>
+                            <li><b>Estandarización Global de 9px</b>: ampliación del ancho y alto de las barras de scroll de 4px a <b>9px</b> (con radio de curvatura de 5px y efecto <i>hover</i> destacado con <code>var(--muted)</code>) en todo el aplicativo.</li>
+                            <li><b>Módulos y Herramientas Actualizadas</b>: aplicado en el <b>Gestor Principal</b> (<code>#main</code>, modal de ajustes, notas rápidas y Vault), <b>FAST 2.0</b> (lienzo de tarjetas, panel lateral drawer y editor modal), <b>Radar de Contingencias Pro</b>, <b>Enlaces</b>, <b>Tipificaciones</b> (árbol de motivos, vista previa y notas), <b>Tráfico</b> (panel principal y tabla de desglose), <b>Calculadora de Días</b>, <b>Ciclos</b>, <b>Horarios</b> y <b>OCC</b>.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Multi-Selección de Tarjetas (Ctrl + Clic), Barra Flotante y Editor de Contenedor con Tipografía Puntual</b>:
+                        <ul>
+                            <li><b>Multi-Selección Ergonómica (<code>Ctrl + Clic</code> / <code>Cmd + Clic</code>)</b>: selección y deselección individual de tarjetas libres y contenidas con realce visual (borde azul brillante de 2.5px y distintivo animado de checkmark <code>✓</code>). Al usar Ctrl+Clic, se anula la copia al portapapeles y la apertura del drawer lateral.</li>
+                            <li><b>Barra Flotante de Acción Rápida (Floating Toolbar)</b>: barra inferior animada con diseño glassmorphic que reporta el conteo de tarjetas seleccionadas, botón <code>📦 Agregar a contenedor</code> y botón <code>✕ Deseleccionar</code> (integrado con la tecla <code>Escape</code> y clics en el lienzo).</li>
+                            <li><b>Creación y Reubicación Automática en Contenedor</b>: agrupa instantáneamente las tarjetas seleccionadas en un nuevo contenedor y lo posiciona en <code>rootOrder</code> en el lugar exacto de la primera tarjeta seleccionada, retirando las tarjetas de la raíz sin duplicados.</li>
+                            <li><b>Editor de Contenedor con Tamaño de Fuente Puntual</b>: se incorporó el selector de <b>Tamaño de fuente del título</b> (<code>11px</code> a <code>18px</code>) en el modal de creación y edición de contenedor (<code>cont.titleFontSize</code>), permitiendo personalizar la jerarquía visual de cada contenedor de forma individual sin alterar la configuración global de la hoja.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Sincronización Dimensional y Cuadratura de Cuadrícula (N Tarjetas = N Columnas Exactas)</b>:
+                        <ul>
+                            <li><b>Ancho Proporcional Exacto a N Tarjetas Libres</b>: el ancho exterior de un contenedor con $N$ tarjetas se calcula matemáticamente como <code>N * cardSize.w + (N - 1) * GRID_GAP</code> (ej. 2 tarjetas dentro = 310px, exactamente el espacio de 2 tarjetas libres + 1 espacio de separación). Esto garantiza que las tarjetas libres contiguas y las filas inferiores se alineen columna a columna con precisión de píxel sin desbordar ni empujar el orden.</li>
+                            <li><b>Contención y Bloqueo de Desborde Vertical</b>: se configuraron restricciones estrictas (<code>max-height: var(--cont-h)</code>, <code>min-height: 0</code>, <code>overflow: hidden</code> y <code>align-self: flex-start</code>) en <code>.container-block</code>, <code>.container-body</code> y <code>.container-body .card-item</code>, garantizando que el bloque del contenedor posea <b>exactamente la misma altura (píxel por píxel)</b> que las tarjetas libres contiguas sin importar el texto interno.</li>
+                            <li><b>Distribución Flexible Interna</b>: las tarjetas dentro de los contenedores emplean <code>flex: 1 1 0</code> con <code>min-width: 0</code> y <code>overflow: hidden</code>, distribuyéndose armónicamente en el ancho asignado para ese número de columnas.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Optimización y Limpieza de la Cabecera del Contenedor (Priorización del Nombre)</b>:
+                        <ul>
+                            <li><b>Eliminación de Elementos Recargados</b>: se eliminaron de la barra de título el indicador numérico de tarjetas (badge), el botón de lápiz (<code>✏️</code>) y el botón de escoba (<code>🧹</code>).</li>
+                            <li><b>Reubicación Estratégica en Menú de Opciones (<code>•••</code>)</b>: tanto <i>«✏️ Editar contenedor»</i> como <i>«🧹 Compactar espacios vacíos»</i> pasaron a ubicarse en las primeras posiciones del menú contextual <code>•••</code>.</li>
+                            <li><b>Máximo Espacio para el Nombre del Contenedor</b>: la cabecera ahora solo contiene el manipulador <code>⠿</code>, el título con expansión completa (<code>flex: 1 1 auto</code>, <code>overflow: hidden</code> y <code>text-overflow: ellipsis</code>), el botón <code>＋</code> y el botón <code>•••</code>.</li>
+                            <li><b>Desplazamiento del Manipulador al Extremo Izquierdo</b>: se redujo el padding lateral izquierdo de la cabecera a <code>2px</code> y los márgenes del manipulador <code>⠿</code>, permitiendo que el texto del título comience inmediatamente desde el extremo izquierdo para aprovechar al máximo el ancho visual en contenedores de 1 o 2 tarjetas.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">30 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Nuevo «Modo Contenedor + Tarjetas» con Flujo Horizontal Unificado</b>: incorporación del 4to modo de hoja en FAST donde los Contenedores y las Tarjetas Libres conviven armónicamente lado a lado en un único lienzo compartido con salto de línea natural (wrap).</li>
+                    <li><b>FAST 2.0 — Uniformidad de Altura y Proporciones</b>: el bloque del contenedor posee la misma altura total que las tarjetas libres fuera de él (<code>cardSize.h</code>). Dentro del contenedor, las tarjetas se alinean horizontalmente con una altura adaptada (<code>cardSize.h - 38px</code>), dejando visible la cabecera con el título y el botón directo <code>＋</code>. Se eliminó el modo colapsar para mantener la armonía de la rejilla.</li>
+                    <li><b>FAST 2.0 — Corrección de Modales y Creación Directa</b>: corrección del anidamiento en el DOM HTML y corrección de sintaxis CSS de <code>#container-modal-overlay</code> (asegurando posición centrada modal con fondo oscuro y paleta de colores activa). El botón <code>➕ Tarjeta</code> abre directamente el editor modal y el botón <code>📦 Contenedor</code> en la barra superior abre de forma instantánea el modal de creación de contenedor con atajo Enter.</li>
+                    <li><b>FAST 2.0 — Auditoría Integral de Lógicas y Operaciones</b>:
+                        <ul>
+                            <li><b>Pegado de Tarjetas Completas (Ctrl+V)</b>: habilitado en modo contenedores tanto en slots vacíos como en zona libre.</li>
+                            <li><b>Duplicación de Hojas con Contenedores</b>: regeneración completa de IDs únicos para contenedores y tarjetas evitando colisiones entre pestañas.</li>
+                            <li><b>Eliminación y Compactación</b>: corrección del diálogo de confirmación y sincronización automática del orden raíz (<code>rootOrder</code>) al compactar o borrar tarjetas/contenedores.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Sistema Completo de Arrastre y Reordenación (Contenedores y Tarjetas)</b>:
+                        <ul>
+                            <li><b>Arrastre de Contenedores por Mango (⠿) o Cabecera</b>: soporte para arrastrar contenedores y reubicarlos fluidamente en el flujo horizontal con indicador visual previo/posterior (borde azul izquierdo o derecho) y tarjeta fantasma (<code>container-ghost</code>).</li>
+                            <li><b>Persistencia de Espacios Vacíos (Empty Slots) Idéntico a Modo Tarjetas</b>: al mover cualquier tarjeta (tanto dentro de un contenedor como en la zona libre de tarjetas), su posición de origen permanece intacta como un espacio vacío (<code>empty-slot</code> con <code>＋</code>) sincronizado en su posición exacta en <code>sheet.rootOrder</code> y en <code>sheet.cards</code>.</li>
+                            <li><b>Intercambio (Swap) y Ocupación de Slots</b>: al soltar sobre un slot vacío, la tarjeta lo ocupa; al soltar sobre otra tarjeta existente, ambas intercambian posiciones manteniendo intactos sus contenedores o estados libres.</li>
+                            <li><b>Preservación de Espacios Vacíos Internos</b>: corrección en <code>createEmptySlot</code> para almacenar siempre <code>containerId</code>, asegurando que los slots generados al mover tarjetas permanezcan dentro de su contenedor respectivo.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Contenedores de Continuidad Automáticos al Tocar el Límite de Ventana</b>:
+                        <ul>
+                            <li><b>Segmentación Inteligente por Ancho de Pantalla</b>: cuando un contenedor supera la cantidad de tarjetas que caben en una fila antes de tocar el borde derecho de la ventana, se abre automáticamente un nuevo <i>Contenedor de Continuidad</i> en la línea inferior que alberga las tarjetas siguientes.</li>
+                            <li><b>Cabecera Minimalista Exclusiva con Botón ＋</b>: el contenedor de continuidad mantiene el color y estilo del contenedor principal pero omite todo texto de título, botones de editar, compactar, menú y mango <code>⠿</code>, conservando exclusivamente el botón <code>＋</code> para agregar tarjetas.</li>
+                            <li><b>Mover Todo en Bloque</b>: al arrastrar el mango <code>⠿</code> del contenedor principal, todo el conjunto (contenedor inicial y sus contenedores de continuidad con todas sus tarjetas) se mueve y reordena como una sola entidad unificada.</li>
+                            <li><b>Adaptabilidad Dinámica (Resize)</b>: ajuste automático con debounce ante cualquier cambio de tamaño de la ventana.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Copia al Clic</b>: soporte completo para copiar el texto de las tarjetas al hacer clic en modo contenedores.</li>
+                    <li><b>FAST 2.0 — Ajustes de Hoja y Vista Previa en Vivo</b>: panel de ajustes con control del tamaño de fuente del título del contenedor (<code>containerTitleFontSize</code>) y vista previa en tiempo real que modela el contenedor y una tarjeta libre conviviendo lado a lado con idéntica altura total.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">28 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Búsqueda Integral en Cuerpo de Tarjetas</b>: ampliación del motor de búsqueda para indexar y evaluar no solo los títulos y cabeceras, sino también el 100% del texto del cuerpo, notas internas y enlaces de cada tarjeta. Se eliminó la restricción que descartaba coincidencias si el término no figuraba en el título.</li>
+                    <li><b>FAST 2.0 — Resaltado Multi-Término en Tiempo Real</b>: optimización del algoritmo de resaltado visual (<code>buildHighlightRe</code>) para marcar simultáneamente todas las palabras buscadas tanto en el título como en el cuerpo de las tarjetas y celdas.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">27 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Guardado y Copiado de Imágenes en Alta Calidad (Fidelidad Nativa)</b>: optimización integral del procesamiento de imágenes en tarjetas. Se eliminó la compresión JPEG destructiva previa (80% a 1.200 px), aumentando el techo de resolución a <b>2.560 px (Ultra-HD / 2K)</b> con preservación 100% sin pérdida (lossless PNG) para capturas de pantalla, esquemas y transparencias.</li>
+                    <li><b>FAST 2.0 — Copiado Nativo al Portapapeles con Cero Pérdida</b>: integración del módulo <code>nativeImage</code> de Electron para inyectar directamente mapas de bits de máxima resolución en el portapapeles del sistema operativo (compatible con WhatsApp Desktop, Paint, Word, Teams y navegadores), junto con conversión directa Base64 a Blob PNG sin paso por canvas degradante.</li>
+                    <li><b>FAST 2.0 — Pegado Directo de Capturas y Renderizado Nítido</b>: soporte para lectura directa de imágenes desde el portapapeles del sistema con <code>clipboard.readImage()</code> y mejora del renderizado CSS con <code>image-rendering: -webkit-optimize-contrast</code> para previsualizaciones nítidas en tarjetas y visor ampliado.</li>
+                </ul>
+            </div>
+        </section>
 
         <section class="entry">
             <div class="enc"><span class="fecha">25 ago 2026</span><span class="ver">v6.1.2</span><span class="agente agy">Antigravity</span></div>

@@ -163,8 +163,13 @@
             padding: 14px 16px;
             position: relative;
         }
-        #content::-webkit-scrollbar { width: 4px; }
-        #content::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+        #content::-webkit-scrollbar { width: 9px; height: 9px; }
+        #content::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 5px; }
+        #content::-webkit-scrollbar-thumb:hover { background: var(--muted); }
         #cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -213,6 +218,36 @@
         }
         .card-item.dragging { opacity: 0.25; transform: scale(0.96); border-style: dashed; transition: none; }
         .card-item.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59,130,246,0.35); }
+        .card-item.multi-selected {
+            outline: 2.5px solid var(--primary) !important;
+            outline-offset: -2.5px;
+            box-shadow: 0 0 16px rgba(59, 130, 246, 0.6), inset 0 0 0 1px rgba(255,255,255,0.2) !important;
+            transform: translateY(-2px);
+        }
+        .card-item.multi-selected::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            z-index: 10;
+            pointer-events: none;
+            animation: popIn 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
         .card-item.empty-slot {
             background: rgba(255,255,255,0.02) !important;
             border: 2px dashed rgba(255,255,255,0.14) !important;
@@ -503,6 +538,7 @@
             max-height: 100%;
             object-fit: contain;
             pointer-events: none;
+            image-rendering: -webkit-optimize-contrast;
         }
         .img-card-noimg {
             font-size: 13px;
@@ -604,6 +640,409 @@
         #content[data-mode="images"] #cards-container {
             gap: 10px;
             align-content: start;
+        }
+
+        /* ============================================================
+               MODO CONTENEDOR + TARJETAS
+               ============================================================ */
+        #content[data-mode="containers"] {
+            padding: 10px;
+            overflow-y: auto;
+        }
+        #content[data-mode="containers"] #cards-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            align-content: flex-start;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #content[data-mode="containers"] #cards-container > .card-item {
+            flex-shrink: 0;
+            box-sizing: border-box;
+            align-self: flex-start;
+        }
+        .container-block {
+            background: var(--surface);
+            border: 2px solid var(--cont-color, var(--primary));
+            border-radius: 8px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+            display: inline-flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            max-width: 100%;
+            min-height: 0;
+            height: var(--cont-h, 190px);
+            max-height: var(--cont-h, 190px);
+            transition: box-shadow 0.15s ease, border-color 0.15s ease;
+            overflow: hidden;
+            align-self: flex-start;
+        }
+        .container-block.container-continuity {
+            border-top: 2px dashed var(--cont-color, var(--primary));
+            opacity: 0.96;
+        }
+        .container-block.container-continuity .container-hdr {
+            background: linear-gradient(to right, var(--cont-bg, rgba(59,130,246,0.15)), rgba(0,0,0,0.25));
+        }
+        .container-cont-indicator {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            margin-left: 4px;
+            letter-spacing: 0.3px;
+        }
+        .container-block.drag-over {
+            border-style: dashed;
+            box-shadow: 0 0 0 3px var(--cont-color, var(--primary)), 0 6px 20px rgba(0,0,0,0.4);
+        }
+        .container-block.dragging {
+            opacity: 0.35;
+            transform: scale(0.98);
+        }
+        .container-block.drag-target-before, .card-item.drag-target-before {
+            border-left: 4px solid var(--primary) !important;
+            box-shadow: -4px 0 14px rgba(59,130,246,0.6) !important;
+        }
+        .container-block.drag-target-after, .card-item.drag-target-after {
+            border-right: 4px solid var(--primary) !important;
+            box-shadow: 4px 0 14px rgba(59,130,246,0.6) !important;
+        }
+        .container-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            opacity: 0.94;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.75);
+            border-radius: 8px;
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            padding: 10px 16px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform: scale(1.03);
+            user-select: none;
+        }
+        .container-hdr {
+            height: 28px;
+            min-height: 28px;
+            max-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+            padding: 0 4px 0 2px;
+            background: linear-gradient(to right, var(--cont-bg, rgba(59,130,246,0.2)), rgba(0,0,0,0.3));
+            border-bottom: 1px solid var(--border);
+            user-select: none;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        .container-hdr-left {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow: hidden;
+        }
+        .container-handle {
+            cursor: grab;
+            color: var(--muted);
+            font-size: 12px;
+            padding: 1px 2px;
+            border-radius: 3px;
+            transition: color 0.15s;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-left: 1px;
+        }
+        .container-handle:hover { color: var(--text); background: var(--surface2); }
+        .container-title {
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: opacity 0.15s;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .container-title:hover { opacity: 0.85; text-decoration: underline; }
+        .cont-add-btn {
+            background: var(--cont-color, var(--primary));
+            border: 1px solid rgba(255,255,255,0.35);
+            color: #fff;
+            border-radius: 4px;
+            padding: 0 5px;
+            height: 19px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            transition: transform 0.12s, filter 0.15s;
+            flex-shrink: 0;
+        }
+        .cont-add-btn:hover {
+            transform: scale(1.08);
+            filter: brightness(1.2);
+        }
+        .cont-add-btn:active {
+            transform: scale(0.96);
+        }
+        .container-hdr-right {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+        .cont-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 4px;
+            padding: 0 4px;
+            height: 19px;
+            font-size: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            font-family: var(--font);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .cont-btn:hover {
+            background: var(--surface3);
+            border-color: var(--border2);
+        }
+        .container-body {
+            padding: 3px 4px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 6px;
+            align-items: stretch;
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: calc(100% - 28px);
+            width: 100%;
+            background: rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        .container-body .card-item {
+            flex: 1 1 0 !important;
+            width: 0 !important;
+            min-width: 0 !important;
+            max-width: none !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            max-height: 100% !important;
+            flex-shrink: 1 !important;
+            padding: 4px 6px 3px !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+        }
+        .container-body .card-item .card-top {
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+        .container-body .card-item .card-body-preview {
+            min-height: 0;
+            flex: 1 1 auto;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        .container-body .card-item .card-copy-row {
+            flex-shrink: 0;
+            margin-top: auto;
+            padding-top: 1px;
+        }
+        .container-empty-inline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border: 1.5px dashed var(--border2);
+            border-radius: 6px;
+            color: var(--muted);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            white-space: nowrap;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        .container-empty-inline:hover {
+            border-color: var(--cont-color, var(--primary));
+            color: var(--text);
+            background: rgba(255,255,255,0.04);
+        }
+
+        /* Modal de Contenedor */
+        #container-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 330;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #container-modal-overlay.show { display: flex; }
+        .container-modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+        .container-modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px 20px;
+        }
+
+        /* Barra flotante de multi-selección (Agregar a Contenedor) */
+        #floating-selection-bar {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(18, 25, 38, 0.95);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 30px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 24px rgba(59, 130, 246, 0.25);
+            padding: 8px 14px 8px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 250;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+        }
+        #floating-selection-bar.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .floating-selection-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            font-size: 12.5px;
+            font-weight: 600;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .floating-selection-icon {
+            font-size: 15px;
+        }
+        .btn-floating-action {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font);
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.4);
+            transition: all 0.15s ease;
+        }
+        .btn-floating-action:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.55);
+        }
+        .btn-floating-cancel {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-floating-cancel:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Vista previa en ajustes para Modo Contenedor */
+        .settings-cont-preview-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px dashed var(--border2);
+            border-radius: 8px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .sp-cont-box {
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+        }
+        .sp-cont-hdr {
+            padding: 5px 10px;
+            background: rgba(59,130,246,0.2);
+            border-bottom: 1px solid var(--border);
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 13px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sp-cont-body {
+            padding: 8px;
+            display: flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.12);
         }
 
         /* ============================================================
@@ -1319,8 +1758,9 @@
         }
         #drawer-hdr .dbtn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
         #drawer-scroll { flex: 1; overflow-y: auto; padding: 10px 12px; }
-        #drawer-scroll::-webkit-scrollbar { width: 4px; }
-        #drawer-scroll::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+        #drawer-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+        #drawer-scroll::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 5px; }
+        #drawer-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); }
         .d-section-label {
             font-size: 10px;
             font-weight: 700;
@@ -1361,7 +1801,7 @@
             aspect-ratio: 1 / 1;
             background: var(--bg);
         }
-        .d-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .d-img img { width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: -webkit-optimize-contrast; }
         .d-img:hover { border-color: var(--primary); }
         .d-img .d-img-actions {
             position: absolute;
@@ -1658,6 +2098,38 @@
             border: 1px solid var(--border);
             border-radius: var(--radius);
         }
+        .settings-mode-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .btn-transform-mode {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: var(--radius);
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            width: fit-content;
+        }
+        .btn-transform-mode:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+        }
+        .transform-hint {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.35;
+        }
         .px-val { color: var(--primary); font-weight: 700; }
         #settings-overlay input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
         .settings-color-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
@@ -1767,8 +2239,9 @@
             padding: 14px 18px;
             overflow-y: auto;
         }
-        .editor-panel::-webkit-scrollbar { width: 4px; }
-        .editor-panel::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+        .editor-panel::-webkit-scrollbar { width: 9px; height: 9px; }
+        .editor-panel::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 5px; }
+        .editor-panel::-webkit-scrollbar-thumb:hover { background: var(--muted); }
         .modal-row {
             display: flex;
             gap: 10px;
@@ -2219,6 +2692,7 @@
             <span id="search-result-count"></span>
         </div>
         <button class="tb-btn" id="btn-new-card" title="Nueva tarjeta (Ctrl+N)">➕ Tarjeta</button>
+        <button class="tb-btn" id="btn-new-container" title="Nuevo contenedor" style="display:none;">📦 Contenedor</button>
         <button class="tb-btn" id="btn-paste-card" title="Pegar tarjeta copiada (Ctrl+V)" style="display:none;">📥 Pegar</button>
         <button class="tb-btn" id="btn-compactar" title="Compactar y eliminar espacios vacíos">🧹</button>
         <button class="tb-btn" id="btn-fav-filter" title="Mostrar solo favoritos">⭐</button>
@@ -2282,13 +2756,23 @@
             <div class="settings-body">
                 <div class="modal-field">
                     <label>Modo de la pestaña</label>
-                    <div id="settings-mode" class="settings-mode-label"></div>
+                    <div class="settings-mode-wrap">
+                        <div id="settings-mode" class="settings-mode-label"></div>
+                        <div id="settings-transform-area"></div>
+                    </div>
                 </div>
                 <div class="modal-field">
                     <label>Color de la hoja</label>
                     <div class="settings-color-row" id="settings-color-row"></div>
                 </div>
                 <div id="settings-font-fields">
+                    <div class="modal-field" id="settings-cont-title-fs-field" style="display:none">
+                        <label>Tamaño de título del contenedor: <span id="settings-cont-title-fs-val" class="px-val"></span> px</label>
+                        <input type="range" id="settings-cont-title-fs-slider" min="10" max="24" step="1" />
+                        <div class="settings-numrow">
+                            <input type="number" id="settings-cont-title-fs-num" min="10" max="24" step="1" /> <span>px</span>
+                        </div>
+                    </div>
                     <div class="modal-field" id="settings-title-fs-field">
                         <label>Tamaño de fuente del título: <span id="settings-title-fs-val" class="px-val"></span> px</label>
                         <input type="range" id="settings-title-fs-slider" min="9" max="28" step="1" />
@@ -2371,6 +2855,41 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONTENEDOR (Crear / Editar) -->
+    <div id="container-modal-overlay">
+        <div class="container-modal-box">
+            <div class="modal-title">
+                <span id="container-modal-title">📦 Nuevo Contenedor</span>
+                <button class="close-modal" id="container-modal-close">✕</button>
+            </div>
+            <div class="container-modal-body">
+                <div class="modal-field">
+                    <label>Nombre del contenedor</label>
+                    <input type="text" id="cont-edit-name" placeholder="Ej: PLANES MÓVILES, DUDAS FRECUENTES..." maxlength="60" />
+                </div>
+                <div class="modal-field">
+                    <label>Color del contenedor</label>
+                    <div class="settings-color-row" id="cont-color-row"></div>
+                </div>
+                <div class="modal-field">
+                    <label>Tamaño de fuente del título</label>
+                    <select id="cont-edit-font-size" style="padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 12px; outline: none; font-family: var(--font);">
+                        <option value="11px">11px — Pequeño</option>
+                        <option value="12px">12px — Estándar</option>
+                        <option value="13px" selected>13px — Mediano</option>
+                        <option value="14px">14px — Grande</option>
+                        <option value="16px">16px — Muy Grande</option>
+                        <option value="18px">18px — Extra Grande</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="cont-modal-cancel">Cancelar</button>
+                <button class="btn-save" id="cont-modal-save">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL EDITOR -->
     <div id="modal-overlay">
         <div class="modal-box">
@@ -2383,6 +2902,10 @@
                     <div class="modal-field">
                         <label>Hoja</label>
                         <select id="edit-sheet"></select>
+                    </div>
+                    <div class="modal-field" id="edit-container-field" style="display:none; flex:1 1 180px;">
+                        <label>Contenedor</label>
+                        <select id="edit-container-select"></select>
                     </div>
                     <div class="modal-field" style="flex:0 0 auto;">
                         <label>Color</label>
@@ -2482,11 +3005,23 @@
         </div>
     </div>
 
+    <!-- BARRA FLOTANTE DE MULTI-SELECCIÓN (Agregar a Contenedor) -->
+    <div id="floating-selection-bar">
+        <div class="floating-selection-info">
+            <span class="floating-selection-icon">📦</span>
+            <span id="floating-selection-count">0 tarjetas seleccionadas</span>
+        </div>
+        <button class="btn-floating-action" id="btn-floating-add-container">
+            <span>➕</span> Agregar a contenedor
+        </button>
+        <button class="btn-floating-cancel" id="btn-floating-clear" title="Deseleccionar todas (Esc)">✕</button>
+    </div>
+
     <!-- TOAST -->
     <div id="toast-container"></div>
 
     <script>
-        const { ipcRenderer, clipboard } = require('electron');
+        const { ipcRenderer, clipboard, nativeImage } = require('electron');
         const fs = require('fs');
         const path = require('path');
         const os = require('os');
@@ -2501,12 +3036,14 @@
             '#fce4ec', '#f8bbd0', '#f48fb1', '#f06292', '#ec407a', '#d81b60'
         ];
         const SHEET_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#06b6d4', '#f97316', '#14b8a6'];
+        const CONTAINER_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#06b6d4', '#f97316', '#ec4899', '#6366f1', '#14b8a6'];
 
         // Modos de hoja
         const SHEET_MODES = {
-            cards:   { icon: '📇', label: 'Tarjetas',            desc: 'Tarjetas copy-first con formato WhatsApp' },
-            images:  { icon: '🖼️', label: 'Buscador de imágenes', desc: 'Tarjetas alargadas: título + imagen + texto' },
-            process: { icon: '⚙️', label: 'Procesos',             desc: 'Múltiples tablas con edición en línea' }
+            cards:      { icon: '📇', label: 'Tarjetas',               desc: 'Tarjetas copy-first con formato WhatsApp' },
+            containers: { icon: '🗂️', label: 'Contenedor + Tarjetas',  desc: 'Contenedores temáticos con tarjetas agrupadas y tarjetas libres' },
+            images:     { icon: '🖼️', label: 'Buscador de imágenes',    desc: 'Tarjetas alargadas: título + imagen + texto' },
+            process:    { icon: '⚙️', label: 'Procesos',                desc: 'Múltiples tablas con edición en línea' }
         };
         const DEFAULT_HEADERS = ['Título', 'Tipo', 'Descripción', 'Área', 'Prioridad', 'Detalles'];
         const DEFAULT_COL2_OPTIONS = ['Opción A', 'Opción B', 'Opción C'];
@@ -2546,12 +3083,37 @@
         const searchInput = document.getElementById('search-input');
         const searchResultCount = document.getElementById('search-result-count');
         const btnNewCard = document.getElementById('btn-new-card');
+        const btnNewContainer = document.getElementById('btn-new-container');
         const btnPasteCard = document.getElementById('btn-paste-card');
         const btnCompactar = document.getElementById('btn-compactar');
         const btnFavFilter = document.getElementById('btn-fav-filter');
         const btnView = document.getElementById('btn-view');
         const btnSheetAdd = document.getElementById('sheet-add-btn');
         const dragGuide = document.getElementById('drag-guide');
+
+        // Contenedor Modal
+        const containerModalOverlay = document.getElementById('container-modal-overlay');
+        const containerModalClose = document.getElementById('container-modal-close');
+        const containerModalCancel = document.getElementById('cont-modal-cancel');
+        const containerModalSave = document.getElementById('cont-modal-save');
+        const containerModalTitle = document.getElementById('container-modal-title');
+        const contEditName = document.getElementById('cont-edit-name');
+        const contColorRow = document.getElementById('cont-color-row');
+        const contEditFontSize = document.getElementById('cont-edit-font-size');
+        const settingsContTitleFsField = document.getElementById('settings-cont-title-fs-field');
+        const settingsContTitleFsVal = document.getElementById('settings-cont-title-fs-val');
+        const settingsContTitleFsSlider = document.getElementById('settings-cont-title-fs-slider');
+        const settingsContTitleFsNum = document.getElementById('settings-cont-title-fs-num');
+
+        // Barra Flotante de Multi-Selección
+        const floatingSelectionBar = document.getElementById('floating-selection-bar');
+        const floatingSelectionCount = document.getElementById('floating-selection-count');
+        const btnFloatingAddContainer = document.getElementById('btn-floating-add-container');
+        const btnFloatingClear = document.getElementById('btn-floating-clear');
+
+        // Multi-selección de tarjetas (Ctrl+Clic)
+        let selectedCardIds = new Set();
+        let selectedSheetId = null;
 
         // Drawer
         const drawer = document.getElementById('drawer');
@@ -2568,6 +3130,8 @@
         const modalSave = document.getElementById('modal-save');
         const modalTitleText = document.getElementById('modal-title-text');
         const editSheet = document.getElementById('edit-sheet');
+        const editContainerField = document.getElementById('edit-container-field');
+        const editContainerSelect = document.getElementById('edit-container-select');
         const editColor = document.getElementById('edit-color');
         const editColorBtn = document.getElementById('edit-color-btn');
         const editPinned = document.getElementById('edit-pinned');
@@ -2615,6 +3179,55 @@
         }
 
         // ============================================================
+        // GESTIÓN DE MULTI-SELECCIÓN DE TARJETAS (Ctrl + Clic)
+        // ============================================================
+        function toggleCardSelection(cardId, sheetId) {
+            if (selectedSheetId && selectedSheetId !== sheetId) {
+                selectedCardIds.clear();
+            }
+            selectedSheetId = sheetId;
+
+            if (selectedCardIds.has(cardId)) {
+                selectedCardIds.delete(cardId);
+            } else {
+                selectedCardIds.add(cardId);
+            }
+
+            updateCardSelectionUI();
+        }
+
+        function clearCardSelection() {
+            if (selectedCardIds.size === 0 && (!floatingSelectionBar || !floatingSelectionBar.classList.contains('show'))) return;
+            selectedCardIds.clear();
+            selectedSheetId = null;
+            updateCardSelectionUI();
+        }
+
+        function updateCardSelectionUI() {
+            // Actualizar clases visuales en el DOM
+            document.querySelectorAll('.card-item[data-card-id]').forEach(el => {
+                const cId = el.dataset.cardId;
+                if (selectedCardIds.has(cId)) {
+                    el.classList.add('multi-selected');
+                } else {
+                    el.classList.remove('multi-selected');
+                }
+            });
+
+            // Actualizar barra flotante
+            if (!floatingSelectionBar) return;
+            const count = selectedCardIds.size;
+            if (count > 0) {
+                if (floatingSelectionCount) {
+                    floatingSelectionCount.textContent = `${count} tarjeta${count > 1 ? 's' : ''} seleccionada${count > 1 ? 's' : ''}`;
+                }
+                floatingSelectionBar.classList.add('show');
+            } else {
+                floatingSelectionBar.classList.remove('show');
+            }
+        }
+
+        // ============================================================
         // CONFIRMACIÓN TEMÁTICA
         // ============================================================
         let confirmCb = null;
@@ -2635,8 +3248,12 @@
             if (cb) cb();
         });
         confirmCancel.addEventListener('click', closeConfirm);
+        let confirmBackdropDown = false;
+        confirmOverlay.addEventListener('mousedown', (e) => {
+            confirmBackdropDown = (e.target === confirmOverlay);
+        });
         confirmOverlay.addEventListener('click', (e) => {
-            if (e.target === confirmOverlay) closeConfirm();
+            if (e.target === confirmOverlay && confirmBackdropDown) closeConfirm();
         });
 
         // ============================================================
@@ -2812,8 +3429,8 @@
         function generateId() {
             return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
         }
-        function createEmptySlot() {
-            return { id: 'slot_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), isEmpty: true };
+        function createEmptySlot(containerId = null) {
+            return { id: 'slot_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), containerId: containerId || null, isEmpty: true };
         }
         function numEmoji(n) {
             const map = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
@@ -2869,12 +3486,10 @@
             return normText(state.searchQuery).split(/[^a-z0-9]+/).filter(t => t.length >= 2);
         }
 
-        // Coincidencia de palabra completa (inicio de palabra), sensible a plurales:
-        // "reclamo" también coincide con "reclamos", "reclamación", etc.
+        // Coincidencia flexible por inicio de palabra o subcadena
         function wordMatch(text, token) {
-            if (!text) return false;
-            const re = new RegExp('(^|[^a-z0-9])' + token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-            return re.test(text);
+            if (!text || !token) return false;
+            return text.includes(token);
         }
 
         // Extrae la cabecera de la tipificación: líneas previas a la plantilla de
@@ -2891,26 +3506,39 @@
         }
 
         // Devuelve score de relevancia (0 = sin coincidencia). AND entre términos.
-        // Solo cuenta como resultado si al menos un término aparece en el título o en la
-        // cabecera (Tipo/Área/Subárea/Estado); las menciones únicamente en el cuerpo de
-        // plantilla (campos genéricos) no generan resultados para evitar ruido.
+        // Busca en título, cabecera, cuerpo completo, notas internas y enlaces.
         function cardSearchScore(card, tokens) {
             if (!card || card.isEmpty || !tokens.length) return 0;
-            const title = normText(card.title);
-            const plain = waToPlain(card.body);
+            const title = normText(card.title || '');
+            const plain = waToPlain(card.body || '');
             const body = normText(plain);
-            const header = tipHeader(plain);
+            const header = normText(tipHeader(plain));
+            const notes = normText(card.notes || '');
+            const linksText = normText((card.links || []).map(l => (l.text || '') + ' ' + (l.url || '')).join(' '));
+            const imgLabels = normText((card.images || []).map(i => i.label || '').join(' '));
+
             let score = 0;
-            let headHit = false;
             for (const tok of tokens) {
                 const inTitle = wordMatch(title, tok);
                 const inHeader = wordMatch(header, tok);
                 const inBody = wordMatch(body, tok);
-                if (inTitle || inHeader) headHit = true;
-                if (!inTitle && !inHeader && !inBody) return 0; // AND: todos los términos
-                score += (inTitle ? 30 : 0) + (inHeader ? 15 : 0) + (inBody ? 2 : 0);
+                const inNotes = wordMatch(notes, tok);
+                const inLinks = wordMatch(linksText, tok);
+                const inImgs = wordMatch(imgLabels, tok);
+
+                if (!inTitle && !inHeader && !inBody && !inNotes && !inLinks && !inImgs) {
+                    return 0; // AND: todos los términos deben coincidir en alguna parte de la tarjeta
+                }
+
+                // Ponderación de relevancia
+                if (inTitle) score += 40;
+                if (inHeader) score += 20;
+                if (inBody) score += 10;
+                if (inNotes) score += 5;
+                if (inLinks) score += 5;
+                if (inImgs) score += 5;
             }
-            return headHit ? score : 0;
+            return score;
         }
 
         // Convierte HTML (v1) a texto con marcadores de WhatsApp
@@ -2946,6 +3574,9 @@
         // RENDERIZADO PRINCIPAL
         // ============================================================
         function render() {
+            if (selectedSheetId && selectedSheetId !== state.activeSheetId) {
+                clearCardSelection();
+            }
             renderSheets();
             renderCards();
             renderDrawer();
@@ -2953,6 +3584,7 @@
             updateViewClass();
             updatePasteButtonState();
             collectVisibleCards();
+            updateCardSelectionUI();
         }
         // ---------- SHEETBAR (pestañas estilo Excel) ----------
         function renderSheets() {
@@ -3053,6 +3685,29 @@
             const copy = JSON.parse(JSON.stringify(sheet));
             copy.id = generateId();
             copy.name = sheet.name + ' (copia)';
+
+            const idMap = {};
+            if (Array.isArray(copy.containers)) {
+                copy.containers.forEach(ct => {
+                    const newCtId = generateId();
+                    idMap[ct.id] = newCtId;
+                    ct.id = newCtId;
+                });
+            }
+            if (Array.isArray(copy.cards)) {
+                copy.cards.forEach(c => {
+                    const newCardId = generateId();
+                    idMap[c.id] = newCardId;
+                    c.id = newCardId;
+                    if (c.containerId && idMap[c.containerId]) {
+                        c.containerId = idMap[c.containerId];
+                    }
+                });
+            }
+            if (Array.isArray(copy.rootOrder)) {
+                copy.rootOrder = copy.rootOrder.map(id => idMap[id] || id);
+            }
+
             const idx = state.sheets.indexOf(sheet);
             state.sheets.splice(idx + 1, 0, copy);
             saveData();
@@ -3106,10 +3761,11 @@
             contentEl.dataset.mode = sheet.mode || 'cards';
             if (sheet.mode === 'images') { renderImagesMode(sheet); return; }
             if (sheet.mode === 'process') { renderProcessMode(sheet); return; }
+            if (sheet.mode === 'containers') { renderContainersMode(sheet); return; }
             renderCardsMode(sheet);
         }
 
-        // ---------- MODO TARJETAS (actual, sin cambios) ----------
+        // ---------- MODO TARJETAS Y CONTENEDORES: RENDERIZADO REUTILIZABLE ----------
         // Ajuste automático del título tipo "shrink to fit" (como Excel/Sheets):
         // la fuente se reduce hasta que el título completo cabe en el alto reservado.
         function autofitTitle(titleEl, cardH, startFs) {
@@ -3131,9 +3787,6 @@
             titleEl.style.hyphens = 'none';
             titleEl.style.lineHeight = '1.2';
             titleEl.style.fontSize = (parseFloat(startFs) > 0 ? startFs : 12) + 'px';
-            // El título SIEMPRE se muestra completo: si sobrepasa, se achica la fuente (sin "...").
-            // Mínimo legible: no bajar de 9px. Si aún así no cabe, el excedente se recorta
-            // (deformación asumida por el usuario) en vez de partir palabras.
             const MIN_TITLE_FS = 9;
             while (parseFloat(titleEl.style.fontSize) > MIN_TITLE_FS) {
                 const overH = titleEl.scrollHeight > budget + 1;
@@ -3144,13 +3797,150 @@
             }
         }
 
+        function createCardElement(card, sheet, sheetId, isContained = false) {
+            const cs = sheet.cardSize || { w: 150, h: 190 };
+            const effectiveH = (cs.h || 190);
+            const effectiveW = (cs.w || 150);
+
+            // Caso: Espacio vacío (slot)
+            if (card.isEmpty) {
+                const el = document.createElement('div');
+                el.className = 'card-item empty-slot';
+                el.dataset.cardId = card.id;
+                el.dataset.sheetId = sheetId;
+                if (isContained) {
+                    el.style.flex = '1 1 0';
+                    el.style.width = '0px';
+                    el.style.minWidth = '0px';
+                    el.style.maxWidth = 'none';
+                    el.style.height = '100%';
+                    el.style.maxHeight = '100%';
+                    el.style.minHeight = '0px';
+                } else {
+                    el.style.flex = '0 0 auto';
+                    el.style.width = effectiveW + 'px';
+                    el.style.minWidth = effectiveW + 'px';
+                    el.style.maxWidth = effectiveW + 'px';
+                    el.style.height = effectiveH + 'px';
+                    el.style.maxHeight = effectiveH + 'px';
+                    el.style.minHeight = effectiveH + 'px';
+                }
+                el.style.boxSizing = 'border-box';
+                el.style.flexShrink = isContained ? '1' : '0';
+                el.style.gridRow = 'auto';
+                el.innerHTML = '<span class="slot-plus" title="Crear tarjeta aquí">＋</span><span class="slot-hint">Espacio libre</span>';
+
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openCardEditor(sheetId, null, card.id, card.containerId || null);
+                });
+
+                el.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showEmptySlotContextMenu(e.clientX, e.clientY, sheetId, card.id);
+                });
+
+                return el;
+            }
+
+            const el = document.createElement('div');
+            el.className = 'card-item' + (card.pinned ? ' pinned' : '') + (selectedCardIds.has(card.id) ? ' multi-selected' : '');
+            el.dataset.cardId = card.id;
+            el.dataset.sheetId = sheetId;
+            el.style.backgroundColor = card.color || 'var(--surface2)';
+            el.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
+            if (isContained) {
+                el.style.flex = '1 1 0';
+                el.style.width = '0px';
+                el.style.minWidth = '0px';
+                el.style.maxWidth = 'none';
+                el.style.height = '100%';
+                el.style.maxHeight = '100%';
+                el.style.minHeight = '0px';
+            } else {
+                el.style.flex = '0 0 auto';
+                el.style.width = effectiveW + 'px';
+                el.style.minWidth = effectiveW + 'px';
+                el.style.maxWidth = effectiveW + 'px';
+                el.style.height = effectiveH + 'px';
+                el.style.maxHeight = effectiveH + 'px';
+                el.style.minHeight = effectiveH + 'px';
+            }
+            el.style.boxSizing = 'border-box';
+            el.style.flexShrink = isContained ? '1' : '0';
+            el.style.gridRow = 'auto';
+
+            const bodyPlain = waToPlain(card.body);
+            const imgInd = (card.images && card.images.length) ? `<span class="copy-ind img-count" title="${card.images.length} imagen(es)">${numEmoji(card.images.length)}</span>` : '';
+            const linkInd = (card.links && card.links.length) ? `<span class="copy-ind" title="${card.links.length} enlace(s)">🔗${card.links.length}</span>` : '';
+            const query = state.searchQuery.trim();
+            const badge = (query && state.searchAll && sheetId !== sheet.id) ? `<span class="card-tab-badge">${esc(getSheetById(sheetId)?.name || '')}</span>` : '';
+
+            el.innerHTML = `
+                <div class="card-top">
+                    <span class="card-star">⭐</span>
+                    <div class="card-title">${esc(card.title) || 'Sin título'}</div>
+                </div>
+                <div class="card-body-preview">${esc(bodyPlain)}</div>
+                <div class="card-copy-row">
+                    ${imgInd}${linkInd}${badge}
+                </div>
+            `;
+
+            // Tamaños de fuente base de la hoja o personalizados por tarjeta
+            const defaultTitleFs = (sheet && parseInt(sheet.titleFontSize, 10)) || 12;
+            const defaultBodyFs = (sheet && parseInt(sheet.bodyFontSize, 10)) || 10;
+            const titleFs = parseInt(card.titleFontSize, 10) || defaultTitleFs;
+            const bodyFs = parseInt(card.bodyFontSize, 10) || defaultBodyFs;
+            const tEl = el.querySelector('.card-title');
+            const bEl = el.querySelector('.card-body-preview');
+            if (tEl) tEl.style.fontSize = titleFs + 'px';
+            if (bEl) bEl.style.fontSize = bodyFs + 'px';
+
+            // Interacción clic vs arrastre (umbral 4px) con soporte de Ctrl+Clic para multi-selección
+            el.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                if (e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleCardSelection(card.id, sheetId);
+                    return;
+                }
+                pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
+                document.addEventListener('mousemove', onGlobalMove);
+                document.addEventListener('mouseup', onGlobalUp);
+                document.addEventListener('mouseleave', onGlobalLeave);
+            });
+
+            el.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            el.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showCardContextMenu(e.clientX, e.clientY, sheetId, card.id);
+            });
+
+            autofitTitle(el.querySelector('.card-title'), effectiveH, titleFs);
+            return el;
+        }
+
         function renderCardsMode(sheet) {
             btnNewCard.style.display = '';
+            if (btnNewContainer) btnNewContainer.style.display = 'none';
             btnCompactar.style.display = '';
             btnFavFilter.style.display = '';
             btnView.style.display = '';
             // Grid adaptado al tamaño configurado por hoja
             const cs = sheet.cardSize || { w: 150, h: 190 };
+            cardsContainer.className = '';
+            cardsContainer.style.display = 'grid';
+            cardsContainer.style.flexDirection = '';
+            cardsContainer.style.gap = '10px';
             cardsContainer.style.gridTemplateColumns = 'repeat(auto-fill, ' + cs.w + 'px)';
             cardsContainer.style.gridAutoRows = cs.h + 'px';
             cardsContainer.classList.remove('images-mode');
@@ -3200,94 +3990,233 @@
             }
 
             cards.forEach(({ card, sheetId }) => {
-                // Caso: Espacio vacío (slot)
-                if (card.isEmpty) {
-                    const el = document.createElement('div');
-                    el.className = 'card-item empty-slot';
-                    el.dataset.cardId = card.id;
-                    el.dataset.sheetId = sheetId;
-                    if (sheet.cardSize && sheet.cardSize.w) el.style.minWidth = sheet.cardSize.w + 'px';
-                    if (sheet.cardSize && sheet.cardSize.h) el.style.height = sheet.cardSize.h + 'px';
-                    el.style.gridRow = 'auto';
-                    el.innerHTML = '<span class="slot-plus" title="Crear tarjeta aquí">＋</span><span class="slot-hint">Espacio libre</span>';
+                const el = createCardElement(card, sheet, sheetId, false);
+                cardsContainer.appendChild(el);
+            });
 
-                    el.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        openCardEditor(sheetId, null, card.id);
+            if (query) highlightMatches(query);
+        }
+
+        function getRootOrder(sheet) {
+            if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = [];
+            const validContainers = new Set((sheet.containers || []).map(c => c.id));
+            const validFreeCards = new Set((sheet.cards || []).filter(c => !c.containerId).map(c => c.id));
+
+            // Filtrar IDs obsoletos
+            sheet.rootOrder = sheet.rootOrder.filter(id => validContainers.has(id) || validFreeCards.has(id));
+
+            // Añadir contenedores no presentes
+            (sheet.containers || []).forEach(c => {
+                if (!sheet.rootOrder.includes(c.id)) sheet.rootOrder.push(c.id);
+            });
+            // Añadir tarjetas libres no presentes
+            (sheet.cards || []).filter(c => !c.containerId).forEach(c => {
+                if (!sheet.rootOrder.includes(c.id)) sheet.rootOrder.push(c.id);
+            });
+
+            return sheet.rootOrder;
+        }
+
+        // ---------- MODO CONTENEDOR + TARJETAS ----------
+        function renderContainersMode(sheet) {
+            btnNewCard.style.display = '';
+            if (btnNewContainer) btnNewContainer.style.display = '';
+            btnCompactar.style.display = '';
+            btnFavFilter.style.display = '';
+            btnView.style.display = 'none';
+
+            cardsContainer.className = 'containers-mode';
+            cardsContainer.style.display = 'flex';
+            cardsContainer.style.flexDirection = 'row';
+            cardsContainer.style.flexWrap = 'wrap';
+            cardsContainer.style.alignItems = 'flex-start';
+            cardsContainer.style.alignContent = 'flex-start';
+            cardsContainer.style.gap = '10px';
+            cardsContainer.style.gridTemplateColumns = '';
+            cardsContainer.style.gridAutoRows = '';
+
+            const cs = sheet.cardSize || { w: 150, h: 190 };
+            const tokens = searchTokens();
+            const query = state.searchQuery.trim();
+
+            if (!Array.isArray(sheet.containers)) sheet.containers = [];
+
+            const allCards = sheet.cards || [];
+            const rootOrder = getRootOrder(sheet);
+
+            if (!rootOrder.length) {
+                if (query) {
+                    cardsContainer.innerHTML = '<div class="empty-cards">Sin resultados.<div class="hint">Prueba con otra búsqueda</div></div>';
+                } else if (state.favOnly) {
+                    cardsContainer.innerHTML = '<div class="empty-cards">Sin favoritas.<div class="hint">Marca una tarjeta con ⭐ en su editor</div></div>';
+                } else {
+                    cardsContainer.innerHTML = '<div class="empty-cards">No hay tarjetas ni contenedores.<div class="hint">Pulsa "➕ Tarjeta" o "📦 Contenedor" para comenzar</div></div>';
+                }
+                return;
+            }
+
+            // Ancho disponible del lienzo contenedor y cálculo de slots
+            const GRID_GAP = 10;
+            const containerWidth = cardsContainer.clientWidth || (window.innerWidth - 80);
+            const cardSlotWidth = (cs.w || 150) + GRID_GAP;
+            // Límite de tarjetas por fila en un contenedor para no exceder la ventana
+            const maxCardsPerSegment = Math.max(1, Math.floor((containerWidth + GRID_GAP) / cardSlotWidth));
+
+            // Renderizar elementos raíz en el orden establecido (side-by-side en la misma grilla horizontal)
+            rootOrder.forEach((itemId) => {
+                // Caso A: Es un Contenedor
+                const cont = sheet.containers.find(c => c.id === itemId);
+                if (cont) {
+                    let contCards = allCards.filter(c => c.containerId === cont.id);
+                    if (tokens.length) {
+                        contCards = contCards.filter(c => !c.isEmpty && cardSearchScore(c, tokens) > 0);
+                    } else if (state.favOnly) {
+                        contCards = contCards.filter(c => !c.isEmpty && c.pinned);
+                    }
+
+                    if ((tokens.length || state.favOnly) && !contCards.length) return;
+
+                    const nonEmpties = contCards.filter(c => !c.isEmpty);
+                    const titleFs = cont.titleFontSize
+                        ? (typeof cont.titleFontSize === 'number' ? cont.titleFontSize + 'px' : cont.titleFontSize)
+                        : ((sheet.containerTitleFontSize ? sheet.containerTitleFontSize + 'px' : '13px'));
+
+                    // Dividir en segmentos según el límite de la ventana
+                    const segments = [];
+                    if (!contCards.length) {
+                        segments.push([]); // Contenedor vacío (segmento único)
+                    } else {
+                        for (let i = 0; i < contCards.length; i += maxCardsPerSegment) {
+                            segments.push(contCards.slice(i, i + maxCardsPerSegment));
+                        }
+                    }
+
+                    segments.forEach((segCards, segIdx) => {
+                        const isMain = segIdx === 0;
+                        const block = document.createElement('div');
+                        block.className = 'container-block' + (isMain ? '' : ' container-continuity');
+                        block.dataset.containerId = cont.id;
+                        block.dataset.sheetId = sheet.id;
+                        block.dataset.segmentIndex = segIdx;
+
+                        // Ancho exacto igual a N tarjetas exteriores + gaps
+                        const numCards = segCards.length;
+                        const blockW = numCards === 0 ? (cs.w || 150) : (numCards * (cs.w || 150) + (numCards - 1) * GRID_GAP);
+                        const blockH = (cs.h || 190);
+
+                        block.style.setProperty('--cont-h', blockH + 'px');
+                        block.style.width = blockW + 'px';
+                        block.style.minWidth = blockW + 'px';
+                        block.style.maxWidth = blockW + 'px';
+                        block.style.height = blockH + 'px';
+                        block.style.maxHeight = blockH + 'px';
+                        block.style.minHeight = blockH + 'px';
+                        block.style.boxSizing = 'border-box';
+                        block.style.flexShrink = '0';
+                        block.style.flexGrow = '0';
+                        block.style.setProperty('--cont-color', cont.color || 'var(--primary)');
+                        block.style.setProperty('--cont-bg', (cont.color || '#3b82f6') + '2a');
+
+                        const hdr = document.createElement('div');
+                        hdr.className = 'container-hdr';
+
+                        if (isMain) {
+                            // Cabecera completa del Contenedor Principal (Nombre priorizado, sin badge; ✏️ y 🧹 accesibles en •••)
+                            hdr.innerHTML = `
+                                <div class="container-hdr-left">
+                                    <span class="container-handle" title="Mover / Reordenar contenedor">⠿</span>
+                                    <span class="container-title" style="font-size: ${titleFs};" title="Clic para editar">${esc(cont.name)}</span>
+                                </div>
+                                <div class="container-hdr-right">
+                                    <button class="cont-add-btn" data-act="add-card" title="Agregar tarjeta a este contenedor">＋</button>
+                                    <button class="cont-btn" data-act="menu" title="Opciones (Editar, compactar, pegar...)">•••</button>
+                                </div>
+                            `;
+
+                            hdr.querySelector('.container-title').addEventListener('click', () => openContainerModal(sheet.id, cont.id));
+                            hdr.querySelector('[data-act="add-card"]').addEventListener('click', () => openCardEditor(sheet.id, null, null, cont.id));
+                            hdr.querySelector('[data-act="menu"]').addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                showContainerContextMenu(e.clientX, e.clientY, sheet.id, cont.id);
+                            });
+                            hdr.addEventListener('contextmenu', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                showContainerContextMenu(e.clientX, e.clientY, sheet.id, cont.id);
+                            });
+
+                            const handleEl = hdr.querySelector('.container-handle');
+                            if (handleEl) {
+                                handleEl.addEventListener('mousedown', (e) => {
+                                    if (e.button !== 0) return;
+                                    e.stopPropagation();
+                                    pressInfo = { type: 'container', sheetId: sheet.id, containerId: cont.id, startX: e.clientX, startY: e.clientY, dragged: false };
+                                    document.addEventListener('mousemove', onGlobalMove);
+                                    document.addEventListener('mouseup', onGlobalUp);
+                                    document.addEventListener('mouseleave', onGlobalLeave);
+                                });
+                            }
+                            hdr.addEventListener('mousedown', (e) => {
+                                if (e.button !== 0) return;
+                                if (e.target.closest('button') || e.target.closest('.container-title')) return;
+                                pressInfo = { type: 'container', sheetId: sheet.id, containerId: cont.id, startX: e.clientX, startY: e.clientY, dragged: false };
+                                document.addEventListener('mousemove', onGlobalMove);
+                                document.addEventListener('mouseup', onGlobalUp);
+                                document.addEventListener('mouseleave', onGlobalLeave);
+                            });
+                        } else {
+                            // Cabecera del Contenedor de Continuidad (SOLO botón de agregar tarjeta ＋, sin texto de título)
+                            hdr.innerHTML = `
+                                <div class="container-hdr-left">
+                                    <button class="cont-add-btn" data-act="add-card" title="Agregar tarjeta a este contenedor">＋</button>
+                                </div>
+                                <div class="container-hdr-right"></div>
+                            `;
+
+                            hdr.querySelector('[data-act="add-card"]').addEventListener('click', () => openCardEditor(sheet.id, null, null, cont.id));
+                            hdr.addEventListener('contextmenu', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                showContainerContextMenu(e.clientX, e.clientY, sheet.id, cont.id);
+                            });
+                        }
+
+                        block.appendChild(hdr);
+
+                        // Body con tarjetas del segmento
+                        const body = document.createElement('div');
+                        body.className = 'container-body';
+                        body.dataset.containerId = cont.id;
+                        body.dataset.segmentIndex = segIdx;
+
+                        if (!segCards.length && !tokens.length && !state.favOnly) {
+                            const emptyBtn = document.createElement('div');
+                            emptyBtn.className = 'container-empty-inline';
+                            emptyBtn.innerHTML = '＋ Agregar tarjeta';
+                            emptyBtn.addEventListener('click', () => openCardEditor(sheet.id, null, null, cont.id));
+                            body.appendChild(emptyBtn);
+                        } else {
+                            segCards.forEach(c => {
+                                const cardEl = createCardElement(c, sheet, sheet.id, true);
+                                body.appendChild(cardEl);
+                            });
+                        }
+
+                        block.appendChild(body);
+                        cardsContainer.appendChild(block);
                     });
-
-                    el.addEventListener('contextmenu', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        showEmptySlotContextMenu(e.clientX, e.clientY, sheetId, card.id);
-                    });
-
-                    cardsContainer.appendChild(el);
                     return;
                 }
 
-                const el = document.createElement('div');
-                el.className = 'card-item' + (card.pinned ? ' pinned' : '');
-                el.dataset.cardId = card.id;
-                el.dataset.sheetId = sheetId;
-                el.style.backgroundColor = card.color || 'var(--surface2)';
-                el.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
-                // Tamaño personalizado por hoja
-                if (sheet.cardSize && sheet.cardSize.w) el.style.minWidth = sheet.cardSize.w + 'px';
-                if (sheet.cardSize && sheet.cardSize.h) el.style.height = sheet.cardSize.h + 'px';
-                el.style.gridRow = 'auto';
+                // Caso B: Es una Tarjeta Libre / Slot Libre
+                const card = allCards.find(c => c.id === itemId && !c.containerId);
+                if (card) {
+                    if (tokens.length && (card.isEmpty || cardSearchScore(card, tokens) === 0)) return;
+                    if (state.favOnly && (card.isEmpty || !card.pinned)) return;
 
-                const bodyPlain = waToPlain(card.body);
-                const imgInd = (card.images && card.images.length) ? `<span class="copy-ind img-count" title="${card.images.length} imagen(es)">${numEmoji(card.images.length)}</span>` : '';
-                const linkInd = (card.links && card.links.length) ? `<span class="copy-ind" title="${card.links.length} enlace(s)">🔗${card.links.length}</span>` : '';
-                const badge = (query && state.searchAll && sheetId !== sheet.id) ? `<span class="card-tab-badge">${esc(getSheetById(sheetId)?.name || '')}</span>` : '';
-
-                el.innerHTML = `
-                    <div class="card-top">
-                        <span class="card-star">⭐</span>
-                        <div class="card-title">${esc(card.title) || 'Sin título'}</div>
-                    </div>
-                    <div class="card-body-preview">${esc(bodyPlain)}</div>
-                    <div class="card-copy-row">
-                        ${imgInd}${linkInd}${badge}
-                    </div>
-                `;
-
-                // Tamaños de fuente base de la hoja o personalizados por tarjeta
-                const defaultTitleFs = (sheet && parseInt(sheet.titleFontSize, 10)) || 12;
-                const defaultBodyFs = (sheet && parseInt(sheet.bodyFontSize, 10)) || 10;
-                const titleFs = parseInt(card.titleFontSize, 10) || defaultTitleFs;
-                const bodyFs = parseInt(card.bodyFontSize, 10) || defaultBodyFs;
-                const tEl = el.querySelector('.card-title');
-                const bEl = el.querySelector('.card-body-preview');
-                if (tEl) tEl.style.fontSize = titleFs + 'px';
-                if (bEl) bEl.style.fontSize = bodyFs + 'px';
-
-                // Interacción clic vs arrastre (umbral 4px)
-                el.addEventListener('mousedown', (e) => {
-                    if (e.button !== 0) return;
-                    if (e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
-                    pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
-                    document.addEventListener('mousemove', onGlobalMove);
-                    document.addEventListener('mouseup', onGlobalUp);
-                    document.addEventListener('mouseleave', onGlobalLeave);
-                });
-
-                // Doble clic: sin acción (ya no abre el editor)
-                el.addEventListener('dblclick', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-
-                // Clic derecho: menú contextual
-                el.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    showCardContextMenu(e.clientX, e.clientY, sheetId, card.id);
-                });
-
-                cardsContainer.appendChild(el);
-                autofitTitle(el.querySelector('.card-title'), cs.h, titleFs);
+                    const cardEl = createCardElement(card, sheet, sheet.id, false);
+                    cardsContainer.appendChild(cardEl);
+                }
             });
 
             if (query) highlightMatches(query);
@@ -4129,17 +5058,23 @@
             }
         }
 
-        // Construye un regex de resaltado insensible a tildes y mayúsculas
+        // Construye un regex de resaltado insensible a tildes y mayúsculas, soportando múltiples términos
         function buildHighlightRe(query) {
+            if (!query || !query.trim()) return null;
             const acc = {
                 'a':'[aáàäâ]', 'e':'[eéèëê]', 'i':'[iíìïî]', 'o':'[oóòöô]', 'u':'[uúùüû]', 'n':'[nñ]',
                 'A':'[AÁÀÄÂ]', 'E':'[EÉÈËÊ]', 'I':'[IÍÌÏÎ]', 'O':'[OÓÒÖÔ]', 'U':'[UÚÙÜÛ]', 'N':'[NÑ]'
             };
-            let pat = '';
-            for (const ch of query) {
-                pat += acc[ch] || ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            }
-            return new RegExp('(' + pat + ')', 'gi');
+            const tokens = query.trim().split(/\s+/).filter(t => t.length > 0);
+            if (!tokens.length) return null;
+            const patterns = tokens.map(token => {
+                let pat = '';
+                for (const ch of token) {
+                    pat += acc[ch] || ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                }
+                return pat;
+            });
+            return new RegExp('(' + patterns.join('|') + ')', 'gi');
         }
 
         // Resalta las coincidencias en texto crudo devolviendo HTML escapado y seguro.
@@ -4228,17 +5163,38 @@
             copyText(text);
         }
 
-        // Convierte una data URL a Blob PNG (la API async de portapapeles solo acepta image/png)
+        // Convierte una data URL a Blob PNG sin recompresión destructiva si ya es PNG
         function dataUrlToPngBlob(dataUrl) {
             return new Promise((resolve, reject) => {
+                if (!dataUrl) { reject(new Error('Data URL vacía')); return; }
+
+                // Si ya es un PNG en base64, creamos el Blob directamente sin pasar por canvas (0% pérdida)
+                if (dataUrl.startsWith('data:image/png;base64,')) {
+                    try {
+                        const binStr = atob(dataUrl.split(',')[1]);
+                        const len = binStr.length;
+                        const arr = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) {
+                            arr[i] = binStr.charCodeAt(i);
+                        }
+                        const blob = new Blob([arr], { type: 'image/png' });
+                        resolve(blob);
+                        return;
+                    } catch (e) {
+                        // Fallback a canvas en caso de fallo en atob
+                    }
+                }
+
                 const img = new Image();
                 img.onload = () => {
                     try {
                         const canvas = document.createElement('canvas');
-                        canvas.width = img.naturalWidth;
-                        canvas.height = img.naturalHeight;
+                        canvas.width = img.naturalWidth || img.width;
+                        canvas.height = img.naturalHeight || img.height;
                         const ctx = canvas.getContext('2d');
                         if (!ctx) { reject(new Error('Sin soporte canvas')); return; }
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
                         ctx.drawImage(img, 0, 0);
                         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Fallo al convertir a PNG')), 'image/png');
                     } catch (err) { reject(err); }
@@ -4248,15 +5204,46 @@
             });
         }
 
+        // Escribe una imagen en el portapapeles con la máxima resolución y fidelidad nativa
+        async function writeImageToClipboard(dataUrl) {
+            if (!dataUrl) throw new Error('Sin datos de imagen');
+            let success = false;
+
+            // 1. Vía nativa de Electron (escribe formatos DIB / Bitmap / PNG directos al portapapeles de Windows)
+            try {
+                if (clipboard && nativeImage) {
+                    const nImg = nativeImage.createFromDataURL(dataUrl);
+                    if (!nImg.isEmpty()) {
+                        clipboard.writeImage(nImg);
+                        success = true;
+                    }
+                }
+            } catch (err) {
+                console.warn('Fallo al escribir en clipboard nativo de Electron:', err);
+            }
+
+            // 2. Vía Web Clipboard API (ClipboardItem con blob PNG sin pérdida)
+            try {
+                const blob = await dataUrlToPngBlob(dataUrl);
+                if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+                    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                    success = true;
+                }
+            } catch (err) {
+                console.warn('Fallo al escribir en navigator.clipboard:', err);
+            }
+
+            if (!success) throw new Error('No se pudo copiar la imagen al portapapeles');
+        }
+
         async function copyCardFirstImage(card) {
             if (!card.images || !card.images.length) {
                 showToast('⚠️ Esta tarjeta no tiene imágenes.', 'warning');
                 return;
             }
             try {
-                const blob = await dataUrlToPngBlob(card.images[0].data);
-                await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-                showToast('🖼️ Imagen copiada al portapapeles.', 'success');
+                await writeImageToClipboard(card.images[0].data);
+                showToast('🖼️ Imagen copiada en alta calidad.', 'success');
             } catch (err) {
                 showToast('❌ Error al copiar imagen.', 'error');
             }
@@ -4573,10 +5560,8 @@
         }
 
         function copyImage(data) {
-            dataUrlToPngBlob(data).then(blob => {
-                return navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-            }).then(() => {
-                showToast('🖼️ Imagen copiada al portapapeles.', 'success');
+            writeImageToClipboard(data).then(() => {
+                showToast('🖼️ Imagen copiada en alta calidad.', 'success');
             }).catch(() => showToast('❌ Error al copiar imagen.', 'error'));
         }
 
@@ -4592,8 +5577,11 @@
                     const idx = sheet.cards.findIndex(c => c.id === cardId);
                     if (idx !== -1) {
                         sheet.cards.splice(idx, 1);
+                        if (sheet.mode === 'containers' && Array.isArray(sheet.rootOrder)) {
+                            sheet.rootOrder = sheet.rootOrder.filter(id => id !== cardId);
+                        }
                         saveData();
-if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state.drawer = null; }
+                        if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state.drawer = null; }
                         render();
                         showToast('🗑 Tarjeta eliminada.', 'success');
                     }
@@ -4611,6 +5599,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             copy.title = original.title + ' (copia)';
             const idx = sheet.cards.indexOf(original);
             sheet.cards.splice(idx + 1, 0, copy);
+            if (sheet.mode === 'containers' && !copy.containerId && Array.isArray(sheet.rootOrder)) {
+                const rootIdx = sheet.rootOrder.indexOf(cardId);
+                if (rootIdx !== -1) sheet.rootOrder.splice(rootIdx + 1, 0, copy.id);
+                else sheet.rootOrder.push(copy.id);
+            }
             saveData();
             render();
             showToast('⧉ Tarjeta duplicada.', 'success');
@@ -4695,7 +5688,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         function updatePasteButtonState() {
             if (!btnPasteCard) return;
             const sheet = getActiveSheet();
-            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images');
+            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers');
             if (isCardsOrImages && hasCopiedCard()) {
                 btnPasteCard.style.display = '';
             } else {
@@ -4703,11 +5696,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             }
         }
 
-        function pasteFullCard(targetSheetId, targetSlotOrCardId = null) {
+        function pasteFullCard(targetSheetId, targetSlotOrCardId = null, targetContainerId = undefined) {
             const sheet = getSheetById(targetSheetId);
             if (!sheet) return;
-            if (sheet.mode !== 'cards' && sheet.mode !== 'images') {
-                showToast('⚠️ Solo se pueden pegar tarjetas en modo Tarjetas o Buscador de imágenes.', 'info');
+            if (sheet.mode !== 'cards' && sheet.mode !== 'images' && sheet.mode !== 'containers') {
+                showToast('⚠️ Solo se pueden pegar tarjetas en modo Tarjetas, Contenedores o Buscador de imágenes.', 'info');
                 return;
             }
 
@@ -4719,6 +5712,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
             const newCard = {
                 id: generateId(),
+                containerId: null,
                 title: data.title || '',
                 body: data.body || '',
                 color: data.color || state.lastCardColor || '#fef3c7',
@@ -4732,23 +5726,73 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 updated: Date.now()
             };
 
-            if (targetSlotOrCardId) {
-                const targetIdx = sheet.cards.findIndex(c => c.id === targetSlotOrCardId);
-                if (targetIdx !== -1) {
-                    if (sheet.cards[targetIdx].isEmpty) {
-                        sheet.cards[targetIdx] = newCard;
+            if (sheet.mode === 'containers') {
+                if (targetContainerId !== undefined && targetContainerId !== null) {
+                    // Pegar dentro de un contenedor específico
+                    newCard.containerId = targetContainerId;
+                    if (targetSlotOrCardId) {
+                        const targetIdx = sheet.cards.findIndex(c => c.id === targetSlotOrCardId);
+                        if (targetIdx !== -1) {
+                            const targetCard = sheet.cards[targetIdx];
+                            if (targetCard.isEmpty) {
+                                sheet.cards[targetIdx] = newCard;
+                            } else {
+                                sheet.cards.splice(targetIdx + 1, 0, newCard);
+                            }
+                        } else {
+                            sheet.cards.push(newCard);
+                        }
                     } else {
-                        sheet.cards.splice(targetIdx + 1, 0, newCard);
+                        sheet.cards.push(newCard);
+                    }
+                } else if (targetSlotOrCardId) {
+                    // Pegar adyacente a una tarjeta o reemplazando un slot
+                    const targetIdx = sheet.cards.findIndex(c => c.id === targetSlotOrCardId);
+                    if (targetIdx !== -1) {
+                        const targetCard = sheet.cards[targetIdx];
+                        newCard.containerId = targetCard.containerId || null;
+                        if (targetCard.isEmpty) {
+                            sheet.cards[targetIdx] = newCard;
+                        } else {
+                            sheet.cards.splice(targetIdx + 1, 0, newCard);
+                            if (!newCard.containerId) {
+                                const rIdx = (sheet.rootOrder || []).indexOf(targetCard.id);
+                                if (rIdx !== -1) sheet.rootOrder.splice(rIdx + 1, 0, newCard.id);
+                                else if (Array.isArray(sheet.rootOrder)) sheet.rootOrder.push(newCard.id);
+                            }
+                        }
+                    } else {
+                        sheet.cards.push(newCard);
+                        if (Array.isArray(sheet.rootOrder)) sheet.rootOrder.push(newCard.id);
                     }
                 } else {
+                    // Pegar como tarjeta libre en el lienzo
                     sheet.cards.push(newCard);
+                    if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = [];
+                    if (!sheet.rootOrder.includes(newCard.id)) sheet.rootOrder.push(newCard.id);
                 }
             } else {
-                const firstEmptyIdx = sheet.cards.findIndex(c => c.isEmpty);
-                if (firstEmptyIdx !== -1) {
-                    sheet.cards[firstEmptyIdx] = newCard;
+                // Modo cards o images
+                newCard.containerId = null;
+                if (targetSlotOrCardId) {
+                    const targetIdx = sheet.cards.findIndex(c => c.id === targetSlotOrCardId);
+                    if (targetIdx !== -1) {
+                        const targetCard = sheet.cards[targetIdx];
+                        if (targetCard.isEmpty) {
+                            sheet.cards[targetIdx] = newCard;
+                        } else {
+                            sheet.cards.splice(targetIdx + 1, 0, newCard);
+                        }
+                    } else {
+                        sheet.cards.push(newCard);
+                    }
                 } else {
-                    sheet.cards.push(newCard);
+                    const firstEmptyIdx = sheet.cards.findIndex(c => c.isEmpty);
+                    if (firstEmptyIdx !== -1) {
+                        sheet.cards[firstEmptyIdx] = newCard;
+                    } else {
+                        sheet.cards.push(newCard);
+                    }
                 }
             }
 
@@ -4869,6 +5913,16 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // MENÚ CONTEXTUAL DE HOJA
         // ============================================================
         function showSheetContextMenu(x, y, sheetId) {
+            const sheet = getSheetById(sheetId);
+            const mode = sheet?.mode || 'cards';
+            const transformItem = mode === 'cards'
+                ? { icon: '🗂️', label: 'Transformar a Contenedor + Tarjetas', fn: () => transformSheetMode(sheetId, 'containers') }
+                : (mode === 'containers'
+                    ? { icon: '🃏', label: 'Transformar a Modo Tarjetas', fn: () => transformSheetMode(sheetId, 'cards') }
+                    : (mode === 'images'
+                        ? { icon: '🃏', label: 'Transformar a Modo Tarjetas', fn: () => transformSheetMode(sheetId, 'cards') }
+                        : null));
+
             const items = [
                 { icon: '✏️', label: 'Renombrar', fn: () => {
                     const el = sheetTabs.querySelector(`.sheet-tab[data-sheet-id="${sheetId}"]`);
@@ -4880,12 +5934,13 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                         if (sheet) { sheet.color = c; saveData(); render(); }
                     }}))
                 ]},
+                transformItem,
                 { icon: '⧉', label: 'Duplicar hoja', fn: () => duplicateSheet(sheetId) },
                 { icon: '⬅', label: 'Mover a la izquierda', fn: () => moveSheet(sheetId, -1) },
                 { icon: '➡', label: 'Mover a la derecha', fn: () => moveSheet(sheetId, 1) },
                 null,
                 { icon: '🗑', label: 'Eliminar hoja', danger: true, fn: () => confirmDeleteSheet(sheetId) }
-            ];
+            ].filter(Boolean);
             showContextMenu(x, y, items);
         }
 
@@ -4896,7 +5951,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const sheet = getSheetById(sheetId);
             const card = getCardById(sheetId, cardId);
             if (!card || card.isEmpty) return;
-            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images');
+            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers');
 
             const moveTo = state.sheets
                 .filter(s => s.id !== sheetId)
@@ -4921,6 +5976,45 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 null,
                 { icon: '🗑', label: 'Eliminar', danger: true, fn: () => confirmDeleteCard(sheetId, cardId) }
             ].filter(Boolean);
+
+            if (sheet.mode === 'containers' && Array.isArray(sheet.containers) && sheet.containers.length > 0) {
+                const moveContChildren = [];
+                sheet.containers.forEach(ct => {
+                    if (card.containerId !== ct.id) {
+                        moveContChildren.push({
+                            icon: '📦',
+                            label: ct.name,
+                            fn: () => {
+                                card.containerId = ct.id;
+                                saveData();
+                                render();
+                                showToast(`➡ Tarjeta movida a "${ct.name}".`, 'success', 1200);
+                            }
+                        });
+                    }
+                });
+                if (card.containerId) {
+                    moveContChildren.push({
+                        icon: '📌',
+                        label: 'Tarjetas Libres',
+                        fn: () => {
+                            card.containerId = null;
+                            saveData();
+                            render();
+                            showToast('➡ Tarjeta movida a Tarjetas Libres.', 'success', 1200);
+                        }
+                    });
+                } else {
+                    items.splice(items.length - 2, 0,
+                        { icon: '⬅', label: 'Mover a la izquierda', fn: () => moveRootItem(sheet, cardId, -1) },
+                        { icon: '➡', label: 'Mover a la derecha', fn: () => moveRootItem(sheet, cardId, 1) }
+                    );
+                }
+                if (moveContChildren.length) {
+                    items.splice(items.length - 2, 0, { icon: '🗂️', label: 'Mover a contenedor...', children: moveContChildren });
+                }
+            }
+
             showContextMenu(x, y, items);
         }
 
@@ -5052,9 +6146,17 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             if (!e.target.closest('.color-palette') && !e.target.closest('#edit-color-btn')) colorPalette.classList.remove('show');
         }, true);
         // Cerrar la paleta al hacer scroll fuera de ella
-        window.addEventListener('wheel', (e) => {
-            if (!e.target.closest('.color-palette')) colorPalette.classList.remove('show');
-        }, { passive: true });
+        // Ajustar contenedores de continuidad automáticamente al redimensionar la ventana
+        let containerResizeTimer = null;
+        window.addEventListener('resize', () => {
+            const sheet = getActiveSheet();
+            if (sheet && sheet.mode === 'containers') {
+                if (containerResizeTimer) clearTimeout(containerResizeTimer);
+                containerResizeTimer = setTimeout(() => {
+                    render();
+                }, 80);
+            }
+        });
 
         // ============================================================
         // AUTO-SCROLL SUAVE CON ACELERACIÓN POR PROXIMIDAD (rAF)
@@ -5095,6 +6197,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const prevCount = sheet.cards.length;
             sheet.cards = sheet.cards.filter(c => !c.isEmpty);
             const removed = prevCount - sheet.cards.length;
+            if (sheet.mode === 'containers' && Array.isArray(sheet.rootOrder)) {
+                const existingCardIds = new Set(sheet.cards.map(c => c.id));
+                const existingContIds = new Set((sheet.containers || []).map(c => c.id));
+                sheet.rootOrder = sheet.rootOrder.filter(id => existingCardIds.has(id) || existingContIds.has(id));
+            }
             saveData();
             render();
             if (removed > 0) {
@@ -5104,24 +6211,107 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             }
         }
 
+        function compactarContainer(sheetId, containerId) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const prevCount = sheet.cards.length;
+            sheet.cards = sheet.cards.filter(c => !(c.isEmpty && c.containerId === containerId));
+            const removed = prevCount - sheet.cards.length;
+            saveData();
+            render();
+            if (removed > 0) {
+                showToast(`🧹 Se compactaron ${removed} espacio(s) del contenedor.`, 'success', 1600);
+            } else {
+                showToast('✨ No hay espacios vacíos en este contenedor.', 'info', 1600);
+            }
+        }
+
         function showEmptySlotContextMenu(x, y, sheetId, slotId) {
             hideContextMenu();
             const sheet = getSheetById(sheetId);
-            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images');
+            const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers');
+            const slot = sheet?.cards?.find(c => c.id === slotId);
+            const containerId = slot?.containerId || null;
+
             const items = [
-                { icon: '➕', label: 'Crear tarjeta aquí', fn: () => openCardEditor(sheetId, null, slotId) },
+                { icon: '➕', label: 'Crear tarjeta aquí', fn: () => openCardEditor(sheetId, null, slotId, containerId) },
                 isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta aquí', fn: () => pasteFullCard(sheetId, slotId) } : null,
                 null,
                 { icon: '🗑', label: 'Eliminar este espacio vacío', danger: true, fn: () => {
                     const sheet = getSheetById(sheetId);
                     if (sheet) {
                         sheet.cards = sheet.cards.filter(c => c.id !== slotId);
+                        if (sheet.mode === 'containers' && Array.isArray(sheet.rootOrder)) {
+                            sheet.rootOrder = sheet.rootOrder.filter(id => id !== slotId);
+                        }
                         saveData();
                         render();
                     }
                 }},
+                containerId ? { icon: '🧹', label: 'Compactar este contenedor', fn: () => compactarContainer(sheetId, containerId) } : null,
                 { icon: '🧹', label: 'Compactar todos los espacios', fn: () => compactarHoja(sheetId) }
             ].filter(Boolean);
+            showContextMenu(x, y, items);
+        }
+
+        function moveRootItem(sheet, itemId, dir) {
+            const rootOrder = getRootOrder(sheet);
+            const idx = rootOrder.indexOf(itemId);
+            if (idx === -1) return;
+            const newIdx = idx + dir;
+            if (newIdx < 0 || newIdx >= rootOrder.length) return;
+            const [moved] = rootOrder.splice(idx, 1);
+            rootOrder.splice(newIdx, 0, moved);
+            sheet.rootOrder = rootOrder;
+            saveData();
+            render();
+        }
+
+        function showContainerContextMenu(x, y, sheetId, containerId) {
+            hideContextMenu();
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const cont = sheet.containers?.find(c => c.id === containerId);
+            if (!cont) return;
+
+            const items = [
+                { icon: '✏️', label: 'Editar contenedor (nombre, color, fuente)', fn: () => openContainerModal(sheetId, containerId) },
+                { icon: '🧹', label: 'Compactar espacios vacíos', fn: () => compactarContainer(sheetId, containerId) },
+                null,
+                { icon: '➕', label: 'Añadir tarjeta a este contenedor', fn: () => openCardEditor(sheetId, null, null, containerId) },
+                hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta en este contenedor', fn: () => pasteFullCard(sheetId, null, containerId) } : null,
+                null,
+                { icon: '⬅', label: 'Mover a la izquierda', fn: () => moveRootItem(sheet, containerId, -1) },
+                { icon: '➡', label: 'Mover a la derecha', fn: () => moveRootItem(sheet, containerId, 1) },
+                null,
+                { icon: '📋', label: 'Copiar texto de todas las tarjetas', fn: () => {
+                    const cards = sheet.cards.filter(c => !c.isEmpty && c.containerId === containerId);
+                    if (!cards.length) { showToast('El contenedor no tiene tarjetas.', 'info'); return; }
+                    const text = cards.map(c => `*${c.title}*\n${waToPlain(c.body)}`).join('\n\n---\n\n');
+                    clipboard.writeText(text);
+                    showToast(`📋 Se copiaron ${cards.length} tarjeta(s).`, 'success');
+                }},
+                null,
+                { icon: '🗑', label: 'Eliminar contenedor', danger: true, fn: () => {
+                    showConfirm(`¿Eliminar el contenedor "${cont.name}"? Las tarjetas se conservarán como libres.`, () => {
+                        sheet.cards.forEach(c => {
+                            if (c.containerId === containerId) {
+                                c.containerId = null;
+                                if (Array.isArray(sheet.rootOrder) && !sheet.rootOrder.includes(c.id)) {
+                                    sheet.rootOrder.push(c.id);
+                                }
+                            }
+                        });
+                        sheet.containers = sheet.containers.filter(c => c.id !== containerId);
+                        if (Array.isArray(sheet.rootOrder)) {
+                            sheet.rootOrder = sheet.rootOrder.filter(id => id !== containerId);
+                        }
+                        saveData();
+                        render();
+                        showToast('🗑 Contenedor eliminado.', 'success');
+                    });
+                }}
+            ];
             showContextMenu(x, y, items);
         }
 
@@ -5135,9 +6325,13 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 const dist = Math.hypot(e.clientX - pressInfo.startX, e.clientY - pressInfo.startY);
                 if (dist > 4) {
                     pressInfo.dragged = true;
-                    const sheet = getSheetById(pressInfo.sheetId);
-                    const card = sheet ? sheet.cards.find(c => c.id === pressInfo.cardId) : null;
-                    if (card && !card.isEmpty) startDrag(pressInfo.sheetId, pressInfo.cardId, sheet.cards.indexOf(card), e);
+                    if (pressInfo.type === 'container') {
+                        startContainerDrag(pressInfo.sheetId, pressInfo.containerId, e);
+                    } else {
+                        const sheet = getSheetById(pressInfo.sheetId);
+                        const card = sheet ? sheet.cards.find(c => c.id === pressInfo.cardId) : null;
+                        if (card && !card.isEmpty) startDrag(pressInfo.sheetId, pressInfo.cardId, sheet.cards.indexOf(card), e);
+                    }
                 }
                 return;
             }
@@ -5150,14 +6344,16 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             document.removeEventListener('mouseleave', onGlobalLeave);
             const wasDragged = pressInfo ? pressInfo.dragged : false;
             if (pressInfo && !wasDragged) {
-                const { sheetId, cardId } = pressInfo;
-                const sheet = getSheetById(sheetId);
-                const card = sheet ? sheet.cards.find(c => c.id === cardId) : null;
-                if (sheet && card && !card.isEmpty && sheet.mode === 'cards') {
-                    copyCardBody(card);
+                if (pressInfo.type !== 'container') {
+                    const { sheetId, cardId } = pressInfo;
+                    const sheet = getSheetById(sheetId);
+                    const card = sheet ? sheet.cards.find(c => c.id === cardId) : null;
+                    if (sheet && card && !card.isEmpty && (sheet.mode === 'cards' || sheet.mode === 'containers')) {
+                        copyCardBody(card);
+                    }
+                    if (openDrawerTimer) clearTimeout(openDrawerTimer);
+                    openDrawerTimer = setTimeout(() => { openDrawerTimer = null; openDrawer(sheetId, cardId); }, 260);
                 }
-                if (openDrawerTimer) clearTimeout(openDrawerTimer);
-                openDrawerTimer = setTimeout(() => { openDrawerTimer = null; openDrawer(sheetId, cardId); }, 260);
             }
             pressInfo = null;
             if (dragState) onDragEnd();
@@ -5169,6 +6365,43 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             document.removeEventListener('mouseleave', onGlobalLeave);
             pressInfo = null;
             if (dragState) onDragEnd();
+        }
+
+        function startContainerDrag(sheetId, containerId, e) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const cont = (sheet.containers || []).find(c => c.id === containerId);
+            if (!cont) return;
+
+            const origEl = cardsContainer.querySelector(`.container-block[data-container-id="${containerId}"]`);
+            if (origEl) origEl.classList.add('dragging');
+
+            const ghost = document.createElement('div');
+            ghost.className = 'container-ghost';
+            ghost.style.borderColor = cont.color || 'var(--primary)';
+            const nonEmpties = (sheet.cards || []).filter(c => c.containerId === containerId && !c.isEmpty);
+            ghost.innerHTML = `<span>⠿ 📦 ${esc(cont.name)}</span> <span style="font-size:11px; opacity:0.85; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:10px;">${nonEmpties.length}</span>`;
+            document.body.appendChild(ghost);
+
+            dragState = {
+                type: 'container',
+                sheetId,
+                containerId,
+                targetItemId: null,
+                targetPosition: 'before',
+                ghost,
+                origEl
+            };
+
+            updateContainerGhostPosition(e.clientX, e.clientY);
+            document.body.style.userSelect = 'none';
+        }
+
+        function updateContainerGhostPosition(x, y) {
+            if (dragState && dragState.ghost) {
+                dragState.ghost.style.left = (x + 12) + 'px';
+                dragState.ghost.style.top = (y + 12) + 'px';
+            }
         }
 
         function startDrag(sheetId, cardId, index, e) {
@@ -5224,6 +6457,59 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
 
         function onDragMove(e) {
             e.preventDefault();
+            if (dragState && dragState.type === 'container') {
+                updateContainerGhostPosition(e.clientX, e.clientY);
+
+                // Auto-scroll
+                const rect = contentEl.getBoundingClientRect();
+                const threshold = 75;
+                const maxSpeed = 16;
+                if (e.clientY < rect.top + threshold && e.clientY >= rect.top - 50) {
+                    const ratio = Math.min(1, Math.max(0.12, (rect.top + threshold - e.clientY) / threshold));
+                    startSmoothScroll(-ratio * maxSpeed);
+                } else if (e.clientY > rect.bottom - threshold && e.clientY <= rect.bottom + 50) {
+                    const ratio = Math.min(1, Math.max(0.12, (e.clientY - (rect.bottom - threshold)) / threshold));
+                    startSmoothScroll(ratio * maxSpeed);
+                } else {
+                    stopSmoothScroll();
+                }
+
+                // Limpiar resaltados previos
+                document.querySelectorAll('.container-block.drag-target-before, .container-block.drag-target-after, .card-item.drag-target-before, .card-item.drag-target-after').forEach(el => {
+                    el.classList.remove('drag-target-before', 'drag-target-after');
+                });
+
+                const elements = document.elementsFromPoint(e.clientX, e.clientY);
+                let targetRootEl = elements.find(el => {
+                    if (!el.classList) return false;
+                    if (el.classList.contains('container-block') && el.dataset.containerId !== dragState.containerId) return true;
+                    if (el.classList.contains('card-item') && el.parentElement === cardsContainer) return true;
+                    return false;
+                });
+
+                if (!targetRootEl) {
+                    const contBlock = elements.find(el => el.closest && el.closest('.container-block'));
+                    if (contBlock) {
+                        const b = contBlock.closest('.container-block');
+                        if (b && b.dataset.containerId !== dragState.containerId) targetRootEl = b;
+                    }
+                }
+
+                if (targetRootEl) {
+                    const targetId = targetRootEl.dataset.containerId || targetRootEl.dataset.cardId;
+                    const r = targetRootEl.getBoundingClientRect();
+                    const isLeftHalf = (e.clientX < r.left + r.width / 2);
+                    const pos = isLeftHalf ? 'before' : 'after';
+
+                    dragState.targetItemId = targetId;
+                    dragState.targetPosition = pos;
+                    targetRootEl.classList.add(pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+                } else {
+                    dragState.targetItemId = null;
+                }
+                return;
+            }
+
             updateGhostPosition(e.clientX, e.clientY);
 
             // 1) Auto-scroll suave con aceleración por proximidad
@@ -5256,9 +6542,77 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 dragState.targetSheetTabId = null;
             }
 
-            // 3) Identificar índice objetivo en la grilla
+            // 3) Identificar índice u objetivo en la grilla / contenedores
             const sheet = getSheetById(dragState.sheetId);
             if (!sheet) return;
+
+            if (sheet.mode === 'containers') {
+                document.querySelectorAll('.container-block.drag-over, .card-item.drag-target-over, .container-block.drag-target-before, .container-block.drag-target-after, .card-item.drag-target-before, .card-item.drag-target-after').forEach(el => {
+                    el.classList.remove('drag-over', 'drag-target-over', 'drag-target-before', 'drag-target-after');
+                });
+
+                // Prioridad 1: Directamente sobre una tarjeta o un slot vacío
+                const targetCardEl = elements.find(el => el.classList && el.classList.contains('card-item') && !el.classList.contains('ghost-card'));
+                if (targetCardEl && targetCardEl.dataset.cardId) {
+                    const foundIdx = sheet.cards.findIndex(c => c.id === targetCardEl.dataset.cardId);
+                    if (foundIdx !== -1) {
+                        dragState.targetGridIdx = foundIdx;
+                        dragState.targetContainerId = targetCardEl.closest('.container-body')?.dataset.containerId || null;
+                        dragState.targetRootItemId = null;
+                        dragState.targetRootPos = null;
+                        dragState.isFreeDrop = false;
+                        targetCardEl.classList.add('drag-target-over');
+                        return;
+                    }
+                }
+
+                // Prioridad 2: Sobre el cuerpo de un contenedor (.container-body o .container-block)
+                const contBody = elements.find(el => el.classList && (el.classList.contains('container-body') || el.classList.contains('container-block')));
+                if (contBody) {
+                    const contBlock = contBody.closest('.container-block') || contBody;
+                    const cId = contBlock.dataset.containerId;
+                    if (cId) {
+                        contBlock.classList.add('drag-over');
+                        dragState.targetContainerId = cId;
+                        dragState.targetGridIdx = null;
+                        dragState.targetRootItemId = null;
+                        dragState.targetRootPos = null;
+                        dragState.isFreeDrop = false;
+                        return;
+                    }
+                }
+
+                // Prioridad 3: Sobre el lienzo / entre elementos raíz (insertar antes/después de un contenedor o tarjeta libre)
+                let targetRootEl = elements.find(el => {
+                    if (!el.classList) return false;
+                    if (el.classList.contains('container-block')) return true;
+                    if (el.classList.contains('card-item') && el.parentElement === cardsContainer) return true;
+                    return false;
+                });
+
+                if (targetRootEl) {
+                    const targetId = targetRootEl.dataset.containerId || targetRootEl.dataset.cardId;
+                    const r = targetRootEl.getBoundingClientRect();
+                    const isLeftHalf = (e.clientX < r.left + r.width / 2);
+                    const pos = isLeftHalf ? 'before' : 'after';
+
+                    dragState.targetContainerId = null;
+                    dragState.targetGridIdx = null;
+                    dragState.targetRootItemId = targetId;
+                    dragState.targetRootPos = pos;
+                    dragState.isFreeDrop = true;
+                    targetRootEl.classList.add(pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+                    return;
+                }
+
+                // Área libre general
+                dragState.targetContainerId = null;
+                dragState.targetGridIdx = null;
+                dragState.targetRootItemId = null;
+                dragState.targetRootPos = null;
+                dragState.isFreeDrop = true;
+                return;
+            }
 
             // Prioridad A: Directamente sobre un elemento tarjeta/slot
             const targetCardEl = elements.find(el => el.classList && el.classList.contains('card-item') && !el.classList.contains('ghost-card'));
@@ -5298,32 +6652,161 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         function onDragEnd() {
             stopSmoothScroll();
             if (dragState && dragState.ghost) dragState.ghost.remove();
-            document.querySelectorAll('.card-item.dragging').forEach(el => el.classList.remove('dragging'));
-            document.querySelectorAll('.card-item.drag-target-over').forEach(el => el.classList.remove('drag-target-over'));
-            document.querySelectorAll('.sheet-tab.drag-sheet-over').forEach(el => el.classList.remove('drag-sheet-over'));
+            document.querySelectorAll('.container-block.dragging, .card-item.dragging').forEach(el => el.classList.remove('dragging'));
+            document.querySelectorAll('.container-block.drag-target-before, .container-block.drag-target-after, .card-item.drag-target-before, .card-item.drag-target-after, .card-item.drag-target-over, .sheet-tab.drag-sheet-over, .container-block.drag-over').forEach(el => {
+                el.classList.remove('drag-target-before', 'drag-target-after', 'drag-target-over', 'drag-sheet-over', 'drag-over');
+            });
             document.body.style.userSelect = '';
 
             if (!dragState) return;
 
-            const { sheetId, cardId, targetSheetTabId, targetGridIdx } = dragState;
+            if (dragState.type === 'container') {
+                const { sheetId, containerId, targetItemId, targetPosition } = dragState;
+                dragState = null;
+
+                if (targetItemId && targetItemId !== containerId) {
+                    const sheet = getSheetById(sheetId);
+                    if (sheet) {
+                        const rootOrder = getRootOrder(sheet);
+                        const fromIdx = rootOrder.indexOf(containerId);
+                        if (fromIdx !== -1) {
+                            rootOrder.splice(fromIdx, 1);
+                            let targetIdx = rootOrder.indexOf(targetItemId);
+                            if (targetIdx !== -1) {
+                                if (targetPosition === 'after') targetIdx += 1;
+                                rootOrder.splice(targetIdx, 0, containerId);
+                                sheet.rootOrder = rootOrder;
+                                saveData();
+                                render();
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+
+            const { sheetId, cardId, targetSheetTabId, targetGridIdx, targetRootItemId, targetRootPos } = dragState;
+            const dropTargetCont = dragState.targetContainerId;
+            const isFree = dragState.isFreeDrop;
             dragState = null;
 
             // Caso A: Mover a otra hoja
             if (targetSheetTabId && targetSheetTabId !== sheetId) {
                 const fromSheet = getSheetById(sheetId);
-                if (fromSheet && fromSheet.mode === 'cards') {
+                if (fromSheet && (fromSheet.mode === 'cards' || fromSheet.mode === 'containers')) {
                     const idx = fromSheet.cards.findIndex(c => c.id === cardId);
                     if (idx !== -1) {
-                        fromSheet.cards[idx] = createEmptySlot();
+                        const origCont = fromSheet.cards[idx].containerId || null;
+                        const emptySlot = createEmptySlot(origCont);
+                        fromSheet.cards[idx] = emptySlot;
+                        if (fromSheet.mode === 'containers' && origCont === null && Array.isArray(fromSheet.rootOrder)) {
+                            const rIdx = fromSheet.rootOrder.indexOf(cardId);
+                            if (rIdx !== -1) fromSheet.rootOrder[rIdx] = emptySlot.id;
+                        }
                     }
                 }
                 moveCardToSheet(sheetId, cardId, targetSheetTabId);
                 return;
             }
 
-            // Caso B: Mover dentro de la misma hoja
+            // Caso B: Modo Contenedores
             const sheet = getSheetById(sheetId);
-            if (!sheet || targetGridIdx == null) {
+            if (!sheet) return;
+
+            if (sheet.mode === 'containers') {
+                const fromIdx = sheet.cards.findIndex(c => c.id === cardId);
+                if (fromIdx === -1) { render(); return; }
+
+                if (targetGridIdx === fromIdx) {
+                    render();
+                    return;
+                }
+
+                const movedCard = sheet.cards[fromIdx];
+                const origContainerId = movedCard.containerId || null;
+                const originSlot = createEmptySlot(origContainerId);
+
+                // El origen SIEMPRE deja un espacio vacío (empty-slot)
+                sheet.cards[fromIdx] = originSlot;
+
+                if (origContainerId === null && Array.isArray(sheet.rootOrder)) {
+                    const rootIdx = sheet.rootOrder.indexOf(cardId);
+                    if (rootIdx !== -1) {
+                        sheet.rootOrder[rootIdx] = originSlot.id;
+                    }
+                }
+
+                // 1. Soltado sobre un slot vacío u otra tarjeta
+                if (targetGridIdx != null) {
+                    const targetCard = sheet.cards[targetGridIdx];
+                    if (targetCard && targetCard.isEmpty) {
+                        // El destino es un espacio vacío -> movedCard toma ese espacio
+                        movedCard.containerId = targetCard.containerId || null;
+                        sheet.cards[targetGridIdx] = movedCard;
+
+                        if (targetCard.containerId === null && Array.isArray(sheet.rootOrder)) {
+                            const tRootIdx = sheet.rootOrder.indexOf(targetCard.id);
+                            if (tRootIdx !== -1) {
+                                sheet.rootOrder[tRootIdx] = movedCard.id;
+                            }
+                        }
+                    } else if (targetCard) {
+                        // El destino es otra tarjeta -> Intercambio de lugares (Swap)
+                        const targetContId = targetCard.containerId || null;
+                        movedCard.containerId = targetContId;
+                        targetCard.containerId = origContainerId;
+
+                        sheet.cards[targetGridIdx] = movedCard;
+                        sheet.cards[fromIdx] = targetCard;
+
+                        if (Array.isArray(sheet.rootOrder)) {
+                            if (origContainerId === null && targetContId === null) {
+                                const r1 = sheet.rootOrder.indexOf(originSlot.id);
+                                const r2 = sheet.rootOrder.indexOf(targetCard.id);
+                                if (r1 !== -1) sheet.rootOrder[r1] = targetCard.id;
+                                if (r2 !== -1) sheet.rootOrder[r2] = movedCard.id;
+                            } else if (origContainerId === null && targetContId !== null) {
+                                const r1 = sheet.rootOrder.indexOf(originSlot.id);
+                                if (r1 !== -1) sheet.rootOrder[r1] = targetCard.id;
+                            } else if (origContainerId !== null && targetContId === null) {
+                                const r2 = sheet.rootOrder.indexOf(targetCard.id);
+                                if (r2 !== -1) sheet.rootOrder[r2] = movedCard.id;
+                            }
+                        }
+                    }
+                }
+                // 2. Soltado en el cuerpo de un contenedor
+                else if (dropTargetCont) {
+                    movedCard.containerId = dropTargetCont;
+                    sheet.cards.push(movedCard);
+                }
+                // 3. Soltado en la zona libre / lienzo
+                else if (isFree) {
+                    movedCard.containerId = null;
+                    sheet.cards.push(movedCard);
+
+                    const rootOrder = getRootOrder(sheet);
+                    if (targetRootItemId) {
+                        let tIdx = rootOrder.indexOf(targetRootItemId);
+                        if (tIdx !== -1) {
+                            if (targetRootPos === 'after') tIdx += 1;
+                            rootOrder.splice(tIdx, 0, movedCard.id);
+                            sheet.rootOrder = rootOrder;
+                        } else {
+                            if (!rootOrder.includes(movedCard.id)) rootOrder.push(movedCard.id);
+                        }
+                    } else {
+                        if (!rootOrder.includes(movedCard.id)) rootOrder.push(movedCard.id);
+                    }
+                }
+
+                saveData();
+                render();
+                return;
+            }
+
+            // Caso C: Mover dentro de la misma hoja (Modo tarjetas normal)
+            if (targetGridIdx == null) {
                 render();
                 return;
             }
@@ -5365,7 +6848,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         let editingCard = null;
         let cardSnapshot = null;
 
-        function openCardEditor(sheetId, cardId, replaceSlotId = null) {
+        function openCardEditor(sheetId, cardId, replaceSlotId = null, targetContainerId = null) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
             let card;
@@ -5375,12 +6858,13 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 if (card && !card.isEmpty) cardSnapshot = JSON.parse(JSON.stringify(card));
             }
             if (!card || replaceSlotId) {
-                card = { id: generateId(), title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
+                card = { id: generateId(), containerId: targetContainerId, title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
                 isNew = true;
                 cardSnapshot = null;
                 if (replaceSlotId) {
                     const slotIdx = sheet.cards.findIndex(c => c.id === replaceSlotId);
                     if (slotIdx !== -1) {
+                        card.containerId = sheet.cards[slotIdx].containerId || targetContainerId || null;
                         sheet.cards[slotIdx] = card;
                     } else {
                         sheet.cards.push(card);
@@ -5392,20 +6876,22 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             }
             editingCard = { sheetId, cardId: card.id, isNew, replacedSlotId: replaceSlotId };
 
-            // Select de hoja (permite mover)
+            // Select de hoja y select de contenedor
             renderSheetSelect();
             editSheet.value = sheetId;
+            renderContainerSelect(sheet, card.containerId);
+
             editColor.value = card.color || '#fef3c7';
             if (editColorBtn) editColorBtn.style.background = editColor.value;
             editPinned.checked = !!card.pinned;
             editTitle.value = card.title || '';
             editBody.value = card.body || '';
 
-            // Controles de tamaño de fuente: solo en modo tarjetas
-            const isCardsMode = (sheet.mode || 'cards') === 'cards';
-            if (editFontFields) editFontFields.style.display = isCardsMode ? '' : 'none';
-            if (editCardPreviewField) editCardPreviewField.style.display = isCardsMode ? '' : 'none';
-            if (isCardsMode) {
+            // Controles de tamaño de fuente: en modo tarjetas o contenedores
+            const isCardsOrContainers = (sheet.mode === 'cards' || sheet.mode === 'containers');
+            if (editFontFields) editFontFields.style.display = isCardsOrContainers ? '' : 'none';
+            if (editCardPreviewField) editCardPreviewField.style.display = isCardsOrContainers ? '' : 'none';
+            if (isCardsOrContainers) {
                 const sheetTitleFs = parseInt(sheet.titleFontSize, 10) || 12;
                 const sheetBodyFs = parseInt(sheet.bodyFontSize, 10) || 10;
                 const tf = parseInt(card.titleFontSize, 10) || sheetTitleFs;
@@ -5433,6 +6919,77 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 opt.value = s.id;
                 opt.textContent = s.name;
                 editSheet.appendChild(opt);
+            });
+        }
+
+        function renderContainerSelect(sheet, selectedContainerId = null) {
+            if (!editContainerField || !editContainerSelect) return;
+            if (!sheet || sheet.mode !== 'containers') {
+                editContainerField.style.display = 'none';
+                return;
+            }
+            editContainerField.style.display = '';
+            editContainerSelect.innerHTML = '';
+
+            const optFree = document.createElement('option');
+            optFree.value = '';
+            optFree.textContent = '📌 Tarjeta Libre (sin contenedor)';
+            editContainerSelect.appendChild(optFree);
+
+            const containers = sheet.containers || [];
+            containers.forEach(ct => {
+                const opt = document.createElement('option');
+                opt.value = ct.id;
+                opt.textContent = `📦 ${ct.name}`;
+                editContainerSelect.appendChild(opt);
+            });
+
+            const optNew = document.createElement('option');
+            optNew.value = '__new__';
+            optNew.textContent = '➕ Crear nuevo contenedor...';
+            editContainerSelect.appendChild(optNew);
+
+            editContainerSelect.value = selectedContainerId || '';
+        }
+
+        if (editContainerSelect) {
+            editContainerSelect.addEventListener('change', () => {
+                if (!editingCard) return;
+                const sheet = getSheetById(editingCard.sheetId);
+                if (!sheet) return;
+                if (editContainerSelect.value === '__new__') {
+                    const newContId = generateId();
+                    const newNum = (sheet.containers ? sheet.containers.length : 0) + 1;
+                    const newCont = {
+                        id: newContId,
+                        name: 'CONTENEDOR ' + newNum,
+                        color: CONTAINER_COLORS[(newNum - 1) % CONTAINER_COLORS.length],
+                        collapsed: false,
+                        order: sheet.containers ? sheet.containers.length : 0
+                    };
+                    if (!Array.isArray(sheet.containers)) sheet.containers = [];
+                    sheet.containers.push(newCont);
+                    saveData();
+                    renderContainerSelect(sheet, newContId);
+                    const card = getCardById(editingCard.sheetId, editingCard.cardId);
+                    if (card) card.containerId = newContId;
+                    showToast(`📦 Contenedor "${newCont.name}" creado.`, 'success', 1200);
+                } else {
+                    const card = getCardById(editingCard.sheetId, editingCard.cardId);
+                    if (card) {
+                        card.containerId = editContainerSelect.value || null;
+                        saveData();
+                    }
+                }
+            });
+        }
+
+        if (editSheet) {
+            editSheet.addEventListener('change', () => {
+                if (!editingCard) return;
+                const targetSheetId = editSheet.value;
+                const targetSheet = getSheetById(targetSheetId);
+                renderContainerSelect(targetSheet, null);
             });
         }
 
@@ -5535,7 +7092,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         }
 
         // ---------- Añadir imagen (archivo o portapapeles) ----------
-        function addImageToCard(dataUrl) {
+        function addImageToCard(dataUrl, originalType = '') {
             if (!editingCard) return;
             const card = getCardById(editingCard.sheetId, editingCard.cardId);
             if (!card) return;
@@ -5545,31 +7102,73 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             }
             const img = new Image();
             img.onload = function() {
+                let w = img.naturalWidth || img.width;
+                let h = img.naturalHeight || img.height;
+                const MAX = 2560; // Soporte para capturas 2K/4K ultra nítidas
+
+                const isPng = (dataUrl && dataUrl.startsWith('data:image/png')) || (originalType && originalType.toLowerCase().includes('png'));
+
+                // Si la imagen está dentro de los límites de resolución, conservamos el archivo/dataURL original intacto (0% compresión)
+                if (w <= MAX && h <= MAX) {
+                    card.images.push({ data: dataUrl, label: '' });
+                    saveData();
+                    renderEditImages(card.images);
+                    showToast('🖼️ Imagen agregada en calidad original.', 'success');
+                    return;
+                }
+
+                // Si sobrepasa 2560px, redimensionar manteniendo nitidez máxima con suavizado de alta calidad
+                if (w >= h) {
+                    h = Math.round((h * MAX) / w);
+                    w = MAX;
+                } else {
+                    w = Math.round((w * MAX) / h);
+                    h = MAX;
+                }
                 const canvas = document.createElement('canvas');
-                let w = img.width, h = img.height;
-                const MAX = 1200;
-                if (w > MAX) { h = Math.round((h * MAX) / w); w = MAX; }
                 canvas.width = w;
                 canvas.height = h;
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
-                const resized = canvas.toDataURL('image/jpeg', 0.8);
-                card.images.push({ data: resized, label: '' });
+                if (ctx) {
+                    ctx.imageSmoothingEnabled = true;
+                    ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, 0, 0, w, h);
+                    // Para PNG conservamos PNG lossless; para JPEG calidad 0.94
+                    const resized = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.94);
+                    card.images.push({ data: resized, label: '' });
+                } else {
+                    card.images.push({ data: dataUrl, label: '' });
+                }
+
                 saveData();
                 renderEditImages(card.images);
-                showToast('🖼️ Imagen agregada.', 'success');
+                showToast('🖼️ Imagen optimizada en alta resolución.', 'success');
+            };
+            img.onerror = function() {
+                showToast('❌ Error al procesar la imagen.', 'error');
             };
             img.src = dataUrl;
         }
 
         function addImageFile(file) {
             const reader = new FileReader();
-            reader.onload = (ev) => addImageToCard(ev.target.result);
+            reader.onload = (ev) => addImageToCard(ev.target.result, file.type);
             reader.readAsDataURL(file);
         }
 
         async function pegarImagenPortapapeles() {
             try {
+                // 1. Vía nativa de Electron (capturas directas de Windows/Snipping Tool en máxima resolución)
+                if (clipboard) {
+                    const nativeImg = clipboard.readImage();
+                    if (nativeImg && !nativeImg.isEmpty()) {
+                        const pngDataUrl = nativeImg.toDataURL();
+                        addImageToCard(pngDataUrl, 'image/png');
+                        return;
+                    }
+                }
+
+                // 2. Vía Web Clipboard API (fallback)
                 if (navigator.clipboard && navigator.clipboard.read) {
                     const items = await navigator.clipboard.read();
                     for (const item of items) {
@@ -5698,6 +7297,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             card.body = editBody.value;
             card.color = editColor.value;
             card.pinned = !!editPinned.checked;
+            const curSheet = getSheetById(editingCard.sheetId);
+            if (curSheet && curSheet.mode === 'containers' && editContainerSelect) {
+                const selVal = editContainerSelect.value;
+                if (selVal !== '__new__') card.containerId = selVal || null;
+            }
             if (editFontFields && editFontFields.style.display !== 'none') {
                 card.titleFontSize = parseInt(editTitleFs.value, 10) || 12;
                 card.bodyFontSize = parseInt(editBodyFs.value, 10) || 10;
@@ -5790,6 +7394,15 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             card.body = editBody.value;
             card.color = editColor.value;
             card.pinned = !!editPinned.checked;
+            const curSheet = getSheetById(editingCard.sheetId);
+            if (curSheet && curSheet.mode === 'containers' && editContainerSelect) {
+                const selVal = editContainerSelect.value;
+                card.containerId = (selVal && selVal !== '__new__') ? selVal : null;
+                if (!card.containerId) {
+                    if (!Array.isArray(curSheet.rootOrder)) curSheet.rootOrder = [];
+                    if (!curSheet.rootOrder.includes(card.id)) curSheet.rootOrder.push(card.id);
+                }
+            }
             if (editFontFields && editFontFields.style.display !== 'none') {
                 card.titleFontSize = parseInt(editTitleFs.value, 10) || 12;
                 card.bodyFontSize = parseInt(editBodyFs.value, 10) || 10;
@@ -5829,8 +7442,12 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // Cierre del selector de modo
         const modePickerOverlay = document.getElementById('mode-picker-overlay');
         document.getElementById('mode-picker-close').addEventListener('click', () => modePickerOverlay.classList.remove('show'));
+        let modePickerBackdropDown = false;
+        modePickerOverlay.addEventListener('mousedown', (e) => {
+            modePickerBackdropDown = (e.target === modePickerOverlay);
+        });
         modePickerOverlay.addEventListener('click', (e) => {
-            if (e.target === modePickerOverlay) modePickerOverlay.classList.remove('show');
+            if (e.target === modePickerOverlay && modePickerBackdropDown) modePickerOverlay.classList.remove('show');
         });
 
         // ============================================================
@@ -5861,10 +7478,46 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             document.getElementById('settings-mode').innerHTML =
                 `<span class="sm-badge">${m.icon} ${m.label}</span><span>${m.desc}</span>`;
 
+            const transformArea = document.getElementById('settings-transform-area');
+            if (transformArea) {
+                transformArea.innerHTML = '';
+                if (sheet.mode === 'cards') {
+                    transformArea.innerHTML = `
+                        <button class="btn-transform-mode" id="settings-btn-transform">
+                            <span>🗂️</span> Transformar a Contenedor + Tarjetas
+                        </button>
+                        <div class="transform-hint">Permite agrupar tarjetas en contenedores temáticos con cabeceras y colores, manteniendo todas tus tarjetas como tarjetas libres.</div>
+                    `;
+                    transformArea.querySelector('#settings-btn-transform').addEventListener('click', () => {
+                        transformSheetMode(sheet.id, 'containers');
+                    });
+                } else if (sheet.mode === 'containers') {
+                    transformArea.innerHTML = `
+                        <button class="btn-transform-mode" id="settings-btn-transform">
+                            <span>🃏</span> Transformar a Modo Tarjetas Estándar
+                        </button>
+                        <div class="transform-hint">Desenvuelve todas las tarjetas de los contenedores y las conserva en una cuadrícula continua de tarjetas estándar.</div>
+                    `;
+                    transformArea.querySelector('#settings-btn-transform').addEventListener('click', () => {
+                        transformSheetMode(sheet.id, 'cards');
+                    });
+                } else if (sheet.mode === 'images') {
+                    transformArea.innerHTML = `
+                        <button class="btn-transform-mode" id="settings-btn-transform">
+                            <span>🃏</span> Transformar a Modo Tarjetas Estándar
+                        </button>
+                        <div class="transform-hint">Transforma la hoja al modo estándar de tarjetas de texto.</div>
+                    `;
+                    transformArea.querySelector('#settings-btn-transform').addEventListener('click', () => {
+                        transformSheetMode(sheet.id, 'cards');
+                    });
+                }
+            }
+
             const sizeFields = document.getElementById('settings-size-fields');
             const fontFields = document.getElementById('settings-font-fields');
             const settingsWField = document.getElementById('settings-w-field');
-            if (sheet.mode === 'cards') {
+            if (sheet.mode === 'cards' || sheet.mode === 'containers') {
                 sizeFields.style.display = '';
                 if (fontFields) fontFields.style.display = '';
                 settingsWField.style.display = '';
@@ -5883,6 +7536,15 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 if (settingsTitleFsNum) settingsTitleFsNum.value = defaultTitleFs;
                 if (settingsBodyFsSlider) settingsBodyFsSlider.value = defaultBodyFs;
                 if (settingsBodyFsNum) settingsBodyFsNum.value = defaultBodyFs;
+
+                if (sheet.mode === 'containers') {
+                    if (settingsContTitleFsField) settingsContTitleFsField.style.display = '';
+                    const defaultContFs = parseInt(sheet.containerTitleFontSize, 10) || 13;
+                    if (settingsContTitleFsSlider) settingsContTitleFsSlider.value = defaultContFs;
+                    if (settingsContTitleFsNum) settingsContTitleFsNum.value = defaultContFs;
+                } else {
+                    if (settingsContTitleFsField) settingsContTitleFsField.style.display = 'none';
+                }
             } else if (sheet.mode === 'images') {
                 sizeFields.style.display = '';
                 if (fontFields) fontFields.style.display = 'none';
@@ -5924,28 +7586,60 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const h = parseInt(settingsHSlider.value, 10);
             const titleFs = (settingsTitleFsSlider && parseInt(settingsTitleFsSlider.value, 10)) || (parseInt(sheet.titleFontSize, 10) || 12);
             const bodyFs = (settingsBodyFsSlider && parseInt(settingsBodyFsSlider.value, 10)) || (parseInt(sheet.bodyFontSize, 10) || 10);
+            const contTitleFs = (settingsContTitleFsSlider && parseInt(settingsContTitleFsSlider.value, 10)) || (parseInt(sheet.containerTitleFontSize, 10) || 13);
 
             if (settingsWVal) settingsWVal.textContent = w;
             if (settingsHVal) settingsHVal.textContent = h;
             if (settingsTitleFsVal) settingsTitleFsVal.textContent = titleFs;
             if (settingsBodyFsVal) settingsBodyFsVal.textContent = bodyFs;
+            if (settingsContTitleFsVal) settingsContTitleFsVal.textContent = contTitleFs;
 
-            if (sheet.mode === 'cards') {
+            if (sheet.mode === 'cards' || sheet.mode === 'containers') {
                 settingsWNum.value = w;
                 if (settingsTitleFsNum) settingsTitleFsNum.value = titleFs;
                 if (settingsBodyFsNum) settingsBodyFsNum.value = bodyFs;
+                if (sheet.mode === 'containers' && settingsContTitleFsNum) settingsContTitleFsNum.value = contTitleFs;
             }
             settingsHNum.value = h;
 
             // Vista previa en vivo
-            if (sheet.mode === 'cards') {
+            if (sheet.mode === 'containers') {
+                settingsPreview.style.display = 'flex';
+                settingsPreview.style.flexDirection = 'row';
+                settingsPreview.style.alignItems = 'flex-start';
+                settingsPreview.style.gap = '10px';
+                settingsPreview.style.width = '100%';
+                settingsPreview.style.height = 'auto';
+                const contH = Math.max(60, h - 38);
+                settingsPreview.innerHTML = `
+                    <div class="sp-cont-box" style="border-color: ${sheet.color || 'var(--primary)'}; height: ${h}px; display: inline-flex; flex-direction: column;">
+                        <div class="sp-cont-hdr" style="font-size: ${contTitleFs}px; background: ${(sheet.color || '#3b82f6')}33; height: 30px;">
+                            <span>📦 CONTENEDOR</span>
+                            <span style="font-size: 10px; opacity: 0.8;">1 tarjeta</span>
+                        </div>
+                        <div class="sp-cont-body" style="flex: 1; display: flex; flex-direction: row; gap: 6px; padding: 4px;">
+                            <div class="card-item card-preview-static" style="width:${w}px; height: 100%; padding:6px; box-sizing:border-box; background:var(--surface2);">
+                                <div class="card-title" style="font-size:${titleFs}px; font-weight:700;">Tarjeta Contenida</div>
+                                <div class="card-body-preview" style="font-size:${bodyFs}px; line-height:1.3;">Alto interior: ${contH}px</div>
+                                <div class="card-copy-row"><span class="copy-main" style="font-size:9px; padding:2px;">📋 COPIAR</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-item card-preview-static" style="width:${w}px; height:${h}px; padding:6px; box-sizing:border-box; background:var(--surface2); border: 1px solid var(--border);">
+                        <div class="card-title" style="font-size:${titleFs}px; font-weight:700;">Tarjeta Libre</div>
+                        <div class="card-body-preview" style="font-size:${bodyFs}px; line-height:1.3;">Misma altura total: ${h}px</div>
+                        <div class="card-copy-row"><span class="copy-main" style="font-size:9px; padding:2px;">📋 COPIAR</span></div>
+                    </div>
+                `;
+            } else if (sheet.mode === 'cards') {
                 settingsPreview.style.display = '';
                 settingsPreview.style.width = w + 'px';
                 settingsPreview.style.height = h + 'px';
-                const spTitle = settingsPreview.querySelector('.sp-title');
-                const spBody = settingsPreview.querySelector('.sp-body');
-                if (spTitle) spTitle.style.fontSize = titleFs + 'px';
-                if (spBody) spBody.style.fontSize = bodyFs + 'px';
+                settingsPreview.innerHTML = `
+                    <div class="sp-title" style="font-size:${titleFs}px;">Título de la tarjeta</div>
+                    <div class="sp-body" style="font-size:${bodyFs}px;">Este es el texto de vista previa para mostrar cómo se verá la tarjeta con este tamaño.</div>
+                    <div class="sp-copy">📋 COPIAR</div>
+                `;
             } else if (sheet.mode === 'images') {
                 settingsPreview.style.display = '';
                 settingsPreview.style.width = '100%';
@@ -5959,6 +7653,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         settingsHSlider.addEventListener('input', syncSettingsSliders);
         if (settingsTitleFsSlider) settingsTitleFsSlider.addEventListener('input', syncSettingsSliders);
         if (settingsBodyFsSlider) settingsBodyFsSlider.addEventListener('input', syncSettingsSliders);
+        if (settingsContTitleFsSlider) settingsContTitleFsSlider.addEventListener('input', syncSettingsSliders);
 
         settingsWNum.addEventListener('input', () => {
             let v = parseInt(settingsWNum.value, 10);
@@ -6000,6 +7695,17 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 syncSettingsSliders();
             });
         }
+        if (settingsContTitleFsNum) {
+            settingsContTitleFsNum.addEventListener('input', () => {
+                let v = parseInt(settingsContTitleFsNum.value, 10);
+                if (isNaN(v)) v = 13;
+                const min = parseInt(settingsContTitleFsSlider.min, 10) || 10;
+                const max = parseInt(settingsContTitleFsSlider.max, 10) || 24;
+                v = Math.max(min, Math.min(max, v));
+                settingsContTitleFsSlider.value = v;
+                syncSettingsSliders();
+            });
+        }
 
         document.getElementById('settings-reset').addEventListener('click', () => {
             const sheet = getSheetById(settingsSheetId);
@@ -6010,13 +7716,18 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             settingsHSlider.value = dh;
             settingsWNum.value = 150;
             settingsHNum.value = dh;
-            if (sheet.mode === 'cards') {
+            if (sheet.mode === 'cards' || sheet.mode === 'containers') {
                 sheet.titleFontSize = 12;
                 sheet.bodyFontSize = 10;
                 if (settingsTitleFsSlider) settingsTitleFsSlider.value = 12;
                 if (settingsTitleFsNum) settingsTitleFsNum.value = 12;
                 if (settingsBodyFsSlider) settingsBodyFsSlider.value = 10;
                 if (settingsBodyFsNum) settingsBodyFsNum.value = 10;
+                if (sheet.mode === 'containers') {
+                    sheet.containerTitleFontSize = 13;
+                    if (settingsContTitleFsSlider) settingsContTitleFsSlider.value = 13;
+                    if (settingsContTitleFsNum) settingsContTitleFsNum.value = 13;
+                }
             }
             syncSettingsSliders();
             saveData();
@@ -6030,11 +7741,14 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             const w = parseInt(settingsWSlider.value, 10);
             const h = parseInt(settingsHSlider.value, 10);
             sheet.cardSize = { w: w || 150, h: h || 190 };
-            if (sheet.mode === 'cards') {
+            if (sheet.mode === 'cards' || sheet.mode === 'containers') {
                 const titleFs = (settingsTitleFsSlider && parseInt(settingsTitleFsSlider.value, 10)) || 12;
                 const bodyFs = (settingsBodyFsSlider && parseInt(settingsBodyFsSlider.value, 10)) || 10;
                 sheet.titleFontSize = titleFs;
                 sheet.bodyFontSize = bodyFs;
+                if (sheet.mode === 'containers') {
+                    sheet.containerTitleFontSize = (settingsContTitleFsSlider && parseInt(settingsContTitleFsSlider.value, 10)) || 13;
+                }
             }
             const drawerSelect = document.getElementById('settings-drawer-timeout');
             const dt = parseInt(drawerSelect.value, 10);
@@ -6055,9 +7769,333 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             showToast('⚙️ Ajustes de hoja guardados.', 'success');
         });
 
+        // ============================================================
+        // TRANSFORMACIÓN DE MODO DE HOJA (sin pérdida de datos)
+        // ============================================================
+        function transformSheetMode(sheetId, targetMode) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet || sheet.mode === targetMode) return;
+            const currentMode = sheet.mode || 'cards';
+
+            if (currentMode === 'process' || targetMode === 'process') {
+                showConfirm(`¿Transformar la hoja "${sheet.name}" a modo ${SHEET_MODES[targetMode]?.label || targetMode}? Las celdas de cuadrícula no se trasladarán directamente a tarjetas.`, () => {
+                    executeTransformSheetMode(sheet, targetMode);
+                });
+                return;
+            }
+
+            if (currentMode === 'containers' && targetMode === 'cards') {
+                showConfirm(`¿Transformar la hoja "${sheet.name}" a Modo Tarjetas Estándar? Todas las tarjetas dentro de los contenedores se conservarán como tarjetas libres en una cuadrícula continua.`, () => {
+                    executeTransformSheetMode(sheet, targetMode);
+                });
+            } else if (currentMode === 'cards' && targetMode === 'containers') {
+                showConfirm(`¿Transformar la hoja "${sheet.name}" a Modo Contenedor + Tarjetas? Todas las tarjetas actuales se conservarán intactas como tarjetas libres para que puedas organizarlas en contenedores.`, () => {
+                    executeTransformSheetMode(sheet, targetMode);
+                });
+            } else {
+                executeTransformSheetMode(sheet, targetMode);
+            }
+        }
+
+        function executeTransformSheetMode(sheet, targetMode) {
+            const fromMode = sheet.mode || 'cards';
+            sheet.mode = targetMode;
+
+            if (targetMode === 'containers') {
+                if (!Array.isArray(sheet.containers)) sheet.containers = [];
+                if (!Array.isArray(sheet.rootOrder)) {
+                    sheet.rootOrder = (sheet.cards || []).map(c => c.id);
+                } else {
+                    (sheet.cards || []).forEach(c => {
+                        if (!sheet.rootOrder.includes(c.id) && !c.containerId) {
+                            sheet.rootOrder.push(c.id);
+                        }
+                    });
+                }
+                sheet.containerTitleFontSize = sheet.containerTitleFontSize || 13;
+                if (!sheet.cardSize || !sheet.cardSize.w) {
+                    sheet.cardSize = { w: 150, h: 190 };
+                }
+            } else if (targetMode === 'cards') {
+                if (fromMode === 'containers') {
+                    const flattened = [];
+                    const rootOrder = getRootOrder(sheet);
+                    rootOrder.forEach(itemId => {
+                        const cont = sheet.containers?.find(c => c.id === itemId);
+                        if (cont) {
+                            const contCards = (sheet.cards || []).filter(c => c.containerId === cont.id);
+                            contCards.forEach(c => {
+                                c.containerId = null;
+                                flattened.push(c);
+                            });
+                        } else {
+                            const card = (sheet.cards || []).find(c => c.id === itemId);
+                            if (card) {
+                                card.containerId = null;
+                                flattened.push(card);
+                            }
+                        }
+                    });
+                    (sheet.cards || []).forEach(c => {
+                        if (!flattened.includes(c)) {
+                            c.containerId = null;
+                            flattened.push(c);
+                        }
+                    });
+                    sheet.cards = flattened;
+                    sheet.containers = [];
+                    delete sheet.rootOrder;
+                }
+                if (!sheet.cardSize || !sheet.cardSize.w) {
+                    sheet.cardSize = { w: 150, h: 190 };
+                }
+            } else if (targetMode === 'images') {
+                if (!sheet.cardSize) sheet.cardSize = { w: 150, h: 420 };
+                else sheet.cardSize.h = Math.max(300, sheet.cardSize.h || 420);
+            } else if (targetMode === 'process') {
+                if (!sheet.grid) {
+                    sheet.grid = { cells: Array.from({ length: 100 }, () => Array(26).fill('')), colWidths: [], rowHeights: {} };
+                }
+            }
+
+            saveData();
+            render();
+            if (settingsOverlay.classList.contains('show') && settingsSheetId === sheet.id) {
+                abrirAjustesHoja();
+            }
+            showToast(`✨ Hoja transformada a modo ${SHEET_MODES[targetMode]?.label || targetMode}.`, 'success', 2400);
+        }
+
+        // ============================================================
+        // MODAL DE CONTENEDOR (Crear / Editar)
+        // ============================================================
+        let editingContainer = null;
+
+        function openContainerModal(sheetId, containerId = null, cardIdsToGroup = null) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            if (!Array.isArray(sheet.containers)) sheet.containers = [];
+
+            let cont = null;
+            if (containerId) {
+                cont = sheet.containers.find(c => c.id === containerId);
+            }
+            const isNew = !cont;
+            if (isNew) {
+                const defaultFs = sheet.containerTitleFontSize ? (typeof sheet.containerTitleFontSize === 'number' ? sheet.containerTitleFontSize + 'px' : sheet.containerTitleFontSize) : '13px';
+                cont = {
+                    id: generateId(),
+                    name: 'CONTENEDOR ' + (sheet.containers.length + 1),
+                    color: CONTAINER_COLORS[sheet.containers.length % CONTAINER_COLORS.length],
+                    titleFontSize: defaultFs,
+                    collapsed: false,
+                    order: sheet.containers.length
+                };
+            }
+
+            editingContainer = {
+                sheetId,
+                containerId: cont.id,
+                isNew,
+                cardIdsToGroup: Array.isArray(cardIdsToGroup) ? [...cardIdsToGroup] : null,
+                contData: JSON.parse(JSON.stringify(cont))
+            };
+
+            if (containerModalTitle) {
+                if (cardIdsToGroup && cardIdsToGroup.length) {
+                    containerModalTitle.textContent = `📦 Nuevo Contenedor (${cardIdsToGroup.length} tarjeta${cardIdsToGroup.length > 1 ? 's' : ''})`;
+                } else {
+                    containerModalTitle.textContent = isNew ? '📦 Nuevo Contenedor' : '✏️ Editar Contenedor';
+                }
+            }
+            if (contEditName) contEditName.value = cont.name || '';
+            renderContColorRow(cont.color);
+
+            if (contEditFontSize) {
+                let fs = cont.titleFontSize || (sheet.containerTitleFontSize ? sheet.containerTitleFontSize + 'px' : '13px');
+                if (typeof fs === 'number' || (typeof fs === 'string' && !fs.endsWith('px'))) {
+                    fs = fs + 'px';
+                }
+                contEditFontSize.value = fs;
+                if (!contEditFontSize.value) contEditFontSize.value = '13px';
+            }
+
+            if (containerModalOverlay) {
+                containerModalOverlay.classList.add('show');
+                setTimeout(() => { if (contEditName) { contEditName.focus(); contEditName.select(); } }, 60);
+            }
+        }
+
+        function renderContColorRow(selectedColor) {
+            if (!contColorRow) return;
+            contColorRow.innerHTML = '';
+            CONTAINER_COLORS.forEach(c => {
+                const sw = document.createElement('div');
+                sw.className = 'cs' + (selectedColor === c ? ' sel' : '');
+                sw.style.backgroundColor = c;
+                sw.title = c;
+                sw.addEventListener('click', () => {
+                    if (editingContainer && editingContainer.contData) {
+                        editingContainer.contData.color = c;
+                    }
+                    renderContColorRow(c);
+                });
+                contColorRow.appendChild(sw);
+            });
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.value = selectedColor || '#3b82f6';
+            colorInput.title = 'Color personalizado';
+            colorInput.addEventListener('input', () => {
+                if (editingContainer && editingContainer.contData) {
+                    editingContainer.contData.color = colorInput.value;
+                }
+                renderContColorRow(colorInput.value);
+            });
+            contColorRow.appendChild(colorInput);
+        }
+
+        if (contEditName) {
+            contEditName.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (containerModalSave) containerModalSave.click();
+                }
+            });
+        }
+
+        if (containerModalClose) containerModalClose.addEventListener('click', () => containerModalOverlay.classList.remove('show'));
+        if (containerModalCancel) containerModalCancel.addEventListener('click', () => containerModalOverlay.classList.remove('show'));
+        let containerBackdropDown = false;
+        if (containerModalOverlay) {
+            containerModalOverlay.addEventListener('mousedown', (e) => {
+                containerBackdropDown = (e.target === containerModalOverlay);
+            });
+            containerModalOverlay.addEventListener('click', (e) => {
+                if (e.target === containerModalOverlay && containerBackdropDown) {
+                    containerModalOverlay.classList.remove('show');
+                }
+            });
+        }
+
+        if (containerModalSave) {
+            containerModalSave.addEventListener('click', () => {
+                if (!editingContainer) return;
+                const sheet = getSheetById(editingContainer.sheetId);
+                if (!sheet) return;
+                if (!Array.isArray(sheet.containers)) sheet.containers = [];
+
+                const name = (contEditName ? contEditName.value.trim() : '') || 'Contenedor';
+                const color = (editingContainer.contData && editingContainer.contData.color) || '#3b82f6';
+                const titleFontSize = (contEditFontSize && contEditFontSize.value) ? contEditFontSize.value : '13px';
+
+                if (editingContainer.isNew) {
+                    const newCont = {
+                        id: editingContainer.containerId,
+                        name,
+                        color,
+                        titleFontSize,
+                        collapsed: false,
+                        order: sheet.containers.length
+                    };
+                    sheet.containers.push(newCont);
+
+                    if (editingContainer.cardIdsToGroup && editingContainer.cardIdsToGroup.length) {
+                        const gCardIds = editingContainer.cardIdsToGroup;
+                        // Asignar containerId a las tarjetas seleccionadas
+                        (sheet.cards || []).forEach(c => {
+                            if (gCardIds.includes(c.id)) {
+                                c.containerId = newCont.id;
+                            }
+                        });
+
+                        // Actualizar rootOrder
+                        if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = getRootOrder(sheet);
+
+                        let firstIdx = -1;
+                        for (let i = 0; i < sheet.rootOrder.length; i++) {
+                            if (gCardIds.includes(sheet.rootOrder[i])) {
+                                firstIdx = i;
+                                break;
+                            }
+                        }
+
+                        // Remover las tarjetas agrupadas de la raíz (ahora viven dentro del contenedor)
+                        sheet.rootOrder = sheet.rootOrder.filter(id => !gCardIds.includes(id));
+
+                        // Insertar el nuevo contenedor en la posición de la primera tarjeta seleccionada
+                        if (firstIdx !== -1 && firstIdx <= sheet.rootOrder.length) {
+                            sheet.rootOrder.splice(firstIdx, 0, newCont.id);
+                        } else {
+                            sheet.rootOrder.push(newCont.id);
+                        }
+
+                        clearCardSelection();
+                        showToast(`📦 Contenedor "${name}" creado con ${gCardIds.length} tarjeta(s).`, 'success');
+                    } else {
+                        if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = getRootOrder(sheet);
+                        if (!sheet.rootOrder.includes(newCont.id)) sheet.rootOrder.push(newCont.id);
+                        showToast('📦 Contenedor creado.', 'success');
+                    }
+                } else {
+                    const existing = sheet.containers.find(c => c.id === editingContainer.containerId);
+                    if (existing) {
+                        existing.name = name;
+                        existing.color = color;
+                        existing.titleFontSize = titleFontSize;
+                    }
+                    showToast('💾 Contenedor actualizado.', 'success');
+                }
+
+                saveData();
+                render();
+                containerModalOverlay.classList.remove('show');
+                editingContainer = null;
+            });
+        }
+
+        if (btnNewContainer) {
+            btnNewContainer.addEventListener('click', () => {
+                const sheet = getActiveSheet();
+                if (!sheet || sheet.mode !== 'containers') return;
+                openContainerModal(sheet.id, null);
+            });
+        }
+
+        // Acciones de la Barra Flotante de Multi-Selección
+        if (btnFloatingAddContainer) {
+            btnFloatingAddContainer.addEventListener('click', () => {
+                const sheet = getActiveSheet();
+                if (!sheet) return;
+                if (selectedCardIds.size === 0) return;
+
+                // Si la hoja no está en modo contenedores, la preparamos para soportar contenedores
+                if (sheet.mode !== 'containers') {
+                    sheet.mode = 'containers';
+                    if (!Array.isArray(sheet.containers)) sheet.containers = [];
+                    if (!Array.isArray(sheet.rootOrder)) {
+                        sheet.rootOrder = (sheet.cards || []).map(c => c.id);
+                    }
+                    sheet.containerTitleFontSize = sheet.containerTitleFontSize || 13;
+                }
+
+                openContainerModal(sheet.id, null, Array.from(selectedCardIds));
+            });
+        }
+
+        if (btnFloatingClear) {
+            btnFloatingClear.addEventListener('click', () => {
+                clearCardSelection();
+            });
+        }
+
         document.getElementById('settings-close').addEventListener('click', () => settingsOverlay.classList.remove('show'));
+        let settingsBackdropDown = false;
+        settingsOverlay.addEventListener('mousedown', (e) => {
+            settingsBackdropDown = (e.target === settingsOverlay);
+        });
         settingsOverlay.addEventListener('click', (e) => {
-            if (e.target === settingsOverlay) settingsOverlay.classList.remove('show');
+            if (e.target === settingsOverlay && settingsBackdropDown) settingsOverlay.classList.remove('show');
         });
 
         document.getElementById('settings-drawer-timeout').addEventListener('change', () => {
@@ -6252,6 +8290,16 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
             openCardEditor(sheet.id, null);
         });
 
+        // Clic en fondo/lienzo vacío: deseleccionar tarjetas si no se pulsaba Ctrl
+        if (contentEl) {
+            contentEl.addEventListener('click', (e) => {
+                if (e.target.closest('.card-item') || e.target.closest('#floating-selection-bar') || e.target.closest('.container-hdr') || e.target.closest('.modal-box') || e.target.closest('#drawer')) return;
+                if (selectedCardIds.size > 0 && !e.ctrlKey && !e.metaKey) {
+                    clearCardSelection();
+                }
+            });
+        }
+
         // El color elegido en el editor se conserva como color por defecto
         // para las siguientes tarjetas nuevas (se actualiza al cambiarlo).
         editColor.addEventListener('input', () => {
@@ -6312,7 +8360,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         if (btnPasteCard) {
             btnPasteCard.addEventListener('click', () => {
                 const sheet = getActiveSheet();
-                if (sheet && (sheet.mode === 'cards' || sheet.mode === 'images')) {
+                if (sheet && (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers')) {
                     pasteFullCard(sheet.id, null);
                 }
             });
@@ -6326,14 +8374,16 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // Clic derecho en el fondo / canvas de tarjetas
         cardsContainer.addEventListener('contextmenu', (e) => {
             if (e.target.closest('.card-item') || e.target.closest('.ex-wrap')) return;
+            if (e.target.closest('.container-block')) return;
             e.preventDefault();
             const sheet = getActiveSheet();
             if (!sheet || sheet.mode === 'process') return;
-            const isCardsOrImages = sheet.mode === 'cards' || sheet.mode === 'images';
+            const isCardsOrImages = (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers');
             const items = [
-                { icon: '➕', label: 'Nueva tarjeta', fn: () => openCardEditor(sheet.id, null) },
-                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta', fn: () => pasteFullCard(sheet.id, null) } : null,
-                sheet.mode === 'cards' ? { icon: '🧹', label: 'Compactar espacios vacíos', fn: () => compactarHoja(sheet.id) } : null
+                { icon: '➕', label: sheet.mode === 'containers' ? 'Nueva tarjeta libre' : 'Nueva tarjeta', fn: () => openCardEditor(sheet.id, null) },
+                sheet.mode === 'containers' ? { icon: '📦', label: 'Nuevo contenedor', fn: () => openContainerModal(sheet.id, null) } : null,
+                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: sheet.mode === 'containers' ? 'Pegar tarjeta libre' : 'Pegar tarjeta', fn: () => pasteFullCard(sheet.id, null) } : null,
+                (sheet.mode === 'cards' || sheet.mode === 'containers') ? { icon: '🧹', label: 'Compactar espacios vacíos', fn: () => compactarHoja(sheet.id) } : null
             ].filter(Boolean);
             if (items.length) showContextMenu(e.clientX, e.clientY, items);
         });
@@ -6418,7 +8468,7 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                             const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
                             if (!typing && !modalOverlay.classList.contains('show')) {
                                 const sheet = getActiveSheet();
-                                if (sheet && (sheet.mode === 'cards' || sheet.mode === 'images') && hasCopiedCard()) {
+                                if (sheet && (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers') && hasCopiedCard()) {
                                     e.preventDefault();
                                     pasteFullCard(sheet.id, null);
                                 }
@@ -6474,6 +8524,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
         // ============================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                if (containerModalOverlay && containerModalOverlay.classList.contains('show')) {
+                    containerModalOverlay.classList.remove('show');
+                    editingContainer = null;
+                    return;
+                }
                 if (modalOverlay.classList.contains('show')) { cancelCardEditor(); return; }
                 if (confirmOverlay.classList.contains('show')) { closeConfirm(); return; }
                 if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
@@ -6481,6 +8536,11 @@ if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state
                 if (state.drawer) {
                     if (state.drawerNoteEdit) { state.drawerNoteEdit = false; state.drawerNoteDraft = ''; renderDrawer(); }
                     else closeDrawer();
+                    return;
+                }
+                if (selectedCardIds.size > 0) {
+                    clearCardSelection();
+                    return;
                 }
             }
         });

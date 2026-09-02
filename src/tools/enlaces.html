@@ -372,12 +372,31 @@
             gap: 4px;
         }
 
+        ::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--faint);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
         #list::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         #list::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        #list::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         .empty-state {
@@ -588,11 +607,15 @@
         }
 
         .modal-scroll::-webkit-scrollbar {
-            width: 4px;
+            width: 9px;
+            height: 9px;
         }
         .modal-scroll::-webkit-scrollbar-thumb {
             background: var(--faint);
-            border-radius: 2px;
+            border-radius: 5px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
         }
 
         .modal-field {
@@ -1836,8 +1859,12 @@
             }
         });
 
+        let backdropDown = false;
+        modalOverlay.addEventListener('mousedown', (e) => {
+            backdropDown = (e.target === modalOverlay);
+        });
         modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeEditor();
+            if (e.target === modalOverlay && backdropDown) closeEditor();
         });
 
         editBtnSelectFile.addEventListener('click', () => editFile.click());

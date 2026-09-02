@@ -34,6 +34,10 @@ body{display:flex;flex-direction:column;border:1px solid var(--border2);border-r
   color:var(--text);font-size:12px;line-height:1.6;
   border:none;outline:none;resize:none;font-family:var(--font);
   min-height: 0; overflow-y: auto;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--faint);border-radius:5px;}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);}
 #editor::placeholder{color:var(--faint);}
 #editor:disabled{opacity:0.85;cursor:default;}
 
