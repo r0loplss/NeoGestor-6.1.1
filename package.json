@@ -1,7 +1,11 @@
 {
   "name": "gestor-casos",
-  "version": "6.1.5",
+  "version": "6.1.6",
   "description": "Gestor de Casos Call Center v6",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/r0loplss/NeoGestor-6.1.1.git"
+  },
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
@@ -43,6 +47,11 @@
     },
     "portable": {
       "artifactName": "GestorCasos-portable-${version}.exe"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "r0loplss",
+      "repo": "NeoGestor-6.1.1"
     }
   },
   "devDependencies": {
