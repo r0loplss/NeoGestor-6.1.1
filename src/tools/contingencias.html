@@ -1419,11 +1419,18 @@
         btnCopyBreve.addEventListener('click', copiarBreve);
 
         // Modal eventos
+        const modalEditOverlay = document.getElementById('modal-edit-contingencia');
+        let backdropDown = false;
+
         document.getElementById('modal-edit-close').addEventListener('click', cerrarEditorContingencia);
         document.getElementById('modal-edit-cancel').addEventListener('click', cerrarEditorContingencia);
         document.getElementById('modal-edit-save').addEventListener('click', guardarEdicionContingencia);
-        document.getElementById('modal-edit-contingencia').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('modal-edit-contingencia')) cerrarEditorContingencia();
+
+        modalEditOverlay.addEventListener('mousedown', (e) => {
+            backdropDown = (e.target === modalEditOverlay);
+        });
+        modalEditOverlay.addEventListener('click', (e) => {
+            if (e.target === modalEditOverlay && backdropDown) cerrarEditorContingencia();
         });
 
         document.addEventListener('keydown', (e) => {

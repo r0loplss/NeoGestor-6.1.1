@@ -10,6 +10,12 @@ const SRC   = path.join(ROOT, 'src');
 const TOOLS = path.join(ROOT, 'src', 'tools');
 
 // ============================================================
+// SISTEMA DE ACTUALIZACIÓN (GitHub Releases)
+// ============================================================
+const updater = require('./updater');
+updater.initUpdater(ipcMain);
+
+// ============================================================
 // RUTAS DE HTML (con nuevas herramientas)
 // ============================================================
 const HTML = {
@@ -384,7 +390,7 @@ function toggleFast() {
   // 3) Visible y con el foco (el usuario la está viendo/activa) → cerrar.
   //    También cuenta como "visible" si estaba enfocada hace muy poco (caso del
   //    botón del drawer, que al hacer clic roba el foco a Fast).
-  if (fastVisible && (win.isFocused() || (Date.now() - fastLastFocusAt) < 1500)) {
+  if (fastVisible && (win.isFocused() || (Date.now() - fastLastFocusAt) < 3000)) {
     closeFast();
     return;
   }
@@ -849,14 +855,18 @@ ipcMain.on('note-minimize', (e, id) => {
   } 
 });
 
-// ── IPC: APERTURA Y CIERRE DE HERRAMIENTAS ──
-ipcMain.on('open-tool', (e, id) => {
-  if (!TOOLS_CONFIG[id]) return;
+// ── IPC: APERTURA, CONMUTACIÓN Y CIERRE DE HERRAMIENTAS ──
+const toolLastFocusAt = new Map();
+let lastFocusedToolId = null;
+let lastFocusedToolTime = 0;
 
-  // Fast: se abre como ventana grande 1000×900 (botón flotante externo)
+function openTool(id) {
+  if (!TOOLS_CONFIG[id]) return null;
+
+  // Fast: se abre como ventana grande 1000×900 (botón flotante externo o drawer)
   if (id === 'fast') {
     openFast();
-    return;
+    return fastWin;
   }
 
   const conf = TOOLS_CONFIG[id];
@@ -866,11 +876,16 @@ ipcMain.on('open-tool', (e, id) => {
     if (!win.isDestroyed()) {
       if (win.isMinimized()) win.restore();
       win.show();
+      win.moveTop();
       win.focus();
+      toolLastFocusAt.set(id, Date.now());
+      lastFocusedToolId = id;
+      lastFocusedToolTime = Date.now();
       if (mainWin && !mainWin.isDestroyed()) {
         mainWin.webContents.send('tool-restored', id);
+        mainWin.webContents.send('tool-focused', id);
       }
-      return;
+      return win;
     }
   }
 
@@ -885,10 +900,32 @@ ipcMain.on('open-tool', (e, id) => {
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   });
 
+  toolWins.set(id, win);
+  toolLastFocusAt.set(id, Date.now());
+  lastFocusedToolId = id;
+  lastFocusedToolTime = Date.now();
+
+  win.on('focus', () => {
+    toolLastFocusAt.set(id, Date.now());
+    lastFocusedToolId = id;
+    lastFocusedToolTime = Date.now();
+    if (mainWin && !mainWin.isDestroyed()) {
+      mainWin.webContents.send('tool-focused', id);
+    }
+  });
+
   win.loadFile(conf.file);
 
   win.on('ready-to-show', () => {
     if (win && !win.isDestroyed()) {
+      win.show();
+      win.focus();
+      toolLastFocusAt.set(id, Date.now());
+      lastFocusedToolId = id;
+      lastFocusedToolTime = Date.now();
+      if (mainWin && !mainWin.isDestroyed()) {
+        mainWin.webContents.send('tool-opened', id);
+      }
       const d = loadData();
       if (id === 'occ') {
         win.webContents.send('init-occ', d.occState || null);
@@ -937,12 +974,17 @@ ipcMain.on('open-tool', (e, id) => {
     }
   });
   win.on('restore', () => {
+    toolLastFocusAt.set(id, Date.now());
+    lastFocusedToolId = id;
+    lastFocusedToolTime = Date.now();
     if (mainWin && !mainWin.isDestroyed()) {
       mainWin.webContents.send('tool-restored', id);
     }
   });
 
   win.on('closed', () => {
+    toolLastFocusAt.delete(id);
+    if (lastFocusedToolId === id) lastFocusedToolId = null;
     if (toolWins.get(id) === win) {
       toolWins.delete(id);
     }
@@ -952,6 +994,94 @@ ipcMain.on('open-tool', (e, id) => {
   });
 
   toolWins.set(id, win);
+  return win;
+}
+
+function toggleTool(id) {
+  if (!TOOLS_CONFIG[id]) return;
+
+  // Fast: delegar a su lógica de toggle consolidada
+  if (id === 'fast') {
+    toggleFast();
+    return;
+  }
+
+  const win = toolWins.get(id);
+
+  // 1) Cerrada (o nunca abierta) → abrir
+  if (!win || win.isDestroyed()) {
+    openTool(id);
+    return;
+  }
+
+  // 2) Minimizada → restaurar y traer al frente
+  if (win.isMinimized()) {
+    win.restore();
+    win.show();
+    win.moveTop();
+    win.focus();
+    toolLastFocusAt.set(id, Date.now());
+    lastFocusedToolId = id;
+    lastFocusedToolTime = Date.now();
+    if (mainWin && !mainWin.isDestroyed()) {
+      mainWin.webContents.send('tool-restored', id);
+    }
+    return;
+  }
+
+  // 3) Visible y con foco (o enfocada recientemente antes de interactuar con el launcher) → cerrar
+  const lastFocus = toolLastFocusAt.get(id) || 0;
+  const isRecentFocus = (Date.now() - lastFocus) < 3000;
+  const wasLastActive = (lastFocusedToolId === id) && ((Date.now() - lastFocusedToolTime) < 5000);
+  const wasInFocus = win.isFocused() || isRecentFocus || wasLastActive;
+
+  if (win.isVisible() && wasInFocus) {
+    win.close();
+    return;
+  }
+
+  // 4) Visible pero al fondo (sin foco) → traer al frente
+  if (win.isVisible()) {
+    win.show();
+    win.moveTop();
+    win.focus();
+    toolLastFocusAt.set(id, Date.now());
+    lastFocusedToolId = id;
+    lastFocusedToolTime = Date.now();
+    if (mainWin && !mainWin.isDestroyed()) {
+      mainWin.webContents.send('tool-restored', id);
+    }
+    return;
+  }
+
+  // 5) Existe pero oculta → mostrar y enfocar
+  win.show();
+  win.moveTop();
+  win.focus();
+  toolLastFocusAt.set(id, Date.now());
+  lastFocusedToolId = id;
+  lastFocusedToolTime = Date.now();
+}
+
+ipcMain.on('open-tool', (e, id) => {
+  openTool(id);
+});
+
+ipcMain.on('toggle-tool', (e, id) => {
+  toggleTool(id);
+});
+
+ipcMain.on('request-tools-state', (e) => {
+  const states = {};
+  for (const [id, win] of toolWins.entries()) {
+    if (win && !win.isDestroyed()) {
+      states[id] = { open: true, minimized: win.isMinimized() };
+    }
+  }
+  if (fastWin && !fastWin.isDestroyed()) {
+    states['fast'] = { open: true, minimized: fastWin.isMinimized() };
+  }
+  e.reply('tools-state', states);
 });
 
 ipcMain.on('close-tool', (e, id) => {

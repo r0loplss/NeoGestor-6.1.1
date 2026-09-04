@@ -1708,6 +1708,36 @@
             transition: 0.15s;
         }
         #sheet-add-btn:hover { color: var(--primary); background: var(--surface2); }
+        .sheet-hidden-btn {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            padding: 0 10px;
+            height: 100%;
+            border: none;
+            border-right: 1px solid var(--border);
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .sheet-hidden-btn:hover {
+            background: rgba(245, 158, 11, 0.22);
+            color: #f59e0b;
+        }
+        .sheet-hidden-badge {
+            background: rgba(245, 158, 11, 0.25);
+            color: #fbbf24;
+            border-radius: 8px;
+            padding: 1px 5px;
+            font-size: 10px;
+            font-weight: 700;
+        }
 
         /* ============================================================
                DRAWER (detalle)
@@ -2634,6 +2664,328 @@
         #confirm-cancel:hover { background: var(--surface2); }
 
         /* ============================================================
+           DIÁLOGO DE COMPROBACIÓN DE TRANSFORMACIÓN DE MODO (ESCRIBIR 'ACEPTO')
+           ============================================================ */
+        #transform-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 650;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        #transform-confirm-overlay.show { display: flex; }
+        #transform-confirm-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 22px;
+            width: 400px;
+            max-width: 92%;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.75);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: modalPop 0.18s ease-out;
+        }
+        .transform-confirm-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .transform-confirm-icon {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            flex-shrink: 0;
+        }
+        .transform-confirm-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.25;
+        }
+        .transform-confirm-desc {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.5;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .transform-confirm-desc strong {
+            color: var(--text);
+        }
+        .transform-confirm-input-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .transform-confirm-label {
+            font-size: 11.5px;
+            color: var(--text);
+            font-weight: 600;
+        }
+        .transform-confirm-label code {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        #transform-confirm-input {
+            width: 100%;
+            background: var(--surface3);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        #transform-confirm-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        #transform-confirm-input.valid {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+        }
+        .transform-confirm-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+        .transform-confirm-actions button {
+            padding: 8px 18px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--font);
+            transition: all 0.15s;
+            border: none;
+        }
+        #transform-confirm-ok {
+            background: #2563eb;
+            color: #fff;
+            opacity: 0.45;
+            cursor: not-allowed;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #transform-confirm-ok.enabled {
+            opacity: 1;
+            cursor: pointer;
+            background: #2563eb;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
+        }
+        #transform-confirm-ok.enabled:hover {
+            background: #1d4ed8;
+        }
+        #transform-confirm-cancel {
+            background: var(--surface3);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+        #transform-confirm-cancel:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        /* ============================================================
+           MODAL: REPOSITORIO DE HOJAS OCULTAS
+           ============================================================ */
+        #hidden-sheets-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 640;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        #hidden-sheets-overlay.show { display: flex; }
+        #hidden-sheets-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 20px;
+            width: 480px;
+            max-width: 92%;
+            max-height: 85vh;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.75);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: modalPop 0.18s ease-out;
+        }
+        .hidden-sheets-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .hidden-sheets-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hidden-sheets-icon {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            flex-shrink: 0;
+        }
+        .hidden-sheets-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .hidden-sheets-subtitle {
+            font-size: 11.5px;
+            color: var(--muted);
+            margin-top: 1px;
+        }
+        .hidden-sheets-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            max-height: 320px;
+            padding-right: 4px;
+        }
+        .hidden-sheet-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .hidden-sheet-item:hover {
+            border-color: var(--border2);
+            background: var(--surface3);
+        }
+        .hidden-sheet-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex: 1;
+        }
+        .hidden-sheet-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .hidden-sheet-text {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .hidden-sheet-name {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .hidden-sheet-meta {
+            font-size: 11px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .hidden-sheet-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .btn-unhide-sheet {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            padding: 6px 12px;
+            font-size: 11.5px;
+            font-weight: 600;
+            font-family: var(--font);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.15s;
+        }
+        .btn-unhide-sheet:hover {
+            background: #1d4ed8;
+        }
+        .hidden-sheets-empty {
+            text-align: center;
+            padding: 24px 12px;
+            color: var(--muted);
+            font-size: 12.5px;
+        }
+        .hidden-sheets-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .hidden-sheets-actions-right {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-unhide-all {
+            background: var(--surface3);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 7px 14px;
+            font-size: 11.5px;
+            font-weight: 600;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-unhide-all:hover {
+            background: var(--surface2);
+            border-color: var(--primary);
+        }
+
+        /* ============================================================
                TOAST
                ============================================================ */
         #toast-container {
@@ -2711,6 +3063,9 @@
 
     <!-- SHEETBAR (Excel) -->
     <div id="sheetbar">
+        <button id="sheet-hidden-btn" class="sheet-hidden-btn" title="Repositorio de hojas ocultas">
+            <span>👁️</span> <span>Ocultas</span> <span class="sheet-hidden-badge" id="sheet-hidden-count">0</span>
+        </button>
         <div id="sheet-tabs"></div>
         <button id="sheet-add-btn" title="Nueva hoja (Ctrl+T)">＋</button>
     </div>
@@ -3005,6 +3360,54 @@
         </div>
     </div>
 
+    <!-- DIÁLOGO DE COMPROBACIÓN DE TRANSFORMACIÓN DE MODO (ESCRIBIR 'ACEPTO') -->
+    <div id="transform-confirm-overlay">
+        <div id="transform-confirm-box">
+            <div class="transform-confirm-header">
+                <div class="transform-confirm-icon">🔄</div>
+                <div class="transform-confirm-title" id="transform-confirm-title">Comprobación de Transformación</div>
+            </div>
+            <div class="transform-confirm-desc" id="transform-confirm-desc">
+                ¿Estás seguro de transformar el modo de esta hoja?
+            </div>
+            <div class="transform-confirm-input-wrap">
+                <label class="transform-confirm-label" for="transform-confirm-input">
+                    Para confirmar, escribe <code>acepto</code> a continuación:
+                </label>
+                <input type="text" id="transform-confirm-input" placeholder="Escribe 'acepto'..." autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="transform-confirm-actions">
+                <button id="transform-confirm-cancel">Cancelar</button>
+                <button id="transform-confirm-ok" disabled>Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REPOSITORIO DE HOJAS OCULTAS -->
+    <div id="hidden-sheets-overlay">
+        <div id="hidden-sheets-box">
+            <div class="hidden-sheets-header">
+                <div class="hidden-sheets-title-wrap">
+                    <div class="hidden-sheets-icon">📦</div>
+                    <div>
+                        <div class="hidden-sheets-title">Repositorio de Hojas Ocultas</div>
+                        <div class="hidden-sheets-subtitle">Hojas preservadas fuera de la barra de pestañas</div>
+                    </div>
+                </div>
+                <button class="btn-close-modal" id="hidden-sheets-close-x" style="background:none; border:none; color:var(--muted); font-size:16px; cursor:pointer;" title="Cerrar (Esc)">✕</button>
+            </div>
+            <div class="hidden-sheets-list" id="hidden-sheets-list">
+                <!-- Se llena dinámicamente -->
+            </div>
+            <div class="hidden-sheets-actions">
+                <button class="btn-unhide-all" id="btn-unhide-all">👁️ Mostrar todas</button>
+                <div class="hidden-sheets-actions-right">
+                    <button class="btn-cancel" id="hidden-sheets-close">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- BARRA FLOTANTE DE MULTI-SELECCIÓN (Agregar a Contenedor) -->
     <div id="floating-selection-bar">
         <div class="floating-selection-info">
@@ -3080,6 +3483,8 @@
         const contentEl = document.getElementById('content');
         const cardsContainer = document.getElementById('cards-container');
         const sheetTabs = document.getElementById('sheet-tabs');
+        const sheetHiddenBtn = document.getElementById('sheet-hidden-btn');
+        const sheetHiddenCount = document.getElementById('sheet-hidden-count');
         const searchInput = document.getElementById('search-input');
         const searchResultCount = document.getElementById('search-result-count');
         const btnNewCard = document.getElementById('btn-new-card');
@@ -3159,6 +3564,19 @@
         const confirmMsg = document.getElementById('confirm-msg');
         const confirmOk = document.getElementById('confirm-ok');
         const confirmCancel = document.getElementById('confirm-cancel');
+
+        const transformConfirmOverlay = document.getElementById('transform-confirm-overlay');
+        const transformConfirmTitle = document.getElementById('transform-confirm-title');
+        const transformConfirmDesc = document.getElementById('transform-confirm-desc');
+        const transformConfirmInput = document.getElementById('transform-confirm-input');
+        const transformConfirmOk = document.getElementById('transform-confirm-ok');
+        const transformConfirmCancel = document.getElementById('transform-confirm-cancel');
+
+        const hiddenSheetsOverlay = document.getElementById('hidden-sheets-overlay');
+        const hiddenSheetsList = document.getElementById('hidden-sheets-list');
+        const btnUnhideAll = document.getElementById('btn-unhide-all');
+        const hiddenSheetsClose = document.getElementById('hidden-sheets-close');
+        const hiddenSheetsCloseX = document.getElementById('hidden-sheets-close-x');
 
         // ============================================================
         // TOAST
@@ -3254,6 +3672,90 @@
         });
         confirmOverlay.addEventListener('click', (e) => {
             if (e.target === confirmOverlay && confirmBackdropDown) closeConfirm();
+        });
+
+        // ============================================================
+        // COMPROBACIÓN DE TRANSFORMACIÓN DE MODO (ESCRIBIR 'ACEPTO')
+        // ============================================================
+        let transformConfirmCb = null;
+
+        function showTransformConfirmModal(title, descHtml, onAccept) {
+            transformConfirmCb = onAccept;
+            if (transformConfirmTitle) transformConfirmTitle.textContent = title || 'Comprobación de Transformación';
+            if (transformConfirmDesc) transformConfirmDesc.innerHTML = descHtml || '';
+            if (transformConfirmInput) {
+                transformConfirmInput.value = '';
+                transformConfirmInput.classList.remove('valid');
+            }
+            if (transformConfirmOk) {
+                transformConfirmOk.disabled = true;
+                transformConfirmOk.classList.remove('enabled');
+            }
+            transformConfirmOverlay.classList.add('show');
+            setTimeout(() => {
+                if (transformConfirmInput) transformConfirmInput.focus();
+            }, 50);
+        }
+
+        function closeTransformConfirmModal() {
+            transformConfirmOverlay.classList.remove('show');
+            transformConfirmCb = null;
+            if (transformConfirmInput) {
+                transformConfirmInput.value = '';
+                transformConfirmInput.classList.remove('valid');
+            }
+        }
+
+        if (transformConfirmInput) {
+            transformConfirmInput.addEventListener('input', () => {
+                const val = (transformConfirmInput.value || '').trim().toLowerCase();
+                const isValid = val === 'acepto';
+                transformConfirmInput.classList.toggle('valid', isValid);
+                if (transformConfirmOk) {
+                    transformConfirmOk.disabled = !isValid;
+                    transformConfirmOk.classList.toggle('enabled', isValid);
+                }
+            });
+
+            transformConfirmInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const val = (transformConfirmInput.value || '').trim().toLowerCase();
+                    if (val === 'acepto' && transformConfirmCb) {
+                        e.preventDefault();
+                        const cb = transformConfirmCb;
+                        closeTransformConfirmModal();
+                        cb();
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeTransformConfirmModal();
+                }
+            });
+        }
+
+        if (transformConfirmOk) {
+            transformConfirmOk.addEventListener('click', () => {
+                const val = (transformConfirmInput.value || '').trim().toLowerCase();
+                if (val === 'acepto' && transformConfirmCb) {
+                    const cb = transformConfirmCb;
+                    closeTransformConfirmModal();
+                    cb();
+                }
+            });
+        }
+
+        if (transformConfirmCancel) {
+            transformConfirmCancel.addEventListener('click', closeTransformConfirmModal);
+        }
+
+        let transformBackdropDown = false;
+        transformConfirmOverlay.addEventListener('mousedown', (e) => {
+            transformBackdropDown = (e.target === transformConfirmOverlay);
+        });
+        transformConfirmOverlay.addEventListener('click', (e) => {
+            if (e.target === transformConfirmOverlay && transformBackdropDown) {
+                closeTransformConfirmModal();
+            }
         });
 
         // ============================================================
@@ -3416,7 +3918,13 @@
         // UTILIDADES
         // ============================================================
         function getActiveSheet() {
-            return state.sheets.find(s => s.id === state.activeSheetId) || state.sheets[0];
+            const visibleSheets = state.sheets.filter(s => !s.hidden);
+            let active = state.sheets.find(s => s.id === state.activeSheetId && !s.hidden);
+            if (!active && visibleSheets.length > 0) {
+                active = visibleSheets[0];
+                state.activeSheetId = active.id;
+            }
+            return active || state.sheets[0];
         }
         function getSheetById(id) {
             return state.sheets.find(s => s.id === id);
@@ -3589,7 +4097,19 @@
         // ---------- SHEETBAR (pestañas estilo Excel) ----------
         function renderSheets() {
             sheetTabs.innerHTML = '';
-            state.sheets.forEach((sheet, idx) => {
+            const visibleSheets = state.sheets.filter(s => !s.hidden);
+            const hiddenSheets = state.sheets.filter(s => s.hidden);
+
+            if (sheetHiddenBtn && sheetHiddenCount) {
+                if (hiddenSheets.length > 0) {
+                    sheetHiddenCount.textContent = hiddenSheets.length;
+                    sheetHiddenBtn.style.display = 'inline-flex';
+                } else {
+                    sheetHiddenBtn.style.display = 'none';
+                }
+            }
+
+            visibleSheets.forEach((sheet, idx) => {
                 const el = document.createElement('div');
                 el.className = 'sheet-tab' + (sheet.id === state.activeSheetId ? ' active' : '');
                 el.dataset.sheetId = sheet.id;
@@ -3739,11 +4259,152 @@
             showConfirm(msg, () => {
                 const idx = state.sheets.indexOf(sheet);
                 if (idx !== -1) state.sheets.splice(idx, 1);
-                if (state.activeSheetId === sheet.id) state.activeSheetId = state.sheets[0].id;
+                const nextVisible = state.sheets.find(s => !s.hidden) || state.sheets[0];
+                if (state.activeSheetId === sheet.id && nextVisible) state.activeSheetId = nextVisible.id;
                 if (state.drawer && state.drawer.sheetId === sheet.id) state.drawer = null;
                 saveData();
                 render();
                 showToast('🗑 Hoja eliminada.', 'success');
+            });
+        }
+
+        // ============================================================
+        // REPOSITORIO DE HOJAS OCULTAS
+        // ============================================================
+        function hideSheet(sheetId) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const visibleSheets = state.sheets.filter(s => !s.hidden);
+            if (visibleSheets.length <= 1) {
+                showToast('⚠️ No se puede ocultar la única hoja visible del libro.', 'warning');
+                return;
+            }
+            sheet.hidden = true;
+            if (state.activeSheetId === sheetId) {
+                const nextVisible = state.sheets.find(s => !s.hidden && s.id !== sheetId);
+                if (nextVisible) state.activeSheetId = nextVisible.id;
+            }
+            if (state.drawer && state.drawer.sheetId === sheetId) state.drawer = null;
+            saveData();
+            render();
+            showToast(`🙈 Hoja "${sheet.name}" enviada al repositorio oculto.`, 'info', 2200);
+        }
+
+        function unhideSheet(sheetId, activate = true) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            sheet.hidden = false;
+            if (activate) {
+                state.activeSheetId = sheet.id;
+                state.drawer = null;
+            }
+            saveData();
+            render();
+            renderHiddenSheetsModal();
+            const remainingHidden = state.sheets.filter(s => s.hidden);
+            if (remainingHidden.length === 0) {
+                closeHiddenSheetsModal();
+            }
+            showToast(`👁️ Hoja "${sheet.name}" reactivada con éxito.`, 'success', 2200);
+        }
+
+        function unhideAllSheets() {
+            let unhiddenCount = 0;
+            state.sheets.forEach(sheet => {
+                if (sheet.hidden) {
+                    sheet.hidden = false;
+                    unhiddenCount++;
+                }
+            });
+            if (unhiddenCount > 0) {
+                saveData();
+                render();
+                closeHiddenSheetsModal();
+                showToast(`👁️ Se reactivaron ${unhiddenCount} hoja(s) oculta(s).`, 'success');
+            }
+        }
+
+        function openHiddenSheetsModal() {
+            renderHiddenSheetsModal();
+            if (hiddenSheetsOverlay) hiddenSheetsOverlay.classList.add('show');
+        }
+
+        function closeHiddenSheetsModal() {
+            if (hiddenSheetsOverlay) hiddenSheetsOverlay.classList.remove('show');
+        }
+
+        function renderHiddenSheetsModal() {
+            if (!hiddenSheetsList) return;
+            hiddenSheetsList.innerHTML = '';
+            const hiddenSheets = state.sheets.filter(s => s.hidden);
+
+            if (btnUnhideAll) {
+                btnUnhideAll.style.display = hiddenSheets.length > 1 ? '' : 'none';
+            }
+
+            if (hiddenSheets.length === 0) {
+                hiddenSheetsList.innerHTML = `
+                    <div class="hidden-sheets-empty">
+                        <span>✨ No hay hojas en el repositorio oculto.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            hiddenSheets.forEach(sheet => {
+                const item = document.createElement('div');
+                item.className = 'hidden-sheet-item';
+
+                const modeIcon = sheet.mode === 'containers' ? '🗂️' : (sheet.mode === 'images' ? '🖼️' : (sheet.mode === 'process' ? '📊' : '🃏'));
+                const modeLabel = SHEET_MODES[sheet.mode || 'cards']?.label || 'Modo Tarjetas';
+                const countLabel = sheet.mode === 'process'
+                    ? `${sheet.grid ? sheet.grid.cells.filter(r => r.some(v => v)).length : 0} filas con datos`
+                    : `${(sheet.cards || []).length} tarjeta(s)`;
+
+                item.innerHTML = `
+                    <div class="hidden-sheet-info">
+                        <span class="hidden-sheet-dot" style="background:${sheet.color || '#3b82f6'};"></span>
+                        <div class="hidden-sheet-text">
+                            <span class="hidden-sheet-name" title="${esc(sheet.name)}">${esc(sheet.name)}</span>
+                            <span class="hidden-sheet-meta">${modeIcon} ${modeLabel} • ${countLabel}</span>
+                        </div>
+                    </div>
+                    <div class="hidden-sheet-actions">
+                        <button class="btn-unhide-sheet" data-sheet-id="${sheet.id}">
+                            <span>👁️</span> Reactivar
+                        </button>
+                    </div>
+                `;
+
+                item.querySelector('.btn-unhide-sheet').addEventListener('click', () => {
+                    unhideSheet(sheet.id, true);
+                });
+
+                hiddenSheetsList.appendChild(item);
+            });
+        }
+
+        if (sheetHiddenBtn) {
+            sheetHiddenBtn.addEventListener('click', openHiddenSheetsModal);
+        }
+        if (btnUnhideAll) {
+            btnUnhideAll.addEventListener('click', unhideAllSheets);
+        }
+        if (hiddenSheetsClose) {
+            hiddenSheetsClose.addEventListener('click', closeHiddenSheetsModal);
+        }
+        if (hiddenSheetsCloseX) {
+            hiddenSheetsCloseX.addEventListener('click', closeHiddenSheetsModal);
+        }
+        let hiddenSheetsBackdropDown = false;
+        if (hiddenSheetsOverlay) {
+            hiddenSheetsOverlay.addEventListener('mousedown', (e) => {
+                hiddenSheetsBackdropDown = (e.target === hiddenSheetsOverlay);
+            });
+            hiddenSheetsOverlay.addEventListener('click', (e) => {
+                if (e.target === hiddenSheetsOverlay && hiddenSheetsBackdropDown) {
+                    closeHiddenSheetsModal();
+                }
             });
         }
 
@@ -5915,6 +6576,8 @@
         function showSheetContextMenu(x, y, sheetId) {
             const sheet = getSheetById(sheetId);
             const mode = sheet?.mode || 'cards';
+            const hiddenSheets = state.sheets.filter(s => s.hidden);
+
             const transformItem = mode === 'cards'
                 ? { icon: '🗂️', label: 'Transformar a Contenedor + Tarjetas', fn: () => transformSheetMode(sheetId, 'containers') }
                 : (mode === 'containers'
@@ -5922,6 +6585,18 @@
                     : (mode === 'images'
                         ? { icon: '🃏', label: 'Transformar a Modo Tarjetas', fn: () => transformSheetMode(sheetId, 'cards') }
                         : null));
+
+            const hideItem = {
+                icon: '🙈',
+                label: 'Ocultar hoja',
+                fn: () => hideSheet(sheetId)
+            };
+
+            const hiddenRepoItem = hiddenSheets.length > 0 ? {
+                icon: '👁️',
+                label: `Repositorio de hojas ocultas (${hiddenSheets.length})...`,
+                fn: () => openHiddenSheetsModal()
+            } : null;
 
             const items = [
                 { icon: '✏️', label: 'Renombrar', fn: () => {
@@ -5938,6 +6613,9 @@
                 { icon: '⧉', label: 'Duplicar hoja', fn: () => duplicateSheet(sheetId) },
                 { icon: '⬅', label: 'Mover a la izquierda', fn: () => moveSheet(sheetId, -1) },
                 { icon: '➡', label: 'Mover a la derecha', fn: () => moveSheet(sheetId, 1) },
+                null,
+                hideItem,
+                hiddenRepoItem,
                 null,
                 { icon: '🗑', label: 'Eliminar hoja', danger: true, fn: () => confirmDeleteSheet(sheetId) }
             ].filter(Boolean);
@@ -7776,25 +8454,36 @@
             const sheet = getSheetById(sheetId);
             if (!sheet || sheet.mode === targetMode) return;
             const currentMode = sheet.mode || 'cards';
+            const sheetNameEsc = esc(sheet.name || 'Hoja');
 
-            if (currentMode === 'process' || targetMode === 'process') {
-                showConfirm(`¿Transformar la hoja "${sheet.name}" a modo ${SHEET_MODES[targetMode]?.label || targetMode}? Las celdas de cuadrícula no se trasladarán directamente a tarjetas.`, () => {
-                    executeTransformSheetMode(sheet, targetMode);
-                });
-                return;
-            }
+            let title = 'Transformar Modo de Hoja';
+            let descHtml = '';
 
-            if (currentMode === 'containers' && targetMode === 'cards') {
-                showConfirm(`¿Transformar la hoja "${sheet.name}" a Modo Tarjetas Estándar? Todas las tarjetas dentro de los contenedores se conservarán como tarjetas libres en una cuadrícula continua.`, () => {
-                    executeTransformSheetMode(sheet, targetMode);
-                });
-            } else if (currentMode === 'cards' && targetMode === 'containers') {
-                showConfirm(`¿Transformar la hoja "${sheet.name}" a Modo Contenedor + Tarjetas? Todas las tarjetas actuales se conservarán intactas como tarjetas libres para que puedas organizarlas en contenedores.`, () => {
-                    executeTransformSheetMode(sheet, targetMode);
-                });
+            if (currentMode === 'cards' && targetMode === 'containers') {
+                title = '🗂️ Transformar a Contenedor + Tarjetas';
+                descHtml = `Vas a transformar la hoja <strong>"${sheetNameEsc}"</strong> a <strong>Modo Contenedor + Tarjetas</strong>.<br><br>Todas tus tarjetas actuales se agruparán en un contenedor temático con cabecera y color, habilitando automáticamente la segmentación en contenedores de continuidad si la cantidad de tarjetas supera el ancho de pantalla.`;
+            } else if (currentMode === 'containers' && targetMode === 'cards') {
+                title = '🃏 Transformar a Modo Tarjetas Estándar';
+                descHtml = `Vas a transformar la hoja <strong>"${sheetNameEsc}"</strong> a <strong>Modo Tarjetas Estándar</strong>.<br><br>Todas las tarjetas dentro de los contenedores se desenvuelven y se conservan como tarjetas libres en una cuadrícula continua.`;
+            } else if (currentMode === 'images' && targetMode === 'cards') {
+                title = '🃏 Transformar a Modo Tarjetas Estándar';
+                descHtml = `Vas a transformar la hoja <strong>"${sheetNameEsc}"</strong> (Buscador de Imágenes) a <strong>Modo Tarjetas Estándar</strong>.<br><br>Las tarjetas y sus datos asociados se adaptarán a la cuadrícula estándar de tarjetas.`;
+            } else if (currentMode === 'cards' && targetMode === 'images') {
+                title = '🖼️ Transformar a Buscador de Imágenes';
+                descHtml = `Vas a transformar la hoja <strong>"${sheetNameEsc}"</strong> a <strong>Modo Buscador de Imágenes</strong>.<br><br>Las tarjetas se adaptarán con visualizadores de imágenes.`;
+            } else if (currentMode === 'process' || targetMode === 'process') {
+                const targetLabel = SHEET_MODES[targetMode]?.label || targetMode;
+                title = `📊 Transformar a ${targetLabel}`;
+                descHtml = `Vas a transformar la hoja <strong>"${sheetNameEsc}"</strong> al modo <strong>${targetLabel}</strong>.<br><br>Ten en cuenta que las celdas de cuadrícula no se trasladarán directamente a tarjetas.`;
             } else {
-                executeTransformSheetMode(sheet, targetMode);
+                const targetLabel = SHEET_MODES[targetMode]?.label || targetMode;
+                title = `🔄 Transformar a ${targetLabel}`;
+                descHtml = `Vas a transformar la hoja <strong>"${sheetNameEsc}"</strong> al modo <strong>${targetLabel}</strong>. Todo el contenido compatible se preservará.`;
             }
+
+            showTransformConfirmModal(title, descHtml, () => {
+                executeTransformSheetMode(sheet, targetMode);
+            });
         }
 
         function executeTransformSheetMode(sheet, targetMode) {
@@ -7803,12 +8492,34 @@
 
             if (targetMode === 'containers') {
                 if (!Array.isArray(sheet.containers)) sheet.containers = [];
-                if (!Array.isArray(sheet.rootOrder)) {
-                    sheet.rootOrder = (sheet.cards || []).map(c => c.id);
+                // Si la hoja tiene tarjetas y no tiene contenedores aún, agrupamos las tarjetas en un contenedor inicial
+                if ((sheet.cards || []).length > 0 && sheet.containers.length === 0) {
+                    const contId = generateId();
+                    const initialCont = {
+                        id: contId,
+                        name: sheet.name || 'CONTENEDOR 1',
+                        color: sheet.color || '#3b82f6',
+                        titleFontSize: sheet.containerTitleFontSize || 13
+                    };
+                    sheet.containers = [initialCont];
+                    sheet.cards.forEach(c => {
+                        c.containerId = contId;
+                    });
+                    sheet.rootOrder = [contId];
+                } else if (!Array.isArray(sheet.rootOrder)) {
+                    sheet.rootOrder = (sheet.cards || []).map(c => c.containerId ? null : c.id).filter(Boolean);
+                    sheet.containers.forEach(c => {
+                        if (!sheet.rootOrder.includes(c.id)) sheet.rootOrder.unshift(c.id);
+                    });
                 } else {
                     (sheet.cards || []).forEach(c => {
                         if (!sheet.rootOrder.includes(c.id) && !c.containerId) {
                             sheet.rootOrder.push(c.id);
+                        }
+                    });
+                    (sheet.containers || []).forEach(c => {
+                        if (!sheet.rootOrder.includes(c.id)) {
+                            sheet.rootOrder.unshift(c.id);
                         }
                     });
                 }
@@ -8480,8 +9191,9 @@
                         if (modalOverlay.classList.contains('show')) break;
                         e.preventDefault();
                         const idx = parseInt(e.key, 10) - 1;
-                        if (state.sheets[idx]) {
-                            state.activeSheetId = state.sheets[idx].id;
+                        const visibleSheets = state.sheets.filter(s => !s.hidden);
+                        if (visibleSheets[idx]) {
+                            state.activeSheetId = visibleSheets[idx].id;
                             state.drawer = null;
                             selectedIndex = -1;
                             saveData();
@@ -8529,8 +9241,10 @@
                     editingContainer = null;
                     return;
                 }
+                if (hiddenSheetsOverlay && hiddenSheetsOverlay.classList.contains('show')) { closeHiddenSheetsModal(); return; }
                 if (modalOverlay.classList.contains('show')) { cancelCardEditor(); return; }
                 if (confirmOverlay.classList.contains('show')) { closeConfirm(); return; }
+                if (transformConfirmOverlay && transformConfirmOverlay.classList.contains('show')) { closeTransformConfirmModal(); return; }
                 if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
                 if (colorPalette.classList.contains('show')) { colorPalette.classList.remove('show'); return; }
                 if (state.drawer) {

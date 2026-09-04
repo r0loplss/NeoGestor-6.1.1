@@ -133,6 +133,135 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">04 sep 2026</span><span class="ver">v6.1.6</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Sistema de Actualización Automática Integrado bajo Demanda (GitHub Releases)</b>:
+                        <ul>
+                            <li><b>Módulo Núcleo de Actualizaciones (<code>src/updater.js</code>)</b>: Comunicación directa con la API pública de GitHub Releases (<code>/repos/r0loplss/NeoGestor-6.1.1/releases/latest</code>) sin requerir autenticación ni tokens. Detección inteligente de versión mediante comparador semántico (<code>compareVersions</code>), extracción de notas de lanzamiento, tamaño en MB y enlace de descarga directo.</li>
+                            <li><b>Detección Dinámica de Arquitectura y Tipo de Distribución</b>: Identificación automática de ejecución portable (<code>GestorCasos-portable-*.exe</code> vía <code>PORTABLE_EXECUTABLE_FILE</code> y <code>process.execPath</code>) o instalador tradicional (<code>Setup.exe</code>), seleccionando el asset correcto correspondiente según el entorno del usuario.</li>
+                            <li><b>Descarga con Flujo de Datos y Progreso en Vivo</b>: Descarga por chunks mediante streams HTTPS con soporte transparente para redirecciones (Amazon S3 de GitHub) y emisión continua de porcentaje vía eventos IPC (<code>updater:progress</code>).</li>
+                            <li><b>Superación de Bloqueo de Ejecutables en Windows (Reemplazo en Caliente)</b>: Solución especializada para aplicaciones portables donde el ejecutable en uso queda bloqueado por el sistema operativo. Se descarga a <code>%TEMP%</code> y, al solicitar reinicio, se genera y ejecuta un script de lote (<code>.bat</code>) independiente y desvinculado (<code>detached: true, stdio: 'ignore'</code>) que monitorea la finalización del PID del proceso actual mediante <code>tasklist</code>, sobrescribe el archivo <code>.exe</code> con el nuevo binario, lanza la nueva versión actualizada de NeoGestor y se autoelimina.</li>
+                            <li><b>Integración UI en "Ajustes de Interfaz" (<code>src/index.html</code>)</b>: Sección estilizada "ACTUALIZACIONES DEL SISTEMA" con botón de verificación de estados reactivos: <code>[ 🔍 Buscar actualizaciones ]</code> → <code>[ 📥 Descargar e instalar (XX MB) ]</code> con notas de versión formateadas → barra de progreso en vivo con porcentaje <code>[ ⏳ Descargando... XX% ]</code> → <code>[ ⚡ Reiniciar y aplicar actualización ]</code> y enlace directo para ver notas completas en GitHub.</li>
+                            <li><b>Integración UI en "Acerca de" (<code>src/tools/acerca.html</code>)</b>: Incorporación de badge de versión actual (<code>v6.1.6</code>) y botón de comprobación inmediata bajo demanda con estados visuales informativos y enlace a notas de versión.</li>
+                            <li><b>Verificación Automatizada Completa en Electron</b>: Pruebas automatizadas de integración validando comprobación en repositorios sin releases (HTTP 404 manejado limpiamente), simulación de actualización disponible (v6.1.7) con descarga, renderizado de notas de lanzamiento y botón de reinicio.</li>
+                        </ul>
+                    </li>
+                    <li><b>Tráfico Móvil PRO — Eliminación Definitiva de la Pestaña "Tráfico en Detalle" y Consolidación en Vista Única Directa</b>:
+                        <ul>
+                            <li><b>Depuración Integral y Desecho de Código Obsoleto</b>: Se eliminó de manera permanente la pestaña oculta "Tráfico en Detalle" (<code>#tabs-bar</code> y <code>#tabViewDetalle</code>), removiendo más de 1.250 líneas de maquetación HTML, reglas CSS en desuso y controladores JavaScript innecesarios (selectores de tipo y destino, filtros rápidos, KPIs obsoletos, insights y tabla plana de registros individuales).</li>
+                            <li><b>Estructura Limpia y Ágil</b>: La interfaz opera ahora bajo un contenedor unificado directo (<code>#main</code>) sin la complejidad ni sobrecarga de wrappers de pestañas. La pantalla inicia y se despliega directamente con los controles de carga, filtros avanzados con bloques de 24 hrs y ciclos Entel, los cuatro cuadrantes de métricas interactivas y el Resumen General de Servicios.</li>
+                            <li><b>Integridad Operativa Total</b>: Se mantiene al 100% el conjunto de herramientas avanzadas: formateo y copiado contextual para WhatsApp con tics esmeralda (<code>✔</code>), animación inteligente tipo marquesina (<i>marquee</i>) en hover y clic para textos extensos, navegación dinámica de ciclos Entel (<code>&lt;</code> y <code>&gt;</code>) y desglose jerárquico con subfilas tipo árbol para bolsas de origen.</li>
+                            <li><b>Verificación Automatizada en Electron</b>: Validación exitosa mediante script headless en Electron comprobando la total ausencia de errores en consola, carga y parseo fluido de datos TSV/Excel, reactividad en filtros cruzados (fecha, 24 hrs y ciclos) y estabilidad del renderizado general.</li>
+                        </ul>
+                    </li>
+                    <li><b>Tráfico Móvil PRO — Filtro por Rangos de Hora (24 hrs) y Navegación de Períodos de Ciclos Entel (&lt; y &gt;)</b>:
+                        <ul>
+                            <li><b>Bloques de Horas en Formato 24 hrs en Fila Única</b>: Se incorporaron selectores de hora (<code>input[type="time"]</code>) junto a las fechas de inicio ("Desde") y fin ("Hasta") en una sola línea horizontal compacta (<code>.date-time-row</code>) con estilo ergonómico (ancho fijo de 66px y tipografía centrada), permitiendo al usuario filtrar con máxima precisión por rangos combinados de día + hora (ej. de 14:00 a 18:00 hrs).</li>
+                            <li><b>Compatibilidad Total Retroactiva</b>: Si el usuario no modifica las horas o las deja vacías, el sistema opera con los límites de día completo (desde <code>00:00:00</code> hasta <code>23:59:59</code>), garantizando 100% de consistencia con el comportamiento habitual sin alterar el flujo de trabajo existente.</li>
+                            <li><b>Navegación Dinámica de Períodos de Ciclos Entel (<code>&lt;</code> y <code>&gt;</code>)</b>: Al costado de los botones de ciclos Entel (50, 51, 52, 53 y 54) se añadieron los botones <b>«&lt;»</b> (período/mes anterior) y <b>«&gt;»</b> (período/mes siguiente). Al pulsarlos, el sistema recalcula inmediatamente las fechas de corte del ciclo seleccionado desplazándose mes a mes hacia atrás o hacia adelante a través de límites mensuales y anuales, actualizando en tiempo real todas las métricas, tarjetas y tablas de consumo.</li>
+                            <li><b>Sincronización Bidireccional y Persistencia</b>: Las horas, fechas y estado del ciclo se sincronizan perfectamente entre la vista simple y la vista en detalle, persistiendo en <code>localStorage</code> y reseteando selectores de forma coherente al pulsar «Quitar filtros de fecha» o «Limpiar datos».</li>
+                            <li><b>Validación Automatizada</b>: Verificación completa en Electron con dataset de tráfico real validando filtrado mixto (día + hora), ciclo 50, ciclo 52 y saltos de mes consecutivos vía navegación interactiva.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">03 sep 2026</span><span class="ver">v6.1.5</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tráfico Móvil PRO — Proporciones de Cuadrantes Armónicas y Animación Inteligente de Desplazamiento (Marquee on Hover & Click)</b>:
+                        <ul>
+                            <li><b>Proporciones Forzadas y Balance Simétrico</b>: Se corrigió la deformación de las tarjetas en donde nombres de bolsas o detalles extensos ensanchaban drásticamente una sola columna rompiendo la armonía de la interfaz. Mediante <code>grid-template-columns: repeat(2, minmax(0, 1fr))</code> y restricciones <code>min-width: 0 / overflow: hidden</code>, se garantiza que los 4 cuadrantes mantengan proporciones idénticas y simétricas (50% cada columna en cuadrícula de 2 columnas o 100% en vista compacta) acorde a la ventana.</li>
+                            <li><b>Animación Inteligente de Desplazamiento al Posar el Cursor / Clic</b>: Al pasar el puntero sobre cualquier detalle extenso, el sistema detecta dinámicamente si existe desbordamiento y activa un desplazamiento fluido hacia la izquierda (<i>marquee / ticker</i>) a velocidad de lectura ergonómica (~40 px/s) con un retardo de gracia preventivo de 0.3s y efecto de desvanecimiento degradado lateral (<code>mask-image</code>), permitiendo leer el texto íntegro sin truncamientos. Al retirar el mouse regresa suavemente a su origen restaurando los puntos suspensivos (<code>...</code>). Adicionalmente, hacer clic sobre la fila permite alternar el desplazamiento al final o retorno inmediato sin colapsar la tarjeta.</li>
+                            <li><b>Integridad Operativa Total</b>: Preservación absoluta del copiado contextual con formato WhatsApp (incluyendo citas <code>&gt;</code>), filtros de fecha y desglose de la tabla general.</li>
+                        </ul>
+                    </li>
+                    <li><b>Tráfico Móvil PRO — Modo Resumido Simple: Formato WhatsApp, Altura Dinámica e Ingreso Bajo Demanda</b>:
+                        <ul>
+                            <li><b>Aprovechamiento de Espacio y Altura Dinámica</b>: Se eliminaron las alturas forzadas artificiales en los recuadros expandidos, permitiendo que la tarjeta envuelva de forma compacta y justa el desglose de bolsas (hasta 125px con scroll suave), ahorrando todo el espacio muerto inferior.</li>
+                            <li><b>Formateo Optimizado para WhatsApp con Citas (<code>&gt;</code>)</b>: Se perfeccionó la generación de texto aplicando sintaxis nativa de WhatsApp: títulos, períodos y métricas envueltos en negritas (<code>*...*</code>), viñetas destacadas (<code>•</code>) para categorías principales y formato de bloque citado (<code>&gt;</code>) para los subdetalles de bolsas de origen, logrando una presentación estética y ordenada con barra lateral al pegar en chats.</li>
+                            <li><b>Ingreso de Tráfico Exclusivo al Pulsar "Ingresar"</b>: Se retiró el procesamiento automático inmediato que se disparaba al pegar texto en el textarea. Ahora el tráfico sólo se procesa y registra cuando el usuario hace clic deliberadamente en el botón "Ingresar" (tanto en pestaña Detallada como Simple), manteniendo la sincronización entre áreas de texto.</li>
+                            <li><b>Subdetalles por Bolsa y Copiado con Tic Verde</b>: Desglose por bolsas origen, apertura sincronizada al hacer clic en cualquier recuadro y botón de copiado reubicado a la derecha con confirmación visual de tic verde esmeralda (<code>✔</code>).</li>
+                            <li><b>Ocultación Preventiva de la Pestaña "Tráfico en Detalle"</b>: Se ocultó temporalmente la pestaña y barra de navegación de "Tráfico en Detalle" (preservando todo su código, tablas y funciones intactas) para iniciar y operar de forma directa y exclusiva en la <b>Vista Resumida Simple</b> hasta nuevo aviso.</li>
+                            <li><b>Tabla Resumen General con Desglose Detallado por Ítem</b>: Se transformó la tabla de "Resumen General de Servicios" en una estructura interactiva jerárquica con despliegue por servicio (Datos Móviles, Llamadas, SMS, Otros VAS):
+                                <ul>
+                                    <li><b>Estructura tabular por columnas</b>: Cada fila expandida alinea con precisión sus métricas en las 5 columnas estándar: <i>Servicio / Concepto</i>, <i>Consumo Total</i>, <i>Incluido en Plan</i>, <i>Con Cobro / Saldo</i> y <i>Monto Cobrado ($)</i>.</li>
+                                    <li><b>Jerarquía de Subcategorías y Bolsas</b>: Presenta subcategorías indentadas (Navegación libre, RRSS, Roaming, Llamadas Nacionales, LDI, Roaming Voz, SMS Nacionales, etc.) y desglosa cada bolsa de origen con su tráfico exacto y montos cobrados destacados en color.</li>
+                                    <li><b>Controles de Despliegue Inteligente</b>: Cada fila principal cuenta con indicador de giro (<code>▶ / ▼</code>), badges dinámicos con conteo de bolsas y toggle individual al hacer clic; adicionalmente se integró el botón <b>«Desplegar todo / Ocultar todo»</b> en la cabecera para ver el panorama completo al instante.</li>
+                                </ul>
+                            </li>
+                            <li><b>Conmutación Inteligente de Herramientas (Ciclo de Vida tipo Fast)</b>: Se homologó el comportamiento de todos los botones del menú de herramientas satélite (Calculadora OCC, Mis Enlaces, Turnos Web, Radar Contingencias, Tráfico PRO, Calculadora de Días, Cambio de Ciclo, Tipificaciones, Fast, Mis Notas y Ajustes):
+                                <ul>
+                                    <li><b>Apertura con un clic</b>: Si la herramienta está cerrada, presionar su botón la inicia y abre de inmediato.</li>
+                                    <li><b>Cierre al presionar en frente</b>: Si la ventana de la herramienta está visible y activa/enfocada al frente, presionar el botón la cierra limpiamente.</li>
+                                    <li><b>Restauración y pase al frente</b>: Si la herramienta está abierta pero minimizada o en segundo plano (sin foco), presionar su botón la desminimiza y la trae de inmediato al frente sin recargar datos.</li>
+                                    <li><b>Compatibilidad IPC Canónica</b>: Se preservó la compatibilidad estricta con los canales nativos <code>open-tool</code>, <code>close-tool</code> y <code>fast-toggle</code>, garantizando que el programa siempre responda inmediatamente y sin bloqueos bajo cualquier estado de ejecución.</li>
+                                    <li><b>Sincronización de estado visual</b>: Los botones del drawer reflejan mediante la clase <code>.active</code> (resaltado azul) si la herramienta correspondiente se encuentra abierta o cerrada.</li>
+                                </ul>
+                            </li>
+                            <li><b>Radar de Contingencias — Corrección de Cierre Involuntario por Arrastre (Error Común Mapeado)</b>:
+                                <ul>
+                                    <li><b>Protección de selección de texto en modal</b>: Se corrigió la vulnerabilidad en el modal de edición de contingencia (<code>#modal-edit-contingencia</code>) donde arrastrar una selección con el cursor fuera de la caja de texto (<code>textarea</code>) provocaba un evento <code>click</code> en el overlay de fondo, cerrando el modal de forma abrupta y perdiendo los cambios.</li>
+                                    <li><b>Patrón <code>backdropDown</code></b>: Se implementó la verificación de origen en <code>mousedown</code> y <code>click</code>, asegurando que el modal solo se cierre cuando el usuario presiona y suelta deliberadamente sobre el fondo exterior, protegiendo cualquier arrastre o selección iniciada desde los campos de edición.</li>
+                                </ul>
+                            </li>
+                            <li><b>Validación Automatizada</b>: Suite de pruebas con 7 escenarios de tráfico, suite de 5 pruebas de tabla resumen, suite de 6 pruebas del ciclo de vida inteligente de ventanas y prueba de prevención de arrastre en contingencias superadas al 100%.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">02 sep 2026</span><span class="ver">v6.1.5</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tráfico Móvil PRO (Modo Simple) — Optimización de Tarjeta de Saldo Consumido (LDI, Roaming y Otros VAS)</b>:
+                        <ul>
+                            <li><b>Eliminación de Saldo en Datos</b>: alineado con la naturaleza del servicio donde el tráfico de red se gestiona mediante bolsas y paquetes de datos (con cobro <code>$0</code> directo por MB).</li>
+                            <li><b>Desglose Especializado de Saldo Consumido (5 Líneas)</b>:
+                                <ul>
+                                    <li>🇨🇱 <b>En Llamadas Nacionales</b>: <code>$X (X min)</code></li>
+                                    <li>🌍 <b>En Llamadas LDI</b>: <code>$X (X min)</code> con detección de cobros de larga distancia internacional.</li>
+                                    <li>✈️ <b>En Llamadas Roaming</b>: <code>$X (X min)</code> con detección de llamadas en el extranjero.</li>
+                                    <li>💬 <b>En SMS / Mensajería</b>: <code>$X (X msg)</code> con cobros de SMS adicionales.</li>
+                                    <li>🛒 <b>En Otros (VAS / Suscripciones)</b>: <code>$X</code> para cobros de servicios de valor agregado, compras o suscripciones de contenido.</li>
+                                </ul>
+                            </li>
+                            <li><b>Ajuste de Cuadrícula y Proporción Visual</b>: optimización del espaciado interno (<code>padding: 10px 13px; gap: 6px;</code>), tamaño tipográfico (<code>font-size: 21px;</code>) e interlineado para alojar las 5 líneas con total claridad y alineación simétrica con el resto de los cuadrantes sin descuadrar la ventana.</li>
+                            <li><b>Tabla Resumen General</b>: incorporación de la fila <code>🛒 Otros (VAS / Suscripciones)</code> en la tabla consolidada para totalizar montos especiales.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Ventana de Comprobación con Confirmación Textual ("acepto") para Transformación de Modos</b>:
+                        <ul>
+                            <li><b>Seguridad Reforzada en Conversión de Hojas</b>: al presionar los botones de transformación (de Tarjetas a Contenedor + Tarjetas, de Contenedor a Tarjetas Estándar, o de Imágenes a Tarjetas) desde los ajustes de hoja o el menú contextual de pestañas, se despliega una ventana modal dedicada.</li>
+                            <li><b>Exigencia Textual "acepto"</b>: el botón de acción <i>«Aceptar»</i> permanece estrictamente bloqueado y deshabilitado hasta que el usuario escriba textualmente <code>acepto</code> (insensible a mayúsculas/minúsculas) en el campo de validación.</li>
+                            <li><b>Validación Inteligente y Atajos</b>: retroalimentación visual en tiempo real (borde verde y activación de botón al coincidir), soporte para ejecutar la conversión presionando <code>Enter</code> y cancelación rápida con <code>Escape</code> o clic en el fondo.</li>
+                            <li><b>Integridad Total de Datos</b>: preserva el 100% de las tarjetas, textos, enlaces e imágenes sin alteraciones durante las conversiones entre modos.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Sistema de Hojas Ocultas y Repositorio de Reactivación (Estilo Google Sheets)</b>:
+                        <ul>
+                            <li><b>Opción «Ocultar hoja» en Menú Contextual</b>: disponible al hacer clic derecho sobre cualquier pestaña de hoja. Protege contra la ocultación accidental de la última hoja visible.</li>
+                            <li><b>Preservación Íntegra de Datos</b>: al ocultar una hoja, sus tarjetas, contenedores, configuraciones y estados se conservan al 100% sin pérdida de información.</li>
+                            <li><b>Botón de Repositorio en Sheetbar y Menú</b>: indicador interactivo <code>👁️ Ocultas (N)</code> visible en la barra inferior cuando existen hojas ocultas, además de acceso directo en el menú contextual de pestañas.</li>
+                            <li><b>Modal Repositorio de Hojas Ocultas (`#hidden-sheets-overlay`)</b>: visor temático que lista las hojas archivadas con su modo, color y cantidad de tarjetas, permitiendo reactivarlas individualmente (<code>👁️ Reactivar</code>) o todas a la vez (<code>👁️ Mostrar todas</code>).</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Corrección y Generación de Contenedor de Continuidad (Extra) en Transformación de Modos</b>:
+                        <ul>
+                            <li><b>Agrupación Automática en Contenedor</b>: al transformar una hoja con tarjetas desde el <i>Modo Tarjetas Estándar</i> al <i>Modo Contenedor + Tarjetas</i>, las tarjetas se empaquetan en un contenedor principal inicial preservando su color y título.</li>
+                            <li><b>Activación de Contenedores de Continuidad (Extra)</b>: si la cantidad de tarjetas supera el ancho de la ventana, el motor de renderizado genera inmediatamente los contenedores de continuidad correspondientes en la línea inferior con su cabecera minimalista y botón <code>＋</code>.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">02 sep 2026</span><span class="ver">v6.1.5</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

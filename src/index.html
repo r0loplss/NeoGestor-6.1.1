@@ -419,6 +419,111 @@ font-family: var(--font);
             }
         }
 
+        /* Actualizaciones en Ajustes */
+        #modal-ajustes .update-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: clamp(8px, 2.5cqw, 10px);
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        #modal-ajustes .update-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        #modal-ajustes .update-ver-tag {
+            font-size: 11px;
+            font-weight: 700;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 999px;
+            padding: 1px 8px;
+        }
+        #modal-ajustes .update-status-msg {
+            font-size: 10.5px;
+            color: var(--muted);
+            line-height: 1.35;
+            word-break: break-word;
+        }
+        #modal-ajustes .btn-update-action {
+            width: 100%;
+            padding: 7px 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--primary);
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-family: var(--font);
+        }
+        #modal-ajustes .btn-update-action:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        #modal-ajustes .btn-update-action.downloading {
+            opacity: 0.8;
+            cursor: wait;
+        }
+        #modal-ajustes .btn-update-action.ready-restart {
+            border-color: var(--success);
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+        #modal-ajustes .btn-update-action.ready-restart:hover {
+            background: var(--success);
+            color: #000;
+        }
+        #modal-ajustes .update-progress-bar-bg {
+            width: 100%;
+            height: 7px;
+            background: var(--surface3);
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            display: none;
+        }
+        #modal-ajustes .update-progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #3b82f6);
+            transition: width 0.15s ease;
+        }
+        #modal-ajustes .update-notes-box {
+            max-height: 100px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 10px;
+            color: var(--muted);
+            white-space: pre-wrap;
+            display: none;
+            line-height: 1.4;
+        }
+        #modal-ajustes .update-footer-link {
+            font-size: 10px;
+            color: #38bdf8;
+            cursor: pointer;
+            text-align: right;
+            text-decoration: underline;
+            display: none;
+        }
+        #modal-ajustes .update-footer-link:hover {
+            color: #fff;
+        }
+
         /* ============================================================
                RESTO DE ESTILOS EXISTENTES (se mantienen igual)
                ============================================================ */
@@ -1940,6 +2045,8 @@ font-family: var(--font);
         const toolsDrawer = document.getElementById('tools-drawer');
         const openTools = new Set();
         const hiddenTools = new Set();
+        const toolBroughtToFront = new Map();
+
         // ============================================================
         // FUNCIONES DE HERRAMIENTAS
         // ============================================================
@@ -1957,28 +2064,51 @@ font-family: var(--font);
 
         function toggleTool(id) {
             document.getElementById('tools-drawer').classList.remove('show');
+
+            // 1) Fast siempre usa fast-toggle (gestor propio consolidado con botón flotante)
             if (id === 'fast') {
-                // Fast usa el toggle inteligente (abrir / traer al frente / cerrar)
                 ipcRenderer.send('fast-toggle');
                 return;
             }
-            if (openTools.has(id)) {
-                if (hiddenTools.has(id)) {
-                    // Minimizada: reabrir (mostrar sin recargar)
-                    hiddenTools.delete(id);
-                    ipcRenderer.send('open-tool', id);
-                    return;
-                }
-                ipcRenderer.send('close-tool', id);
-                openTools.delete(id);
-                const btn = document.getElementById(`btn-${id}`);
-                if (btn) btn.classList.remove('active');
-            } else {
-                ipcRenderer.send('open-tool', id);
+
+            // 2) Si la herramienta no está abierta -> Abrir
+            if (!openTools.has(id)) {
                 openTools.add(id);
+                toolBroughtToFront.set(id, Date.now());
+                ipcRenderer.send('open-tool', id);
                 const btn = document.getElementById(`btn-${id}`);
                 if (btn) btn.classList.add('active');
+                return;
             }
+
+            // 3) Si está minimizada en barra de tareas -> Restaurar y traer de frente
+            if (hiddenTools.has(id)) {
+                hiddenTools.delete(id);
+                toolBroughtToFront.set(id, Date.now());
+                ipcRenderer.send('open-tool', id);
+                const btn = document.getElementById(`btn-${id}`);
+                if (btn) btn.classList.add('active');
+                return;
+            }
+
+            // 4) Si ya estaba abierta:
+            const lastFront = toolBroughtToFront.get(id) || 0;
+            const timeSinceFront = Date.now() - lastFront;
+
+            // Si está de frente (en foco o mostrada hace menos de 4.5s) -> Cerrar
+            if (timeSinceFront < 4500) {
+                toolBroughtToFront.delete(id);
+                openTools.delete(id);
+                hiddenTools.delete(id);
+                ipcRenderer.send('close-tool', id);
+                const btn = document.getElementById(`btn-${id}`);
+                if (btn) btn.classList.remove('active');
+                return;
+            }
+
+            // 5) Si estaba al fondo (sin foco reciente) -> Traer de frente
+            toolBroughtToFront.set(id, Date.now());
+            ipcRenderer.send('open-tool', id);
         }
 
         // ============================================================
@@ -2000,8 +2130,10 @@ font-family: var(--font);
         function toggleNotasVault() {
             const vault = document.getElementById('notas-vault');
             document.getElementById('tools-drawer').classList.remove('show');
+            const btnNotas = document.getElementById('btn-notas');
             if (!vault.classList.contains('show')) {
                 vault.classList.add('show');
+                if (btnNotas) btnNotas.classList.add('active');
                 document.getElementById('nv-search').value = '';
                 filterVault();
 
@@ -2029,6 +2161,7 @@ font-family: var(--font);
                 }
             } else {
                 vault.classList.remove('show');
+                if (btnNotas) btnNotas.classList.remove('active');
                 // Restaurar el estado real que había antes de abrir la bóveda
                 const actBody = document.getElementById('body-active');
                 const pendBody = document.getElementById('body-pend');
@@ -2049,7 +2182,12 @@ font-family: var(--font);
         // AJUSTES
         // ============================================================
         function abrirAjustes() {
+            document.getElementById('tools-drawer').classList.remove('show');
             let overlay = document.getElementById('modal-ajustes');
+            if (overlay && overlay.classList.contains('show')) {
+                cerrarAjustes();
+                return;
+            }
             if (!overlay) {
                 overlay = document.createElement('div');
                 overlay.id = 'modal-ajustes';
@@ -2094,6 +2232,26 @@ font-family: var(--font);
                                 <input type="checkbox" id="chk-autostart" />
                                 <label for="chk-autostart">Iniciar al encender el PC</label>
                             </div>
+
+                            <div class="modal-field">
+                                <label>Actualizaciones del Sistema</label>
+                                <div class="update-box">
+                                    <div class="update-hdr">
+                                        <span style="font-size:11px;color:var(--text);font-weight:600;">NeoGestor</span>
+                                        <span class="update-ver-tag" id="ajustes-ver-badge">v6.1.6</span>
+                                    </div>
+                                    <div class="update-status-msg" id="ajustes-update-msg">Estado: Verificación bajo demanda</div>
+                                    <div class="update-progress-bar-bg" id="ajustes-update-pbar-bg">
+                                        <div class="update-progress-bar-fill" id="ajustes-update-pbar-fill"></div>
+                                    </div>
+                                    <div class="update-notes-box" id="ajustes-update-notes"></div>
+                                    <button type="button" class="btn-update-action" id="btn-check-update-ajustes" onclick="gestionarActualizacionAjustes()">
+                                        🔍 Buscar actualizaciones
+                                    </button>
+                                    <span class="update-footer-link" id="ajustes-update-ext-link">Ver notas completas en GitHub ↗</span>
+                                </div>
+                            </div>
+
                             <div class="about-link" onclick="ipcRenderer.send('open-acerca')">ℹ️ Acerca de</div>
                         </div>
                         <div class="modal-actions">
@@ -2114,11 +2272,17 @@ font-family: var(--font);
             document.getElementById('chk-autostart').checked = prefs.autostart || false;
 
             overlay.classList.add('show');
+            const btnAjustes = document.getElementById('btn-ajustes');
+            if (btnAjustes) btnAjustes.classList.add('active');
+
+            initAjustesUpdater();
         }
 
         function cerrarAjustes() {
             const overlay = document.getElementById('modal-ajustes');
             if (overlay) overlay.classList.remove('show');
+            const btnAjustes = document.getElementById('btn-ajustes');
+            if (btnAjustes) btnAjustes.classList.remove('active');
         }
 
         function guardarAjustes() {
@@ -2139,6 +2303,154 @@ font-family: var(--font);
             cerrarAjustes();
             showToast('✅ Ajustes guardados', 'success');
         }
+
+        // ============================================================
+        // SISTEMA DE ACTUALIZACIONES (GitHub Releases)
+        // ============================================================
+        let currentUpdateData = null;
+
+        async function initAjustesUpdater() {
+            try {
+                const info = await ipcRenderer.invoke('updater:get-info');
+                const badge = document.getElementById('ajustes-ver-badge');
+                if (badge && info && info.version) {
+                    badge.textContent = 'v' + info.version;
+                }
+            } catch (e) {}
+        }
+
+        async function gestionarActualizacionAjustes() {
+            const btn = document.getElementById('btn-check-update-ajustes');
+            const msg = document.getElementById('ajustes-update-msg');
+            const pbarBg = document.getElementById('ajustes-update-pbar-bg');
+            const pbarFill = document.getElementById('ajustes-update-pbar-fill');
+            const notesBox = document.getElementById('ajustes-update-notes');
+            const extLink = document.getElementById('ajustes-update-ext-link');
+
+            if (!btn || !msg) return;
+
+            // Estado 3: Descarga completa, reiniciar
+            if (btn.dataset.step === 'restart') {
+                btn.disabled = true;
+                btn.textContent = '⚡ Reiniciando aplicación...';
+                msg.textContent = 'Cerrando y aplicando actualización...';
+                const res = await ipcRenderer.invoke('updater:apply');
+                if (res && !res.success) {
+                    showToast('❌ ' + (res.error || 'No se pudo reiniciar'), 'danger');
+                    btn.disabled = false;
+                    btn.textContent = '⚡ Reintentar reinicio';
+                }
+                return;
+            }
+
+            // Estado 2: Actualización disponible, comenzar descarga
+            if (btn.dataset.step === 'download' && currentUpdateData) {
+                if (!currentUpdateData.asset || !currentUpdateData.asset.downloadUrl) {
+                    if (currentUpdateData.releaseUrl) {
+                        ipcRenderer.invoke('updater:open-url', currentUpdateData.releaseUrl);
+                    }
+                    return;
+                }
+
+                btn.dataset.step = 'downloading';
+                btn.disabled = true;
+                btn.classList.add('downloading');
+                btn.textContent = '⏳ Descargando... 0%';
+                msg.textContent = `Descargando ${currentUpdateData.asset.name}...`;
+                if (pbarBg) pbarBg.style.display = 'block';
+                if (pbarFill) pbarFill.style.width = '0%';
+
+                const downloadRes = await ipcRenderer.invoke('updater:download', currentUpdateData.asset.downloadUrl);
+
+                btn.classList.remove('downloading');
+
+                if (downloadRes && downloadRes.success) {
+                    btn.disabled = false;
+                    btn.dataset.step = 'restart';
+                    btn.classList.add('ready-restart');
+                    btn.textContent = '⚡ Reiniciar y aplicar actualización';
+                    msg.textContent = '✅ Descarga completada exitosamente.';
+                    if (pbarFill) pbarFill.style.width = '100%';
+                    showToast('✅ Actualización lista para instalarse', 'success');
+                } else {
+                    btn.disabled = false;
+                    btn.dataset.step = 'download';
+                    btn.textContent = '📥 Reintentar descarga';
+                    msg.textContent = '❌ ' + (downloadRes && downloadRes.error ? downloadRes.error : 'Error en la descarga.');
+                    showToast('❌ Error al descargar actualización', 'danger');
+                }
+                return;
+            }
+
+            // Estado 1: Buscar actualizaciones
+            btn.disabled = true;
+            btn.textContent = '⏳ Buscando en GitHub...';
+            msg.textContent = 'Consultando últimas versiones en GitHub Releases...';
+            if (notesBox) notesBox.style.display = 'none';
+            if (extLink) extLink.style.display = 'none';
+            if (pbarBg) pbarBg.style.display = 'none';
+
+            try {
+                const res = await ipcRenderer.invoke('updater:check');
+                btn.disabled = false;
+
+                if (res.status === 'no_releases') {
+                    btn.textContent = '🔍 Buscar actualizaciones';
+                    msg.textContent = 'Al día: no hay versiones publicadas en GitHub todavía.';
+                    showToast('ℹ️ Aún no hay releases en GitHub', 'warning');
+                } else if (res.status === 'up_to_date') {
+                    btn.textContent = '🔍 Buscar actualizaciones';
+                    msg.textContent = `✅ Tienes la versión más reciente instalada (v${res.currentVersion}).`;
+                    showToast(`✅ NeoGestor está al día (v${res.currentVersion})`, 'success');
+                } else if (res.status === 'update_available') {
+                    currentUpdateData = res;
+                    btn.dataset.step = 'download';
+                    msg.innerHTML = `🚀 ¡Nueva versión <b>${esc(res.latestVersion)}</b> disponible!`;
+
+                    if (res.releaseNotes && notesBox) {
+                        notesBox.textContent = res.releaseNotes;
+                        notesBox.style.display = 'block';
+                    }
+
+                    if (res.releaseUrl && extLink) {
+                        extLink.style.display = 'block';
+                        extLink.onclick = () => ipcRenderer.invoke('updater:open-url', res.releaseUrl);
+                    }
+
+                    if (res.asset && res.asset.size) {
+                        const mb = (res.asset.size / (1024 * 1024)).toFixed(1);
+                        btn.textContent = `📥 Descargar e instalar (${mb} MB)`;
+                    } else {
+                        btn.textContent = `📥 Descargar actualización`;
+                    }
+                    showToast(`🚀 Nueva versión ${res.latestVersion} disponible`, 'success');
+                } else {
+                    btn.textContent = '🔍 Buscar actualizaciones';
+                    msg.textContent = '❌ ' + (res.error || 'Error al comprobar actualizaciones.');
+                    showToast('❌ ' + (res.error || 'Error al comprobar actualizaciones'), 'danger');
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = '🔍 Buscar actualizaciones';
+                msg.textContent = '❌ Error de conexión al verificar.';
+                showToast('❌ Error de conexión al verificar', 'danger');
+            }
+        }
+
+        ipcRenderer.on('updater:progress', (event, data) => {
+            const pbarFill = document.getElementById('ajustes-update-pbar-fill');
+            const btn = document.getElementById('btn-check-update-ajustes');
+            const msg = document.getElementById('ajustes-update-msg');
+            if (pbarFill) pbarFill.style.width = data.percent + '%';
+            if (btn && btn.dataset.step === 'downloading') {
+                btn.textContent = `⏳ Descargando... ${data.percent}%`;
+            }
+            if (msg && data.total > 0) {
+                const recMb = (data.received / (1024 * 1024)).toFixed(1);
+                const totMb = (data.total / (1024 * 1024)).toFixed(1);
+                msg.textContent = `Descargando: ${recMb} MB / ${totMb} MB (${data.percent}%)`;
+            }
+        });
 
         // ============================================================
         // ESTADO GLOBAL Y DATOS
@@ -2223,6 +2535,12 @@ renderHistory();
             if (document.getElementById('notas-vault').classList.contains('show')) renderNotes();
         });
         ipcRenderer.on('note-limit-reached', () => { showToast('⚠️ Máximo de 10 notas alcanzado', 'warning', 3000); });
+        ipcRenderer.on('tool-opened', (e, id) => {
+            openTools.add(id);
+            hiddenTools.delete(id);
+            const menuBtn = document.getElementById(`btn-${id}`);
+            if (menuBtn) menuBtn.classList.add('active');
+        });
         ipcRenderer.on('tool-closed', (e, id) => {
             openTools.delete(id);
             hiddenTools.delete(id);
@@ -2230,7 +2548,30 @@ renderHistory();
             if (menuBtn) menuBtn.classList.remove('active');
         });
         ipcRenderer.on('tool-minimized', (e, id) => { hiddenTools.add(id); });
-        ipcRenderer.on('tool-restored', (e, id) => { hiddenTools.delete(id); });
+        ipcRenderer.on('tool-restored', (e, id) => {
+            openTools.add(id);
+            hiddenTools.delete(id);
+            toolBroughtToFront.set(id, Date.now());
+            const menuBtn = document.getElementById(`btn-${id}`);
+            if (menuBtn) menuBtn.classList.add('active');
+        });
+        ipcRenderer.on('tool-focused', (e, id) => {
+            toolBroughtToFront.set(id, Date.now());
+        });
+        ipcRenderer.on('tools-state', (e, states) => {
+            if (!states) return;
+            Object.entries(states).forEach(([id, st]) => {
+                if (st && st.open) {
+                    openTools.add(id);
+                    const btn = document.getElementById(`btn-${id}`);
+                    if (btn) btn.classList.add('active');
+                }
+                if (st && st.minimized) {
+                    hiddenTools.add(id);
+                }
+            });
+        });
+        ipcRenderer.send('request-tools-state');
 ipcRenderer.on('request-close-confirm', () => {
             const hasDraft = appData.draft && !!(appData.draft.name || appData.draft.content || appData.draft.comuna || appData.draft.huerfanos || (appData.draft.customFields && appData.draft.customFields.length > 0));
             const msg = hasDraft

@@ -140,6 +140,59 @@
     }
     .at-descarga:hover { text-decoration: underline; opacity: 0.9; }
 
+    .at-ver-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 2px 0;
+        flex-wrap: wrap;
+    }
+    .at-ver-tag {
+        font-size: 11px;
+        font-weight: 700;
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 999px;
+        padding: 1px 8px;
+        white-space: nowrap;
+    }
+    .btn-check-acerca {
+        background: var(--surface3);
+        color: var(--text);
+        border: 1px solid var(--border2);
+        border-radius: 5px;
+        padding: 2px 8px;
+        font-size: 10.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-family: inherit;
+    }
+    .btn-check-acerca:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+    .btn-check-acerca.ready-update {
+        background: rgba(34, 197, 94, 0.2);
+        color: #86efac;
+        border-color: var(--teal);
+    }
+    .btn-check-acerca.ready-update:hover {
+        background: var(--teal);
+        color: #000;
+    }
+    .acerca-status-msg {
+        font-size: 10px;
+        color: var(--muted);
+        min-height: 14px;
+        line-height: 1.2;
+    }
+
     #col-logo {
         flex-shrink: 0;
         display: flex;
@@ -180,6 +233,13 @@
     <div id="content">
         <div id="col-texto">
             <span class="at-nombre">Herramienta de gestión integral Call Center</span>
+            <div class="at-ver-row">
+                <span class="at-ver-tag" id="lbl-acerca-version">v6.1.6</span>
+                <button type="button" class="btn-check-acerca" id="btn-check-acerca" onclick="comprobarActualizacionAcerca()">
+                    🔍 Buscar actualizaciones
+                </button>
+            </div>
+            <div id="acerca-update-status" class="acerca-status-msg"></div>
             <span class="at-dev">Desarrollado por: <b>Rolando Tapia</b></span>
             <span class="at-agentes">Compilado y asistido vía <span class="tag-oc">Open Code</span> y <span class="tag-agy">Antigravity</span></span>
             <span class="at-pct">% de desarrollo con agentes basados en IA</span>
@@ -240,11 +300,65 @@
     </div>
 
 <script>
+    const { ipcRenderer, shell } = require('electron');
+
+    async function cargarInfoVersion() {
+        try {
+            const info = await ipcRenderer.invoke('updater:get-info');
+            if (info && info.version) {
+                document.getElementById('lbl-acerca-version').textContent = 'v' + info.version;
+            }
+        } catch(e) {}
+    }
+    cargarInfoVersion();
+
+    let updateAcercaInfo = null;
+
+    async function comprobarActualizacionAcerca() {
+        const btn = document.getElementById('btn-check-acerca');
+        const msg = document.getElementById('acerca-update-status');
+
+        if (btn.classList.contains('ready-update') && updateAcercaInfo) {
+            if (updateAcercaInfo.releaseUrl) {
+                ipcRenderer.invoke('updater:open-url', updateAcercaInfo.releaseUrl);
+            }
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '⏳ Buscando...';
+        msg.textContent = 'Consultando GitHub Releases...';
+
+        try {
+            const res = await ipcRenderer.invoke('updater:check');
+            btn.disabled = false;
+            btn.textContent = '🔍 Buscar actualizaciones';
+
+            if (res.status === 'no_releases') {
+                msg.textContent = 'No hay releases publicados en GitHub.';
+            } else if (res.status === 'up_to_date') {
+                msg.textContent = '✅ Tienes la versión más reciente (v' + res.currentVersion + ').';
+            } else if (res.status === 'update_available') {
+                updateAcercaInfo = res;
+                msg.innerHTML = '🚀 ¡Nueva versión <b>' + res.latestVersion + '</b> disponible!';
+                btn.textContent = '📥 Ver en GitHub ↗';
+                btn.classList.add('ready-update');
+            } else {
+                msg.textContent = '❌ ' + (res.error || 'Error al comprobar');
+            }
+        } catch(err) {
+            btn.disabled = false;
+            btn.textContent = '🔍 Buscar actualizaciones';
+            msg.textContent = '❌ Error de comunicación.';
+        }
+    }
+
     function abrirEnlace(url) {
         try {
-            const { shell } = require('electron');
             if (shell && shell.openExternal) {
                 shell.openExternal(url).catch(e => console.error('Error abriendo enlace:', e));
+            } else {
+                ipcRenderer.invoke('updater:open-url', url);
             }
         } catch(e) {
             console.error('Error shell:', e);

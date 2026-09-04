@@ -185,6 +185,7 @@
         }
 
         .control-row input[type="date"],
+        .control-row input[type="time"],
         .control-row select,
         .control-row input[type="text"] {
             padding: 4px 6px;
@@ -200,7 +201,39 @@
             min-width: 80px;
         }
 
-        .control-row input[type="text"]:focus {
+        .control-row.date-time-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: nowrap;
+        }
+
+        .control-row.date-time-row label {
+            font-size: 11px;
+            color: var(--muted);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .control-row.date-time-row input[type="date"] {
+            flex: 1 1 95px;
+            min-width: 90px;
+            padding: 4px 5px;
+            font-size: 11px;
+        }
+
+        .control-row.date-time-row input[type="time"] {
+            width: 66px;
+            flex: 0 0 66px;
+            padding: 4px 4px;
+            font-size: 11px;
+            text-align: center;
+            min-width: unset;
+        }
+
+        .control-row input[type="text"]:focus,
+        .control-row input[type="time"]:focus,
+        .control-row input[type="date"]:focus {
             border-color: var(--primary);
         }
 
@@ -247,39 +280,7 @@
             background: var(--surface2);
         }
 
-        /* ============================================================
-               FILTROS RÁPIDOS (chips)
-               ============================================================ */
-        .quick-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            padding: 6px 0 2px;
-        }
 
-        .quick-filters .chip {
-            padding: 3px 10px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            font-size: 10px;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.15s;
-            user-select: none;
-            white-space: nowrap;
-        }
-
-        .quick-filters .chip:hover {
-            border-color: var(--primary);
-            color: var(--text);
-        }
-
-        .quick-filters .chip.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-        }
 
         .entel-ciclos {
             display: flex;
@@ -307,182 +308,43 @@
             border-color: var(--primary);
             color: #fff;
         }
+        .entel-ciclos .ciclo-nav-sep {
+            color: var(--border2);
+            font-size: 11px;
+            margin: 0 2px;
+            user-select: none;
+            opacity: 0.6;
+        }
+        .entel-ciclos .btn-ciclo-nav {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            font-family: var(--font);
+            transition: all 0.15s;
+            line-height: 1.1;
+            user-select: none;
+        }
+        .entel-ciclos .btn-ciclo-nav:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            transform: scale(1.06);
+        }
+        .entel-ciclos .btn-ciclo-nav:active {
+            transform: scale(0.95);
+        }
 
         /* ============================================================
                KPIS (cuatro tarjetas)
                ============================================================ */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .kpi-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 8px 12px;
-            text-align: center;
-        }
-
-        .kpi-card .kpi-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .kpi-card .kpi-label {
-            font-size: 10px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .kpi-card .kpi-value.datos {
-            color: var(--warning);
-        }
-        .kpi-card .kpi-value.voz {
-            color: var(--success);
-        }
-        .kpi-card .kpi-value.saldo {
-            color: var(--primary);
-        }
-        .kpi-card .kpi-value.registros {
-            color: var(--text);
-        }
-
         /* ============================================================
-               INSIGHTS (grid 2x2)
+               TABLA BASE
                ============================================================ */
-        .insights-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .insight-item {
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 8px 10px;
-            font-size: 11px;
-            line-height: 1.4;
-        }
-
-        .insight-item .insight-title {
-            font-weight: 700;
-            color: var(--muted);
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .insight-item .insight-text {
-            color: var(--text);
-            margin-top: 2px;
-        }
-
-        /* ============================================================
-               EXPLICACIÓN
-               ============================================================ */
-        .explanation-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .explanation-box textarea {
-            width: 100%;
-            min-height: 80px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text);
-            font-size: 12px;
-            font-family: var(--font);
-            padding: 6px 8px;
-            resize: vertical;
-            outline: none;
-            line-height: 1.5;
-        }
-
-        .explanation-box textarea:focus {
-            border-color: var(--primary);
-        }
-
-        .explanation-box .exp-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .explanation-box .exp-actions .btn {
-            padding: 5px 14px;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 11px;
-            font-family: var(--font);
-            transition: background 0.15s;
-        }
-
-        .explanation-box .exp-actions .btn:hover {
-            background: #2563eb;
-        }
-
-        .explanation-box .exp-actions .btn.secondary {
-            background: var(--surface3);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .explanation-box .exp-actions .btn.secondary:hover {
-            background: var(--surface2);
-        }
-
-        /* ============================================================
-               TABLA
-               ============================================================ */
-        .table-wrapper {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .table-wrapper .table-header {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 10px;
-            background: var(--surface2);
-            border-bottom: 1px solid var(--border);
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-        }
-
-        .table-scroll {
-            max-height: 300px;
-            overflow: auto;
-        }
-
-        .table-scroll::-webkit-scrollbar {
-            width: 9px;
-            height: 9px;
-        }
-        .table-scroll::-webkit-scrollbar-thumb {
-            background: var(--faint);
-            border-radius: 5px;
-        }
-        .table-scroll::-webkit-scrollbar-thumb:hover {
-            background: var(--muted);
-        }
 
         table {
             width: 100%;
@@ -596,86 +458,111 @@
             }
         }
 
-        /* ============================================================
-           PESTAÑAS (TABS)
-           ============================================================ */
-        #tabs-bar {
-            display: flex;
-            gap: 4px;
-            padding: 4px 12px 0;
-            background: #0d1220;
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-            user-select: none;
-        }
-
-        .tab-nav-btn {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: var(--muted);
-            padding: 6px 14px;
-            font-size: 11px;
-            font-weight: 700;
-            font-family: var(--font);
-            cursor: pointer;
-            transition: all 0.15s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .tab-nav-btn:hover {
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 4px 4px 0 0;
-        }
-
-        .tab-nav-btn.active {
-            color: #60a5fa;
-            border-bottom-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-            border-radius: 4px 4px 0 0;
-        }
-
-        .tab-pane {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
 
         /* ============================================================
            VISTA SIMPLE: CARDS Y DESGLOSES
            ============================================================ */
+        .simple-cards-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 2px;
+            padding: 2px 2px;
+        }
+
+        .simple-cards-header-hint {
+            font-size: 11px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .simple-cards-header-hint strong {
+            color: var(--text);
+        }
+
         .simple-cards-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            align-items: stretch;
+            transition: all 0.25s ease;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .simple-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 12px 14px;
+            padding: 9px 12px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            justify-content: flex-start;
+            gap: 4px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            transition: border-color 0.15s, transform 0.15s;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .simple-card:hover {
             border-color: var(--border2);
             transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
         }
 
         .simple-card-hdr {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 8px;
+        }
+
+        .simple-card-hdr-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .simple-card-copy-btn {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            flex-shrink: 0;
+            min-width: 22px;
+            height: 20px;
+        }
+
+        .simple-card-copy-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            transform: scale(1.08);
+        }
+
+        .simple-card-copy-btn.copied {
+            background: rgba(16, 185, 129, 0.2) !important;
+            color: #10b981 !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+            transform: scale(1.08);
         }
 
         .simple-card-title {
@@ -687,6 +574,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         .simple-card-badge {
@@ -697,13 +585,14 @@
             background: var(--surface2);
             color: var(--text);
             border: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .simple-card-main-val {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 800;
             line-height: 1.1;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.4px;
         }
 
         .simple-card-main-val.datos { color: #f59e0b; }
@@ -714,8 +603,8 @@
         .simple-breakdown {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            padding-top: 8px;
+            gap: 3px;
+            padding-top: 5px;
             border-top: 1px solid var(--border);
         }
 
@@ -723,7 +612,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 11px;
+            font-size: 10.5px;
+            line-height: 1.3;
         }
 
         .simple-breakdown-row .lbl {
@@ -741,6 +631,137 @@
         .simple-breakdown-row .val.highlight {
             color: #f43f5e;
             font-weight: 700;
+        }
+
+        /* Modo Detalle Expandido para todas las tarjetas simultáneamente */
+        .simple-cards-grid.expanded .simple-card {
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .simple-cards-grid.expanded .simple-card[data-card="saldo"] {
+            border-color: rgba(244, 63, 94, 0.45) !important;
+        }
+
+        .simple-details-wrapper {
+            display: none;
+            flex-direction: column;
+            gap: 3px;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px dashed var(--border);
+            max-height: 125px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border2) transparent;
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .simple-cards-grid.expanded .simple-details-wrapper {
+            display: flex;
+        }
+
+        .simple-details-wrapper::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .simple-details-wrapper::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 3px;
+        }
+
+        .simple-details-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
+        .bag-section-title {
+            font-size: 9.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--muted);
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .bag-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+            padding: 3px 6px;
+            background: var(--surface2);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 3px;
+            gap: 6px;
+            min-width: 0;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .bag-item-row:hover {
+            background: var(--surface3);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .bag-item-name {
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            display: block;
+        }
+
+        .bag-item-name.is-scrolling {
+            -webkit-mask-image: linear-gradient(to right, transparent 0px, black 10px, black calc(100% - 8px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0px, black 10px, black calc(100% - 8px), transparent 100%);
+        }
+
+        .bag-item-text {
+            display: inline-block;
+            white-space: nowrap;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+            will-change: transform;
+            transition: transform 0.25s ease-out;
+        }
+
+        .bag-item-name.is-scrolling .bag-item-text {
+            max-width: none;
+            overflow: visible;
+            text-overflow: clip;
+        }
+
+        .bag-item-val {
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-left: auto;
+            z-index: 2;
+        }
+
+        .bag-item-val.highlight {
+            color: #f43f5e;
+        }
+
+        .bag-empty-text {
+            font-size: 9.5px;
+            color: var(--muted);
+            font-style: italic;
+            padding: 4px 6px;
+            text-align: center;
         }
 
         /* Tabla resumen sintética */
@@ -774,7 +795,7 @@
         .simple-table th {
             background: var(--surface3);
             color: var(--muted);
-            padding: 6px 10px;
+            padding: 7px 10px;
             font-size: 10px;
             font-weight: 700;
             text-align: left;
@@ -787,10 +808,135 @@
             padding: 7px 10px;
             border-bottom: 1px solid var(--border);
             color: var(--text);
+            vertical-align: middle;
         }
 
-        .simple-table tr:last-child td {
-            border-bottom: none;
+        /* Grupos de servicios (cada tbody) */
+        .st-service-group {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .st-main-row {
+            cursor: pointer;
+            transition: background 0.15s ease;
+            user-select: none;
+        }
+
+        .st-main-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .st-service-group.expanded .st-main-row {
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .st-service-group[data-service="otros"].expanded .st-main-row {
+            background: rgba(244, 63, 94, 0.08);
+        }
+
+        .st-toggle-icon {
+            display: inline-block;
+            font-size: 9px;
+            color: var(--muted);
+            transition: transform 0.18s ease, color 0.18s ease;
+            margin-right: 6px;
+            width: 10px;
+            text-align: center;
+        }
+
+        .st-service-group.expanded .st-toggle-icon {
+            transform: rotate(90deg);
+            color: #60a5fa;
+        }
+
+        .st-service-group[data-service="otros"].expanded .st-toggle-icon {
+            color: #fb7185;
+        }
+
+        .st-count-badge {
+            font-size: 9px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            padding: 1px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+
+        .st-subrow {
+            display: none;
+        }
+
+        .st-service-group.expanded .st-subrow {
+            display: table-row;
+        }
+
+        .st-subrow-cat {
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 10.5px;
+        }
+
+        .st-subrow-cat:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .st-subrow-cat td:first-child {
+            padding-left: 22px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .st-tree-icon {
+            color: var(--border2);
+            margin-right: 5px;
+            font-family: monospace;
+        }
+
+        .st-subrow-bag {
+            background: rgba(0, 0, 0, 0.16);
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .st-subrow-bag:hover {
+            background: rgba(255, 255, 255, 0.035);
+            color: var(--text);
+        }
+
+        .st-subrow-bag td:first-child {
+            padding-left: 36px;
+        }
+
+        .st-subrow-bag td {
+            padding: 4px 10px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
+        .st-tree-leaf {
+            color: var(--muted);
+            margin-right: 4px;
+        }
+
+        .st-bag-name {
+            display: inline-block;
+            max-width: 340px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: bottom;
+        }
+
+        .st-empty-item {
+            font-style: italic;
+            color: var(--faint);
+            font-size: 9.5px;
+        }
+
+        .st-val-highlight {
+            color: #f43f5e !important;
+            font-weight: 700;
         }
 
         .simple-table tr.total-row td {
@@ -813,7 +959,7 @@
                 grid-template-columns: 1fr;
             }
             .simple-cards-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
             }
         }
         @media (max-width: 450px) {
@@ -842,204 +988,11 @@
     </div>
 
     <!-- ============================================================
-    PESTAÑAS (TABS)
-    ============================================================ -->
-    <div id="tabs-bar">
-        <button class="tab-nav-btn active" data-tab="detalle">📊 Tráfico en Detalle</button>
-        <button class="tab-nav-btn" data-tab="simple">⚡ Vista Resumida Simple</button>
-    </div>
-
-    <!-- ============================================================
     CUERPO PRINCIPAL (scroll)
     ============================================================ -->
     <div id="main">
 
-        <!-- ============================================================
-        PESTAÑA 1: TRÁFICO EN DETALLE
-        ============================================================ -->
-        <div id="tabViewDetalle" class="tab-pane active">
-            <!-- CONTROLES -->
-            <div class="controls-grid">
-                <!-- Columna izquierda: Carga de datos -->
-                <div class="control-group">
-                    <div class="group-title">📂 Carga de datos</div>
-                    <div class="control-row">
-                        <label>📄 Excel</label>
-                        <input type="file" id="fileInput" accept=".xlsx,.xls" />
-                    </div>
-                    <div class="control-row">
-                        <label>📋 Pegar desde Excel / Siebel (TSV)</label>
-                        <textarea id="pasteInput" rows="2" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;padding:4px 6px;font-family:var(--font);resize:vertical;min-height:40px;" placeholder="Copia y pega aquí las celdas de tráfico..."></textarea>
-                    </div>
-                    <div class="control-row">
-                        <button class="btn" id="pasteBtn">📥 Ingresar</button>
-                        <button class="btn secondary" id="clearBtn">🗑 Limpiar datos</button>
-                        <span id="pasteStatus" style="font-size:10px;color:var(--faint);"></span>
-                    </div>
-                </div>
-
-                <!-- Columna derecha: Filtros -->
-                <div class="control-group">
-                    <div class="group-title">🔍 Filtros</div>
-                    <div class="control-row">
-                        <label>Desde</label>
-                        <input type="date" id="filterFrom" />
-                        <label>Hasta</label>
-                        <input type="date" id="filterTo" />
-                    </div>
-                    <div class="control-row">
-                        <label>Ciclo Entel</label>
-                        <span class="entel-ciclos" id="entelCiclos">
-                            <button data-ciclo="50" title="Ciclo 50 (01 → 31)">50</button>
-                            <button data-ciclo="51" title="Ciclo 51 (01 → 31)">51</button>
-                            <button data-ciclo="52" title="Ciclo 52 (08 → 07)">52</button>
-                            <button data-ciclo="53" title="Ciclo 53 (16 → 15)">53</button>
-                            <button data-ciclo="54" title="Ciclo 54 (23 → 22)">54</button>
-                        </span>
-                    </div>
-                    <div class="control-row">
-                        <label>Tipo</label>
-                        <select id="filterTipo">
-                            <option value="todos">Todos los tipos</option>
-                            <option value="datos">📶 Datos (Todos)</option>
-                            <option value="datosLibres">📶 Datos</option>
-                            <option value="rrss">📱 Redes Sociales</option>
-                            <option value="voz">📞 Voz</option>
-                            <option value="sms">💬 SMS / Mensajes</option>
-                        </select>
-                        <label>Registro</label>
-                        <select id="filterRegistro">
-                            <option value="todos">Todos los registros</option>
-                            <option value="saldo">💰 Con cobro / Saldo</option>
-                            <option value="trafico">📦 Tráfico incluido en plan</option>
-                        </select>
-                    </div>
-                    <div class="control-row">
-                        <label>🔎 Buscar</label>
-                        <input type="text" id="filterDestino" placeholder="Buscar destino, número, PO, bolsa..." />
-                    </div>
-                </div>
-            </div>
-
-            <!-- FILTROS RÁPIDOS -->
-            <div>
-                <div class="quick-filters" id="quickFilters">
-                    <span class="chip" data-qf="last7">📅 Últimos 7 días</span>
-                    <span class="chip" data-qf="last30">📅 Últimos 30 días</span>
-                    <span class="chip" data-qf="monthcurrent">📅 Mes actual</span>
-                    <span class="chip" data-qf="monthprev">📅 Mes anterior</span>
-                    <span class="chip" data-qf="datosLibres">📶 Datos</span>
-                    <span class="chip" data-qf="redesSociales">📱 Redes Sociales</span>
-                    <span class="chip" data-qf="soloDatos">📶 Datos (Todos)</span>
-                    <span class="chip" data-qf="roamingDatos">✈️ Roaming Datos</span>
-                    <span class="chip" data-qf="soloVoz">📞 Voz</span>
-                    <span class="chip" data-qf="roamingVoz">✈️ Voz Roaming</span>
-                    <span class="chip" data-qf="vozLDI">🌍 Voz LDI</span>
-                    <span class="chip" data-qf="smsNacional">💬 SMS Nacional</span>
-                    <span class="chip" data-qf="smsIntl">🌍 SMS Internacional</span>
-                    <span class="chip" data-qf="saldoMin">⏱ Minutos con cobro</span>
-                    <span class="chip" data-qf="saldoMsg">💬 SMS con cobro</span>
-                    <span class="chip" data-qf="conCobro">💰 Solo con Cobro</span>
-                    <span class="chip" data-qf="nocturno">🌙 Uso Nocturno (00-06h)</span>
-                    <span class="chip" data-qf="picos">📈 Picos &gt; 1 GB</span>
-                    <span class="chip" id="clearFiltersBtn">✖ Quitar filtros</span>
-                </div>
-            </div>
-
-            <!-- KPIS -->
-            <div class="kpi-grid" id="kpiGrid">
-                <div class="kpi-card">
-                    <div class="kpi-value registros" id="kpiRegistros">0</div>
-                    <div class="kpi-label">Registros visibles</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-value datos" id="kpiDatos">0 MB</div>
-                    <div class="kpi-label">Datos totales</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-value voz" id="kpiVoz">0 min</div>
-                    <div class="kpi-label">Voz total</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-value saldo" id="kpiSaldo">0 min / 0 msg / $0</div>
-                    <div class="kpi-label">Saldo / Cobros</div>
-                </div>
-            </div>
-
-            <!-- INSIGHTS -->
-            <div class="insights-grid" id="insightsGrid">
-                <div class="insight-item">
-                    <div class="insight-title">✈️ Roaming</div>
-                    <div class="insight-text" id="insightRoaming">Sin uso de roaming.</div>
-                </div>
-                <div class="insight-item">
-                    <div class="insight-title">🌙 Uso nocturno (00:00–06:00)</div>
-                    <div class="insight-text" id="insightNocturno">Sin actividad nocturna relevante.</div>
-                </div>
-                <div class="insight-item">
-                    <div class="insight-title">📈 Picos de consumo (&gt;1 GB)</div>
-                    <div class="insight-text" id="insightPicos">Sin picos de consumo altos.</div>
-                </div>
-                <div class="insight-item">
-                    <div class="insight-title">📊 Desglose de Servicios &amp; Cobros</div>
-                    <div class="insight-text" id="insightVozSms">Sin actividad registrada.</div>
-                </div>
-            </div>
-
-            <!-- EXPLICACIÓN -->
-            <div class="explanation-box">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-weight:700;font-size:12px;color:var(--muted);">💬 Explicación para el cliente</span>
-                    <span style="font-size:10px;color:var(--faint);" id="periodoChip">Período: —</span>
-                </div>
-                <textarea id="explanationText" placeholder="Haz clic en Generar explicación para obtener un resumen detallado para el cliente..."></textarea>
-                <div class="exp-actions">
-                    <button class="btn" id="generateExplanationBtn">🔄 Generar explicación</button>
-                    <button class="btn secondary" id="copyExplanationBtn">📋 Copiar</button>
-                </div>
-            </div>
-
-            <!-- TABLA -->
-            <div class="table-wrapper">
-                <div class="table-header">
-                    <span>📋 Detalle de tráfico</span>
-                    <span id="rowCount">0 registros</span>
-                </div>
-                <div class="table-scroll" id="tableScroll">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th data-sort="FechaObj">Fecha</th>
-                                <th data-sort="Msisdn">Línea</th>
-                                <th data-sort="Destino">Destino</th>
-                                <th data-sort="Unidad">Unidad</th>
-                                <th data-sort="Cantidad">Cantidad</th>
-                                <th data-sort="MB">MB</th>
-                                <th data-sort="GB">GB</th>
-                                <th data-sort="Segundos">Segundos</th>
-                                <th data-sort="Minutos">Minutos</th>
-                                <th data-sort="SaldoMin">Saldo (min)</th>
-                                <th data-sort="SaldoMsg">Saldo (msg)</th>
-                                <th data-sort="spDes">sp Des</th>
-                                <th data-sort="snDes">sn Des</th>
-                                <th data-sort="Tecnologia">Tecnología</th>
-                                <th data-sort="CallType">Call Type</th>
-                                <th data-sort="Monto">Monto ($)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <tr><td colspan="16" class="empty-state">Sube un archivo Excel o pega datos desde Excel/Siebel para comenzar.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ============================================================
-        PESTAÑA 2: VISTA RESUMIDA SIMPLE (Sin filtros complejos ni scripts)
-        ============================================================ -->
-        <div id="tabViewSimple" class="tab-pane" style="display:none;">
-            <!-- CONTROLES -->
+        <!-- CONTROLES -->
             <div class="controls-grid">
                 <!-- Columna izquierda: Carga de datos -->
                 <div class="control-group">
@@ -1065,11 +1018,13 @@
                         <div class="group-title">🔍 Filtros</div>
                         <span id="periodoChipSimple" style="font-size:10px;color:var(--faint);">Período: —</span>
                     </div>
-                    <div class="control-row">
+                    <div class="control-row date-time-row">
                         <label>Desde</label>
                         <input type="date" id="filterFromSimple" />
+                        <input type="time" id="filterTimeFromSimple" step="60" title="Hora inicio (24 hrs, opcional)" />
                         <label>Hasta</label>
                         <input type="date" id="filterToSimple" />
+                        <input type="time" id="filterTimeToSimple" step="60" title="Hora fin (24 hrs, opcional)" />
                     </div>
                     <div class="control-row">
                         <label>Ciclo Entel</label>
@@ -1079,6 +1034,9 @@
                             <button data-ciclo="52" title="Ciclo 52 (08 → 07)">52</button>
                             <button data-ciclo="53" title="Ciclo 53 (16 → 15)">53</button>
                             <button data-ciclo="54" title="Ciclo 54 (23 → 22)">54</button>
+                            <span class="ciclo-nav-sep">|</span>
+                            <button class="btn-ciclo-nav" id="btnCicloPrevSimple" title="Período anterior (mes anterior del ciclo)">&lt;</button>
+                            <button class="btn-ciclo-nav" id="btnCicloNextSimple" title="Período posterior (mes siguiente del ciclo)">&gt;</button>
                         </span>
                     </div>
                     <div class="control-row" style="margin-top:4px;">
@@ -1087,13 +1045,21 @@
                 </div>
             </div>
 
+            <!-- Pista interactiva para modo detalle -->
+            <div class="simple-cards-header-bar">
+                <span class="simple-cards-header-hint" id="simpleCardsHint">💡 Haz clic en cualquier recuadro para <strong>desplegar u ocultar</strong> el desglose por bolsas de origen</span>
+            </div>
+
             <!-- Tarjetas de métricas directas (4 cuadrantes: Datos, Minutos, SMS, Saldo Consumido) -->
-            <div class="simple-cards-grid">
+            <div class="simple-cards-grid" id="simpleCardsGrid">
                 <!-- 1. DATOS -->
-                <div class="simple-card">
+                <div class="simple-card" data-card="datos" id="simpleCardDatos" title="Clic para alternar desglose de bolsas">
                     <div class="simple-card-hdr">
                         <span class="simple-card-title">📶 Consumo de Datos</span>
-                        <span class="simple-card-badge" id="simpleBadgeDatos">Internet Móvil</span>
+                        <div class="simple-card-hdr-right">
+                            <span class="simple-card-badge" id="simpleBadgeDatos">Internet Móvil</span>
+                            <button type="button" class="simple-card-copy-btn" id="btnCopyDatos" title="Copiar información de este recuadro" data-copy-target="datos">📋</button>
+                        </div>
                     </div>
                     <div class="simple-card-main-val datos" id="simpleValDatos">0 MB</div>
                     <div class="simple-breakdown">
@@ -1110,13 +1076,18 @@
                             <span class="val" id="simpleSubDatosRoam">0 MB</span>
                         </div>
                     </div>
+                    <!-- Subdetalles por bolsa -->
+                    <div class="simple-details-wrapper" id="simpleDetailsDatos"></div>
                 </div>
 
                 <!-- 2. VOZ / MINUTOS -->
-                <div class="simple-card">
+                <div class="simple-card" data-card="voz" id="simpleCardVoz" title="Clic para alternar desglose de bolsas">
                     <div class="simple-card-hdr">
                         <span class="simple-card-title">📞 Minutos / Llamadas</span>
-                        <span class="simple-card-badge" id="simpleBadgeVoz">Voz</span>
+                        <div class="simple-card-hdr-right">
+                            <span class="simple-card-badge" id="simpleBadgeVoz">Voz</span>
+                            <button type="button" class="simple-card-copy-btn" id="btnCopyVoz" title="Copiar información de este recuadro" data-copy-target="voz">📋</button>
+                        </div>
                     </div>
                     <div class="simple-card-main-val voz" id="simpleValVoz">0 min</div>
                     <div class="simple-breakdown">
@@ -1133,13 +1104,18 @@
                             <span class="val" id="simpleSubVozRoam">0 min</span>
                         </div>
                     </div>
+                    <!-- Subdetalles por bolsa -->
+                    <div class="simple-details-wrapper" id="simpleDetailsVoz"></div>
                 </div>
 
                 <!-- 3. SMS / MENSAJES -->
-                <div class="simple-card">
+                <div class="simple-card" data-card="sms" id="simpleCardSMS" title="Clic para alternar desglose de bolsas">
                     <div class="simple-card-hdr">
                         <span class="simple-card-title">💬 SMS / Mensajería</span>
-                        <span class="simple-card-badge" id="simpleBadgeSMS">Mensajes</span>
+                        <div class="simple-card-hdr-right">
+                            <span class="simple-card-badge" id="simpleBadgeSMS">Mensajes</span>
+                            <button type="button" class="simple-card-copy-btn" id="btnCopySMS" title="Copiar información de este recuadro" data-copy-target="sms">📋</button>
+                        </div>
                     </div>
                     <div class="simple-card-main-val sms" id="simpleValSMS">0 SMS</div>
                     <div class="simple-breakdown">
@@ -1156,78 +1132,112 @@
                             <span class="val" id="simpleSubSMSRoam">0 SMS</span>
                         </div>
                     </div>
+                    <!-- Subdetalles por bolsa -->
+                    <div class="simple-details-wrapper" id="simpleDetailsSMS"></div>
                 </div>
 
-                <!-- 4. SALDO CONSUMIDO (SEPARADO EN VOZ Y SMS) -->
-                <div class="simple-card" style="border-color: rgba(244, 63, 94, 0.3);">
+                <!-- 4. SALDO CONSUMIDO (LLAMADAS NAC/LDI/ROAMING, SMS Y OTROS/VAS) -->
+                <div class="simple-card" data-card="saldo" id="simpleCardSaldo" title="Clic para alternar desglose de bolsas" style="border-color: rgba(244, 63, 94, 0.3);">
                     <div class="simple-card-hdr">
                         <span class="simple-card-title" style="color: #fb7185;">💰 Saldo Consumido</span>
-                        <span class="simple-card-badge" style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border-color: rgba(244, 63, 94, 0.3);">Cobros Adicionales</span>
+                        <div class="simple-card-hdr-right">
+                            <span class="simple-card-badge" style="background: rgba(244, 63, 94, 0.15); color: #fda4af; border-color: rgba(244, 63, 94, 0.3);">Cobros Adicionales</span>
+                            <button type="button" class="simple-card-copy-btn" id="btnCopySaldo" title="Copiar información de este recuadro" data-copy-target="saldo">📋</button>
+                        </div>
                     </div>
                     <div class="simple-card-main-val saldo" id="simpleValSaldo">$0</div>
                     <div class="simple-breakdown">
                         <div class="simple-breakdown-row">
-                            <span class="lbl">📞 Saldo en Llamadas / Minutos</span>
-                            <span class="val highlight" id="simpleSubSaldoMin">$0 (0 min)</span>
+                            <span class="lbl">🇨🇱 En Llamadas Nacionales</span>
+                            <span class="val highlight" id="simpleSubSaldoMinNac">$0 (0 min)</span>
                         </div>
                         <div class="simple-breakdown-row">
-                            <span class="lbl">💬 Saldo en SMS / Mensajes</span>
+                            <span class="lbl">🌍 En Llamadas LDI</span>
+                            <span class="val highlight" id="simpleSubSaldoMinLDI">$0 (0 min)</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">✈️ En Llamadas Roaming</span>
+                            <span class="val highlight" id="simpleSubSaldoMinRoam">$0 (0 min)</span>
+                        </div>
+                        <div class="simple-breakdown-row">
+                            <span class="lbl">💬 En SMS / Mensajes</span>
                             <span class="val highlight" id="simpleSubSaldoMsg">$0 (0 msg)</span>
                         </div>
                         <div class="simple-breakdown-row">
-                            <span class="lbl">📶 Saldo en Datos / Otros</span>
-                            <span class="val highlight" id="simpleSubSaldoDatos">$0</span>
+                            <span class="lbl">🛒 En Otros (VAS / Suscripciones)</span>
+                            <span class="val highlight" id="simpleSubSaldoOtros">$0</span>
                         </div>
                     </div>
+                    <!-- Subdetalles por bolsa -->
+                    <div class="simple-details-wrapper" id="simpleDetailsSaldo"></div>
                 </div>
             </div>
 
-            <!-- Tabla de resumen global consolidada -->
+            <!-- Tabla de resumen global consolidada con desglose desplegable por item -->
             <div class="simple-summary-table-box">
                 <div class="simple-summary-table-hdr">
-                    <span>📊 Resumen General de Servicios</span>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span>📊 Resumen General de Servicios</span>
+                        <button type="button" class="btn secondary" id="btnToggleAllTable" style="font-size:10px;padding:2px 8px;cursor:pointer;" title="Desplegar u ocultar el desglose de todos los servicios">
+                            <span id="toggleTableIcon">🔽</span> <span id="toggleTableText">Desplegar todo</span>
+                        </button>
+                    </div>
                     <span id="simpleRowCount">0 registros analizados</span>
                 </div>
-                <table class="simple-table">
+                <table class="simple-table" id="simpleSummaryTable">
                     <thead>
                         <tr>
-                            <th>Servicio</th>
-                            <th>Consumo Total</th>
-                            <th>Incluido en Plan</th>
-                            <th>Con Cobro / Saldo</th>
-                            <th>Monto Cobrado ($)</th>
+                            <th style="width: 36%;">Servicio</th>
+                            <th style="width: 17%;">Consumo Total</th>
+                            <th style="width: 16%;">Incluido en Plan</th>
+                            <th style="width: 16%;">Con Cobro / Saldo</th>
+                            <th style="width: 15%;">Monto Cobrado ($)</th>
                         </tr>
                     </thead>
-                    <tbody id="simpleTableBody">
-                        <tr>
-                            <td>📶 Datos Móviles</td>
-                            <td id="stDatosTotal">0 MB</td>
+                    <tbody id="stGroupDatos" class="st-service-group" data-service="datos">
+                        <tr class="st-main-row" data-service="datos" title="Clic para desplegar u ocultar desglose de Datos">
+                            <td><span class="st-toggle-icon">▶</span> <strong style="color:var(--text);">📶 Datos Móviles</strong> <span class="st-count-badge" id="stBadgeDatos"></span></td>
+                            <td id="stDatosTotal" style="font-weight: 600;">0 MB</td>
                             <td id="stDatosPlan">0 MB</td>
                             <td id="stDatosCobro">0 MB</td>
                             <td id="stDatosMonto">$0</td>
                         </tr>
-                        <tr>
-                            <td>📞 Llamadas (Voz)</td>
-                            <td id="stVozTotal">0 min</td>
+                    </tbody>
+                    <tbody id="stGroupVoz" class="st-service-group" data-service="voz">
+                        <tr class="st-main-row" data-service="voz" title="Clic para desplegar u ocultar desglose de Voz">
+                            <td><span class="st-toggle-icon">▶</span> <strong style="color:var(--text);">📞 Llamadas (Voz)</strong> <span class="st-count-badge" id="stBadgeVoz"></span></td>
+                            <td id="stVozTotal" style="font-weight: 600;">0 min</td>
                             <td id="stVozPlan">0 min</td>
                             <td id="stVozCobro">0 min</td>
                             <td id="stVozMonto">$0</td>
                         </tr>
-                        <tr>
-                            <td>💬 SMS / Mensajes</td>
-                            <td id="stSMSTotal">0 SMS</td>
+                    </tbody>
+                    <tbody id="stGroupSMS" class="st-service-group" data-service="sms">
+                        <tr class="st-main-row" data-service="sms" title="Clic para desplegar u ocultar desglose de SMS">
+                            <td><span class="st-toggle-icon">▶</span> <strong style="color:var(--text);">💬 SMS / Mensajes</strong> <span class="st-count-badge" id="stBadgeSMS"></span></td>
+                            <td id="stSMSTotal" style="font-weight: 600;">0 SMS</td>
                             <td id="stSMSPlan">0 SMS</td>
                             <td id="stSMSCobro">0 SMS</td>
                             <td id="stSMSMonto">$0</td>
                         </tr>
+                    </tbody>
+                    <tbody id="stGroupOtros" class="st-service-group" data-service="otros">
+                        <tr class="st-main-row" data-service="otros" title="Clic para desplegar u ocultar cargos adicionales de Otros">
+                            <td><span class="st-toggle-icon">▶</span> <strong style="color:#fb7185;">🛒 Otros (VAS / Suscripciones)</strong> <span class="st-count-badge" id="stBadgeOtros"></span></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td id="stOtrosCobro">—</td>
+                            <td id="stOtrosMonto" style="font-weight: 600;">$0</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
                         <tr class="total-row">
                             <td colspan="4" style="text-align: right; color: var(--text);">TOTAL SALDO / COBROS ADICIONALES:</td>
                             <td id="stTotalMonto" style="color: #f43f5e; font-size: 13px;">$0</td>
                         </tr>
-                    </tbody>
+                    </tfoot>
                 </table>
             </div>
-        </div>
 
     </div>
 
@@ -1247,53 +1257,41 @@
         // ============================================================
         // REFERENCIAS DOM
         // ============================================================
-        // Pestañas
-        const tabBtns = document.querySelectorAll('.tab-nav-btn');
-        const tabViewDetalle = document.getElementById('tabViewDetalle');
-        const tabViewSimple = document.getElementById('tabViewSimple');
+        // Elementos principales de carga y controles
+        const fileInput = document.getElementById('fileInputSimple');
+        const pasteInput = document.getElementById('pasteInputSimple');
+        const pasteBtn = document.getElementById('pasteBtnSimple');
+        const pasteStatus = document.getElementById('pasteStatusSimple');
+        const clearBtn = document.getElementById('clearBtnSimple');
 
-        // Carga en Detalle
-        const fileInput = document.getElementById('fileInput');
-        const pasteInput = document.getElementById('pasteInput');
-        const pasteBtn = document.getElementById('pasteBtn');
-        const pasteStatus = document.getElementById('pasteStatus');
-        const clearBtn = document.getElementById('clearBtn');
+        // Aliases por compatibilidad
+        const fileInputSimple = fileInput;
+        const pasteInputSimple = pasteInput;
+        const pasteBtnSimple = pasteBtn;
+        const pasteStatusSimple = pasteStatus;
+        const clearBtnSimple = clearBtn;
 
-        // Carga en Simple
-        const fileInputSimple = document.getElementById('fileInputSimple');
-        const pasteInputSimple = document.getElementById('pasteInputSimple');
-        const pasteBtnSimple = document.getElementById('pasteBtnSimple');
-        const pasteStatusSimple = document.getElementById('pasteStatusSimple');
-        const clearBtnSimple = document.getElementById('clearBtnSimple');
+        // Filtros de fecha, hora y ciclo
+        const filterFrom = document.getElementById('filterFromSimple');
+        const filterTo = document.getElementById('filterToSimple');
+        const filterTimeFrom = document.getElementById('filterTimeFromSimple');
+        const filterTimeTo = document.getElementById('filterTimeToSimple');
+        const btnCicloPrev = document.getElementById('btnCicloPrevSimple');
+        const btnCicloNext = document.getElementById('btnCicloNextSimple');
+        const periodoChip = document.getElementById('periodoChipSimple');
+        const clearDatesBtn = document.getElementById('clearDatesBtnSimple');
 
-        // Filtros en Detalle
-        const filterFrom = document.getElementById('filterFrom');
-        const filterTo = document.getElementById('filterTo');
-        const filterTipo = document.getElementById('filterTipo');
-        const filterRegistro = document.getElementById('filterRegistro');
-        const filterDestino = document.getElementById('filterDestino');
-        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-        const kpiRegistros = document.getElementById('kpiRegistros');
-        const kpiDatos = document.getElementById('kpiDatos');
-        const kpiVoz = document.getElementById('kpiVoz');
-        const kpiSaldo = document.getElementById('kpiSaldo');
-        const insightRoaming = document.getElementById('insightRoaming');
-        const insightNocturno = document.getElementById('insightNocturno');
-        const insightPicos = document.getElementById('insightPicos');
-        const insightVozSms = document.getElementById('insightVozSms');
-        const explanationText = document.getElementById('explanationText');
-        const generateExplanationBtn = document.getElementById('generateExplanationBtn');
-        const copyExplanationBtn = document.getElementById('copyExplanationBtn');
-        const tableBody = document.getElementById('tableBody');
-        const rowCount = document.getElementById('rowCount');
-        const periodoChip = document.getElementById('periodoChip');
+        // Aliases por compatibilidad
+        const filterFromSimple = filterFrom;
+        const filterToSimple = filterTo;
+        const filterTimeFromSimple = filterTimeFrom;
+        const filterTimeToSimple = filterTimeTo;
+        const btnCicloPrevSimple = btnCicloPrev;
+        const btnCicloNextSimple = btnCicloNext;
+        const periodoChipSimple = periodoChip;
+        const clearDatesBtnSimple = clearDatesBtn;
 
-        // Referencias de Vista Simple
-        const filterFromSimple = document.getElementById('filterFromSimple');
-        const filterToSimple = document.getElementById('filterToSimple');
-        const periodoChipSimple = document.getElementById('periodoChipSimple');
-        const clearDatesBtnSimple = document.getElementById('clearDatesBtnSimple');
-
+        // Elementos de métricas y cards
         const simpleValDatos = document.getElementById('simpleValDatos');
         const simpleSubDatosLibres = document.getElementById('simpleSubDatosLibres');
         const simpleSubDatosRRSS = document.getElementById('simpleSubDatosRRSS');
@@ -1310,10 +1308,13 @@
         const simpleSubSMSRoam = document.getElementById('simpleSubSMSRoam');
 
         const simpleValSaldo = document.getElementById('simpleValSaldo');
-        const simpleSubSaldoMin = document.getElementById('simpleSubSaldoMin');
+        const simpleSubSaldoMinNac = document.getElementById('simpleSubSaldoMinNac');
+        const simpleSubSaldoMinLDI = document.getElementById('simpleSubSaldoMinLDI');
+        const simpleSubSaldoMinRoam = document.getElementById('simpleSubSaldoMinRoam');
         const simpleSubSaldoMsg = document.getElementById('simpleSubSaldoMsg');
-        const simpleSubSaldoDatos = document.getElementById('simpleSubSaldoDatos');
+        const simpleSubSaldoOtros = document.getElementById('simpleSubSaldoOtros');
 
+        // Elementos de la tabla de resumen general
         const simpleRowCount = document.getElementById('simpleRowCount');
         const stDatosTotal = document.getElementById('stDatosTotal');
         const stDatosPlan = document.getElementById('stDatosPlan');
@@ -1327,16 +1328,38 @@
         const stSMSPlan = document.getElementById('stSMSPlan');
         const stSMSCobro = document.getElementById('stSMSCobro');
         const stSMSMonto = document.getElementById('stSMSMonto');
+        const stOtrosMonto = document.getElementById('stOtrosMonto');
+        const stOtrosCobro = document.getElementById('stOtrosCobro');
         const stTotalMonto = document.getElementById('stTotalMonto');
+
+        const btnToggleAllTable = document.getElementById('btnToggleAllTable');
+        const toggleTableIcon = document.getElementById('toggleTableIcon');
+        const toggleTableText = document.getElementById('toggleTableText');
+        const stGroupDatos = document.getElementById('stGroupDatos');
+        const stGroupVoz = document.getElementById('stGroupVoz');
+        const stGroupSMS = document.getElementById('stGroupSMS');
+        const stGroupOtros = document.getElementById('stGroupOtros');
+        const stBadgeDatos = document.getElementById('stBadgeDatos');
+        const stBadgeVoz = document.getElementById('stBadgeVoz');
+        const stBadgeSMS = document.getElementById('stBadgeSMS');
+        const stBadgeOtros = document.getElementById('stBadgeOtros');
+
+        const simpleCardsGrid = document.getElementById('simpleCardsGrid');
+        const simpleCardsHint = document.getElementById('simpleCardsHint');
+        const simpleDetailsDatos = document.getElementById('simpleDetailsDatos');
+        const simpleDetailsVoz = document.getElementById('simpleDetailsVoz');
+        const simpleDetailsSMS = document.getElementById('simpleDetailsSMS');
+        const simpleDetailsSaldo = document.getElementById('simpleDetailsSaldo');
 
         // ============================================================
         // ESTADO
         // ============================================================
         let allRows = [];
         let filteredRows = [];
-        let sortState = { key: 'FechaObj', dir: 'desc' };
-        let activeQuickFilter = null;
-        let lastSummary = null;
+        let isSimpleDetailExpanded = false;
+        let simpleSummaryState = null;
+        let activeCicloNumber = null;
+        let activeCicloMonthOffset = 0;
 
         // ============================================================
         // TOAST
@@ -1363,12 +1386,12 @@
         function guardarFiltros() {
             try {
                 localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify({
-                    from: filterFrom.value,
-                    to: filterTo.value,
-                    tipo: filterTipo.value,
-                    registro: filterRegistro.value,
-                    destino: filterDestino.value,
-                    activeQuickFilter: activeQuickFilter
+                    from: filterFrom ? filterFrom.value : '',
+                    to: filterTo ? filterTo.value : '',
+                    timeFrom: filterTimeFrom ? filterTimeFrom.value : '',
+                    timeTo: filterTimeTo ? filterTimeTo.value : '',
+                    activeCicloNumber: activeCicloNumber,
+                    activeCicloMonthOffset: activeCicloMonthOffset
                 }));
             } catch (e) {}
         }
@@ -1378,12 +1401,25 @@
                 const raw = localStorage.getItem(FILTER_STORAGE_KEY);
                 if (!raw) return;
                 const data = JSON.parse(raw);
-                if (data.from) filterFrom.value = data.from;
-                if (data.to) filterTo.value = data.to;
-                if (data.tipo) filterTipo.value = data.tipo;
-                if (data.registro) filterRegistro.value = data.registro;
-                if (data.destino) filterDestino.value = data.destino;
-                if (data.activeQuickFilter) activeQuickFilter = data.activeQuickFilter;
+                if (data.from && filterFrom) {
+                    filterFrom.value = data.from;
+                }
+                if (data.to && filterTo) {
+                    filterTo.value = data.to;
+                }
+                if (data.timeFrom && filterTimeFrom) {
+                    filterTimeFrom.value = data.timeFrom;
+                }
+                if (data.timeTo && filterTimeTo) {
+                    filterTimeTo.value = data.timeTo;
+                }
+                if (data.activeCicloNumber != null) {
+                    activeCicloNumber = data.activeCicloNumber;
+                    activeCicloMonthOffset = data.activeCicloMonthOffset || 0;
+                    document.querySelectorAll('#entelCiclosSimple button[data-ciclo]').forEach(b => {
+                        b.classList.toggle('active', parseInt(b.dataset.ciclo) === activeCicloNumber);
+                    });
+                }
             } catch (e) {}
         }
 
@@ -1430,8 +1466,11 @@
             let tipoTrafico = 'otro'; // 'datos', 'voz', 'sms', 'otro'
             let esSaldo = false;
 
-            // Detección precisa de unidades
-            if (unidadLower.includes('byte') || unidadLower === 'b' || unidadLower === 'kb' || unidadLower === 'mb' || unidadLower === 'gb') {
+            // Detección precisa de unidades y servicios VAS
+            if (desLower.includes('vas') || desLower.includes('suscripcion') || desLower.includes('suscripción') || desLower.includes('carrier billing') || desLower.includes('donacion') || desLower.includes('donación') || desLower.includes('compra')) {
+                tipoTrafico = 'otro';
+                if (monto > 0) esSaldo = true;
+            } else if (unidadLower.includes('byte') || unidadLower === 'b' || unidadLower === 'kb' || unidadLower === 'mb' || unidadLower === 'gb') {
                 tipoTrafico = 'datos';
                 if (unidadLower.includes('kb') || unidadLower === 'kbytes') bytes = cantidad * 1024;
                 else if (unidadLower.includes('gb') || unidadLower === 'gbytes') bytes = cantidad * 1024 * 1024 * 1024;
@@ -1676,697 +1715,168 @@
             }
         }
 
-        // ============================================================
-        // BÚSQUEDA MULTI-CAMPO INTELIGENTE
-        // ============================================================
-        function multiFieldMatch(row, text) {
-            if (!text) return true;
-            const q = text.toLowerCase().trim();
-            const haystack = [
-                row.FechaFormateada || '',
-                row.Msisdn || '',
-                row.Destino || '',
-                row.Unidad || '',
-                String(row.Cantidad || ''),
-                row.spDes || '',
-                row.snDes || '',
-                row.PO || '',
-                row.Tecnologia || '',
-                row.CallType || '',
-                String(row.Monto || '')
-            ].join(' ').toLowerCase();
-            return haystack.includes(q);
-        }
+
+
+
+
+
 
         // ============================================================
-        // APLICAR FILTROS (Unificado y reactivo)
+        // CICLOS ENTEL (Períodos según dataset o fecha actual y navegación)
         // ============================================================
-        function aplicarFiltros() {
-            if (!allRows.length) {
-                filteredRows = [];
-                renderTable();
-                updateSummary();
-                return;
-            }
-
-            const fromStr = filterFrom.value;
-            const toStr = filterTo.value;
-            const tipo = filterTipo.value;
-            const registro = filterRegistro.value;
-            const destinoText = filterDestino.value.trim();
-
-            const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : null;
-            const toDate = toStr ? new Date(toStr + 'T23:59:59') : null;
-
-            let rows = allRows.filter(row => {
-                if (fromDate && row.FechaObj && row.FechaObj < fromDate) return false;
-                if (toDate && row.FechaObj && row.FechaObj > toDate) return false;
-
-                if (tipo === 'datos' && row.TipoTrafico !== 'datos') return false;
-                if (tipo === 'rrss' && (row.TipoTrafico !== 'datos' || row.categoriaServicio !== 'Redes Sociales')) return false;
-                if (tipo === 'datosLibres' && (row.TipoTrafico !== 'datos' || row.categoriaServicio === 'Redes Sociales')) return false;
-                if (tipo === 'voz' && row.TipoTrafico !== 'voz') return false;
-                if (tipo === 'sms' && row.TipoTrafico !== 'sms') return false;
-
-                if (registro === 'saldo' && !row.EsSaldo) return false;
-                if (registro === 'trafico' && row.EsSaldo) return false;
-
-                if (activeQuickFilter) {
-                    if (activeQuickFilter === 'redesSociales' && (row.TipoTrafico !== 'datos' || row.categoriaServicio !== 'Redes Sociales')) return false;
-                    if (activeQuickFilter === 'datosLibres' && (row.TipoTrafico !== 'datos' || row.categoriaServicio === 'Redes Sociales')) return false;
-                    if (activeQuickFilter === 'roamingDatos' && (row.TipoTrafico !== 'datos' || !row.tipoRoaming)) return false;
-                    if (activeQuickFilter === 'roamingVoz' && (row.TipoTrafico !== 'voz' || !row.tipoRoaming)) return false;
-                    if (activeQuickFilter === 'vozLDI' && row.tipoLDI !== 'LDI') return false;
-                    if (activeQuickFilter === 'smsNacional' && row.tipoSMS !== 'SMS_Nacional') return false;
-                    if (activeQuickFilter === 'smsIntl' && row.tipoSMS !== 'SMS_Internacional') return false;
-                    if (activeQuickFilter === 'saldoMin' && row.SaldoMin == null) return false;
-                    if (activeQuickFilter === 'saldoMsg' && row.SaldoMsg == null) return false;
-                    if (activeQuickFilter === 'conCobro' && (!row.MontoNum || row.MontoNum <= 0)) return false;
-                    if (activeQuickFilter === 'nocturno') {
-                        if (!row.FechaObj) return false;
-                        const h = row.FechaObj.getHours();
-                        if (h < 0 || h >= 6) return false;
-                    }
-                    if (activeQuickFilter === 'picos' && (!row.MB || row.MB <= 1024)) return false;
-                }
-
-                if (destinoText && !multiFieldMatch(row, destinoText)) return false;
-
-                return true;
-            });
-
-            if (sortState.key) {
-                rows = sortRows(rows, sortState.key, sortState.dir);
-            }
-
-            filteredRows = rows;
-            renderTable();
-            updateSummary();
-            updatePeriodoChip();
-            guardarFiltros();
-        }
-
-        // ============================================================
-        // ORDENAMIENTO DE TABLA
-        // ============================================================
-        function sortRows(rows, key, dir) {
-            const factor = dir === 'asc' ? 1 : -1;
-            return rows.slice().sort((a, b) => {
-                let va = a[key],
-                    vb = b[key];
-                if (va == null && vb == null) return 0;
-                if (va == null) return 1;
-                if (vb == null) return -1;
-                if (va instanceof Date && vb instanceof Date) return (va - vb) * factor;
-                if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * factor;
-                va = va.toString().toLowerCase();
-                vb = vb.toString().toLowerCase();
-                if (va < vb) return -factor;
-                if (va > vb) return factor;
-                return 0;
-            });
-        }
-
-        // ============================================================
-        // RENDERIZAR TABLA
-        // ============================================================
-        function renderTable() {
-            if (!filteredRows.length) {
-                tableBody.innerHTML =
-                    `<tr><td colspan="16" class="empty-state">${allRows.length ? 'Sin resultados con los filtros actuales.' : 'Sube un archivo o pega datos para comenzar.'}</td></tr>`;
-                rowCount.textContent = '0 registros';
-                return;
-            }
-
-            let html = '';
-            filteredRows.forEach(row => {
-                const fecha = row.FechaFormateada || '';
-                const msisdn = row.Msisdn || '';
-                const destino = row.Destino || '';
-                const unidad = row.Unidad || '';
-                const cantidad = row.CantidadNum != null ? row.CantidadNum.toLocaleString('es-CL') : '';
-                const mb = row.MB != null ? row.MB.toFixed(2) : '';
-                const gb = row.GB != null ? row.GB.toFixed(3) : '';
-                const seg = row.Segundos != null ? row.Segundos.toFixed(0) : '';
-                const min = row.Minutos != null ? row.Minutos.toFixed(2) : '';
-                const saldoMin = row.SaldoMin != null ? row.SaldoMin.toFixed(2) : '';
-                const saldoMsg = row.SaldoMsg != null ? row.SaldoMsg : '';
-                const spDes = row.spDes || '';
-                const snDes = row.snDes || '';
-                const tec = row.Tecnologia || '';
-                const callType = row.CallType || '';
-                const monto = row.MontoNum != null ? (row.MontoNum > 0 ? '$' + row.MontoNum.toLocaleString('es-CL') : '0') : '';
-
-                html += `<tr>
-                            <td>${esc(fecha)}</td>
-                            <td>${esc(msisdn)}</td>
-                            <td>${esc(destino)}</td>
-                            <td>${esc(unidad)}</td>
-                            <td>${esc(cantidad)}</td>
-                            <td>${esc(mb)}</td>
-                            <td>${esc(gb)}</td>
-                            <td>${esc(seg)}</td>
-                            <td>${esc(min)}</td>
-                            <td>${esc(saldoMin)}</td>
-                            <td>${esc(saldoMsg)}</td>
-                            <td>${esc(spDes)}</td>
-                            <td>${esc(snDes)}</td>
-                            <td>${esc(tec)}</td>
-                            <td>${esc(callType)}</td>
-                            <td>${esc(monto)}</td>
-                        </tr>`;
-            });
-            tableBody.innerHTML = html;
-            rowCount.textContent = filteredRows.length.toLocaleString('es-CL') + ' registros';
-        }
-
-        // ============================================================
-        // ACTUALIZAR SUMMARY (KPIs e Insights)
-        // ============================================================
-        function updateSummary() {
-            if (!filteredRows.length) {
-                kpiRegistros.textContent = '0';
-                kpiDatos.textContent = '0 MB';
-                kpiVoz.textContent = '0 min';
-                kpiSaldo.textContent = '0 min / 0 msg / $0';
-                insightRoaming.textContent = 'Sin uso de roaming.';
-                insightNocturno.textContent = 'Sin actividad nocturna relevante.';
-                insightPicos.textContent = 'Sin picos de consumo altos.';
-                insightVozSms.textContent = 'Sin actividad registrada.';
-                lastSummary = null;
-                return;
-            }
-
-            let totalMB = 0, totalGB = 0, totalMin = 0;
-            let saldoMinTotal = 0, saldoMsgTotal = 0, saldoMontoTotal = 0;
-            let roamingDatosMB = 0, roamingSMS = 0, roamingVozSeg = 0, roamingMonto = 0;
-            let noctNacMB = 0, noctRoamMB = 0, noctCount = 0;
-            let picos = [];
-            let vozNacSeg = 0, vozLDISeg = 0, vozRoamSeg = 0, vozCobroSeg = 0, vozCobroMonto = 0;
-            let smsNac = 0, smsIntl = 0, smsCobro = 0, smsCobroMonto = 0;
-            let redesSocialesMB = 0, datosIncluidosMB = 0;
-            let minFecha = null, maxFecha = null;
-
-            filteredRows.forEach(row => {
-                if (row.MB && !isNaN(row.MB)) {
-                    totalMB += row.MB;
-                    totalGB += row.GB || 0;
-                    if (row.categoriaServicio === 'Redes Sociales') redesSocialesMB += row.MB;
-                    else datosIncluidosMB += row.MB;
-                }
-                if (row.Minutos && !isNaN(row.Minutos)) {
-                    totalMin += row.Minutos;
-                }
-                if (row.SaldoMin && !isNaN(row.SaldoMin)) saldoMinTotal += row.SaldoMin;
-                if (row.SaldoMsg && !isNaN(row.SaldoMsg)) saldoMsgTotal += row.SaldoMsg;
-                if (row.MontoNum && !isNaN(row.MontoNum)) saldoMontoTotal += row.MontoNum;
-
-                if (row.FechaObj && !isNaN(row.FechaObj.getTime())) {
-                    if (!minFecha || row.FechaObj < minFecha) minFecha = row.FechaObj;
-                    if (!maxFecha || row.FechaObj > maxFecha) maxFecha = row.FechaObj;
-
-                    const h = row.FechaObj.getHours();
-                    if (h >= 0 && h < 6) {
-                        noctCount++;
-                        if (row.MB && !isNaN(row.MB)) {
-                            if (row.tipoRoaming) noctRoamMB += row.MB;
-                            else noctNacMB += row.MB;
-                        }
-                    }
-                }
-
-                if (row.tipoRoaming) {
-                    if (row.MB && !isNaN(row.MB)) roamingDatosMB += row.MB;
-                    if (row.tipoSMS) roamingSMS += (row.CantidadNum || 1);
-                    if (row.Segundos && !isNaN(row.Segundos)) roamingVozSeg += row.Segundos;
-                    if (row.MontoNum > 0) roamingMonto += row.MontoNum;
-                }
-
-                if (row.MB && row.MB > 1024) {
-                    picos.push({ mb: row.MB, fecha: row.FechaObj, roaming: !!row.tipoRoaming, servicio: row.categoriaServicio });
-                }
-
-                if (row.Segundos && !isNaN(row.Segundos)) {
-                    if (row.tipoLDI === 'LDI') vozLDISeg += row.Segundos;
-                    else if (row.tipoRoaming) vozRoamSeg += row.Segundos;
-                    else vozNacSeg += row.Segundos;
-
-                    if (row.MontoNum > 0) {
-                        vozCobroSeg += row.Segundos;
-                        vozCobroMonto += row.MontoNum;
-                    }
-                }
-
-                if (row.TipoTrafico === 'sms') {
-                    if (row.tipoSMS === 'SMS_Internacional') smsIntl += row.CantidadNum;
-                    else smsNac += row.CantidadNum;
-
-                    if (row.MontoNum > 0) {
-                        smsCobro += row.CantidadNum;
-                        smsCobroMonto += row.MontoNum;
-                    }
-                }
-            });
-
-            // Tarjetas KPI
-            kpiRegistros.textContent = filteredRows.length.toLocaleString('es-CL');
-
-            if (totalGB >= 1) {
-                kpiDatos.textContent = totalGB.toFixed(2) + ' GB';
-            } else {
-                kpiDatos.textContent = Math.round(totalMB).toLocaleString('es-CL') + ' MB';
-            }
-
-            if (totalMin >= 60) {
-                const hrs = (totalMin / 60).toFixed(1);
-                kpiVoz.textContent = `${Math.round(totalMin).toLocaleString('es-CL')} min (~${hrs}h)`;
-            } else {
-                kpiVoz.textContent = Math.round(totalMin).toLocaleString('es-CL') + ' min';
-            }
-
-            let kpiSaldoParts = [];
-            if (saldoMinTotal > 0) kpiSaldoParts.push(`${Math.round(saldoMinTotal)} min`);
-            if (saldoMsgTotal > 0) kpiSaldoParts.push(`${Math.round(saldoMsgTotal)} msg`);
-            if (saldoMontoTotal > 0) kpiSaldoParts.push(`$${Math.round(saldoMontoTotal).toLocaleString('es-CL')}`);
-            kpiSaldo.textContent = kpiSaldoParts.length ? kpiSaldoParts.join(' / ') : '0 min / 0 msg / $0';
-
-            // Insight 1: Roaming
-            let roamParts = [];
-            if (roamingDatosMB > 0) {
-                const roamGB = (roamingDatosMB / 1024).toFixed(2);
-                roamParts.push(`📶 ${Math.round(roamingDatosMB).toLocaleString('es-CL')} MB (${roamGB} GB)`);
-            }
-            if (roamingSMS > 0) roamParts.push(`💬 ${roamingSMS} SMS`);
-            if (roamingVozSeg > 0) roamParts.push(`📞 ${Math.round(roamingVozSeg/60)} min`);
-            if (roamingMonto > 0) roamParts.push(`💰 $${Math.round(roamingMonto).toLocaleString('es-CL')}`);
-            insightRoaming.textContent = roamParts.length ? 'Actividad Roaming: ' + roamParts.join('; ') : 'Sin uso de roaming.';
-
-            // Insight 2: Uso nocturno
-            let noctParts = [];
-            const totalNoctMB = noctNacMB + noctRoamMB;
-            if (totalNoctMB > 0) {
-                const pct = totalMB > 0 ? ((totalNoctMB / totalMB) * 100).toFixed(1) : '0';
-                if (totalNoctMB >= 1024) {
-                    noctParts.push(`🌙 ${(totalNoctMB/1024).toFixed(2)} GB (${pct}% del total)`);
-                } else {
-                    noctParts.push(`🌙 ${Math.round(totalNoctMB).toLocaleString('es-CL')} MB (${pct}% del total)`);
-                }
-            }
-            insightNocturno.textContent = noctParts.length ? `Uso 00:00–06:00: ${noctParts.join('; ')} (${noctCount} sesiones)` : 'Sin actividad nocturna relevante.';
-
-            // Insight 3: Picos
-            if (picos.length) {
-                const maxPico = picos.reduce((a, b) => a.mb > b.mb ? a : b);
-                const maxGB = (maxPico.mb / 1024).toFixed(2);
-                let fechaStr = '';
-                if (maxPico.fecha && !isNaN(maxPico.fecha.getTime())) {
-                    const d = String(maxPico.fecha.getDate()).padStart(2, '0');
-                    const m = String(maxPico.fecha.getMonth() + 1).padStart(2, '0');
-                    const y = maxPico.fecha.getFullYear();
-                    const hh = String(maxPico.fecha.getHours()).padStart(2, '0');
-                    const mm = String(maxPico.fecha.getMinutes()).padStart(2, '0');
-                    fechaStr = ` (${d}-${m}-${y} ${hh}:${mm} - ${maxPico.servicio})`;
-                }
-                insightPicos.textContent = `${picos.length} pico(s) >1 GB, mayor de ${maxGB} GB${fechaStr}`;
-            } else {
-                insightPicos.textContent = 'Sin picos de consumo altos (>1 GB).';
-            }
-
-            // Insight 4: Desglose de servicios
-            let vsParts = [];
-            if (redesSocialesMB > 0) vsParts.push(`📱 RRSS: ${(redesSocialesMB/1024).toFixed(2)} GB`);
-            if (datosIncluidosMB > 0) vsParts.push(`📶 Datos: ${(datosIncluidosMB/1024).toFixed(2)} GB`);
-            if (vozCobroMonto > 0) vsParts.push(`📞 Voz Adicional: $${Math.round(vozCobroMonto).toLocaleString('es-CL')}`);
-            if (smsCobroMonto > 0) vsParts.push(`💬 SMS Adicional: $${Math.round(smsCobroMonto).toLocaleString('es-CL')}`);
-            if (saldoMontoTotal > 0 && !vsParts.length) vsParts.push(`💰 Cobros: $${Math.round(saldoMontoTotal).toLocaleString('es-CL')}`);
-            insightVozSms.textContent = vsParts.length ? vsParts.join(' | ') : 'Sin actividad registrada.';
-
-            lastSummary = {
-                totalMB,
-                totalGB,
-                totalMin,
-                saldoMinTotal,
-                saldoMsgTotal,
-                saldoMontoTotal,
-                roamingDatosMB,
-                roamingSMS,
-                roamingVozSeg,
-                noctNacMB,
-                noctRoamMB,
-                noctCount,
-                picos,
-                vozNacSeg,
-                vozLDISeg,
-                vozRoamSeg,
-                vozCobroSeg,
-                vozCobroMonto,
-                smsNac,
-                smsIntl,
-                smsCobro,
-                smsCobroMonto,
-                redesSocialesMB,
-                datosIncluidosMB,
-                rowsCount: filteredRows.length,
-                minFecha,
-                maxFecha
-            };
-        }
-
-        // ============================================================
-        // PERÍODO VISIBLE
-        // ============================================================
-        function updatePeriodoChip() {
-            if (!lastSummary || !lastSummary.minFecha || !lastSummary.maxFecha) {
-                periodoChip.textContent = 'Período: —';
-                return;
-            }
-            const min = lastSummary.minFecha;
-            const max = lastSummary.maxFecha;
-            const d1 = String(min.getDate()).padStart(2, '0');
-            const m1 = String(min.getMonth() + 1).padStart(2, '0');
-            const y1 = min.getFullYear();
-            const d2 = String(max.getDate()).padStart(2, '0');
-            const m2 = String(max.getMonth() + 1).padStart(2, '0');
-            const y2 = max.getFullYear();
-            if (d1 === d2 && m1 === m2 && y1 === y2) {
-                periodoChip.textContent = `📅 ${d1}-${m1}-${y1}`;
-            } else {
-                periodoChip.textContent = `📅 ${d1}-${m1}-${y1} → ${d2}-${m2}-${y2}`;
-            }
-        }
-
-        // ============================================================
-        // GENERAR EXPLICACIÓN PARA EL CLIENTE (Super Inteligente)
-        // ============================================================
-        function generateExplanation() {
-            if (!lastSummary || !filteredRows.length) {
-                explanationText.value = 'Primero carga datos y aplica filtros para generar una explicación.';
-                return;
-            }
-
-            const s = lastSummary;
-            const f1 = s.minFecha ? `${String(s.minFecha.getDate()).padStart(2,'0')}-${String(s.minFecha.getMonth()+1).padStart(2,'0')}-${s.minFecha.getFullYear()}` : '';
-            const f2 = s.maxFecha ? `${String(s.maxFecha.getDate()).padStart(2,'0')}-${String(s.maxFecha.getMonth()+1).padStart(2,'0')}-${s.maxFecha.getFullYear()}` : '';
-
-            let lines = [];
-            lines.push(`(Nombre del cliente), revisé en detalle el tráfico y consumos de tu línea para entregarte un resumen claro y transparente:`);
-            lines.push('');
-            lines.push(`📅 Período analizado: ${f1} al ${f2} (${s.rowsCount.toLocaleString('es-CL')} registros).`);
-
-            // Datos
-            if (s.totalGB > 0 || s.totalMB > 0) {
-                let txtDatos = `📶 Datos móviles: Tu línea utilizó un total de `;
-                if (s.totalGB >= 1) txtDatos += `${s.totalGB.toFixed(2)} GB (${Math.round(s.totalMB).toLocaleString('es-CL')} MB).`;
-                else txtDatos += `${Math.round(s.totalMB).toLocaleString('es-CL')} MB.`;
-
-                if (s.redesSocialesMB > 0 && s.datosIncluidosMB > 0) {
-                    const rrGB = (s.redesSocialesMB / 1024).toFixed(2);
-                    const libGB = (s.datosIncluidosMB / 1024).toFixed(2);
-                    txtDatos += `\n   • ${rrGB} GB correspondieron a Redes Sociales incluidas.`;
-                    txtDatos += `\n   • ${libGB} GB correspondieron a datos del plan.`;
-                }
-                lines.push(txtDatos);
-            }
-
-            // Voz
-            if (s.totalMin > 0) {
-                let txtVoz = `📞 Llamadas (Voz): Se registraron ${Math.round(s.totalMin).toLocaleString('es-CL')} minutos en total.`;
-                if (s.vozCobroMonto > 0) {
-                    txtVoz += `\n   • ${Math.round(s.vozCobroSeg/60)} minutos adicionales/con cargo a saldo (total: $${Math.round(s.vozCobroMonto).toLocaleString('es-CL')}).`;
-                }
-                lines.push(txtVoz);
-            }
-
-            // SMS
-            if (s.smsNac > 0 || s.smsIntl > 0) {
-                const totalMsg = s.smsNac + s.smsIntl;
-                let txtSMS = `💬 Mensajes SMS: Se enviaron ${totalMsg.toLocaleString('es-CL')} SMS en total.`;
-                if (s.smsCobro > 0) {
-                    txtSMS += `\n   • ${s.smsCobro} mensajes adicionales con cobro de saldo (total: $${Math.round(s.smsCobroMonto).toLocaleString('es-CL')}).`;
-                    if (totalMsg - s.smsCobro > 0) {
-                        txtSMS += `\n   • ${(totalMsg - s.smsCobro).toLocaleString('es-CL')} mensajes incluidos en tu plan sin cobro adicional.`;
-                    }
-                }
-                lines.push(txtSMS);
-            }
-
-            // Saldo / Monto consumido
-            if (s.saldoMontoTotal > 0) {
-                lines.push(`💰 Cobros adicionales / Saldo consumido: Se debitó un total de $${Math.round(s.saldoMontoTotal).toLocaleString('es-CL')} por consumos adicionales fuera del plan base.`);
-            }
-
-            // Roaming
-            if (s.roamingDatosMB > 0 || s.roamingSMS > 0 || s.roamingVozSeg > 0) {
-                let rParts = [];
-                if (s.roamingDatosMB > 0) rParts.push(`${(s.roamingDatosMB/1024).toFixed(2)} GB en datos`);
-                if (s.roamingVozSeg > 0) rParts.push(`${Math.round(s.roamingVozSeg/60)} min en llamadas`);
-                if (s.roamingSMS > 0) rParts.push(`${s.roamingSMS} SMS`);
-                lines.push(`✈️ Roaming internacional: Se registró actividad en roaming (${rParts.join(', ')}).`);
-            }
-
-            // Horario nocturno
-            if (s.noctNacMB > 0 || s.noctRoamMB > 0) {
-                const totalNoctMB = s.noctNacMB + noctRoamMB;
-                const pctNoct = s.totalMB > 0 ? ((totalNoctMB / s.totalMB) * 100).toFixed(1) : 0;
-                lines.push(`🌙 Tráfico en horario nocturno (00:00 a 06:00 hrs): Se consumieron ${(totalNoctMB/1024).toFixed(2)} GB (${pctNoct}% del total de datos consumidos).`);
-            }
-
-            // Picos de consumo
-            if (s.picos.length > 0) {
-                const maxPico = s.picos.reduce((a, b) => a.mb > b.mb ? a : b);
-                const maxPicoGB = (maxPico.mb / 1024).toFixed(2);
-                const picoFecha = maxPico.fecha ? `${String(maxPico.fecha.getDate()).padStart(2,'0')}-${String(maxPico.fecha.getMonth()+1).padStart(2,'0')} ${String(maxPico.fecha.getHours()).padStart(2,'0')}:${String(maxPico.fecha.getMinutes()).padStart(2,'0')}` : '';
-                lines.push(`📈 Picos de tráfico: Se detectaron ${s.picos.length} sesiones de alto consumo (>1 GB), la mayor fue de ${maxPicoGB} GB el día ${picoFecha} (${maxPico.servicio}).`);
-            }
-
-            lines.push('');
-            lines.push(`Si hay algo en este uso que no te calza o quieres revisar algún punto más a fondo, estoy aquí para ayudarte y aclararte todo lo que necesites. 💙`);
-
-            explanationText.value = lines.join('\n');
-            showToast('✅ Explicación generada.', 'success');
-        }
-
-        // ============================================================
-        // COPIAR EXPLICACIÓN
-        // ============================================================
-        function copyExplanation() {
-            const text = explanationText.value;
-            if (!text || text.trim() === '') {
-                showToast('⚠️ No hay texto para copiar.', 'warning');
-                return;
-            }
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('📋 Explicación copiada al portapapeles.', 'success');
-            }).catch(() => {
-                showToast('❌ Error al copiar.', 'error');
-            });
-        }
-
-        // ============================================================
-        // FILTROS RÁPIDOS
-        // ============================================================
-        function applyQuickFilter(type) {
-            // Referencia de fecha: Usar fecha del dataset o fecha actual
-            let refDate = new Date();
-            if (allRows.length > 0) {
-                const validDates = allRows.filter(r => r.FechaObj).map(r => r.FechaObj);
-                if (validDates.length > 0) {
-                    refDate = new Date(Math.max(...validDates.map(d => d.getTime())));
-                }
-            }
-
-            let from = null, to = null;
-
-            if (type === 'last7') {
-                from = new Date(refDate);
-                from.setDate(from.getDate() - 6);
-                to = new Date(refDate);
-                activeQuickFilter = null;
-            } else if (type === 'last30') {
-                from = new Date(refDate);
-                from.setDate(from.getDate() - 29);
-                to = new Date(refDate);
-                activeQuickFilter = null;
-            } else if (type === 'monthcurrent') {
-                from = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
-                to = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0);
-                activeQuickFilter = null;
-            } else if (type === 'monthprev') {
-                from = new Date(refDate.getFullYear(), refDate.getMonth() - 1, 1);
-                to = new Date(refDate.getFullYear(), refDate.getMonth(), 0);
-                activeQuickFilter = null;
-            } else if (type === 'soloDatos') {
-                filterTipo.value = 'datos';
-                activeQuickFilter = null;
-            } else if (type === 'redesSociales') {
-                filterTipo.value = 'rrss';
-                activeQuickFilter = null;
-            } else if (type === 'datosLibres') {
-                filterTipo.value = 'datosLibres';
-                activeQuickFilter = null;
-            } else if (type === 'soloVoz') {
-                filterTipo.value = 'voz';
-                activeQuickFilter = null;
-            } else {
-                activeQuickFilter = type;
-            }
-
-            if (from && to) {
-                const f = from.getFullYear() + '-' + String(from.getMonth() + 1).padStart(2, '0') + '-' + String(from.getDate()).padStart(2, '0');
-                const t = to.getFullYear() + '-' + String(to.getMonth() + 1).padStart(2, '0') + '-' + String(to.getDate()).padStart(2, '0');
-                filterFrom.value = f;
-                filterTo.value = t;
-            }
-
-            document.querySelectorAll('.chip[data-qf]').forEach(chip => {
-                chip.classList.toggle('active', chip.dataset.qf === type);
-            });
-
-            aplicarFiltros();
-        }
-
-        // ============================================================
-        // CICLOS ENTEL (Períodos según dataset o fecha actual)
-        // ============================================================
-        const ENTEL_TABLA = {
-            50: [[1,1,31,1],[1,2,29,2],[1,3,31,3],[1,4,30,4],[1,5,31,5],[1,6,30,6],[1,7,31,7],[1,8,31,8],[1,9,30,9],[1,10,31,10],[1,11,30,11],[1,12,31,12]],
-            51: [[1,1,31,1],[1,2,29,2],[1,3,31,3],[1,4,30,4],[1,5,31,5],[1,6,30,6],[1,7,31,7],[1,8,31,8],[1,9,30,9],[1,10,31,10],[1,11,30,11],[1,12,31,12]],
-            52: [[8,1,7,2],[8,2,7,3],[8,3,7,4],[8,4,7,5],[8,5,7,6],[8,6,7,7],[8,7,7,8],[8,8,7,9],[8,9,7,10],[8,10,7,11],[8,11,7,12],[8,12,7,1]],
-            53: [[16,1,15,2],[16,2,15,3],[16,3,15,4],[16,4,15,5],[16,5,15,6],[16,6,15,7],[16,7,15,8],[16,8,15,9],[16,9,15,10],[16,10,15,11],[16,11,15,12],[16,12,15,1]],
-            54: [[23,1,22,2],[23,2,22,3],[23,3,22,4],[23,4,22,5],[23,5,22,6],[23,6,22,7],[23,7,22,8],[23,8,22,9],[23,9,22,10],[23,10,22,11],[23,11,22,12],[23,12,22,1]]
-        };
-
         function fmtCicloDate(d) {
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
         }
 
-        function aplicarCicloEntel(n) {
-            let refDate = new Date();
-            if (allRows.length > 0) {
-                const validDates = allRows.filter(r => r.FechaObj).map(r => r.FechaObj);
-                if (validDates.length > 0) {
-                    refDate = new Date(Math.max(...validDates.map(d => d.getTime())));
-                }
-            }
+        function calcularRangoCiclo(n, monthOffset = 0, refDate = new Date()) {
+            const Y = refDate.getFullYear();
+            const M = refDate.getMonth();
+            const D = refDate.getDate();
 
-            const dia = refDate.getDate(),
-                mes = refDate.getMonth() + 1;
-            const filas = ENTEL_TABLA[n];
-            let rango = null;
-            for (const [dIni, mIni, dFin, mFin] of filas) {
-                const f = mes * 100 + dia,
-                    i = mIni * 100 + dIni,
-                    e = mFin * 100 + dFin;
-                const dentro = i <= e ? (f >= i && f <= e) : (f >= i || f <= e);
-                if (dentro) {
-                    let yIni = refDate.getFullYear(),
-                        yFin = refDate.getFullYear();
-                    if (mIni > mFin) {
-                        if (mes <= mFin) yIni -= 1;
-                        else yFin += 1;
-                    }
-                    rango = { inicio: new Date(yIni, mIni - 1, dIni), fin: new Date(yFin, mFin - 1, dFin) };
-                    break;
-                }
-            }
-            if (!rango) {
-                showToast('⚠️ No se pudo determinar el período del ciclo ' + n + '.', 'warning');
-                return;
-            }
-            filterFrom.value = fmtCicloDate(rango.inicio);
-            filterTo.value = fmtCicloDate(rango.fin);
-            filterFromSimple.value = fmtCicloDate(rango.inicio);
-            filterToSimple.value = fmtCicloDate(rango.fin);
-            document.querySelectorAll('.chip[data-qf]').forEach(chip => chip.classList.remove('active'));
-            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => {
-                b.classList.toggle('active', parseInt(b.dataset.ciclo) === n);
-            });
-            aplicarFiltros();
-            aplicarFiltrosSimple();
-            showToast('✅ Ciclo Entel ' + n + ' aplicado: ' + fmtCicloDate(rango.inicio) + ' → ' + fmtCicloDate(rango.fin), 'success', 2600);
-        }
+            let startMonth = M;
+            let startDay = 1;
+            let endDay = 0;
 
-        function aplicarCicloEntelSimple(n) {
-            let refDate = new Date();
-            if (allRows.length > 0) {
-                const validDates = allRows.filter(r => r.FechaObj).map(r => r.FechaObj);
-                if (validDates.length > 0) {
-                    refDate = new Date(Math.max(...validDates.map(d => d.getTime())));
-                }
-            }
-
-            const dia = refDate.getDate(),
-                mes = refDate.getMonth() + 1;
-            const filas = ENTEL_TABLA[n];
-            let rango = null;
-            for (const [dIni, mIni, dFin, mFin] of filas) {
-                const f = mes * 100 + dia,
-                    i = mIni * 100 + dIni,
-                    e = mFin * 100 + dFin;
-                const dentro = i <= e ? (f >= i && f <= e) : (f >= i || f <= e);
-                if (dentro) {
-                    let yIni = refDate.getFullYear(),
-                        yFin = refDate.getFullYear();
-                    if (mIni > mFin) {
-                        if (mes <= mFin) yIni -= 1;
-                        else yFin += 1;
-                    }
-                    rango = { inicio: new Date(yIni, mIni - 1, dIni), fin: new Date(yFin, mFin - 1, dFin) };
-                    break;
-                }
-            }
-            if (!rango) {
-                showToast('⚠️ No se pudo determinar el período del ciclo ' + n + '.', 'warning');
-                return;
-            }
-            filterFrom.value = fmtCicloDate(rango.inicio);
-            filterTo.value = fmtCicloDate(rango.fin);
-            filterFromSimple.value = fmtCicloDate(rango.inicio);
-            filterToSimple.value = fmtCicloDate(rango.fin);
-            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => {
-                b.classList.toggle('active', parseInt(b.dataset.ciclo) === n);
-            });
-            aplicarFiltros();
-            aplicarFiltrosSimple();
-            showToast('✅ Ciclo Entel ' + n + ' aplicado: ' + fmtCicloDate(rango.inicio) + ' → ' + fmtCicloDate(rango.fin), 'success', 2600);
-        }
-
-        // ============================================================
-        // PESTAÑAS (SWITCH TAB)
-        // ============================================================
-        function switchTab(tabName) {
-            tabBtns.forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.tab === tabName);
-            });
-            if (tabName === 'detalle') {
-                tabViewDetalle.style.display = 'flex';
-                tabViewDetalle.classList.add('active');
-                tabViewSimple.style.display = 'none';
-                tabViewSimple.classList.remove('active');
+            if (n === 50 || n === 51) {
+                startMonth = M + monthOffset;
+                const inicio = new Date(Y, startMonth, 1);
+                const fin = new Date(Y, startMonth + 1, 0);
+                return { inicio, fin };
+            } else if (n === 52) {
+                startDay = 8;
+                endDay = 7;
+                const baseStartMonth = (D >= 8) ? M : (M - 1);
+                startMonth = baseStartMonth + monthOffset;
+            } else if (n === 53) {
+                startDay = 16;
+                endDay = 15;
+                const baseStartMonth = (D >= 16) ? M : (M - 1);
+                startMonth = baseStartMonth + monthOffset;
+            } else if (n === 54) {
+                startDay = 23;
+                endDay = 22;
+                const baseStartMonth = (D >= 23) ? M : (M - 1);
+                startMonth = baseStartMonth + monthOffset;
             } else {
-                tabViewDetalle.style.display = 'none';
-                tabViewDetalle.classList.remove('active');
-                tabViewSimple.style.display = 'flex';
-                tabViewSimple.classList.add('active');
-                aplicarFiltrosSimple();
+                return null;
             }
+
+            const inicio = new Date(Y, startMonth, startDay);
+            const fin = new Date(Y, startMonth + 1, endDay);
+            return { inicio, fin };
+        }
+
+        function aplicarCicloEntel(n, monthOffset = 0) {
+            if (!n) return;
+            activeCicloNumber = n;
+            activeCicloMonthOffset = monthOffset;
+
+            let refDate = new Date();
+            if (allRows.length > 0) {
+                const validDates = allRows.filter(r => r.FechaObj && !isNaN(r.FechaObj.getTime())).map(r => r.FechaObj);
+                if (validDates.length > 0) {
+                    refDate = new Date(Math.max(...validDates.map(d => d.getTime())));
+                }
+            }
+
+            const rango = calcularRangoCiclo(n, monthOffset, refDate);
+            if (!rango) {
+                showToast('⚠️ No se pudo determinar el período del ciclo ' + n + '.', 'warning');
+                return;
+            }
+
+            const fIni = fmtCicloDate(rango.inicio);
+            const fFin = fmtCicloDate(rango.fin);
+
+            filterFrom.value = fIni;
+            filterTo.value = fFin;
+
+            if (filterTimeFrom) filterTimeFrom.value = '';
+            if (filterTimeTo) filterTimeTo.value = '';
+
+            document.querySelectorAll('#entelCiclosSimple button[data-ciclo]').forEach(b => {
+                b.classList.toggle('active', parseInt(b.dataset.ciclo) === n);
+            });
+
+            guardarFiltros();
+            aplicarFiltros();
+
+            const offsetTxt = monthOffset === 0 ? '' : (monthOffset < 0 ? ` (${monthOffset} mes)` : ` (+${monthOffset} mes)`);
+            showToast(`✅ Ciclo Entel ${n}${offsetTxt}: ${fIni} → ${fFin}`, 'success', 2600);
+        }
+
+        const aplicarCicloEntelSimple = aplicarCicloEntel;
+
+        function navegarCiclo(direction) {
+            let n = activeCicloNumber;
+            if (!n) {
+                const activeBtn = document.querySelector('#entelCiclosSimple button.active[data-ciclo]');
+                if (activeBtn) {
+                    n = parseInt(activeBtn.dataset.ciclo);
+                } else {
+                    n = 50;
+                }
+            }
+            const newOffset = (activeCicloMonthOffset || 0) + direction;
+            aplicarCicloEntel(n, newOffset);
         }
 
         // ============================================================
         // VISTA SIMPLE: APLICAR FILTROS Y RESUMEN DIRECTO
         // ============================================================
-        function aplicarFiltrosSimple() {
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatMbOrGb(mbVal) {
+            if (mbVal >= 1024) return (mbVal / 1024).toFixed(2) + ' GB';
+            return Math.round(mbVal).toLocaleString('es-CL') + ' MB';
+        }
+
+        function aplicarFiltros() {
             const fromStr = filterFromSimple.value;
             const toStr = filterToSimple.value;
+            const fromTime = filterTimeFromSimple ? filterTimeFromSimple.value : '';
+            const toTime = filterTimeToSimple ? filterTimeToSimple.value : '';
 
-            const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : null;
-            const toDate = toStr ? new Date(toStr + 'T23:59:59') : null;
+            let fromDate = null;
+            if (fromStr) {
+                const t = fromTime ? (fromTime.length === 5 ? fromTime + ':00' : fromTime) : '00:00:00';
+                fromDate = new Date(fromStr + 'T' + t);
+            }
+            let toDate = null;
+            if (toStr) {
+                const t = toTime ? (toTime.length === 5 ? toTime + ':59' : toTime) : '23:59:59';
+                toDate = new Date(toStr + 'T' + t);
+            }
+
+            const timeOnlyFrom = (!fromStr && fromTime) ? fromTime : null;
+            const timeOnlyTo = (!toStr && toTime) ? toTime : null;
 
             let rows = allRows;
-            if (fromDate || toDate) {
+            if (fromDate || toDate || timeOnlyFrom || timeOnlyTo) {
                 rows = allRows.filter(row => {
                     if (fromDate && row.FechaObj && row.FechaObj < fromDate) return false;
                     if (toDate && row.FechaObj && row.FechaObj > toDate) return false;
+
+                    if (timeOnlyFrom || timeOnlyTo) {
+                        if (!row.FechaObj) return false;
+                        const rowMinutes = row.FechaObj.getHours() * 60 + row.FechaObj.getMinutes();
+                        if (timeOnlyFrom) {
+                            const [h, m] = timeOnlyFrom.split(':').map(Number);
+                            if (rowMinutes < (h * 60 + (m || 0))) return false;
+                        }
+                        if (timeOnlyTo) {
+                            const [h, m] = timeOnlyTo.split(':').map(Number);
+                            if (rowMinutes > (h * 60 + (m || 0))) return false;
+                        }
+                    }
                     return true;
                 });
             }
@@ -2388,9 +1898,17 @@
                 simpleSubSMSRoam.textContent = '0 SMS';
 
                 simpleValSaldo.textContent = '$0';
-                simpleSubSaldoMin.textContent = '$0 (0 min)';
+                simpleSubSaldoMinNac.textContent = '$0 (0 min)';
+                simpleSubSaldoMinLDI.textContent = '$0 (0 min)';
+                simpleSubSaldoMinRoam.textContent = '$0 (0 min)';
                 simpleSubSaldoMsg.textContent = '$0 (0 msg)';
-                simpleSubSaldoDatos.textContent = '$0';
+                simpleSubSaldoOtros.textContent = '$0';
+
+                simpleDetailsDatos.innerHTML = '<div class="bag-empty-text">Sin registros disponibles</div>';
+                simpleDetailsVoz.innerHTML = '<div class="bag-empty-text">Sin registros disponibles</div>';
+                simpleDetailsSMS.innerHTML = '<div class="bag-empty-text">Sin registros disponibles</div>';
+                simpleDetailsSaldo.innerHTML = '<div class="bag-empty-text">Sin registros disponibles</div>';
+                simpleSummaryState = null;
 
                 stDatosTotal.textContent = '0 MB';
                 stDatosPlan.textContent = '0 MB';
@@ -2407,6 +1925,14 @@
                 stSMSCobro.textContent = '0 SMS';
                 stSMSMonto.textContent = '$0';
 
+                stOtrosMonto.textContent = '$0';
+                if (stOtrosCobro) stOtrosCobro.textContent = '—';
+                if (stBadgeDatos) stBadgeDatos.textContent = '';
+                if (stBadgeVoz) stBadgeVoz.textContent = '';
+                if (stBadgeSMS) stBadgeSMS.textContent = '';
+                if (stBadgeOtros) stBadgeOtros.textContent = '';
+                clearTableDetailedSubrows();
+
                 stTotalMonto.textContent = '$0';
                 simpleRowCount.textContent = '0 registros analizados';
                 periodoChipSimple.textContent = 'Período: —';
@@ -2415,17 +1941,49 @@
 
             let totalMB = 0, totalGB = 0;
             let datosLibresMB = 0, redesSocialesMB = 0, roamingDatosMB = 0;
-            let datosCobroMB = 0, datosCobroMonto = 0;
 
             let totalMin = 0, totalSeg = 0;
             let vozNacSeg = 0, vozLDISeg = 0, vozRoamSeg = 0;
-            let vozCobroSeg = 0, vozCobroMonto = 0, vozCobroMin = 0;
+            let vozNacCobroSeg = 0, vozNacCobroMin = 0, vozNacCobroMonto = 0;
+            let vozLDICobroSeg = 0, vozLDICobroMin = 0, vozLDICobroMonto = 0;
+            let vozRoamCobroSeg = 0, vozRoamCobroMin = 0, vozRoamCobroMonto = 0;
 
             let totalSMS = 0;
             let smsNac = 0, smsIntl = 0, roamingSMS = 0;
             let smsCobro = 0, smsCobroMonto = 0;
 
+            let otrosCobroMonto = 0;
+
             let minFecha = null, maxFecha = null;
+
+            // Agregaciones a nivel de bolsa de origen (spDes / snDes)
+            const bagsDatosLibres = {};
+            const bagsRRSS = {};
+            const bagsRoamDatos = {};
+
+            const bagsVozNac = {};
+            const bagsVozLDI = {};
+            const bagsVozRoam = {};
+
+            const bagsSMSNac = {};
+            const bagsSMSIntl = {};
+            const bagsSMSRoam = {};
+
+            const bagsSaldoVozNac = {};
+            const bagsSaldoVozLDI = {};
+            const bagsSaldoVozRoam = {};
+            const bagsSaldoSMS = {};
+            const bagsSaldoOtros = {};
+            const bagsSaldoOtrosCount = {};
+
+            function getRowBagName(r) {
+                const sp = (r.spDes || '').trim();
+                const sn = (r.snDes || '').trim();
+                if (sp && sn && sp.toLowerCase() !== sn.toLowerCase()) {
+                    return `${sp} [${sn}]`;
+                }
+                return sp || sn || (r.Destino ? `Destino ${r.Destino}` : 'General / Estándar');
+            }
 
             rows.forEach(row => {
                 if (row.FechaObj && !isNaN(row.FechaObj.getTime())) {
@@ -2433,20 +1991,21 @@
                     if (!maxFecha || row.FechaObj > maxFecha) maxFecha = row.FechaObj;
                 }
 
+                const bagName = getRowBagName(row);
+
                 // Datos
                 if (row.MB && !isNaN(row.MB)) {
                     totalMB += row.MB;
                     totalGB += row.GB || 0;
                     if (row.tipoRoaming) {
                         roamingDatosMB += row.MB;
+                        bagsRoamDatos[bagName] = (bagsRoamDatos[bagName] || 0) + row.MB;
                     } else if (row.categoriaServicio === 'Redes Sociales') {
                         redesSocialesMB += row.MB;
+                        bagsRRSS[bagName] = (bagsRRSS[bagName] || 0) + row.MB;
                     } else {
                         datosLibresMB += row.MB;
-                    }
-                    if (row.MontoNum > 0 && row.TipoTrafico === 'datos') {
-                        datosCobroMB += row.MB;
-                        datosCobroMonto += row.MontoNum;
+                        bagsDatosLibres[bagName] = (bagsDatosLibres[bagName] || 0) + row.MB;
                     }
                 }
 
@@ -2456,14 +2015,22 @@
                 }
                 if (row.Segundos && !isNaN(row.Segundos)) {
                     totalSeg += row.Segundos;
-                    if (row.tipoLDI === 'LDI') vozLDISeg += row.Segundos;
-                    else if (row.tipoRoaming) vozRoamSeg += row.Segundos;
-                    else vozNacSeg += row.Segundos;
-
-                    if (row.MontoNum > 0 || (row.SaldoMin && row.SaldoMin > 0)) {
-                        vozCobroSeg += row.Segundos;
-                        vozCobroMin += (row.SaldoMin || row.Minutos || (row.Segundos / 60));
-                        vozCobroMonto += row.MontoNum;
+                    const m = row.Minutos || (row.Segundos / 60);
+                    if (row.tipoLDI === 'LDI') {
+                        vozLDISeg += row.Segundos;
+                        if (!bagsVozLDI[bagName]) bagsVozLDI[bagName] = { seg: 0, min: 0 };
+                        bagsVozLDI[bagName].seg += row.Segundos;
+                        bagsVozLDI[bagName].min += m;
+                    } else if (row.tipoRoaming) {
+                        vozRoamSeg += row.Segundos;
+                        if (!bagsVozRoam[bagName]) bagsVozRoam[bagName] = { seg: 0, min: 0 };
+                        bagsVozRoam[bagName].seg += row.Segundos;
+                        bagsVozRoam[bagName].min += m;
+                    } else {
+                        vozNacSeg += row.Segundos;
+                        if (!bagsVozNac[bagName]) bagsVozNac[bagName] = { seg: 0, min: 0 };
+                        bagsVozNac[bagName].seg += row.Segundos;
+                        bagsVozNac[bagName].min += m;
                     }
                 }
 
@@ -2471,18 +2038,72 @@
                 if (row.TipoTrafico === 'sms') {
                     const qty = row.CantidadNum || 1;
                     totalSMS += qty;
-                    if (row.tipoSMS === 'SMS_Internacional') smsIntl += qty;
-                    else if (row.tipoRoaming) roamingSMS += qty;
-                    else smsNac += qty;
+                    if (row.tipoSMS === 'SMS_Internacional') {
+                        smsIntl += qty;
+                        bagsSMSIntl[bagName] = (bagsSMSIntl[bagName] || 0) + qty;
+                    } else if (row.tipoRoaming) {
+                        roamingSMS += qty;
+                        bagsSMSRoam[bagName] = (bagsSMSRoam[bagName] || 0) + qty;
+                    } else {
+                        smsNac += qty;
+                        bagsSMSNac[bagName] = (bagsSMSNac[bagName] || 0) + qty;
+                    }
+                }
 
-                    if (row.MontoNum > 0 || (row.SaldoMsg && row.SaldoMsg > 0)) {
-                        smsCobro += (row.SaldoMsg || qty);
+                // Cobros / Saldo
+                if (row.MontoNum > 0 || (row.SaldoMin && row.SaldoMin > 0) || (row.SaldoMsg && row.SaldoMsg > 0)) {
+                    if (row.TipoTrafico === 'voz') {
+                        const minCobrado = (row.SaldoMin || row.Minutos || (row.Segundos / 60));
+                        if (row.tipoLDI === 'LDI') {
+                            vozLDICobroSeg += row.Segundos || 0;
+                            vozLDICobroMin += minCobrado;
+                            vozLDICobroMonto += row.MontoNum;
+                            if (!bagsSaldoVozLDI[bagName]) bagsSaldoVozLDI[bagName] = { monto: 0, min: 0, seg: 0 };
+                            bagsSaldoVozLDI[bagName].monto += row.MontoNum;
+                            bagsSaldoVozLDI[bagName].min += minCobrado;
+                            bagsSaldoVozLDI[bagName].seg += (row.Segundos || 0);
+                        } else if (row.tipoRoaming) {
+                            vozRoamCobroSeg += row.Segundos || 0;
+                            vozRoamCobroMin += minCobrado;
+                            vozRoamCobroMonto += row.MontoNum;
+                            if (!bagsSaldoVozRoam[bagName]) bagsSaldoVozRoam[bagName] = { monto: 0, min: 0, seg: 0 };
+                            bagsSaldoVozRoam[bagName].monto += row.MontoNum;
+                            bagsSaldoVozRoam[bagName].min += minCobrado;
+                            bagsSaldoVozRoam[bagName].seg += (row.Segundos || 0);
+                        } else {
+                            vozNacCobroSeg += row.Segundos || 0;
+                            vozNacCobroMin += minCobrado;
+                            vozNacCobroMonto += row.MontoNum;
+                            if (!bagsSaldoVozNac[bagName]) bagsSaldoVozNac[bagName] = { monto: 0, min: 0, seg: 0 };
+                            bagsSaldoVozNac[bagName].monto += row.MontoNum;
+                            bagsSaldoVozNac[bagName].min += minCobrado;
+                            bagsSaldoVozNac[bagName].seg += (row.Segundos || 0);
+                        }
+                    } else if (row.TipoTrafico === 'sms') {
+                        const qty = row.SaldoMsg || row.CantidadNum || 1;
+                        smsCobro += qty;
                         smsCobroMonto += row.MontoNum;
+                        if (!bagsSaldoSMS[bagName]) bagsSaldoSMS[bagName] = { monto: 0, qty: 0 };
+                        bagsSaldoSMS[bagName].monto += row.MontoNum;
+                        bagsSaldoSMS[bagName].qty += qty;
+                    } else {
+                        // Otros cobros (VAS / Suscripciones / etc.)
+                        otrosCobroMonto += row.MontoNum;
+                        bagsSaldoOtros[bagName] = (bagsSaldoOtros[bagName] || 0) + row.MontoNum;
+                        bagsSaldoOtrosCount[bagName] = (bagsSaldoOtrosCount[bagName] || 0) + 1;
                     }
                 }
             });
 
-            const totalSaldoMonto = vozCobroMonto + smsCobroMonto + datosCobroMonto;
+            const totalVozCobroMin = vozNacCobroMin + vozLDICobroMin + vozRoamCobroMin;
+            const totalVozCobroMonto = vozNacCobroMonto + vozLDICobroMonto + vozRoamCobroMonto;
+            const totalSaldoMonto = totalVozCobroMonto + smsCobroMonto + otrosCobroMonto;
+
+            // Formateador de MB/GB
+            function formatMbOrGb(mbVal) {
+                if (mbVal >= 1024) return (mbVal / 1024).toFixed(2) + ' GB';
+                return Math.round(mbVal).toLocaleString('es-CL') + ' MB';
+            }
 
             // 1. Tarjeta Datos
             if (totalGB >= 1) {
@@ -2490,9 +2111,9 @@
             } else {
                 simpleValDatos.textContent = Math.round(totalMB).toLocaleString('es-CL') + ' MB';
             }
-            simpleSubDatosLibres.textContent = (datosLibresMB >= 1024 ? (datosLibresMB / 1024).toFixed(2) + ' GB' : Math.round(datosLibresMB).toLocaleString('es-CL') + ' MB');
-            simpleSubDatosRRSS.textContent = (redesSocialesMB >= 1024 ? (redesSocialesMB / 1024).toFixed(2) + ' GB' : Math.round(redesSocialesMB).toLocaleString('es-CL') + ' MB');
-            simpleSubDatosRoam.textContent = (roamingDatosMB >= 1024 ? (roamingDatosMB / 1024).toFixed(2) + ' GB' : Math.round(roamingDatosMB).toLocaleString('es-CL') + ' MB');
+            simpleSubDatosLibres.textContent = formatMbOrGb(datosLibresMB);
+            simpleSubDatosRRSS.textContent = formatMbOrGb(redesSocialesMB);
+            simpleSubDatosRoam.textContent = formatMbOrGb(roamingDatosMB);
 
             // 2. Tarjeta Voz
             if (totalMin >= 60) {
@@ -2511,27 +2132,147 @@
             simpleSubSMSIntl.textContent = smsIntl.toLocaleString('es-CL') + ' SMS';
             simpleSubSMSRoam.textContent = roamingSMS.toLocaleString('es-CL') + ' SMS';
 
-            // 4. Tarjeta Saldo Consumido (Separado por Voz y SMS)
+            // 4. Tarjeta Saldo Consumido (Llamadas Nac/LDI/Roaming, SMS y Otros VAS)
             simpleValSaldo.textContent = '$' + Math.round(totalSaldoMonto).toLocaleString('es-CL');
-            simpleSubSaldoMin.textContent = `$${Math.round(vozCobroMonto).toLocaleString('es-CL')} (${Math.round(vozCobroMin)} min)`;
+            simpleSubSaldoMinNac.textContent = `$${Math.round(vozNacCobroMonto).toLocaleString('es-CL')} (${Math.round(vozNacCobroMin)} min)`;
+            simpleSubSaldoMinLDI.textContent = `$${Math.round(vozLDICobroMonto).toLocaleString('es-CL')} (${Math.round(vozLDICobroMin)} min)`;
+            simpleSubSaldoMinRoam.textContent = `$${Math.round(vozRoamCobroMonto).toLocaleString('es-CL')} (${Math.round(vozRoamCobroMin)} min)`;
             simpleSubSaldoMsg.textContent = `$${Math.round(smsCobroMonto).toLocaleString('es-CL')} (${smsCobro} SMS)`;
-            simpleSubSaldoDatos.textContent = datosCobroMonto > 0 ? `$${Math.round(datosCobroMonto).toLocaleString('es-CL')} (${(datosCobroMB/1024).toFixed(2)} GB)` : '$0';
+            simpleSubSaldoOtros.textContent = `$${Math.round(otrosCobroMonto).toLocaleString('es-CL')}`;
+
+            // Helper para renderizar filas de bolsas con soporte de animación inteligente
+            function renderBagItemRow(name, valHtml, isHighlight = false) {
+                return `<div class="bag-item-row" title="${escapeHtml(name)}">
+                    <span class="bag-item-name"><span class="bag-item-text">${escapeHtml(name)}</span></span>
+                    <span class="bag-item-val ${isHighlight ? 'highlight' : ''}">${valHtml}</span>
+                </div>`;
+            }
+
+            // RENDERIZADO DE SUBDETALLES (BOLSAS DE ORIGEN)
+            // 1. Subdetalles Datos
+            let htmlDatos = '';
+            if (Object.keys(bagsDatosLibres).length > 0) {
+                htmlDatos += '<div class="bag-section-title">🌐 Datos libres / Navegación</div>';
+                Object.entries(bagsDatosLibres).sort((a, b) => b[1] - a[1]).forEach(([name, mb]) => {
+                    htmlDatos += renderBagItemRow(name, formatMbOrGb(mb));
+                });
+            }
+            if (Object.keys(bagsRRSS).length > 0) {
+                htmlDatos += '<div class="bag-section-title">📱 Redes Sociales</div>';
+                Object.entries(bagsRRSS).sort((a, b) => b[1] - a[1]).forEach(([name, mb]) => {
+                    htmlDatos += renderBagItemRow(name, formatMbOrGb(mb));
+                });
+            }
+            if (Object.keys(bagsRoamDatos).length > 0) {
+                htmlDatos += '<div class="bag-section-title">✈️ Roaming Datos</div>';
+                Object.entries(bagsRoamDatos).sort((a, b) => b[1] - a[1]).forEach(([name, mb]) => {
+                    htmlDatos += renderBagItemRow(name, formatMbOrGb(mb));
+                });
+            }
+            if (!htmlDatos) htmlDatos = '<div class="bag-empty-text">Sin consumos de datos en este período</div>';
+            simpleDetailsDatos.innerHTML = htmlDatos;
+
+            // 2. Subdetalles Voz
+            let htmlVoz = '';
+            if (Object.keys(bagsVozNac).length > 0) {
+                htmlVoz += '<div class="bag-section-title">🇨🇱 Llamadas Nacionales</div>';
+                Object.entries(bagsVozNac).sort((a, b) => b[1].seg - a[1].seg).forEach(([name, item]) => {
+                    const m = Math.round(item.seg / 60);
+                    htmlVoz += renderBagItemRow(name, `${m.toLocaleString('es-CL')} min (${Math.round(item.seg)}s)`);
+                });
+            }
+            if (Object.keys(bagsVozLDI).length > 0) {
+                htmlVoz += '<div class="bag-section-title">🌍 Larga Distancia (LDI)</div>';
+                Object.entries(bagsVozLDI).sort((a, b) => b[1].seg - a[1].seg).forEach(([name, item]) => {
+                    const m = Math.round(item.seg / 60);
+                    htmlVoz += renderBagItemRow(name, `${m.toLocaleString('es-CL')} min (${Math.round(item.seg)}s)`);
+                });
+            }
+            if (Object.keys(bagsVozRoam).length > 0) {
+                htmlVoz += '<div class="bag-section-title">✈️ Llamadas en Roaming</div>';
+                Object.entries(bagsVozRoam).sort((a, b) => b[1].seg - a[1].seg).forEach(([name, item]) => {
+                    const m = Math.round(item.seg / 60);
+                    htmlVoz += renderBagItemRow(name, `${m.toLocaleString('es-CL')} min (${Math.round(item.seg)}s)`);
+                });
+            }
+            if (!htmlVoz) htmlVoz = '<div class="bag-empty-text">Sin consumos de voz en este período</div>';
+            simpleDetailsVoz.innerHTML = htmlVoz;
+
+            // 3. Subdetalles SMS
+            let htmlSMS = '';
+            if (Object.keys(bagsSMSNac).length > 0) {
+                htmlSMS += '<div class="bag-section-title">✉️ SMS Nacionales</div>';
+                Object.entries(bagsSMSNac).sort((a, b) => b[1] - a[1]).forEach(([name, qty]) => {
+                    htmlSMS += renderBagItemRow(name, `${qty.toLocaleString('es-CL')} SMS`);
+                });
+            }
+            if (Object.keys(bagsSMSIntl).length > 0) {
+                htmlSMS += '<div class="bag-section-title">🌐 SMS Internacionales</div>';
+                Object.entries(bagsSMSIntl).sort((a, b) => b[1] - a[1]).forEach(([name, qty]) => {
+                    htmlSMS += renderBagItemRow(name, `${qty.toLocaleString('es-CL')} SMS`);
+                });
+            }
+            if (Object.keys(bagsSMSRoam).length > 0) {
+                htmlSMS += '<div class="bag-section-title">✈️ SMS en Roaming</div>';
+                Object.entries(bagsSMSRoam).sort((a, b) => b[1] - a[1]).forEach(([name, qty]) => {
+                    htmlSMS += renderBagItemRow(name, `${qty.toLocaleString('es-CL')} SMS`);
+                });
+            }
+            if (!htmlSMS) htmlSMS = '<div class="bag-empty-text">Sin consumos de SMS en este período</div>';
+            simpleDetailsSMS.innerHTML = htmlSMS;
+
+            // 4. Subdetalles Saldo Consumido
+            let htmlSaldo = '';
+            if (Object.keys(bagsSaldoVozNac).length > 0) {
+                htmlSaldo += '<div class="bag-section-title">🇨🇱 En Llamadas Nacionales</div>';
+                Object.entries(bagsSaldoVozNac).sort((a, b) => b[1].monto - a[1].monto).forEach(([name, item]) => {
+                    htmlSaldo += renderBagItemRow(name, `$${Math.round(item.monto).toLocaleString('es-CL')} (${Math.round(item.min)} min)`, true);
+                });
+            }
+            if (Object.keys(bagsSaldoVozLDI).length > 0) {
+                htmlSaldo += '<div class="bag-section-title">🌍 En Llamadas LDI</div>';
+                Object.entries(bagsSaldoVozLDI).sort((a, b) => b[1].monto - a[1].monto).forEach(([name, item]) => {
+                    htmlSaldo += renderBagItemRow(name, `$${Math.round(item.monto).toLocaleString('es-CL')} (${Math.round(item.min)} min)`, true);
+                });
+            }
+            if (Object.keys(bagsSaldoVozRoam).length > 0) {
+                htmlSaldo += '<div class="bag-section-title">✈️ En Llamadas Roaming</div>';
+                Object.entries(bagsSaldoVozRoam).sort((a, b) => b[1].monto - a[1].monto).forEach(([name, item]) => {
+                    htmlSaldo += renderBagItemRow(name, `$${Math.round(item.monto).toLocaleString('es-CL')} (${Math.round(item.min)} min)`, true);
+                });
+            }
+            if (Object.keys(bagsSaldoSMS).length > 0) {
+                htmlSaldo += '<div class="bag-section-title">💬 En SMS / Mensajes</div>';
+                Object.entries(bagsSaldoSMS).sort((a, b) => b[1].monto - a[1].monto).forEach(([name, item]) => {
+                    htmlSaldo += renderBagItemRow(name, `$${Math.round(item.monto).toLocaleString('es-CL')} (${item.qty} SMS)`, true);
+                });
+            }
+            if (Object.keys(bagsSaldoOtros).length > 0) {
+                htmlSaldo += '<div class="bag-section-title">🛒 En Otros (VAS / Suscripciones)</div>';
+                Object.entries(bagsSaldoOtros).sort((a, b) => b[1] - a[1]).forEach(([name, monto]) => {
+                    htmlSaldo += renderBagItemRow(name, `$${Math.round(monto).toLocaleString('es-CL')}`, true);
+                });
+            }
+            if (!htmlSaldo) htmlSaldo = '<div class="bag-empty-text">Sin cobros adicionales de saldo en este período</div>';
+            simpleDetailsSaldo.innerHTML = htmlSaldo;
 
             // Tabla consolidada
             stDatosTotal.textContent = totalGB >= 1 ? totalGB.toFixed(2) + ' GB' : Math.round(totalMB).toLocaleString('es-CL') + ' MB';
-            stDatosPlan.textContent = (totalMB - datosCobroMB) >= 1024 ? ((totalMB - datosCobroMB)/1024).toFixed(2) + ' GB' : Math.round(totalMB - datosCobroMB).toLocaleString('es-CL') + ' MB';
-            stDatosCobro.textContent = datosCobroMB >= 1024 ? (datosCobroMB/1024).toFixed(2) + ' GB' : Math.round(datosCobroMB).toLocaleString('es-CL') + ' MB';
-            stDatosMonto.textContent = '$' + Math.round(datosCobroMonto).toLocaleString('es-CL');
+            stDatosPlan.textContent = totalGB >= 1 ? totalGB.toFixed(2) + ' GB' : Math.round(totalMB).toLocaleString('es-CL') + ' MB';
+            stDatosCobro.textContent = '0 MB';
+            stDatosMonto.textContent = '$0';
 
             stVozTotal.textContent = Math.round(totalMin).toLocaleString('es-CL') + ' min';
-            stVozPlan.textContent = Math.round(Math.max(0, totalMin - vozCobroMin)).toLocaleString('es-CL') + ' min';
-            stVozCobro.textContent = Math.round(vozCobroMin).toLocaleString('es-CL') + ' min';
-            stVozMonto.textContent = '$' + Math.round(vozCobroMonto).toLocaleString('es-CL');
+            stVozPlan.textContent = Math.round(Math.max(0, totalMin - totalVozCobroMin)).toLocaleString('es-CL') + ' min';
+            stVozCobro.textContent = Math.round(totalVozCobroMin).toLocaleString('es-CL') + ' min';
+            stVozMonto.textContent = '$' + Math.round(totalVozCobroMonto).toLocaleString('es-CL');
 
             stSMSTotal.textContent = totalSMS.toLocaleString('es-CL') + ' SMS';
             stSMSPlan.textContent = Math.max(0, totalSMS - smsCobro).toLocaleString('es-CL') + ' SMS';
             stSMSCobro.textContent = smsCobro.toLocaleString('es-CL') + ' SMS';
             stSMSMonto.textContent = '$' + Math.round(smsCobroMonto).toLocaleString('es-CL');
+
+            stOtrosMonto.textContent = '$' + Math.round(otrosCobroMonto).toLocaleString('es-CL');
 
             stTotalMonto.textContent = '$' + Math.round(totalSaldoMonto).toLocaleString('es-CL');
             simpleRowCount.textContent = rows.length.toLocaleString('es-CL') + ' registros analizados';
@@ -2544,237 +2285,908 @@
                 const d2 = String(maxFecha.getDate()).padStart(2, '0');
                 const m2 = String(maxFecha.getMonth() + 1).padStart(2, '0');
                 const y2 = maxFecha.getFullYear();
-                periodoChipSimple.textContent = (d1 === d2 && m1 === m2 && y1 === y2) ? `📅 ${d1}-${m1}-${y1}` : `📅 ${d1}-${m1}-${y1} → ${d2}-${m2}-${y2}`;
+                const hasHours = Boolean((filterTimeFromSimple && filterTimeFromSimple.value) || (filterTimeToSimple && filterTimeToSimple.value));
+                const t1 = hasHours ? ` ${String(minFecha.getHours()).padStart(2, '0')}:${String(minFecha.getMinutes()).padStart(2, '0')}` : '';
+                const t2 = hasHours ? ` ${String(maxFecha.getHours()).padStart(2, '0')}:${String(maxFecha.getMinutes()).padStart(2, '0')}` : '';
+
+                periodoChipSimple.textContent = (d1 === d2 && m1 === m2 && y1 === y2 && !hasHours) ? `📅 ${d1}-${m1}-${y1}` : `📅 ${d1}-${m1}-${y1}${t1} → ${d2}-${m2}-${y2}${t2}`;
             } else {
                 periodoChipSimple.textContent = 'Período: —';
             }
+
+            // Guardar estado estructurado para copiado inteligente
+            simpleSummaryState = {
+                periodo: periodoChipSimple.textContent,
+                datos: {
+                    totalStr: totalGB >= 1 ? totalGB.toFixed(2) + ' GB' : Math.round(totalMB).toLocaleString('es-CL') + ' MB',
+                    libresStr: formatMbOrGb(datosLibresMB),
+                    rrssStr: formatMbOrGb(redesSocialesMB),
+                    roamStr: formatMbOrGb(roamingDatosMB),
+                    bagsLibres: bagsDatosLibres,
+                    bagsRRSS: bagsRRSS,
+                    bagsRoam: bagsRoamDatos
+                },
+                voz: {
+                    totalStr: totalMin >= 60 ? `${Math.round(totalMin).toLocaleString('es-CL')} min (~${(totalMin/60).toFixed(1)}h)` : Math.round(totalMin).toLocaleString('es-CL') + ' min',
+                    nacStr: Math.round(vozNacSeg / 60).toLocaleString('es-CL') + ' min',
+                    ldiStr: Math.round(vozLDISeg / 60).toLocaleString('es-CL') + ' min',
+                    roamStr: Math.round(vozRoamSeg / 60).toLocaleString('es-CL') + ' min',
+                    bagsNac: bagsVozNac,
+                    bagsLDI: bagsVozLDI,
+                    bagsRoam: bagsVozRoam
+                },
+                sms: {
+                    totalStr: totalSMS.toLocaleString('es-CL') + ' SMS',
+                    nacStr: smsNac.toLocaleString('es-CL') + ' SMS',
+                    intlStr: smsIntl.toLocaleString('es-CL') + ' SMS',
+                    roamStr: roamingSMS.toLocaleString('es-CL') + ' SMS',
+                    bagsNac: bagsSMSNac,
+                    bagsIntl: bagsSMSIntl,
+                    bagsRoam: bagsSMSRoam
+                },
+                saldo: {
+                    totalStr: '$' + Math.round(totalSaldoMonto).toLocaleString('es-CL'),
+                    minNacStr: `$${Math.round(vozNacCobroMonto).toLocaleString('es-CL')} (${Math.round(vozNacCobroMin)} min)`,
+                    minLDIStr: `$${Math.round(vozLDICobroMonto).toLocaleString('es-CL')} (${Math.round(vozLDICobroMin)} min)`,
+                    minRoamStr: `$${Math.round(vozRoamCobroMonto).toLocaleString('es-CL')} (${Math.round(vozRoamCobroMin)} min)`,
+                    msgStr: `$${Math.round(smsCobroMonto).toLocaleString('es-CL')} (${smsCobro} SMS)`,
+                    otrosStr: `$${Math.round(otrosCobroMonto).toLocaleString('es-CL')}`,
+                    bagsVozNac: bagsSaldoVozNac,
+                    bagsVozLDI: bagsSaldoVozLDI,
+                    bagsVozRoam: bagsSaldoVozRoam,
+                    bagsSMS: bagsSaldoSMS,
+                    bagsOtros: bagsSaldoOtros
+                }
+            };
+
+            // Renderizar desglose detallado en tabla general por item
+            renderTableDetailedSubrows({
+                datos: {
+                    libresStr: formatMbOrGb(datosLibresMB),
+                    rrssStr: formatMbOrGb(redesSocialesMB),
+                    roamStr: formatMbOrGb(roamingDatosMB),
+                    bagsLibres: bagsDatosLibres,
+                    bagsRRSS: bagsRRSS,
+                    bagsRoam: bagsRoamDatos
+                },
+                voz: {
+                    totalMin,
+                    totalVozCobroMin,
+                    vozNacSeg, vozNacCobroMin, vozNacCobroMonto, bagsNac: bagsVozNac, bagsSaldoNac: bagsSaldoVozNac,
+                    vozLDISeg, vozLDICobroMin, vozLDICobroMonto, bagsLDI: bagsVozLDI, bagsSaldoLDI: bagsSaldoVozLDI,
+                    vozRoamSeg, vozRoamCobroMin, vozRoamCobroMonto, bagsRoam: bagsVozRoam, bagsSaldoRoam: bagsSaldoVozRoam
+                },
+                sms: {
+                    smsNac, bagsNac: bagsSMSNac,
+                    smsIntl, bagsIntl: bagsSMSIntl,
+                    roamingSMS, bagsRoam: bagsSMSRoam,
+                    smsCobro, smsCobroMonto,
+                    bagsSaldo: bagsSaldoSMS
+                },
+                otros: {
+                    monto: otrosCobroMonto,
+                    bags: bagsSaldoOtros,
+                    counts: bagsSaldoOtrosCount
+                }
+            });
         }
 
-        function clearAllFilters() {
-            filterFrom.value = '';
-            filterTo.value = '';
-            filterFromSimple.value = '';
-            filterToSimple.value = '';
-            filterTipo.value = 'todos';
-            filterRegistro.value = 'todos';
-            filterDestino.value = '';
-            activeQuickFilter = null;
-            document.querySelectorAll('.chip[data-qf]').forEach(chip => chip.classList.remove('active'));
-            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => b.classList.remove('active'));
-            aplicarFiltros();
-            aplicarFiltrosSimple();
-            showToast('✅ Filtros eliminados.', 'success');
+        const aplicarFiltrosSimple = aplicarFiltros;
+
+        // ============================================================
+        // DESGLOSE DETALLADO EN TABLA RESUMEN POR ITEM
+        // ============================================================
+        function clearTableDetailedSubrows() {
+            [stGroupDatos, stGroupVoz, stGroupSMS, stGroupOtros].forEach(group => {
+                if (!group) return;
+                const subrows = group.querySelectorAll('.st-subrow');
+                subrows.forEach(r => r.remove());
+            });
+        }
+
+        function renderTableDetailedSubrows(data) {
+            clearTableDetailedSubrows();
+
+            // 1. DATOS MÓVILES
+            if (stGroupDatos) {
+                const bLibres = Object.entries(data.datos.bagsLibres).sort((a, b) => b[1] - a[1]);
+                const bRRSS = Object.entries(data.datos.bagsRRSS).sort((a, b) => b[1] - a[1]);
+                const bRoam = Object.entries(data.datos.bagsRoam).sort((a, b) => b[1] - a[1]);
+                const totalBagsDatos = bLibres.length + bRRSS.length + bRoam.length;
+                if (stBadgeDatos) stBadgeDatos.textContent = totalBagsDatos > 0 ? `${totalBagsDatos} bolsa${totalBagsDatos > 1 ? 's' : ''}` : '';
+
+                // Cat 1: Navegación / Datos libres
+                const rCatLibres = document.createElement('tr');
+                rCatLibres.className = 'st-subrow st-subrow-cat';
+                rCatLibres.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>🌐 Navegación / Datos libres</strong></td>
+                    <td>${data.datos.libresStr}</td>
+                    <td>${data.datos.libresStr}</td>
+                    <td>0 MB</td>
+                    <td>$0</td>
+                `;
+                stGroupDatos.appendChild(rCatLibres);
+
+                if (bLibres.length > 0) {
+                    bLibres.forEach(([name, mb]) => {
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${formatMbOrGb(mb)}</td>
+                            <td>${formatMbOrGb(mb)}</td>
+                            <td>0 MB</td>
+                            <td>$0</td>
+                        `;
+                        stGroupDatos.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin consumo de datos libres</span></td>
+                        <td>0 MB</td>
+                        <td>0 MB</td>
+                        <td>0 MB</td>
+                        <td>$0</td>
+                    `;
+                    stGroupDatos.appendChild(r);
+                }
+
+                // Cat 2: Redes Sociales
+                const rCatRRSS = document.createElement('tr');
+                rCatRRSS.className = 'st-subrow st-subrow-cat';
+                rCatRRSS.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>📱 Redes Sociales incluidas</strong></td>
+                    <td>${data.datos.rrssStr}</td>
+                    <td>${data.datos.rrssStr}</td>
+                    <td>0 MB</td>
+                    <td>$0</td>
+                `;
+                stGroupDatos.appendChild(rCatRRSS);
+
+                if (bRRSS.length > 0) {
+                    bRRSS.forEach(([name, mb]) => {
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${formatMbOrGb(mb)}</td>
+                            <td>${formatMbOrGb(mb)}</td>
+                            <td>0 MB</td>
+                            <td>$0</td>
+                        `;
+                        stGroupDatos.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin consumo de redes sociales</span></td>
+                        <td>0 MB</td>
+                        <td>0 MB</td>
+                        <td>0 MB</td>
+                        <td>$0</td>
+                    `;
+                    stGroupDatos.appendChild(r);
+                }
+
+                // Cat 3: Roaming Datos
+                const rCatRoam = document.createElement('tr');
+                rCatRoam.className = 'st-subrow st-subrow-cat';
+                rCatRoam.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>✈️ Roaming Datos internacional</strong></td>
+                    <td>${data.datos.roamStr}</td>
+                    <td>${data.datos.roamStr}</td>
+                    <td>0 MB</td>
+                    <td>$0</td>
+                `;
+                stGroupDatos.appendChild(rCatRoam);
+
+                if (bRoam.length > 0) {
+                    bRoam.forEach(([name, mb]) => {
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${formatMbOrGb(mb)}</td>
+                            <td>${formatMbOrGb(mb)}</td>
+                            <td>0 MB</td>
+                            <td>$0</td>
+                        `;
+                        stGroupDatos.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin consumo de roaming de datos</span></td>
+                        <td>0 MB</td>
+                        <td>0 MB</td>
+                        <td>0 MB</td>
+                        <td>$0</td>
+                    `;
+                    stGroupDatos.appendChild(r);
+                }
+            }
+
+            // 2. LLAMADAS (VOZ)
+            if (stGroupVoz) {
+                const bNac = Object.entries(data.voz.bagsNac).sort((a, b) => b[1].seg - a[1].seg);
+                const bLDI = Object.entries(data.voz.bagsLDI).sort((a, b) => b[1].seg - a[1].seg);
+                const bRoam = Object.entries(data.voz.bagsRoam).sort((a, b) => b[1].seg - a[1].seg);
+                const totalBagsVoz = bNac.length + bLDI.length + bRoam.length;
+                if (stBadgeVoz) stBadgeVoz.textContent = totalBagsVoz > 0 ? `${totalBagsVoz} bolsa${totalBagsVoz > 1 ? 's' : ''}` : '';
+
+                // Cat 1: Nacionales
+                const vozNacTotMin = Math.round(data.voz.vozNacSeg / 60);
+                const vozNacCobMin = Math.round(data.voz.vozNacCobroMin);
+                const vozNacPlanMin = Math.max(0, vozNacTotMin - vozNacCobMin);
+                const rCatVozNac = document.createElement('tr');
+                rCatVozNac.className = 'st-subrow st-subrow-cat';
+                rCatVozNac.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>🇨🇱 Llamadas Nacionales</strong></td>
+                    <td>${vozNacTotMin.toLocaleString('es-CL')} min</td>
+                    <td>${vozNacPlanMin.toLocaleString('es-CL')} min</td>
+                    <td>${vozNacCobMin.toLocaleString('es-CL')} min</td>
+                    <td class="${data.voz.vozNacCobroMonto > 0 ? 'st-val-highlight' : ''}">$${Math.round(data.voz.vozNacCobroMonto).toLocaleString('es-CL')}</td>
+                `;
+                stGroupVoz.appendChild(rCatVozNac);
+
+                if (bNac.length > 0) {
+                    bNac.forEach(([name, item]) => {
+                        const cobroItem = data.voz.bagsSaldoNac[name];
+                        const itemMin = Math.round(item.seg / 60);
+                        const itemCobroMin = cobroItem ? Math.round(cobroItem.min) : 0;
+                        const itemPlanMin = Math.max(0, itemMin - itemCobroMin);
+                        const itemMonto = cobroItem ? Math.round(cobroItem.monto) : 0;
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${itemMin.toLocaleString('es-CL')} min (${Math.round(item.seg)}s)</td>
+                            <td>${itemPlanMin.toLocaleString('es-CL')} min</td>
+                            <td>${itemCobroMin.toLocaleString('es-CL')} min</td>
+                            <td class="${itemMonto > 0 ? 'st-val-highlight' : ''}">$${itemMonto.toLocaleString('es-CL')}</td>
+                        `;
+                        stGroupVoz.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin llamadas nacionales</span></td>
+                        <td>0 min</td>
+                        <td>0 min</td>
+                        <td>0 min</td>
+                        <td>$0</td>
+                    `;
+                    stGroupVoz.appendChild(r);
+                }
+
+                // Cat 2: LDI
+                const vozLDITotMin = Math.round(data.voz.vozLDISeg / 60);
+                const vozLDICobMin = Math.round(data.voz.vozLDICobroMin);
+                const vozLDIPlanMin = Math.max(0, vozLDITotMin - vozLDICobMin);
+                const rCatVozLDI = document.createElement('tr');
+                rCatVozLDI.className = 'st-subrow st-subrow-cat';
+                rCatVozLDI.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>🌍 Larga Distancia (LDI)</strong></td>
+                    <td>${vozLDITotMin.toLocaleString('es-CL')} min</td>
+                    <td>${vozLDIPlanMin.toLocaleString('es-CL')} min</td>
+                    <td>${vozLDICobMin.toLocaleString('es-CL')} min</td>
+                    <td class="${data.voz.vozLDICobroMonto > 0 ? 'st-val-highlight' : ''}">$${Math.round(data.voz.vozLDICobroMonto).toLocaleString('es-CL')}</td>
+                `;
+                stGroupVoz.appendChild(rCatVozLDI);
+
+                if (bLDI.length > 0) {
+                    bLDI.forEach(([name, item]) => {
+                        const cobroItem = data.voz.bagsSaldoLDI[name];
+                        const itemMin = Math.round(item.seg / 60);
+                        const itemCobroMin = cobroItem ? Math.round(cobroItem.min) : 0;
+                        const itemPlanMin = Math.max(0, itemMin - itemCobroMin);
+                        const itemMonto = cobroItem ? Math.round(cobroItem.monto) : 0;
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${itemMin.toLocaleString('es-CL')} min (${Math.round(item.seg)}s)</td>
+                            <td>${itemPlanMin.toLocaleString('es-CL')} min</td>
+                            <td>${itemCobroMin.toLocaleString('es-CL')} min</td>
+                            <td class="${itemMonto > 0 ? 'st-val-highlight' : ''}">$${itemMonto.toLocaleString('es-CL')}</td>
+                        `;
+                        stGroupVoz.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin llamadas de larga distancia</span></td>
+                        <td>0 min</td>
+                        <td>0 min</td>
+                        <td>0 min</td>
+                        <td>$0</td>
+                    `;
+                    stGroupVoz.appendChild(r);
+                }
+
+                // Cat 3: Roaming Voz
+                const vozRoamTotMin = Math.round(data.voz.vozRoamSeg / 60);
+                const vozRoamCobMin = Math.round(data.voz.vozRoamCobroMin);
+                const vozRoamPlanMin = Math.max(0, vozRoamTotMin - vozRoamCobMin);
+                const rCatVozRoam = document.createElement('tr');
+                rCatVozRoam.className = 'st-subrow st-subrow-cat';
+                rCatVozRoam.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>✈️ Llamadas en Roaming</strong></td>
+                    <td>${vozRoamTotMin.toLocaleString('es-CL')} min</td>
+                    <td>${vozRoamPlanMin.toLocaleString('es-CL')} min</td>
+                    <td>${vozRoamCobMin.toLocaleString('es-CL')} min</td>
+                    <td class="${data.voz.vozRoamCobroMonto > 0 ? 'st-val-highlight' : ''}">$${Math.round(data.voz.vozRoamCobroMonto).toLocaleString('es-CL')}</td>
+                `;
+                stGroupVoz.appendChild(rCatVozRoam);
+
+                if (bRoam.length > 0) {
+                    bRoam.forEach(([name, item]) => {
+                        const cobroItem = data.voz.bagsSaldoRoam[name];
+                        const itemMin = Math.round(item.seg / 60);
+                        const itemCobroMin = cobroItem ? Math.round(cobroItem.min) : 0;
+                        const itemPlanMin = Math.max(0, itemMin - itemCobroMin);
+                        const itemMonto = cobroItem ? Math.round(cobroItem.monto) : 0;
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${itemMin.toLocaleString('es-CL')} min (${Math.round(item.seg)}s)</td>
+                            <td>${itemPlanMin.toLocaleString('es-CL')} min</td>
+                            <td>${itemCobroMin.toLocaleString('es-CL')} min</td>
+                            <td class="${itemMonto > 0 ? 'st-val-highlight' : ''}">$${itemMonto.toLocaleString('es-CL')}</td>
+                        `;
+                        stGroupVoz.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin llamadas en roaming</span></td>
+                        <td>0 min</td>
+                        <td>0 min</td>
+                        <td>0 min</td>
+                        <td>$0</td>
+                    `;
+                    stGroupVoz.appendChild(r);
+                }
+            }
+
+            // 3. SMS / MENSAJES
+            if (stGroupSMS) {
+                const bNac = Object.entries(data.sms.bagsNac).sort((a, b) => b[1] - a[1]);
+                const bIntl = Object.entries(data.sms.bagsIntl).sort((a, b) => b[1] - a[1]);
+                const bRoam = Object.entries(data.sms.bagsRoam).sort((a, b) => b[1] - a[1]);
+                const totalBagsSMS = bNac.length + bIntl.length + bRoam.length;
+                if (stBadgeSMS) stBadgeSMS.textContent = totalBagsSMS > 0 ? `${totalBagsSMS} bolsa${totalBagsSMS > 1 ? 's' : ''}` : '';
+
+                // Cat 1: Nacionales
+                const rCatSMSNac = document.createElement('tr');
+                rCatSMSNac.className = 'st-subrow st-subrow-cat';
+                rCatSMSNac.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>✉️ SMS Nacionales</strong></td>
+                    <td>${data.sms.smsNac.toLocaleString('es-CL')} SMS</td>
+                    <td>${Math.max(0, data.sms.smsNac - data.sms.smsCobro).toLocaleString('es-CL')} SMS</td>
+                    <td>${data.sms.smsCobro.toLocaleString('es-CL')} SMS</td>
+                    <td class="${data.sms.smsCobroMonto > 0 ? 'st-val-highlight' : ''}">$${Math.round(data.sms.smsCobroMonto).toLocaleString('es-CL')}</td>
+                `;
+                stGroupSMS.appendChild(rCatSMSNac);
+
+                if (bNac.length > 0) {
+                    bNac.forEach(([name, qty]) => {
+                        const cobroItem = data.sms.bagsSaldo[name];
+                        const itemCobro = cobroItem ? cobroItem.qty : 0;
+                        const itemPlan = Math.max(0, qty - itemCobro);
+                        const itemMonto = cobroItem ? Math.round(cobroItem.monto) : 0;
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${qty.toLocaleString('es-CL')} SMS</td>
+                            <td>${itemPlan.toLocaleString('es-CL')} SMS</td>
+                            <td>${itemCobro.toLocaleString('es-CL')} SMS</td>
+                            <td class="${itemMonto > 0 ? 'st-val-highlight' : ''}">$${itemMonto.toLocaleString('es-CL')}</td>
+                        `;
+                        stGroupSMS.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin SMS nacionales</span></td>
+                        <td>0 SMS</td>
+                        <td>0 SMS</td>
+                        <td>0 SMS</td>
+                        <td>$0</td>
+                    `;
+                    stGroupSMS.appendChild(r);
+                }
+
+                // Cat 2: Internacionales
+                const rCatSMSIntl = document.createElement('tr');
+                rCatSMSIntl.className = 'st-subrow st-subrow-cat';
+                rCatSMSIntl.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>🌐 SMS Internacionales</strong></td>
+                    <td>${data.sms.smsIntl.toLocaleString('es-CL')} SMS</td>
+                    <td>${data.sms.smsIntl.toLocaleString('es-CL')} SMS</td>
+                    <td>0 SMS</td>
+                    <td>$0</td>
+                `;
+                stGroupSMS.appendChild(rCatSMSIntl);
+
+                if (bIntl.length > 0) {
+                    bIntl.forEach(([name, qty]) => {
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${qty.toLocaleString('es-CL')} SMS</td>
+                            <td>${qty.toLocaleString('es-CL')} SMS</td>
+                            <td>0 SMS</td>
+                            <td>$0</td>
+                        `;
+                        stGroupSMS.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin SMS internacionales</span></td>
+                        <td>0 SMS</td>
+                        <td>0 SMS</td>
+                        <td>0 SMS</td>
+                        <td>$0</td>
+                    `;
+                    stGroupSMS.appendChild(r);
+                }
+
+                // Cat 3: Roaming SMS
+                const rCatSMSRoam = document.createElement('tr');
+                rCatSMSRoam.className = 'st-subrow st-subrow-cat';
+                rCatSMSRoam.innerHTML = `
+                    <td><span class="st-tree-icon">↳</span> <strong>✈️ SMS en Roaming</strong></td>
+                    <td>${data.sms.roamingSMS.toLocaleString('es-CL')} SMS</td>
+                    <td>${data.sms.roamingSMS.toLocaleString('es-CL')} SMS</td>
+                    <td>0 SMS</td>
+                    <td>$0</td>
+                `;
+                stGroupSMS.appendChild(rCatSMSRoam);
+
+                if (bRoam.length > 0) {
+                    bRoam.forEach(([name, qty]) => {
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>${qty.toLocaleString('es-CL')} SMS</td>
+                            <td>${qty.toLocaleString('es-CL')} SMS</td>
+                            <td>0 SMS</td>
+                            <td>$0</td>
+                        `;
+                        stGroupSMS.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin SMS en roaming</span></td>
+                        <td>0 SMS</td>
+                        <td>0 SMS</td>
+                        <td>0 SMS</td>
+                        <td>$0</td>
+                    `;
+                    stGroupSMS.appendChild(r);
+                }
+            }
+
+            // 4. OTROS (VAS / SUSCRIPCIONES)
+            if (stGroupOtros) {
+                const bOtros = Object.entries(data.otros.bags).sort((a, b) => b[1] - a[1]);
+                if (stBadgeOtros) stBadgeOtros.textContent = bOtros.length > 0 ? `${bOtros.length} cobro${bOtros.length > 1 ? 's' : ''}` : '';
+                const totalEvents = Object.values(data.otros.counts).reduce((a, b) => a + b, 0);
+                if (stOtrosCobro) stOtrosCobro.textContent = totalEvents > 0 ? `${totalEvents} evento${totalEvents > 1 ? 's' : ''}` : '—';
+
+                if (bOtros.length > 0) {
+                    bOtros.forEach(([name, monto]) => {
+                        const cnt = data.otros.counts[name] || 1;
+                        const r = document.createElement('tr');
+                        r.className = 'st-subrow st-subrow-bag';
+                        r.innerHTML = `
+                            <td><span class="st-tree-leaf">•</span> <span class="st-bag-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>${cnt} evento${cnt > 1 ? 's' : ''}</td>
+                            <td class="st-val-highlight">$${Math.round(monto).toLocaleString('es-CL')}</td>
+                        `;
+                        stGroupOtros.appendChild(r);
+                    });
+                } else {
+                    const r = document.createElement('tr');
+                    r.className = 'st-subrow st-subrow-bag';
+                    r.innerHTML = `
+                        <td><span class="st-tree-leaf">•</span> <span class="st-empty-item">Sin cargos adicionales de VAS ni suscripciones</span></td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>—</td>
+                        <td>$0</td>
+                    `;
+                    stGroupOtros.appendChild(r);
+                }
+            }
+        }
+
+        // Toggles y botones para tabla resumen
+        function updateToggleAllTableButton() {
+            const groups = [stGroupDatos, stGroupVoz, stGroupSMS, stGroupOtros].filter(Boolean);
+            const allExpanded = groups.length > 0 && groups.every(g => g.classList.contains('expanded'));
+            if (toggleTableIcon && toggleTableText) {
+                toggleTableIcon.textContent = allExpanded ? '🔼' : '🔽';
+                toggleTableText.textContent = allExpanded ? 'Ocultar todo' : 'Desplegar todo';
+            }
+        }
+
+        function toggleAllTable(forceState) {
+            const groups = [stGroupDatos, stGroupVoz, stGroupSMS, stGroupOtros].filter(Boolean);
+            const allExpanded = groups.length > 0 && groups.every(g => g.classList.contains('expanded'));
+            const targetState = (typeof forceState === 'boolean') ? forceState : !allExpanded;
+            groups.forEach(g => g.classList.toggle('expanded', targetState));
+            updateToggleAllTableButton();
+        }
+
+        if (btnToggleAllTable) {
+            btnToggleAllTable.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleAllTable();
+            });
+        }
+
+        document.querySelectorAll('.st-main-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const group = row.closest('.st-service-group');
+                if (group) {
+                    group.classList.toggle('expanded');
+                    updateToggleAllTableButton();
+                }
+            });
+        });
+
+        // ============================================================
+        // COPIADO INTELIGENTE (MODO SIMPLE / MODO DETALLE)
+        // ============================================================
+        function copySimpleCard(cardType, btn) {
+            if (!simpleSummaryState) {
+                showToast('⚠️ No hay datos analizados para copiar.', 'warning');
+                return;
+            }
+
+            const isDetail = isSimpleDetailExpanded;
+            let text = '';
+            const s = simpleSummaryState;
+
+            function fmt(mb) {
+                if (mb >= 1024) return (mb / 1024).toFixed(2) + ' GB';
+                return Math.round(mb).toLocaleString('es-CL') + ' MB';
+            }
+
+            if (cardType === 'datos') {
+                text += `*📶 CONSUMO DE DATOS MÓVILES*${isDetail ? ' *(DESGLOSE POR BOLSAS)*' : ''}\n`;
+                text += `*Período:* ${s.periodo}\n`;
+                text += `*Total Consumido:* ${s.datos.totalStr}\n`;
+                text += `• *Navegación / Datos libres:* ${s.datos.libresStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.datos.bagsLibres).sort((a,b)=>b[1]-a[1]);
+                    if (b.length) b.forEach(([name, mb]) => text += `> ${name}: ${fmt(mb)}\n`);
+                }
+                text += `• *Redes Sociales incluidas:* ${s.datos.rrssStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.datos.bagsRRSS).sort((a,b)=>b[1]-a[1]);
+                    if (b.length) b.forEach(([name, mb]) => text += `> ${name}: ${fmt(mb)}\n`);
+                }
+                text += `• *Roaming Datos internacional:* ${s.datos.roamStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.datos.bagsRoam).sort((a,b)=>b[1]-a[1]);
+                    if (b.length) b.forEach(([name, mb]) => text += `> ${name}: ${fmt(mb)}\n`);
+                }
+            } else if (cardType === 'voz') {
+                text += `*📞 MINUTOS / LLAMADAS*${isDetail ? ' *(DESGLOSE POR BOLSAS)*' : ''}\n`;
+                text += `*Período:* ${s.periodo}\n`;
+                text += `*Total Consumido:* ${s.voz.totalStr}\n`;
+                text += `• *Llamadas Nacionales:* ${s.voz.nacStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.voz.bagsNac).sort((a,b)=>b[1].seg-a[1].seg);
+                    if (b.length) b.forEach(([name, item]) => text += `> ${name}: ${Math.round(item.seg/60).toLocaleString('es-CL')} min (${Math.round(item.seg)}s)\n`);
+                }
+                text += `• *Larga Distancia (LDI):* ${s.voz.ldiStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.voz.bagsLDI).sort((a,b)=>b[1].seg-a[1].seg);
+                    if (b.length) b.forEach(([name, item]) => text += `> ${name}: ${Math.round(item.seg/60).toLocaleString('es-CL')} min (${Math.round(item.seg)}s)\n`);
+                }
+                text += `• *Llamadas en Roaming:* ${s.voz.roamStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.voz.bagsRoam).sort((a,b)=>b[1].seg-a[1].seg);
+                    if (b.length) b.forEach(([name, item]) => text += `> ${name}: ${Math.round(item.seg/60).toLocaleString('es-CL')} min (${Math.round(item.seg)}s)\n`);
+                }
+            } else if (cardType === 'sms') {
+                text += `*💬 SMS / MENSAJERÍA*${isDetail ? ' *(DESGLOSE POR BOLSAS)*' : ''}\n`;
+                text += `*Período:* ${s.periodo}\n`;
+                text += `*Total Consumido:* ${s.sms.totalStr}\n`;
+                text += `• *SMS Nacionales:* ${s.sms.nacStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.sms.bagsNac).sort((a,b)=>b[1]-a[1]);
+                    if (b.length) b.forEach(([name, qty]) => text += `> ${name}: ${qty.toLocaleString('es-CL')} SMS\n`);
+                }
+                text += `• *SMS Internacionales:* ${s.sms.intlStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.sms.bagsIntl).sort((a,b)=>b[1]-a[1]);
+                    if (b.length) b.forEach(([name, qty]) => text += `> ${name}: ${qty.toLocaleString('es-CL')} SMS\n`);
+                }
+                text += `• *SMS en Roaming:* ${s.sms.roamStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.sms.bagsRoam).sort((a,b)=>b[1]-a[1]);
+                    if (b.length) b.forEach(([name, qty]) => text += `> ${name}: ${qty.toLocaleString('es-CL')} SMS\n`);
+                }
+            } else if (cardType === 'saldo') {
+                text += `*💰 SALDO CONSUMIDO (COBROS ADICIONALES)*${isDetail ? ' *(DESGLOSE POR ORIGEN)*' : ''}\n`;
+                text += `*Período:* ${s.periodo}\n`;
+                text += `*Total Cobros:* ${s.saldo.totalStr}\n`;
+                text += `• *En Llamadas Nacionales:* ${s.saldo.minNacStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.saldo.bagsVozNac).sort((a,b)=>b[1].monto-a[1].monto);
+                    if (b.length) b.forEach(([name, item]) => text += `> ${name}: $${Math.round(item.monto).toLocaleString('es-CL')} (${Math.round(item.min)} min)\n`);
+                }
+                text += `• *En Llamadas LDI:* ${s.saldo.minLDIStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.saldo.bagsVozLDI).sort((a,b)=>b[1].monto-a[1].monto);
+                    if (b.length) b.forEach(([name, item]) => text += `> ${name}: $${Math.round(item.monto).toLocaleString('es-CL')} (${Math.round(item.min)} min)\n`);
+                }
+                text += `• *En Llamadas Roaming:* ${s.saldo.minRoamStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.saldo.bagsVozRoam).sort((a,b)=>b[1].monto-a[1].monto);
+                    if (b.length) b.forEach(([name, item]) => text += `> ${name}: $${Math.round(item.monto).toLocaleString('es-CL')} (${Math.round(item.min)} min)\n`);
+                }
+                text += `• *En SMS / Mensajes:* ${s.saldo.msgStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.saldo.bagsSMS).sort((a,b)=>b[1].monto-a[1].monto);
+                    if (b.length) b.forEach(([name, item]) => text += `> ${name}: $${Math.round(item.monto).toLocaleString('es-CL')} (${item.qty} SMS)\n`);
+                }
+                text += `• *En Otros (VAS / Suscripciones):* ${s.saldo.otrosStr}\n`;
+                if (isDetail) {
+                    const b = Object.entries(s.saldo.bagsOtros).sort((a,b)=>b[1]-a[1]);
+                    if (b.length) b.forEach(([name, monto]) => text += `> ${name}: $${Math.round(monto).toLocaleString('es-CL')}\n`);
+                }
+            }
+
+            text = text.trim();
+            if (!text) return;
+
+            navigator.clipboard.writeText(text).then(() => {
+                if (btn) {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '<span style="color:#10b981;font-weight:900;font-size:12px;">✔</span>';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.textContent = '📋';
+                    }, 1200);
+                }
+                const titles = { datos: 'Datos', voz: 'Voz', sms: 'SMS', saldo: 'Saldo Consumido' };
+                showToast(`📋 Copiado al portapapeles (${titles[cardType] || 'Resumen'} - ${isDetail ? 'Detallado' : 'Simple'})`, 'success');
+            }).catch(() => {
+                showToast('❌ Error al copiar al portapapeles.', 'error');
+            });
+        }
+
+        // ============================================================
+        // TOGGLE SINCRONIZADO DE MODO DETALLE (TODAS LAS CARDS A LA VEZ)
+        // ============================================================
+        function toggleAllSimpleDetails(forceState) {
+            if (typeof forceState === 'boolean') {
+                isSimpleDetailExpanded = forceState;
+            } else {
+                isSimpleDetailExpanded = !isSimpleDetailExpanded;
+            }
+
+            if (simpleCardsGrid) {
+                simpleCardsGrid.classList.toggle('expanded', isSimpleDetailExpanded);
+            }
+            if (simpleCardsHint) {
+                simpleCardsHint.innerHTML = isSimpleDetailExpanded
+                    ? '💡 Haz clic en cualquier recuadro para <strong>ocultar</strong> el desglose'
+                    : '💡 Haz clic en cualquier recuadro para <strong>desplegar u ocultar</strong> el desglose por bolsas de origen';
+            }
         }
 
         // ============================================================
         // EVENTOS
         // ============================================================
-        // Pestañas
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-        });
-
-        // Eventos Carga Detalle
+        // Carga de Excel
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length) loadFromExcel(e.target.files[0]);
             e.target.value = '';
         });
 
-        pasteInput.addEventListener('paste', () => {
-            setTimeout(() => {
-                const text = pasteInput.value;
-                if (text.trim()) processPastedText(text);
-            }, 50);
-        });
-
-        pasteBtn.addEventListener('click', () => {
-            const ok = processPastedText(pasteInput.value);
+        function ingresarTraficoPegado() {
+            const text = (pasteInput.value || '').trim();
+            if (!text) {
+                showToast('⚠️ Pega primero los datos de tráfico en el recuadro.', 'warning');
+                return;
+            }
+            const ok = processPastedText(text);
             if (ok) {
                 const countStr = `✅ ${allRows.length.toLocaleString('es-CL')} registros ingresados`;
                 pasteStatus.textContent = countStr;
                 pasteStatus.style.color = 'var(--success)';
-                pasteStatusSimple.textContent = countStr;
-                pasteStatusSimple.style.color = 'var(--success)';
             } else {
                 pasteStatus.textContent = '❌ No se pudo ingresar';
                 pasteStatus.style.color = 'var(--danger)';
             }
-        });
+        }
 
-        // Eventos Carga Simple
-        fileInputSimple.addEventListener('change', (e) => {
-            if (e.target.files.length) loadFromExcel(e.target.files[0]);
-            e.target.value = '';
-        });
+        pasteBtn.addEventListener('click', ingresarTraficoPegado);
 
-        pasteInputSimple.addEventListener('paste', () => {
-            setTimeout(() => {
-                const text = pasteInputSimple.value;
-                if (text.trim()) processPastedText(text);
-            }, 50);
-        });
-
-        pasteBtnSimple.addEventListener('click', () => {
-            const ok = processPastedText(pasteInputSimple.value);
-            if (ok) {
-                const countStr = `✅ ${allRows.length.toLocaleString('es-CL')} registros ingresados`;
-                pasteStatus.textContent = countStr;
-                pasteStatus.style.color = 'var(--success)';
-                pasteStatusSimple.textContent = countStr;
-                pasteStatusSimple.style.color = 'var(--success)';
-            } else {
-                pasteStatusSimple.textContent = '❌ No se pudo ingresar';
-                pasteStatusSimple.style.color = 'var(--danger)';
-            }
-        });
-
-        // Filtros Detalle
-        filterFrom.addEventListener('change', () => {
-            filterFromSimple.value = filterFrom.value;
+        // Filtros de fecha y hora
+        const onDateOrTimeChange = () => {
+            activeCicloNumber = null;
+            activeCicloMonthOffset = 0;
+            document.querySelectorAll('#entelCiclosSimple button[data-ciclo]').forEach(b => b.classList.remove('active'));
+            guardarFiltros();
             aplicarFiltros();
-            aplicarFiltrosSimple();
-        });
-        filterTo.addEventListener('change', () => {
-            filterToSimple.value = filterTo.value;
-            aplicarFiltros();
-            aplicarFiltrosSimple();
-        });
-        filterTipo.addEventListener('change', () => {
-            const val = filterTipo.value;
-            document.querySelectorAll('.chip[data-qf]').forEach(chip => {
-                const qf = chip.dataset.qf;
-                if ((val === 'datos' && qf === 'soloDatos') ||
-                    (val === 'rrss' && qf === 'redesSociales') ||
-                    (val === 'datosLibres' && qf === 'datosLibres') ||
-                    (val === 'voz' && qf === 'soloVoz')) {
-                    chip.classList.add('active');
-                } else if (['soloDatos', 'redesSociales', 'datosLibres', 'soloVoz'].includes(qf)) {
-                    chip.classList.remove('active');
-                }
-            });
-            aplicarFiltros();
-        });
-        filterRegistro.addEventListener('change', aplicarFiltros);
-        let destinoTimeout;
-        filterDestino.addEventListener('input', () => {
-            clearTimeout(destinoTimeout);
-            destinoTimeout = setTimeout(aplicarFiltros, 250);
-        });
+        };
 
-        // Filtros Simple
-        filterFromSimple.addEventListener('change', () => {
-            filterFrom.value = filterFromSimple.value;
-            aplicarFiltros();
-            aplicarFiltrosSimple();
-        });
-        filterToSimple.addEventListener('change', () => {
-            filterTo.value = filterToSimple.value;
-            aplicarFiltros();
-            aplicarFiltrosSimple();
-        });
+        filterFrom.addEventListener('change', onDateOrTimeChange);
+        filterTo.addEventListener('change', onDateOrTimeChange);
+        if (filterTimeFrom) {
+            filterTimeFrom.addEventListener('change', onDateOrTimeChange);
+            filterTimeFrom.addEventListener('input', onDateOrTimeChange);
+        }
+        if (filterTimeTo) {
+            filterTimeTo.addEventListener('change', onDateOrTimeChange);
+            filterTimeTo.addEventListener('input', onDateOrTimeChange);
+        }
 
-        clearDatesBtnSimple.addEventListener('click', () => {
+        clearDatesBtn.addEventListener('click', () => {
             filterFrom.value = '';
             filterTo.value = '';
-            filterFromSimple.value = '';
-            filterToSimple.value = '';
-            document.querySelectorAll('#entelCiclos button, #entelCiclosSimple button').forEach(b => b.classList.remove('active'));
+            if (filterTimeFrom) filterTimeFrom.value = '';
+            if (filterTimeTo) filterTimeTo.value = '';
+            activeCicloNumber = null;
+            activeCicloMonthOffset = 0;
+            document.querySelectorAll('#entelCiclosSimple button[data-ciclo]').forEach(b => b.classList.remove('active'));
+            guardarFiltros();
             aplicarFiltros();
-            aplicarFiltrosSimple();
-            showToast('✅ Fechas eliminadas.', 'success');
+            showToast('✅ Fechas y horas eliminadas.', 'success');
         });
 
-        document.querySelectorAll('#entelCiclosSimple button').forEach(b => {
-            b.addEventListener('click', () => aplicarCicloEntelSimple(parseInt(b.dataset.ciclo)));
+        // Botones Ciclos Entel
+        document.querySelectorAll('#entelCiclosSimple button[data-ciclo]').forEach(b => {
+            b.addEventListener('click', () => aplicarCicloEntel(parseInt(b.dataset.ciclo), 0));
         });
 
-        // Limpiar Datos (Sincronizado)
+        // Navegación de períodos de ciclo (< y >)
+        if (btnCicloPrev) btnCicloPrev.addEventListener('click', () => navegarCiclo(-1));
+        if (btnCicloNext) btnCicloNext.addEventListener('click', () => navegarCiclo(1));
+
+        // Limpiar Datos
         function limpiarTodo() {
             allRows = [];
             filteredRows = [];
             fileInput.value = '';
-            fileInputSimple.value = '';
             pasteInput.value = '';
-            pasteInputSimple.value = '';
             pasteStatus.textContent = '';
-            pasteStatusSimple.textContent = '';
-            clearAllFilters();
-            filterFromSimple.value = '';
-            filterToSimple.value = '';
-            document.querySelectorAll('#entelCiclosSimple button').forEach(b => b.classList.remove('active'));
-            renderTable();
-            updateSummary();
-            updatePeriodoChip();
-            aplicarFiltrosSimple();
-            explanationText.value = '';
+            filterFrom.value = '';
+            filterTo.value = '';
+            if (filterTimeFrom) filterTimeFrom.value = '';
+            if (filterTimeTo) filterTimeTo.value = '';
+            activeCicloNumber = null;
+            activeCicloMonthOffset = 0;
+            document.querySelectorAll('#entelCiclosSimple button[data-ciclo]').forEach(b => b.classList.remove('active'));
+            guardarFiltros();
+            aplicarFiltros();
+            toggleAllSimpleDetails(false);
+            toggleAllTable(false);
             showToast('🗑 Datos limpiados.', 'success');
         }
 
         clearBtn.addEventListener('click', limpiarTodo);
-        clearBtnSimple.addEventListener('click', limpiarTodo);
 
-        clearFiltersBtn.addEventListener('click', clearAllFilters);
-
-        document.querySelectorAll('#entelCiclos button').forEach(b => {
-            b.addEventListener('click', () => aplicarCicloEntel(parseInt(b.dataset.ciclo)));
-        });
-
-        document.querySelectorAll('.chip[data-qf]').forEach(chip => {
-            chip.addEventListener('click', () => {
-                const type = chip.dataset.qf;
-                if (chip.classList.contains('active')) {
-                    chip.classList.remove('active');
-                    activeQuickFilter = null;
-                    if (['last7', 'last30', 'monthcurrent', 'monthprev'].includes(type)) {
-                        filterFrom.value = '';
-                        filterTo.value = '';
-                    }
-                    if (['soloDatos', 'redesSociales', 'datosLibres', 'soloVoz'].includes(type)) {
-                        filterTipo.value = 'todos';
-                    }
-                    aplicarFiltros();
-                    return;
-                }
-                applyQuickFilter(type);
+        // Eventos para Vista Simple: Copiado contextual y Toggle de Subdetalles
+        document.querySelectorAll('.simple-card-copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const target = btn.dataset.copyTarget;
+                copySimpleCard(target, btn);
             });
         });
 
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-            th.addEventListener('click', () => {
-                const key = th.dataset.sort;
-                let dir = 'asc';
-                if (sortState.key === key) {
-                    dir = sortState.dir === 'asc' ? 'desc' : 'asc';
-                }
-                sortState = { key, dir };
-                document.querySelectorAll('th[data-sort]').forEach(h => {
-                    h.classList.remove('sorted-asc', 'sorted-desc');
-                });
-                th.classList.add(dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
-                aplicarFiltros();
+        document.querySelectorAll('.simple-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.simple-card-copy-btn, .bag-item-row, button, input, a, textarea')) return;
+                toggleAllSimpleDetails();
             });
         });
 
-        generateExplanationBtn.addEventListener('click', generateExplanation);
-        copyExplanationBtn.addEventListener('click', copyExplanation);
+        // Animación inteligente para detalles extensos en tarjetas (hover y clic)
+        const cardsGrid = document.getElementById('simpleCardsGrid');
+        if (cardsGrid) {
+            cardsGrid.addEventListener('mouseover', (e) => {
+                const row = e.target.closest('.bag-item-row');
+                if (!row) return;
+                if (e.relatedTarget && row.contains(e.relatedTarget)) return;
+
+                const nameEl = row.querySelector('.bag-item-name');
+                const textEl = row.querySelector('.bag-item-text');
+                if (!nameEl || !textEl) return;
+
+                const overflow = textEl.scrollWidth - nameEl.clientWidth;
+                if (overflow > 4) {
+                    const duration = Math.max(1.8, overflow / 40);
+                    nameEl.classList.add('is-scrolling');
+                    textEl.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s`;
+                    textEl.style.transform = `translateX(-${overflow + 6}px)`;
+                }
+            });
+
+            cardsGrid.addEventListener('mouseout', (e) => {
+                const row = e.target.closest('.bag-item-row');
+                if (!row) return;
+                if (e.relatedTarget && row.contains(e.relatedTarget)) return;
+
+                const nameEl = row.querySelector('.bag-item-name');
+                const textEl = row.querySelector('.bag-item-text');
+                if (!nameEl || !textEl) return;
+
+                textEl.style.transition = 'transform 0.25s ease-out';
+                textEl.style.transform = 'translateX(0px)';
+                textEl.dataset.isEnd = 'false';
+                setTimeout(() => {
+                    if (!row.matches(':hover')) {
+                        nameEl.classList.remove('is-scrolling');
+                    }
+                }, 250);
+            });
+
+            cardsGrid.addEventListener('click', (e) => {
+                const row = e.target.closest('.bag-item-row');
+                if (!row) return;
+
+                const nameEl = row.querySelector('.bag-item-name');
+                const textEl = row.querySelector('.bag-item-text');
+                if (!nameEl || !textEl) return;
+
+                const overflow = textEl.scrollWidth - nameEl.clientWidth;
+                if (overflow > 4) {
+                    const isAtEnd = textEl.dataset.isEnd === 'true';
+                    if (!isAtEnd) {
+                        const duration = Math.max(1.8, overflow / 40);
+                        nameEl.classList.add('is-scrolling');
+                        textEl.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
+                        textEl.style.transform = `translateX(-${overflow + 6}px)`;
+                        textEl.dataset.isEnd = 'true';
+                    } else {
+                        textEl.style.transition = 'transform 0.25s ease-out';
+                        textEl.style.transform = 'translateX(0px)';
+                        textEl.dataset.isEnd = 'false';
+                        setTimeout(() => {
+                            if (!row.matches(':hover')) {
+                                nameEl.classList.remove('is-scrolling');
+                            }
+                        }, 250);
+                    }
+                }
+            });
+        }
 
         // ============================================================
         // INICIALIZACIÓN
         // ============================================================
         cargarFiltros();
-        renderTable();
-        updateSummary();
-        updatePeriodoChip();
-        aplicarFiltrosSimple();
+        aplicarFiltros();
 
         showToast('📶 Sube un archivo Excel o pega datos desde Excel para comenzar.', 'success', 3000);
-
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'g') {
-                e.preventDefault();
-                generateExplanation();
-            }
-        });
     </script>
 </body>
 </html>
