@@ -1711,16 +1711,16 @@
         .sheet-hidden-btn {
             display: none;
             align-items: center;
-            gap: 5px;
-            padding: 0 10px;
+            justify-content: center;
+            gap: 3px;
+            padding: 0 5px;
             height: 100%;
             border: none;
             border-right: 1px solid var(--border);
+            border-top: 3px solid transparent;
             background: rgba(245, 158, 11, 0.12);
             color: #fbbf24;
             font-size: 11px;
-            font-weight: 600;
-            font-family: var(--font);
             cursor: pointer;
             transition: background 0.15s, color 0.15s;
             flex-shrink: 0;
@@ -1730,13 +1730,25 @@
             background: rgba(245, 158, 11, 0.22);
             color: #f59e0b;
         }
+        .sheet-hidden-icon {
+            font-size: 12px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+        }
         .sheet-hidden-badge {
             background: rgba(245, 158, 11, 0.25);
             color: #fbbf24;
             border-radius: 8px;
-            padding: 1px 5px;
-            font-size: 10px;
+            padding: 0 4px;
+            font-size: 9.5px;
             font-weight: 700;
+            line-height: 14px;
+            min-width: 14px;
+            height: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* ============================================================
@@ -3064,7 +3076,7 @@
     <!-- SHEETBAR (Excel) -->
     <div id="sheetbar">
         <button id="sheet-hidden-btn" class="sheet-hidden-btn" title="Repositorio de hojas ocultas">
-            <span>👁️</span> <span>Ocultas</span> <span class="sheet-hidden-badge" id="sheet-hidden-count">0</span>
+            <span class="sheet-hidden-icon">👁️</span><span class="sheet-hidden-badge" id="sheet-hidden-count">0</span>
         </button>
         <div id="sheet-tabs"></div>
         <button id="sheet-add-btn" title="Nueva hoja (Ctrl+T)">＋</button>
@@ -4103,6 +4115,7 @@
             if (sheetHiddenBtn && sheetHiddenCount) {
                 if (hiddenSheets.length > 0) {
                     sheetHiddenCount.textContent = hiddenSheets.length;
+                    sheetHiddenBtn.title = `${hiddenSheets.length} hoja(s) oculta(s) — Clic para abrir repositorio`;
                     sheetHiddenBtn.style.display = 'inline-flex';
                 } else {
                     sheetHiddenBtn.style.display = 'none';
