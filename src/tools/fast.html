@@ -7186,6 +7186,21 @@
                     }
                 }
 
+                if (!targetRootEl) {
+                    const isInsideCanvas = elements.some(el => el === cardsContainer || (el && el.id === 'content'));
+                    if (isInsideCanvas) {
+                        const rootEls = Array.from(cardsContainer.children).filter(el => {
+                            if (!el.classList) return false;
+                            if (el.classList.contains('container-block') && el.dataset.containerId !== dragState.containerId) return true;
+                            if (el.classList.contains('card-item') && el.parentElement === cardsContainer) return true;
+                            return false;
+                        });
+                        if (rootEls.length > 0) {
+                            targetRootEl = rootEls[rootEls.length - 1];
+                        }
+                    }
+                }
+
                 if (targetRootEl) {
                     const targetId = targetRootEl.dataset.containerId || targetRootEl.dataset.cardId;
                     const r = targetRootEl.getBoundingClientRect();
@@ -7361,15 +7376,33 @@
                         const rootOrder = getRootOrder(sheet);
                         const fromIdx = rootOrder.indexOf(containerId);
                         if (fromIdx !== -1) {
-                            rootOrder.splice(fromIdx, 1);
+                            // Contar cuántas tarjetas tiene el contenedor
+                            const contCards = sheet.cards.filter(c => c.containerId === containerId);
+                            const cardCount = contCards.length;
+
+                            // Si el contenedor tiene al menos 1 tarjeta, deja 'cardCount' espacios vacíos visibles en el origen
+                            const newEmptySlots = [];
+                            if (cardCount >= 1) {
+                                for (let i = 0; i < cardCount; i++) {
+                                    const slot = createEmptySlot(null);
+                                    sheet.cards.push(slot);
+                                    newEmptySlots.push(slot.id);
+                                }
+                            }
+
+                            // Reemplazar el contenedor en la posición de origen por los slots vacíos
+                            rootOrder.splice(fromIdx, 1, ...newEmptySlots);
+
                             let targetIdx = rootOrder.indexOf(targetItemId);
                             if (targetIdx !== -1) {
                                 if (targetPosition === 'after') targetIdx += 1;
                                 rootOrder.splice(targetIdx, 0, containerId);
-                                sheet.rootOrder = rootOrder;
-                                saveData();
-                                render();
+                            } else {
+                                rootOrder.push(containerId);
                             }
+                            sheet.rootOrder = rootOrder;
+                            saveData();
+                            render();
                         }
                     }
                 }

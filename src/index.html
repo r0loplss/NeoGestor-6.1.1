@@ -524,6 +524,91 @@ font-family: var(--font);
             color: #fff;
         }
 
+        /* Herramientas Ocultadas en Ajustes */
+        #modal-ajustes .hidden-tools-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        #modal-ajustes .hidden-tools-empty {
+            font-size: 11px;
+            color: var(--muted);
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            line-height: 1.4;
+        }
+        #modal-ajustes .hidden-tools-empty .hint {
+            font-size: 10px;
+            color: var(--faint);
+        }
+        #modal-ajustes .hidden-tool-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 8px;
+            background: var(--surface3);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 4px;
+            gap: 8px;
+        }
+        #modal-ajustes .hidden-tool-info {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #modal-ajustes .btn-reactivate-tool {
+            flex-shrink: 0;
+            background: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 10.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font);
+        }
+        #modal-ajustes .btn-reactivate-tool:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        #modal-ajustes .btn-reactivate-all {
+            margin-top: 4px;
+            width: 100%;
+            background: rgba(34, 197, 94, 0.12);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            font-family: var(--font);
+        }
+        #modal-ajustes .btn-reactivate-all:hover {
+            background: var(--success);
+            color: #000;
+        }
+
         /* ============================================================
                RESTO DE ESTILOS EXISTENTES (se mantienen igual)
                ============================================================ */
@@ -1814,6 +1899,12 @@ font-family: var(--font);
         <div class="ctx-i" onclick="abrirConfigCb()"><span style="font-size:13px; margin-right:4px;">⚙️</span> Editar tipificación y SMS</div>
     </div>
 
+    <div id="tools-ctx" class="float-menu">
+        <div class="ctx-i" id="tools-ctx-hide" onclick="esconderHerramientaSeleccionada()">
+            <span style="font-size:12px;">👁️</span> <span>Esconder herramienta</span>
+        </div>
+    </div>
+
     <!-- ============================================================
     MODALES
     ============================================================ -->
@@ -1893,6 +1984,7 @@ font-family: var(--font);
     ============================================================ -->
 <script>
         const { ipcRenderer, webFrame } = require('electron');
+        let appData = { pending: [], history: [], notes: [], turno: {}, caseTemplate: [], draft: {}, contingencias: [], alertsMuted: false, cbTexts: {}, favNotes: [], attempts: {}, prefsApoyo: {}, turnosWeb: null };
 
         // ============================================================
         // CONTROL DE ZOOM Y ESCALADO DE INTERFAZ
@@ -2050,6 +2142,174 @@ font-family: var(--font);
         // ============================================================
         // FUNCIONES DE HERRAMIENTAS
         // ============================================================
+        const ALL_TOOLS_CATALOG = [
+            { id: 'notas', name: 'Mis Notas', icon: '📚', canHide: false },
+            { id: 'occ', name: 'Calculadora OCC', icon: '🧮', canHide: true },
+            { id: 'enlaces', name: 'Mis enlaces', icon: '🔗', canHide: true },
+            { id: 'horarios', name: 'Turnos Web', icon: '📅', canHide: true },
+            { id: 'contingencias', name: 'Radar Contingencias', icon: '📡', canHide: true },
+            { id: 'trafico', name: 'Tráfico PRO', icon: '📶', canHide: true },
+            { id: 'calculadora-dias', name: 'Calculadora de Días', icon: '📅', canHide: true, defaultHidden: true },
+            { id: 'ciclos', name: 'Cambio de Ciclo', icon: '🔄', canHide: true, defaultHidden: true },
+            { id: 'tipificaciones', name: 'Tipificaciones', icon: '📋', canHide: true },
+            { id: 'fast', name: 'Fast', icon: '⚡', canHide: true },
+            { id: 'ajustes', name: 'Ajustes', icon: '⚙️', canHide: false }
+        ];
+
+        const DEFAULT_HIDDEN_TOOLS = ['calculadora-dias', 'ciclos'];
+        let selectedToolToHide = null;
+
+        function getStoredDrawerHiddenTools() {
+            try {
+                const stored = localStorage.getItem('neogestor_hidden_tools');
+                if (stored !== null) {
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) return new Set(parsed);
+                }
+            } catch (e) {}
+
+            if (typeof appData !== 'undefined' && appData && appData.prefsApoyo && Array.isArray(appData.prefsApoyo.drawerHiddenTools)) {
+                return new Set(appData.prefsApoyo.drawerHiddenTools);
+            }
+
+            return new Set(DEFAULT_HIDDEN_TOOLS);
+        }
+
+        const drawerHiddenTools = getStoredDrawerHiddenTools();
+
+        function saveDrawerHiddenTools() {
+            const arr = Array.from(drawerHiddenTools);
+            try {
+                localStorage.setItem('neogestor_hidden_tools', JSON.stringify(arr));
+            } catch (e) {}
+
+            if (typeof appData !== 'undefined') {
+                if (!appData.prefsApoyo) appData.prefsApoyo = {};
+                appData.prefsApoyo.drawerHiddenTools = arr;
+                ipcRenderer.send('save-data', { prefsApoyo: appData.prefsApoyo });
+            }
+        }
+
+        function applyDrawerHiddenTools() {
+            ALL_TOOLS_CATALOG.forEach(tool => {
+                if (!tool.canHide) return;
+                const btn = document.getElementById(`btn-${tool.id}`);
+                if (btn) {
+                    btn.style.display = drawerHiddenTools.has(tool.id) ? 'none' : '';
+                }
+            });
+        }
+
+        function esconderHerramientaSeleccionada() {
+            if (!selectedToolToHide) return;
+            esconderHerramienta(selectedToolToHide);
+            hideCtxMenus();
+            selectedToolToHide = null;
+        }
+
+        function esconderHerramienta(toolId) {
+            const tool = ALL_TOOLS_CATALOG.find(t => t.id === toolId);
+            if (!tool || !tool.canHide) {
+                showToast('ℹ️ Esta herramienta es esencial y no se puede ocultar', 'info');
+                return;
+            }
+            drawerHiddenTools.add(toolId);
+            saveDrawerHiddenTools();
+            applyDrawerHiddenTools();
+            renderAjustesHiddenTools();
+            showToast(`👁️ "${tool.name}" ocultada. Puedes reactivarla en Ajustes.`, 'info');
+        }
+
+        function reactivarHerramienta(toolId) {
+            const tool = ALL_TOOLS_CATALOG.find(t => t.id === toolId);
+            drawerHiddenTools.delete(toolId);
+            saveDrawerHiddenTools();
+            applyDrawerHiddenTools();
+            renderAjustesHiddenTools();
+            showToast(`✅ "${tool ? tool.name : toolId}" reactivada en el menú tools`, 'success');
+        }
+
+        function reactivarTodasHerramientas() {
+            drawerHiddenTools.clear();
+            saveDrawerHiddenTools();
+            applyDrawerHiddenTools();
+            renderAjustesHiddenTools();
+            showToast('✅ Todas las herramientas han sido reactivadas', 'success');
+        }
+
+        function renderAjustesHiddenTools() {
+            const box = document.getElementById('ajustes-hidden-tools-box');
+            if (!box) return;
+
+            const hiddenList = ALL_TOOLS_CATALOG.filter(t => t.canHide && drawerHiddenTools.has(t.id));
+
+            if (hiddenList.length === 0) {
+                box.innerHTML = `
+                    <div class="hidden-tools-empty">
+                        <span>✅ No hay herramientas ocultadas.</span>
+                        <span class="hint">Haz clic derecho sobre cualquier herramienta en el menú "tools" para ocultarla.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            hiddenList.forEach(tool => {
+                html += `
+                    <div class="hidden-tool-item">
+                        <div class="hidden-tool-info">
+                            <span>${tool.icon}</span>
+                            <span>${esc(tool.name)}</span>
+                        </div>
+                        <button type="button" class="btn-reactivate-tool" onclick="reactivarHerramienta('${tool.id}')" title="Volver a mostrar en el menú tools">
+                            👁️ Reactivar
+                        </button>
+                    </div>
+                `;
+            });
+
+            if (hiddenList.length >= 2) {
+                html += `
+                    <button type="button" class="btn-reactivate-all" onclick="reactivarTodasHerramientas()">
+                        👁️ Reactivar todas (${hiddenList.length})
+                    </button>
+                `;
+            }
+
+            box.innerHTML = html;
+        }
+
+        // Listener de clic derecho en #tools-drawer
+        document.addEventListener('DOMContentLoaded', () => {
+            applyDrawerHiddenTools();
+            const drawer = document.getElementById('tools-drawer');
+            if (drawer) {
+                drawer.addEventListener('contextmenu', (e) => {
+                    const btn = e.target.closest('.td-btn');
+                    if (!btn) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const toolId = btn.id.replace(/^btn-/, '');
+                    const tool = ALL_TOOLS_CATALOG.find(t => t.id === toolId);
+                    if (!tool || !tool.canHide) {
+                        showToast('ℹ️ "Mis Notas" y "Ajustes" son herramientas esenciales y no se pueden ocultar.', 'info');
+                        hideCtxMenus();
+                        return;
+                    }
+
+                    selectedToolToHide = toolId;
+                    hideCtxMenus();
+                    const m = document.getElementById('tools-ctx');
+                    if (m) {
+                        m.style.cssText = `display:block;left:${Math.min(e.clientX, window.innerWidth - 170)}px;top:${Math.min(e.clientY, window.innerHeight - 50)}px;`;
+                    }
+                });
+            }
+        });
+        // Aplicar inmediatamente al cargar el script
+        applyDrawerHiddenTools();
+
         function toggleDrawer(e) {
             e.stopPropagation();
             document.getElementById('tools-drawer').classList.toggle('show');
@@ -2234,6 +2494,11 @@ font-family: var(--font);
                             </div>
 
                             <div class="modal-field">
+                                <label>Herramientas Ocultadas</label>
+                                <div id="ajustes-hidden-tools-box" class="hidden-tools-box"></div>
+                            </div>
+
+                            <div class="modal-field">
                                 <label>Actualizaciones del Sistema</label>
                                 <div class="update-box">
                                     <div class="update-hdr">
@@ -2275,6 +2540,7 @@ font-family: var(--font);
             const btnAjustes = document.getElementById('btn-ajustes');
             if (btnAjustes) btnAjustes.classList.add('active');
 
+            renderAjustesHiddenTools();
             initAjustesUpdater();
         }
 
@@ -2293,7 +2559,7 @@ font-family: var(--font);
 
             aplicarZoom(zoomVal);
 
-            appData.prefsApoyo = { fuente, alwaysOnTop, autostart };
+            appData.prefsApoyo = { fuente, alwaysOnTop, autostart, drawerHiddenTools: Array.from(drawerHiddenTools) };
             ipcRenderer.send('save-data', { prefsApoyo: appData.prefsApoyo });
 
             document.documentElement.style.setProperty('--font', fuente);
@@ -2455,8 +2721,8 @@ font-family: var(--font);
         // ============================================================
         // ESTADO GLOBAL Y DATOS
         // ============================================================
-        let appData = { pending: [], history: [], notes: [], turno: {}, caseTemplate: [], draft: {}, contingencias: [], alertsMuted: false, cbTexts: {}, favNotes: [], attempts: {}, prefsApoyo: {}, turnosWeb: null };
-let pinnedNotes = new Set();
+        // (appData inicializado al inicio del script)
+        let pinnedNotes = new Set();
         let dismissedAlerts = new Set();
         let histFilter = '';
         let vaultFilter = '';
@@ -2524,6 +2790,11 @@ renderHistory();
             // Aplicar fuente guardada
             if (data.prefsApoyo && data.prefsApoyo.fuente) {
                 document.documentElement.style.setProperty('--font', data.prefsApoyo.fuente);
+            }
+            if (data.prefsApoyo && Array.isArray(data.prefsApoyo.drawerHiddenTools)) {
+                drawerHiddenTools.clear();
+                data.prefsApoyo.drawerHiddenTools.forEach(id => drawerHiddenTools.add(id));
+                applyDrawerHiddenTools();
             }
         });
 
@@ -2653,10 +2924,12 @@ ipcRenderer.on('request-close-confirm', () => {
             document.getElementById('ctx').style.display = 'none';
             document.getElementById('hist-ctx').style.display = 'none';
             document.getElementById('pend-ctx').style.display = 'none';
+            const tc = document.getElementById('tools-ctx');
+            if (tc) tc.style.display = 'none';
         }
         document.addEventListener('click', () => hideCtxMenus());
         document.addEventListener('contextmenu', (e) => {
-            if (!e.target.closest('.sec-hdr') && !e.target.closest('.dyn-area')) hideCtxMenus();
+            if (!e.target.closest('.sec-hdr') && !e.target.closest('.dyn-area') && !e.target.closest('#tools-drawer')) hideCtxMenus();
         });
         function showCtxMenu(e, target) {
             e.preventDefault();

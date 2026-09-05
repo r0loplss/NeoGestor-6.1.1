@@ -136,6 +136,24 @@
             <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.6</span><span class="agente agy">Antigravity</span></div>
             <div class="desc">
                 <ul>
+                    <li><b>Menú Tools — Ocultación de Herramientas con Clic Derecho, Ocultación Nativa por Defecto y Reactivación en Ajustes</b>:
+                        <ul>
+                            <li><b>Menú Contextual con Clic Derecho (<code>#tools-ctx</code>)</b>: Al hacer clic derecho sobre cualquier herramienta del menú desplegable Tools (<code>#tools-drawer</code>), se despliega una opción flotante <b>«👁️ Esconder herramienta»</b> que permite al usuario remover de la lista las aplicaciones satélite que no utilice con frecuencia.</li>
+                            <li><b>Protección Estricta de Herramientas Críticas</b>: Las herramientas <b>«Mis Notas»</b> y <b>«Ajustes»</b> se encuentran blindadas contra ocultación accidental; al hacer clic derecho sobre ellas, el sistema emite una notificación informativa protegida (<i>«ℹ️ Mis Notas y Ajustes son herramientas esenciales y no se pueden ocultar»</i>).</li>
+                            <li><b>Ocultación Nativa Inicial por Defecto</b>: Para cualquier usuario o instalación limpia del programa, las herramientas <b>«Calendario de Días»</b> (<code>btn-calculadora-dias</code>) y <b>«Cambio de Ciclo»</b> (<code>btn-ciclos</code>) inician nativamente ocultas para ofrecer un menú más compacto y enfocado en la operativa diaria.</li>
+                            <li><b>Apartado "Herramientas Ocultadas" en Ajustes</b>: Se integró una sección interactiva dedicada en el modal de Ajustes que lista en tiempo real las herramientas archivadas con su icono, nombre y botón <b>«👁️ Reactivar»</b> individual, además del botón <b>«👁️ Reactivar todas»</b> cuando hay 2 o más herramientas ocultas.</li>
+                            <li><b>Persistencia Dual y Sincronización</b>: La configuración de herramientas ocultas se almacena y sincroniza de forma redundante en <code>localStorage</code> (<code>neogestor_hidden_tools</code>) y en el estado global <code>appData.prefsApoyo.drawerHiddenTools</code> mediante IPC, garantizando persistencia absoluta entre reinicios y ejecuciones portables.</li>
+                            <li><b>Verificación Automatizada en Electron</b>: Validación completa de arranque limpio con valores nativos por defecto, ocultación dinámica, inmunidad de herramientas esenciales, renderizado de tarjetas en Ajustes y reactivación unitaria y masiva.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Generación Proporcional de Espacios Vacíos al Mover Contenedores</b>:
+                        <ul>
+                            <li><b>Preservación de Espacios en Origen</b>: Al arrastrar y reubicar un contenedor en el modo contenedor (<code>sheet.mode === 'containers'</code>), si este posee \(N\) tarjetas (\(N \ge 1\)), el sistema genera automáticamente \(N\) tarjetas visiblemente vacías (<code>createEmptySlot(null)</code> con clase <code>.card-item.empty-slot</code>) en la posición de origen dentro de <code>sheet.rootOrder</code> y <code>sheet.cards</code>.</li>
+                            <li><b>Comportamiento Idéntico al Movimiento de Tarjetas</b>: La cuadrícula conserva su estructura visual y dimensional sin colapsos abruptos, permitiendo al usuario utilizar dichos espacios para crear nuevas tarjetas con un clic (<code>＋</code>), soltar otras tarjetas libres dentro de ellos o compactarlos selectivamente usando la escoba (<code>🧹</code>).</li>
+                            <li><b>Detección Inteligente de Inserción al Final del Lienzo</b>: Detección ergonómica del cursor en áreas libres del contenedor para permitir reubicar contenedores al final de la fila sin requerir soltar sobre un elemento existente.</li>
+                            <li><b>Verificación Automatizada en Electron</b>: Prueba completa en entorno Electron comprobando la inserción exacta de 2 slots vacíos visibles tras el desplazamiento de un contenedor con 2 tarjetas y la reubicación perfecta en la lista de orden raíz.</li>
+                        </ul>
+                    </li>
                     <li><b>FAST 2.0 — Rediseño Ultra Compacto del Botón de Hojas Ocultas en Sheetbar</b>:
                         <ul>
                             <li><b>Eliminación del Texto Invasivo</b>: Se retiró el texto descriptivo <code>Ocultas</code> del botón (<code>#sheet-hidden-btn</code>), manteniendo exclusivamente el icono del ojo (<code>👁️</code>) junto al indicador numérico de hojas ocultas (<code>#sheet-hidden-count</code>).</li>
