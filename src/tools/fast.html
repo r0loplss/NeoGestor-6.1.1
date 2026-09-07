@@ -106,34 +106,143 @@
             align-items: center;
             gap: 6px;
             flex: 1;
-            min-width: 140px;
-        }
-        #search-wrap input[type="search"] {
-            flex: 1;
-            padding: 5px 10px;
+            min-width: 220px;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: var(--radius);
+            padding: 2px 4px 2px 8px;
+            box-sizing: border-box;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        #search-wrap:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
+        }
+        #search-wrap input[type="search"] {
+            flex: 1;
+            min-width: 70px;
+            padding: 4px 6px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
             color: var(--text);
             font-size: 12px;
             outline: none;
             font-family: var(--font);
         }
-        #search-wrap input[type="search"]:focus { border-color: var(--primary); }
-        #search-wrap label {
-            font-size: 11px;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        #search-wrap label input[type="checkbox"] { accent-color: var(--primary); cursor: pointer; }
         #search-result-count {
             font-size: 10px;
             color: var(--faint);
             white-space: nowrap;
+            margin-right: 2px;
+        }
+        .search-mode-buttons {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 2px 3px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-left: auto;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .search-mode-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 500;
+            font-family: var(--font);
+            cursor: pointer;
+            padding: 2.5px 8px;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1.3;
+            outline: none;
+        }
+        .search-mode-btn:hover:not(.active) {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+        /* Iluminado para "Marcar Busqueda" */
+        .search-mode-btn#btn-search-mark.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.3);
+            font-weight: 700;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+        }
+        /* Iluminado para "Ocultar en busqueda" */
+        .search-mode-btn#btn-search-hide.active {
+            background: rgba(59, 130, 246, 0.28);
+            color: #93c5fd;
+            border: 1px solid #60a5fa;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.7), inset 0 0 4px rgba(59, 130, 246, 0.35);
+            font-weight: 700;
+            text-shadow: 0 0 4px rgba(96, 165, 250, 0.9);
+        }
+
+        /* Botones de Navegación de Coincidencias (↑ ↓) en Modo Marcar */
+        .search-nav-buttons {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 1.5px 4px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            flex-shrink: 0;
+            user-select: none;
+            margin-right: 4px;
+        }
+        .search-nav-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            color: var(--text);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 1px 5px;
+            line-height: 1.2;
+            transition: all 0.15s ease;
+            outline: none;
+        }
+        .search-nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+        }
+        .search-nav-btn:active:not(:disabled) {
+            transform: scale(0.92);
+        }
+        .search-nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .search-nav-count {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #93c5fd;
+            padding: 0 4px;
+            letter-spacing: 0.3px;
+            font-family: Consolas, Monaco, monospace;
+            white-space: nowrap;
+        }
+
+        /* Tarjeta con Enfoque Activo durante la navegación de búsqueda */
+        .card-item.search-focus {
+            z-index: 25 !important;
+            transform: translateY(-2px) scale(1.03) !important;
+            box-shadow: 0 0 0 3px #fbbf24, 0 0 26px rgba(251, 191, 36, 0.95), inset 0 0 10px rgba(251, 191, 36, 0.5) !important;
+            border-color: #fbbf24 !important;
+            animation: none !important;
+            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
         }
         .tb-btn {
             background: var(--surface3);
@@ -209,7 +318,6 @@
             overflow: hidden;
             user-select: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            animation: cardIn 0.2s ease-out;
         }
         .card-item:hover {
             border-color: var(--primary);
@@ -247,6 +355,41 @@
         @keyframes popIn {
             0% { transform: scale(0.3); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
+        }
+        /* Tarjeta coincidente en modo Marcar Búsqueda (Luz oscilante roja y blanca de alta intensidad) */
+        .card-item.search-marked {
+            border-width: 2.5px;
+            border-style: solid;
+            position: relative;
+            z-index: 5;
+            animation: pulseSearchMarkRedWhite 1.3s ease-in-out infinite alternate;
+            will-change: border-color, box-shadow;
+        }
+        .card-item.search-marked:hover {
+            transform: translateY(-2px);
+        }
+        @keyframes pulseSearchMarkRedWhite {
+            0% {
+                /* Luz Roja Neón: alta visibilidad y halo escarlata */
+                border-color: #ef4444;
+                box-shadow: 0 0 14px rgba(239, 68, 68, 0.95), 
+                            0 0 28px rgba(239, 68, 68, 0.65), 
+                            inset 0 0 8px rgba(239, 68, 68, 0.4);
+            }
+            100% {
+                /* Luz Blanca Radiante: brillo puro y halo resplandeciente */
+                border-color: #ffffff;
+                box-shadow: 0 0 16px rgba(255, 255, 255, 1), 
+                            0 0 32px rgba(255, 255, 255, 0.75), 
+                            inset 0 0 8px rgba(255, 255, 255, 0.45);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .card-item.search-marked {
+                animation: none;
+                border-color: #ef4444;
+                box-shadow: 0 0 16px rgba(239, 68, 68, 0.9);
+            }
         }
         .card-item.empty-slot {
             background: rgba(255,255,255,0.02) !important;
@@ -642,6 +785,80 @@
             align-content: start;
         }
 
+        /* Drag & drop en modo imágenes (Intercambio vs Inserción relativa) */
+        .card-item.img-card.drag-target-swap {
+            border: 2px dashed #a855f7 !important;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.45), inset 0 0 28px rgba(168, 85, 247, 0.18) !important;
+            background: rgba(168, 85, 247, 0.08) !important;
+            transform: scale(1.008) !important;
+            transition: transform 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease;
+        }
+        .card-item.img-card.drag-target-swap::after {
+            content: '🔄 Intercambiar posición';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.94);
+            color: #c084fc;
+            border: 1.5px solid #a855f7;
+            padding: 7px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 6px 22px rgba(0,0,0,0.75);
+            animation: pulseSwap 1.2s infinite ease-in-out;
+        }
+        .card-item.img-card.drag-target-before {
+            border-left: 1px solid var(--border) !important;
+            border-right: 1px solid var(--border) !important;
+            border-top: 5px solid var(--primary) !important;
+            box-shadow: inset 0 10px 16px rgba(59,130,246,0.35), 0 -4px 14px rgba(59,130,246,0.45) !important;
+        }
+        .card-item.img-card.drag-target-before::before {
+            content: '⬆ Ubicar aquí (por sobre)';
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            background: var(--primary);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        }
+        .card-item.img-card.drag-target-after {
+            border-left: 1px solid var(--border) !important;
+            border-right: 1px solid var(--border) !important;
+            border-bottom: 5px solid var(--primary) !important;
+            box-shadow: inset 0 -10px 16px rgba(59,130,246,0.35), 0 4px 14px rgba(59,130,246,0.45) !important;
+        }
+        .card-item.img-card.drag-target-after::before {
+            content: '⬇ Ubicar aquí (por debajo)';
+            position: absolute;
+            bottom: 6px;
+            left: 12px;
+            background: var(--primary);
+            color: #fff;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        }
+        @keyframes pulseSwap {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
         /* ============================================================
                MODO CONTENEDOR + TARJETAS
                ============================================================ */
@@ -710,6 +927,16 @@
         .container-block.drag-target-after, .card-item.drag-target-after {
             border-right: 4px solid var(--primary) !important;
             box-shadow: 4px 0 14px rgba(59,130,246,0.6) !important;
+        }
+        .card-item.empty-slot.drag-target-before {
+            border-left: 4px solid var(--primary) !important;
+            box-shadow: -4px 0 16px rgba(59,130,246,0.7) !important;
+            background: rgba(59,130,246,0.08) !important;
+        }
+        .card-item.empty-slot.drag-target-after {
+            border-right: 4px solid var(--primary) !important;
+            box-shadow: 4px 0 16px rgba(59,130,246,0.7) !important;
+            background: rgba(59,130,246,0.08) !important;
         }
         .container-ghost {
             position: fixed;
@@ -926,6 +1153,121 @@
             padding: 16px 20px;
         }
 
+        .cont-color-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 3px;
+        }
+        .cont-color-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+        .cont-color-presets .cs {
+            width: 25px;
+            height: 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-sizing: border-box;
+            transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+        }
+        .cont-color-presets .cs:hover {
+            transform: scale(1.12);
+            border-color: rgba(255,255,255,0.7);
+        }
+        .cont-color-presets .cs.sel {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px var(--primary), 0 2px 8px rgba(0,0,0,0.5);
+            transform: scale(1.08);
+        }
+        .cont-color-custom-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 6px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        .cont-color-picker-native {
+            width: 28px;
+            height: 28px;
+            border: none;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+            flex: 0 0 auto;
+            border-radius: 6px;
+            outline: none;
+        }
+        .cont-color-picker-native::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border-radius: 6px;
+        }
+        .cont-color-picker-native::-webkit-color-swatch {
+            border: 2px solid var(--border2);
+            border-radius: 6px;
+        }
+        .cont-color-picker-native:hover::-webkit-color-swatch {
+            border-color: var(--primary);
+        }
+        .cont-color-hex-input {
+            width: 78px;
+            height: 28px;
+            padding: 0 7px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: Consolas, Monaco, monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.15s;
+        }
+        .cont-color-hex-input:focus {
+            border-color: var(--primary);
+        }
+        .cont-color-preview {
+            flex: 1;
+            min-width: 0;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            border-radius: 6px;
+            border: 1px solid var(--cont-preview-color, var(--primary));
+            background: linear-gradient(to right, var(--cont-preview-bg, rgba(59,130,246,0.2)), rgba(0,0,0,0.3));
+            box-sizing: border-box;
+            overflow: hidden;
+            user-select: none;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .cont-preview-icon {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .cont-preview-text {
+            font-size: 11px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         /* Barra flotante de multi-selección (Agregar a Contenedor) */
         #floating-selection-bar {
             position: fixed;
@@ -1004,6 +1346,62 @@
             background: rgba(239, 68, 68, 0.2);
             color: var(--danger);
             border-color: var(--danger);
+        }
+        .btn-floating-action.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: var(--text);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .btn-floating-action.secondary:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.38);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Ghost de colocación de espacios vacíos anclado al cursor */
+        .slot-placement-ghost {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100000;
+            background: rgba(15, 23, 42, 0.94);
+            border: 1.5px solid var(--primary);
+            box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 0 2px rgba(59,130,246,0.3);
+            border-radius: 8px;
+            padding: 8px 14px;
+            color: #fff;
+            font-family: var(--font);
+            transform: translate(14px, 14px);
+            user-select: none;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            animation: pulseSlotGhost 1.4s infinite ease-in-out;
+        }
+        .slot-ghost-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+        .slot-ghost-icon {
+            font-size: 16px;
+        }
+        .slot-ghost-hint {
+            font-size: 10.5px;
+            color: var(--muted);
+            margin-top: 3px;
+            letter-spacing: 0.2px;
+        }
+        body.placing-slots, body.placing-slots * {
+            cursor: crosshair !important;
+        }
+        @keyframes pulseSlotGhost {
+            0%, 100% { box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 0 2px rgba(59,130,246,0.3); }
+            50% { box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 0 4px rgba(59,130,246,0.65); }
         }
 
         /* Vista previa en ajustes para Modo Contenedor */
@@ -3054,6 +3452,15 @@
         <div id="search-wrap">
             <input type="search" id="search-input" placeholder="🔍 Buscar tarjetas... (Ctrl+F)" />
             <span id="search-result-count"></span>
+            <div id="search-nav-buttons" class="search-nav-buttons" style="display:none;">
+                <button type="button" class="search-nav-btn" id="btn-search-prev" title="Coincidencia anterior (Shift+Enter o ↑)">↑</button>
+                <span id="search-nav-count" class="search-nav-count">0/0</span>
+                <button type="button" class="search-nav-btn" id="btn-search-next" title="Siguiente coincidencia (Enter o ↓)">↓</button>
+            </div>
+            <div id="search-mode-buttons" class="search-mode-buttons">
+                <button type="button" class="search-mode-btn" id="btn-search-mark" title="Marcar coincidencias con borde luminoso rojo y blanco">Marcar Busqueda</button>
+                <button type="button" class="search-mode-btn" id="btn-search-hide" title="Ocultar no coincidentes y mostrar solo resultados">Ocultar en busqueda</button>
+            </div>
         </div>
         <button class="tb-btn" id="btn-new-card" title="Nueva tarjeta (Ctrl+N)">➕ Tarjeta</button>
         <button class="tb-btn" id="btn-new-container" title="Nuevo contenedor" style="display:none;">📦 Contenedor</button>
@@ -3236,7 +3643,17 @@
                 </div>
                 <div class="modal-field">
                     <label>Color del contenedor</label>
-                    <div class="settings-color-row" id="cont-color-row"></div>
+                    <div id="cont-color-row" class="cont-color-section">
+                        <div class="cont-color-presets" id="cont-color-presets"></div>
+                        <div class="cont-color-custom-row">
+                            <input type="color" id="cont-color-picker" class="cont-color-picker-native" value="#3b82f6" title="Selector de color personalizado" />
+                            <input type="text" id="cont-color-hex-input" class="cont-color-hex-input" placeholder="#3B82F6" maxlength="7" spellcheck="false" title="Código HEX (#RRGGBB)" />
+                            <div class="cont-color-preview" id="cont-color-preview" title="Vista previa del contenedor">
+                                <span class="cont-preview-icon">⠿</span>
+                                <span class="cont-preview-text">VISTA PREVIA</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-field">
                     <label>Tamaño de fuente del título</label>
@@ -3420,14 +3837,17 @@
         </div>
     </div>
 
-    <!-- BARRA FLOTANTE DE MULTI-SELECCIÓN (Agregar a Contenedor) -->
+    <!-- BARRA FLOTANTE DE MULTI-SELECCIÓN (Agregar a Contenedor / Crear Espacios Vacíos) -->
     <div id="floating-selection-bar">
         <div class="floating-selection-info">
             <span class="floating-selection-icon">📦</span>
             <span id="floating-selection-count">0 tarjetas seleccionadas</span>
         </div>
-        <button class="btn-floating-action" id="btn-floating-add-container">
+        <button class="btn-floating-action" id="btn-floating-add-container" title="Crear un nuevo contenedor con las tarjetas seleccionadas">
             <span>➕</span> Agregar a contenedor
+        </button>
+        <button class="btn-floating-action secondary" id="btn-floating-add-empty-slots" title="Crear esta cantidad de espacios vacíos para ubicar libremente">
+            <span>🔲</span> <span id="btn-floating-empty-slots-text">Crear espacios vacíos</span>
         </button>
         <button class="btn-floating-cancel" id="btn-floating-clear" title="Deseleccionar todas (Esc)">✕</button>
     </div>
@@ -3468,6 +3888,13 @@
             activeSheetId: null,
             searchQuery: '',
             searchAll: false,
+            searchFilterMode: (function() {
+                try {
+                    return localStorage.getItem('FAST_SEARCH_FILTER_MODE') || 'hide';
+                } catch (e) {
+                    return 'hide';
+                }
+            })(),
             favOnly: false,
             view: 'grid',
             lastCardColor: '#fef3c7',
@@ -3485,6 +3912,7 @@
         // Estado de arrastre
         let dragState = null;
         let pressInfo = null;
+        let lastDragEndTime = 0;
         let scrollInterval = null;
         const SCROLL_SPEED = 15;
         let openDrawerTimer = null;
@@ -3499,6 +3927,13 @@
         const sheetHiddenCount = document.getElementById('sheet-hidden-count');
         const searchInput = document.getElementById('search-input');
         const searchResultCount = document.getElementById('search-result-count');
+        const searchModeButtons = document.getElementById('search-mode-buttons');
+        const btnSearchMark = document.getElementById('btn-search-mark');
+        const btnSearchHide = document.getElementById('btn-search-hide');
+        const searchNavButtons = document.getElementById('search-nav-buttons');
+        const searchNavCount = document.getElementById('search-nav-count');
+        const btnSearchPrev = document.getElementById('btn-search-prev');
+        const btnSearchNext = document.getElementById('btn-search-next');
         const btnNewCard = document.getElementById('btn-new-card');
         const btnNewContainer = document.getElementById('btn-new-container');
         const btnPasteCard = document.getElementById('btn-paste-card');
@@ -3526,6 +3961,8 @@
         const floatingSelectionBar = document.getElementById('floating-selection-bar');
         const floatingSelectionCount = document.getElementById('floating-selection-count');
         const btnFloatingAddContainer = document.getElementById('btn-floating-add-container');
+        const btnFloatingAddEmptySlots = document.getElementById('btn-floating-add-empty-slots');
+        const btnFloatingEmptySlotsText = document.getElementById('btn-floating-empty-slots-text');
         const btnFloatingClear = document.getElementById('btn-floating-clear');
 
         // Multi-selección de tarjetas (Ctrl+Clic)
@@ -3651,6 +4088,9 @@
                 if (floatingSelectionCount) {
                     floatingSelectionCount.textContent = `${count} tarjeta${count > 1 ? 's' : ''} seleccionada${count > 1 ? 's' : ''}`;
                 }
+                if (btnFloatingEmptySlotsText) {
+                    btnFloatingEmptySlotsText.textContent = `Crear ${count} espacio${count > 1 ? 's vacíos' : ' vacío'}`;
+                }
                 floatingSelectionBar.classList.add('show');
             } else {
                 floatingSelectionBar.classList.remove('show');
@@ -3771,8 +4211,67 @@
         });
 
         // ============================================================
-        // PERSISTENCIA CON COLA DE GUARDADO
+        // PERSISTENCIA CON COLA DE GUARDADO + BACKUPS ROTATIVOS
         // ============================================================
+        const MAX_FAST_BACKUPS = 20;
+
+        function getFastBackupsDir() {
+            if (!state.dataPath) return null;
+            return path.join(path.dirname(state.dataPath), 'backups');
+        }
+
+        function rotateFastBackup() {
+            try {
+                if (!state.dataPath || !fs.existsSync(state.dataPath)) return;
+                const dir = path.dirname(state.dataPath);
+                const bDir = getFastBackupsDir();
+                if (!fs.existsSync(bDir)) fs.mkdirSync(bDir, { recursive: true });
+
+                const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                const dest = path.join(bDir, `gestor-fast-${stamp}.json`);
+                fs.copyFileSync(state.dataPath, dest);
+                fs.copyFileSync(state.dataPath, path.join(dir, 'gestor-fast.json.bak'));
+
+                const files = fs.readdirSync(bDir)
+                    .filter(f => /^gestor-fast-.*\.json$/.test(f))
+                    .sort();
+                while (files.length > MAX_FAST_BACKUPS) {
+                    const oldest = files.shift();
+                    try { fs.unlinkSync(path.join(bDir, oldest)); } catch (_) {}
+                }
+            } catch (e) {
+                console.error('Error en backup rotativo de fast:', e);
+            }
+        }
+
+        function restoreLatestFastBackup() {
+            try {
+                const bDir = getFastBackupsDir();
+                if (!bDir || !fs.existsSync(bDir)) return null;
+                const files = fs.readdirSync(bDir)
+                    .filter(f => /^gestor-fast-.*\.json$/.test(f))
+                    .sort();
+                const latest = files[files.length - 1];
+                if (!latest) {
+                    const bak = path.join(path.dirname(state.dataPath), 'gestor-fast.json.bak');
+                    if (fs.existsSync(bak)) {
+                        const rawBak = fs.readFileSync(bak, 'utf8');
+                        fs.writeFileSync(state.dataPath, rawBak, 'utf8');
+                        return JSON.parse(rawBak);
+                    }
+                    return null;
+                }
+                const raw = fs.readFileSync(path.join(bDir, latest), 'utf8');
+                const parsed = JSON.parse(raw);
+                fs.writeFileSync(state.dataPath, raw, 'utf8');
+                console.log('Se restauró gestor-fast.json desde backup:', latest);
+                return parsed;
+            } catch (e) {
+                console.error('No se pudo restaurar backup de fast:', e);
+                return null;
+            }
+        }
+
         function obtenerRuta() {
             return new Promise((resolve) => {
                 ipcRenderer.invoke('get-user-data-path').then((ruta) => {
@@ -3780,7 +4279,12 @@
                     state.dataPathReady = true;
                     resolve();
                 }).catch(() => {
-                    state.dataPath = path.join(os.homedir(), 'AppData', 'Roaming', 'gestor-casos', 'gestor-fast.json');
+                    // Si está en entorno de prueba y no se proveyó ruta, usar scratch temporal
+                    if (window.__TEST_MODE__) {
+                        state.dataPath = path.join(os.tmpdir(), 'gestor-fast-test.json');
+                    } else {
+                        state.dataPath = path.join(os.homedir(), 'AppData', 'Roaming', 'gestor-casos', 'gestor-fast.json');
+                    }
                     state.dataPathReady = true;
                     resolve();
                 });
@@ -3789,12 +4293,27 @@
 
         function processSaveQueue() {
             if (isSaving || saveQueue.length === 0 || !state.dataPathReady) return;
+            // Guardia de seguridad: si es test mode y apunta a AppData real, bloquear
+            if (window.__TEST_MODE__ && state.dataPath && state.dataPath.includes('Roaming')) {
+                console.warn('[Guardia Fast] Guardado bloqueado: no se permite escribir en AppData de producción bajo test mode.');
+                saveQueue.shift();
+                return;
+            }
             isSaving = true;
             const dataToSave = saveQueue.shift();
             try {
                 const dir = path.dirname(state.dataPath);
                 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-                fs.writeFileSync(state.dataPath, JSON.stringify(dataToSave, null, 2), 'utf8');
+                
+                // Rotar backup del archivo actual antes de sobreescribir
+                if (fs.existsSync(state.dataPath)) {
+                    rotateFastBackup();
+                }
+
+                // Escritura atómica vía archivo temporal
+                const tmpPath = state.dataPath + '.tmp';
+                fs.writeFileSync(tmpPath, JSON.stringify(dataToSave, null, 2), 'utf8');
+                fs.renameSync(tmpPath, state.dataPath);
             } catch (e) {
                 showToast('❌ Error al guardar datos: ' + e.message, 'error');
             } finally {
@@ -3807,7 +4326,12 @@
             saveQueue.push({
                 sheets: state.sheets,
                 activeSheetId: state.activeSheetId,
-                settings: { searchAll: state.searchAll, view: state.view, lastCardColor: state.lastCardColor }
+                settings: {
+                    searchAll: state.searchAll,
+                    searchFilterMode: state.searchFilterMode,
+                    view: state.view,
+                    lastCardColor: state.lastCardColor
+                }
             });
             processSaveQueue();
         }
@@ -3873,6 +4397,15 @@
                     while (s.grid.cells.length < 100) s.grid.cells.push(Array(26).fill(''));
                     s.grid.cells.forEach(row => { while (row.length < 26) row.push(''); });
                 }
+            if (Array.isArray(s.cards)) {
+                s.cards.forEach(c => {
+                    if (!c || c.isEmpty) return;
+                    if (!Array.isArray(c.images)) c.images = [];
+                    if (!Array.isArray(c.links)) c.links = [];
+                    if (c.pinned == null) c.pinned = false;
+                    if (c.notes == null) c.notes = '';
+                });
+            }
             return s;
         }
 
@@ -3898,6 +4431,9 @@
                     state.activeSheetId = data.activeSheetId || data.sheets[0].id;
                     if (data.settings) {
                         state.searchAll = !!data.settings.searchAll;
+                        if (data.settings.searchFilterMode) {
+                            state.searchFilterMode = (data.settings.searchFilterMode === 'mark') ? 'mark' : 'hide';
+                        }
                         state.view = data.settings.view === 'list' ? 'list' : 'grid';
                         if (data.settings.lastCardColor) state.lastCardColor = data.settings.lastCardColor;
                     }
@@ -3913,6 +4449,14 @@
                     }
                 }
             } catch (e) {
+                console.error('Error al cargar gestor-fast.json, intentando recuperar último backup:', e);
+                const restored = restoreLatestFastBackup();
+                if (restored && restored.sheets && restored.sheets.length) {
+                    state.sheets = restored.sheets.map(normalizeSheet);
+                    state.activeSheetId = restored.activeSheetId || restored.sheets[0].id;
+                    showToast('🔄 Se recuperaron los datos de Fast desde el último respaldo automático.', 'success', 4000);
+                    return;
+                }
                 showToast('⚠️ Error al cargar datos. Se crearán datos por defecto.', 'warning');
                 const defaultSheet = normalizeSheet({
                     id: 'sheet_' + Date.now(),
@@ -3968,6 +4512,26 @@
             return luminance > 0.5 ? '#191919' : '#e2e8f0';
         }
 
+        function normalizeHexColor(val, fallback = '#3b82f6') {
+            if (!val || typeof val !== 'string') return fallback;
+            let clean = val.trim().replace(/^#+/, '');
+            if (clean.length === 3) {
+                clean = clean[0] + clean[0] + clean[1] + clean[1] + clean[2] + clean[2];
+            }
+            if (/^[0-9a-fA-F]{6}$/.test(clean)) {
+                return '#' + clean.toLowerCase();
+            }
+            return fallback;
+        }
+
+        function getContBgColor(hex, alpha = 0.18) {
+            const normalized = normalizeHexColor(hex, '#3b82f6');
+            const r = parseInt(normalized.slice(1, 3), 16);
+            const g = parseInt(normalized.slice(3, 5), 16);
+            const b = parseInt(normalized.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         // ============================================================
         // FORMATO WHATSAPP
         // ============================================================
@@ -4002,8 +4566,21 @@
             return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         }
 
+        const SPANISH_STOP_WORDS = new Set([
+            'a', 'al', 'con', 'de', 'del', 'el', 'en', 'la', 'las', 'los', 'o', 'para', 'por', 'que', 'se', 'su', 'sus', 'un', 'una', 'unos', 'unas', 'y'
+        ]);
+
         function searchTokens() {
-            return normText(state.searchQuery).split(/[^a-z0-9]+/).filter(t => t.length >= 2);
+            const rawTokens = normText(state.searchQuery).split(/[^a-z0-9]+/).filter(t => t.length > 0);
+            if (!rawTokens.length) return [];
+            // Si hay términos significativos (>= 2 caracteres y no stop words), descartar conectores
+            const meaningful = rawTokens.filter(t => t.length >= 2 && !SPANISH_STOP_WORDS.has(t));
+            if (meaningful.length > 0) return meaningful;
+            // Si todos son palabras cortas o conectores, usar tokens de longitud >= 2
+            const len2 = rawTokens.filter(t => t.length >= 2);
+            if (len2.length > 0) return len2;
+            // Búsqueda deliberada de 1 solo carácter (ej. "5", "A")
+            return rawTokens;
         }
 
         // Coincidencia flexible por inicio de palabra o subcadena
@@ -4058,6 +4635,15 @@
                 if (inLinks) score += 5;
                 if (inImgs) score += 5;
             }
+
+            // Bonus de coincidencia por frase exacta completa
+            const rawQueryNorm = normText(state.searchQuery.trim());
+            if (rawQueryNorm.length >= 3 && rawQueryNorm.includes(' ')) {
+                if (title.includes(rawQueryNorm)) score += 120;
+                else if (header.includes(rawQueryNorm)) score += 60;
+                else if (body.includes(rawQueryNorm)) score += 40;
+            }
+
             return score;
         }
 
@@ -4103,8 +4689,10 @@
             updateResultCount();
             updateViewClass();
             updatePasteButtonState();
+            updateSearchModeButtonsUI();
             collectVisibleCards();
             updateCardSelectionUI();
+            updateSearchNav();
         }
         // ---------- SHEETBAR (pestañas estilo Excel) ----------
         function renderSheets() {
@@ -4424,6 +5012,7 @@
         // ---------- GRILLA DE TARJETAS ----------
         function renderCards() {
             const sheet = getActiveSheet();
+            const savedScrollTop = contentEl ? contentEl.scrollTop : 0;
             cardsContainer.innerHTML = '';
 
             if (!sheet) {
@@ -4433,10 +5022,19 @@
 
             // Despacho por modo de hoja
             contentEl.dataset.mode = sheet.mode || 'cards';
-            if (sheet.mode === 'images') { renderImagesMode(sheet); return; }
+            if (sheet.mode === 'images') {
+                renderImagesMode(sheet);
+                if (contentEl) contentEl.scrollTop = savedScrollTop;
+                return;
+            }
             if (sheet.mode === 'process') { renderProcessMode(sheet); return; }
-            if (sheet.mode === 'containers') { renderContainersMode(sheet); return; }
+            if (sheet.mode === 'containers') {
+                renderContainersMode(sheet);
+                if (contentEl) contentEl.scrollTop = savedScrollTop;
+                return;
+            }
             renderCardsMode(sheet);
+            if (contentEl) contentEl.scrollTop = savedScrollTop;
         }
 
         // ---------- MODO TARJETAS Y CONTENEDORES: RENDERIZADO REUTILIZABLE ----------
@@ -4502,9 +5100,19 @@
                 el.style.boxSizing = 'border-box';
                 el.style.flexShrink = isContained ? '1' : '0';
                 el.style.gridRow = 'auto';
+                el.style.cursor = 'grab';
                 el.innerHTML = '<span class="slot-plus" title="Crear tarjeta aquí">＋</span><span class="slot-hint">Espacio libre</span>';
 
+                el.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
+                    document.addEventListener('mousemove', onGlobalMove);
+                    document.addEventListener('mouseup', onGlobalUp);
+                    document.addEventListener('mouseleave', onGlobalLeave);
+                });
+
                 el.addEventListener('click', (e) => {
+                    if (Date.now() - lastDragEndTime < 250) return;
                     e.stopPropagation();
                     openCardEditor(sheetId, null, card.id, card.containerId || null);
                 });
@@ -4591,6 +5199,13 @@
             el.addEventListener('dblclick', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (openDrawerTimer) { clearTimeout(openDrawerTimer); openDrawerTimer = null; }
+                if (sheet && sheet.mode === 'containers') {
+                    // En modo contenedor, doble clic NO abre el editor modal de tarjeta
+                    openDrawer(sheetId, card.id);
+                    return;
+                }
+                openCardEditor(sheetId, card.id);
             });
 
             el.addEventListener('contextmenu', (e) => {
@@ -4623,7 +5238,7 @@
             const query = state.searchQuery.trim();
             let cards = [];
 
-            if (tokens.length && state.searchAll) {
+            if (tokens.length && state.searchAll && state.searchFilterMode !== 'mark') {
                 state.sheets.forEach(s => {
                     s.cards.forEach(c => {
                         if (!c.isEmpty) {
@@ -4633,12 +5248,19 @@
                     });
                 });
             } else if (tokens.length) {
-                sheet.cards.forEach(c => {
-                    if (!c.isEmpty) {
-                        const sc = cardSearchScore(c, tokens);
-                        if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
-                    }
-                });
+                if (state.searchFilterMode === 'mark') {
+                    sheet.cards.forEach(c => {
+                        const sc = c.isEmpty ? 0 : cardSearchScore(c, tokens);
+                        cards.push({ card: c, sheetId: sheet.id, score: sc });
+                    });
+                } else {
+                    sheet.cards.forEach(c => {
+                        if (!c.isEmpty) {
+                            const sc = cardSearchScore(c, tokens);
+                            if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
+                        }
+                    });
+                }
             } else if (state.favOnly) {
                 cards = sheet.cards
                     .filter(c => !c.isEmpty && c.pinned)
@@ -4647,13 +5269,13 @@
                 cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id, score: 0 }));
             }
 
-            // Solo ordenar por relevancia si hay búsqueda activa
-            if (tokens.length) {
+            // Solo ordenar por relevancia si hay búsqueda activa y estamos en modo ocultar
+            if (tokens.length && state.searchFilterMode !== 'mark') {
                 cards.sort((a, b) => (b.score - a.score) || ((b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0)));
             }
 
             if (!cards.length) {
-                if (query) {
+                if (query && state.searchFilterMode !== 'mark') {
                     cardsContainer.innerHTML = '<div class="empty-cards">Sin resultados.<div class="hint">Prueba con otra búsqueda</div></div>';
                 } else if (state.favOnly) {
                     cardsContainer.innerHTML = '<div class="empty-cards">Sin favoritas.<div class="hint">Marca una tarjeta con ⭐ en su editor</div></div>';
@@ -4663,8 +5285,11 @@
                 return;
             }
 
-            cards.forEach(({ card, sheetId }) => {
+            cards.forEach(({ card, sheetId, score }) => {
                 const el = createCardElement(card, sheet, sheetId, false);
+                if (tokens.length && state.searchFilterMode === 'mark' && score > 0) {
+                    el.classList.add('search-marked');
+                }
                 cardsContainer.appendChild(el);
             });
 
@@ -4689,6 +5314,12 @@
             });
 
             return sheet.rootOrder;
+        }
+
+        function isRootEmptySlot(sheet, id) {
+            if (!sheet || !sheet.cards) return false;
+            const card = sheet.cards.find(c => c.id === id);
+            return !!(card && card.isEmpty && !card.containerId);
         }
 
         // ---------- MODO CONTENEDOR + TARJETAS ----------
@@ -4743,12 +5374,16 @@
                 if (cont) {
                     let contCards = allCards.filter(c => c.containerId === cont.id);
                     if (tokens.length) {
-                        contCards = contCards.filter(c => !c.isEmpty && cardSearchScore(c, tokens) > 0);
+                        if (state.searchFilterMode === 'mark') {
+                            // En modo marcar NO filtramos las tarjetas del contenedor
+                        } else {
+                            contCards = contCards.filter(c => !c.isEmpty && cardSearchScore(c, tokens) > 0);
+                        }
                     } else if (state.favOnly) {
                         contCards = contCards.filter(c => !c.isEmpty && c.pinned);
                     }
 
-                    if ((tokens.length || state.favOnly) && !contCards.length) return;
+                    if (state.searchFilterMode !== 'mark' && (tokens.length || state.favOnly) && !contCards.length) return;
 
                     const nonEmpties = contCards.filter(c => !c.isEmpty);
                     const titleFs = cont.titleFontSize
@@ -4788,8 +5423,9 @@
                         block.style.boxSizing = 'border-box';
                         block.style.flexShrink = '0';
                         block.style.flexGrow = '0';
-                        block.style.setProperty('--cont-color', cont.color || 'var(--primary)');
-                        block.style.setProperty('--cont-bg', (cont.color || '#3b82f6') + '2a');
+                        const contColorNorm = normalizeHexColor(cont.color, '#3b82f6');
+                        block.style.setProperty('--cont-color', contColorNorm);
+                        block.style.setProperty('--cont-bg', getContBgColor(contColorNorm, 0.16));
 
                         const hdr = document.createElement('div');
                         hdr.className = 'container-hdr';
@@ -4872,6 +5508,9 @@
                         } else {
                             segCards.forEach(c => {
                                 const cardEl = createCardElement(c, sheet, sheet.id, true);
+                                if (tokens.length && state.searchFilterMode === 'mark' && !c.isEmpty && cardSearchScore(c, tokens) > 0) {
+                                    cardEl.classList.add('search-marked');
+                                }
                                 body.appendChild(cardEl);
                             });
                         }
@@ -4885,10 +5524,13 @@
                 // Caso B: Es una Tarjeta Libre / Slot Libre
                 const card = allCards.find(c => c.id === itemId && !c.containerId);
                 if (card) {
-                    if (tokens.length && (card.isEmpty || cardSearchScore(card, tokens) === 0)) return;
+                    if (tokens.length && state.searchFilterMode !== 'mark' && (card.isEmpty || cardSearchScore(card, tokens) === 0)) return;
                     if (state.favOnly && (card.isEmpty || !card.pinned)) return;
 
                     const cardEl = createCardElement(card, sheet, sheet.id, false);
+                    if (tokens.length && state.searchFilterMode === 'mark' && !card.isEmpty && cardSearchScore(card, tokens) > 0) {
+                        cardEl.classList.add('search-marked');
+                    }
                     cardsContainer.appendChild(cardEl);
                 }
             });
@@ -4911,7 +5553,7 @@
             const tokens = searchTokens();
             const query = state.searchQuery.trim();
             let cards = [];
-            if (tokens.length && state.searchAll) {
+            if (tokens.length && state.searchAll && state.searchFilterMode !== 'mark') {
                 state.sheets.forEach(s => {
                     s.cards.forEach(c => {
                         const sc = cardSearchScore(c, tokens);
@@ -4919,30 +5561,58 @@
                     });
                 });
             } else if (tokens.length) {
-                sheet.cards.forEach(c => {
-                    const sc = cardSearchScore(c, tokens);
-                    if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
-                });
+                if (state.searchFilterMode === 'mark') {
+                    sheet.cards.forEach(c => {
+                        const sc = c.isEmpty ? 0 : cardSearchScore(c, tokens);
+                        cards.push({ card: c, sheetId: sheet.id, score: sc });
+                    });
+                } else {
+                    sheet.cards.forEach(c => {
+                        const sc = cardSearchScore(c, tokens);
+                        if (sc) cards.push({ card: c, sheetId: sheet.id, score: sc });
+                    });
+                }
             } else {
                 cards = sheet.cards.map(c => ({ card: c, sheetId: sheet.id, score: 0 }));
             }
             if (state.favOnly) cards = cards.filter(({ card }) => card.pinned);
-            if (tokens.length) {
+            if (tokens.length && state.searchFilterMode !== 'mark') {
                 cards.sort((a, b) => (b.score - a.score) || ((b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0)));
-            } else {
-                cards.sort((a, b) => (b.card.pinned ? 1 : 0) - (a.card.pinned ? 1 : 0));
             }
 
             if (!cards.length) {
-                cardsContainer.innerHTML = query
+                cardsContainer.innerHTML = (query && state.searchFilterMode !== 'mark')
                     ? '<div class="empty-cards">Sin resultados.</div>'
                     : '<div class="empty-cards">No hay tarjetas de imagen.<div class="hint">Pulsa "➕ Tarjeta" para crear una</div></div>';
                 return;
             }
 
-            cards.forEach(({ card, sheetId }) => {
+            cards.forEach(({ card, sheetId, score }) => {
+                if (card.isEmpty) {
+                    const el = document.createElement('div');
+                    el.className = 'card-item img-card empty-slot' + (selectedCardIds.has(card.id) ? ' multi-selected' : '');
+                    el.dataset.cardId = card.id;
+                    el.dataset.sheetId = sheetId;
+                    el.style.height = h + 'px';
+                    el.style.setProperty('--img-h', h + 'px');
+                    el.style.boxSizing = 'border-box';
+                    el.innerHTML = '<span class="slot-plus" title="Crear tarjeta aquí">＋</span><span class="slot-hint">Espacio libre</span>';
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openCardEditor(sheetId, null, card.id);
+                    });
+                    el.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showEmptySlotContextMenu(e.clientX, e.clientY, sheetId, card.id);
+                    });
+                    cardsContainer.appendChild(el);
+                    return;
+                }
+
+                const isMarked = tokens.length && state.searchFilterMode === 'mark' && score > 0;
                 const el = document.createElement('div');
-                el.className = 'card-item img-card' + (card.pinned ? ' pinned' : '');
+                el.className = 'card-item img-card' + (card.pinned ? ' pinned' : '') + (selectedCardIds.has(card.id) ? ' multi-selected' : '') + (isMarked ? ' search-marked' : '');
                 el.dataset.cardId = card.id;
                 el.dataset.sheetId = sheetId;
                 el.style.height = h + 'px';
@@ -4988,6 +5658,12 @@
                 el.addEventListener('mousedown', (e) => {
                     if (e.button !== 0) return;
                     if (e.target.closest('.card-copy-row') || e.target.closest('.img-card-btns') || e.target.closest('.img-card-media')) return;
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleCardSelection(card.id, sheetId);
+                        return;
+                    }
                     pressInfo = { sheetId, cardId: card.id, startX: e.clientX, startY: e.clientY, dragged: false };
                     document.addEventListener('mousemove', onGlobalMove);
                     document.addEventListener('mouseup', onGlobalUp);
@@ -5691,13 +6367,59 @@
             exUpdateSel();
         }
         function highlightMatches(query) {
-            const cards = cardsContainer.querySelectorAll('.card-item');
+            if (!query || !query.trim()) return;
+            // En modo 'mark', solo resaltamos las tarjetas que coinciden (.search-marked)
+            // En modo 'hide', todas las tarjetas mostradas en cardsContainer son coincidentes (excluyendo slots vacíos)
+            const selector = (state.searchFilterMode === 'mark')
+                ? '.card-item.search-marked'
+                : '.card-item:not(.empty-slot)';
+            const cards = cardsContainer.querySelectorAll(selector);
             cards.forEach(el => {
-                const title = el.querySelector('.card-title');
-                const preview = el.querySelector('.card-body-preview');
+                const title = el.querySelector('.card-title') || el.querySelector('.img-card-title');
+                const preview = el.querySelector('.card-body-preview') || el.querySelector('.img-card-text');
                 if (title) title.innerHTML = highlightHtml(title.textContent, query);
                 if (preview) preview.innerHTML = highlightHtml(preview.textContent, query);
             });
+        }
+
+        // Actualiza el estado de las tarjetas en modo 'Marcar Búsqueda' en sitio, sin destruir
+        // ni reconstruir el DOM, garantizando 0 parpadeos, 0 saltos de scroll y máxima fluidez.
+        function applyMarkSearchInPlace() {
+            const sheet = getActiveSheet();
+            if (!sheet) return;
+            const tokens = searchTokens();
+            const query = state.searchQuery.trim();
+
+            const cardEls = cardsContainer.querySelectorAll('.card-item:not(.empty-slot)');
+            cardEls.forEach(el => {
+                const cardId = el.dataset.cardId;
+                const card = sheet.cards.find(c => c.id === cardId);
+                if (!card) return;
+
+                const score = (tokens.length && !card.isEmpty) ? cardSearchScore(card, tokens) : 0;
+                const isMarked = tokens.length > 0 && score > 0;
+
+                if (isMarked) {
+                    el.classList.add('search-marked');
+                } else {
+                    el.classList.remove('search-marked');
+                }
+
+                const titleEl = el.querySelector('.card-title') || el.querySelector('.img-card-title');
+                const previewEl = el.querySelector('.card-body-preview') || el.querySelector('.img-card-text');
+
+                const plain = waToPlain(card.body || '');
+                if (titleEl) {
+                    titleEl.innerHTML = (isMarked && query) ? highlightHtml(card.title || '', query) : esc(card.title || 'Sin título');
+                }
+                if (previewEl) {
+                    previewEl.innerHTML = (isMarked && query) ? highlightHtml(plain, query) : esc(plain);
+                }
+            });
+
+            updateResultCount();
+            collectVisibleCards();
+            updateSearchNav();
         }
 
         // Re-resalta las celdas del grid de procesos en sitio (sin reconstruir el
@@ -5732,22 +6454,45 @@
             }
         }
 
-        // Construye un regex de resaltado insensible a tildes y mayúsculas, soportando múltiples términos
+        // Construye un regex de resaltado insensible a tildes y mayúsculas, usando los tokens significativos de búsqueda
         function buildHighlightRe(query) {
             if (!query || !query.trim()) return null;
             const acc = {
                 'a':'[aáàäâ]', 'e':'[eéèëê]', 'i':'[iíìïî]', 'o':'[oóòöô]', 'u':'[uúùüû]', 'n':'[nñ]',
                 'A':'[AÁÀÄÂ]', 'E':'[EÉÈËÊ]', 'I':'[IÍÌÏÎ]', 'O':'[OÓÒÖÔ]', 'U':'[UÚÙÜÛ]', 'N':'[NÑ]'
             };
-            const tokens = query.trim().split(/\s+/).filter(t => t.length > 0);
+            const tokens = searchTokens();
             if (!tokens.length) return null;
-            const patterns = tokens.map(token => {
+
+            const patterns = [];
+            const rawTrim = query.trim();
+
+            // Si el usuario escribió una frase con varias palabras, resaltar la frase completa como primer patrón
+            if (rawTrim.includes(' ') && rawTrim.length >= 3) {
+                let phrasePat = '';
+                for (const ch of rawTrim) {
+                    if (/\s+/.test(ch)) {
+                        phrasePat += '\\s+';
+                    } else {
+                        phrasePat += acc[ch] || ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    }
+                }
+                patterns.push(phrasePat);
+            }
+
+            // Agregar patrones para cada token significativo
+            tokens.forEach(token => {
                 let pat = '';
                 for (const ch of token) {
                     pat += acc[ch] || ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 }
-                return pat;
+                if (token.length <= 2) {
+                    patterns.push('\\b' + pat + '\\b');
+                } else {
+                    patterns.push(pat);
+                }
             });
+
             return new RegExp('(' + patterns.join('|') + ')', 'gi');
         }
 
@@ -5803,9 +6548,125 @@
         }
 
         function updateViewClass() {
-            contentEl.classList.toggle('list-view', state.view === 'list');
+            const sheet = getActiveSheet();
+            const allowsListView = sheet && sheet.mode === 'cards';
+            contentEl.classList.toggle('list-view', state.view === 'list' && allowsListView);
             btnView.textContent = state.view === 'list' ? '▥' : '▦';
             btnFavFilter.classList.toggle('fav-on', state.favOnly);
+        }
+
+        function updateSearchModeButtonsUI() {
+            const container = document.getElementById('search-mode-buttons');
+            if (!container) return;
+            const sheet = getActiveSheet();
+            const isCardMode = sheet && (sheet.mode === 'cards' || sheet.mode === 'containers' || sheet.mode === 'images');
+
+            if (!isCardMode) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'inline-flex';
+            const mode = state.searchFilterMode || 'hide';
+            const btnMark = document.getElementById('btn-search-mark');
+            const btnHide = document.getElementById('btn-search-hide');
+
+            if (btnMark) {
+                btnMark.classList.toggle('active', mode === 'mark');
+            }
+            if (btnHide) {
+                btnHide.classList.toggle('active', mode === 'hide');
+            }
+        }
+
+        function setSearchFilterMode(mode) {
+            state.searchFilterMode = mode;
+            try {
+                localStorage.setItem('FAST_SEARCH_FILTER_MODE', mode);
+            } catch (e) {}
+            saveData();
+            updateSearchModeButtonsUI();
+            render();
+            updateSearchNav();
+        }
+
+        // ============================================================
+        // NAVEGACIÓN DE COINCIDENCIAS (↑ ↓) EN MODO MARCAR BÚSQUEDA
+        // ============================================================
+        let searchMatchElements = [];
+        let searchMatchIndex = -1;
+
+        function updateSearchNav() {
+            const navWrap = document.getElementById('search-nav-buttons');
+            const navCount = document.getElementById('search-nav-count');
+            const btnPrev = document.getElementById('btn-search-prev');
+            const btnNext = document.getElementById('btn-search-next');
+            if (!navWrap) return;
+
+            const sheet = getActiveSheet();
+            const isMarkMode = state.searchFilterMode === 'mark' && sheet && (sheet.mode === 'cards' || sheet.mode === 'containers' || sheet.mode === 'images');
+            const query = (state.searchQuery || '').trim();
+
+            if (!isMarkMode || !query) {
+                navWrap.style.display = 'none';
+                searchMatchIndex = -1;
+                searchMatchElements = [];
+                cardsContainer.querySelectorAll('.card-item.search-focus').forEach(el => el.classList.remove('search-focus'));
+                return;
+            }
+
+            // Recolectar tarjetas marcadas en el orden visual del DOM
+            searchMatchElements = Array.from(cardsContainer.querySelectorAll('.card-item.search-marked'));
+            const total = searchMatchElements.length;
+
+            if (total === 0) {
+                navWrap.style.display = 'none';
+                searchMatchIndex = -1;
+                cardsContainer.querySelectorAll('.card-item.search-focus').forEach(el => el.classList.remove('search-focus'));
+                return;
+            }
+
+            navWrap.style.display = 'inline-flex';
+            const currentFocused = cardsContainer.querySelector('.card-item.search-focus');
+            if (currentFocused && searchMatchElements.includes(currentFocused)) {
+                searchMatchIndex = searchMatchElements.indexOf(currentFocused);
+            } else if (searchMatchIndex < 0 || searchMatchIndex >= total) {
+                searchMatchIndex = 0;
+            }
+
+            if (navCount) navCount.textContent = `${searchMatchIndex + 1}/${total}`;
+            if (btnPrev) btnPrev.disabled = total <= 1;
+            if (btnNext) btnNext.disabled = total <= 1;
+
+            focusCurrentMatch(false);
+        }
+
+        function focusCurrentMatch(shouldScroll = true) {
+            cardsContainer.querySelectorAll('.card-item.search-focus').forEach(el => el.classList.remove('search-focus'));
+            if (!searchMatchElements.length || searchMatchIndex < 0 || searchMatchIndex >= searchMatchElements.length) return;
+
+            const targetEl = searchMatchElements[searchMatchIndex];
+            if (targetEl) {
+                targetEl.classList.add('search-focus');
+                if (shouldScroll) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                }
+            }
+            const navCount = document.getElementById('search-nav-count');
+            if (navCount) navCount.textContent = `${searchMatchIndex + 1}/${searchMatchElements.length}`;
+        }
+
+        function navigateSearchMatch(direction) {
+            searchMatchElements = Array.from(cardsContainer.querySelectorAll('.card-item.search-marked'));
+            const total = searchMatchElements.length;
+            if (total === 0) return;
+
+            if (searchMatchIndex === -1) {
+                searchMatchIndex = direction > 0 ? 0 : total - 1;
+            } else {
+                searchMatchIndex = (searchMatchIndex + direction + total) % total;
+            }
+            focusCurrentMatch(true);
         }
 
         // ============================================================
@@ -5822,15 +6683,40 @@
             }
         }
 
+        function cacheCopiedCard(card) {
+            if (!card || card.isEmpty) return;
+            window.__lastCopiedCard = {
+                __type: 'FAST_CARD',
+                version: 1,
+                title: card.title || '',
+                body: card.body || '',
+                color: card.color || '#fef3c7',
+                images: Array.isArray(card.images) ? JSON.parse(JSON.stringify(card.images)) : [],
+                links: Array.isArray(card.links) ? JSON.parse(JSON.stringify(card.links)) : [],
+                pinned: !!card.pinned,
+                notes: card.notes || '',
+                titleFontSize: card.titleFontSize || null,
+                bodyFontSize: card.bodyFontSize || null,
+                copiedAt: Date.now()
+            };
+            try {
+                localStorage.setItem(FAST_CLIPBOARD_KEY, JSON.stringify(window.__lastCopiedCard));
+            } catch (e) {}
+            if (typeof updatePasteButtonState === 'function') updatePasteButtonState();
+        }
+
         function copyCardBody(card) {
+            cacheCopiedCard(card);
             copyText(card.body || '');
         }
 
         function copyCardPlain(card) {
+            cacheCopiedCard(card);
             copyText(waToPlain(card.body));
         }
 
         function copyCardTitleBody(card) {
+            cacheCopiedCard(card);
             const title = card.title || '';
             const body = waToPlain(card.body);
             const text = (title && body) ? title + '\n\n' + body : (title || body);
@@ -6174,13 +7060,15 @@
             drawerScroll.appendChild(noteBox);
 
             drawerActions.innerHTML = `
-                <button class="da-btn primary" data-a="copy">📋 Copiar</button>
-                <button class="da-btn" data-a="edit">✏️ Editar</button>
-                <button class="da-btn" data-a="duplicate">⧉ Duplicar</button>
-                <button class="da-btn" data-a="pin">⭐</button>
-                <button class="da-btn danger" data-a="delete">🗑</button>
+                <button class="da-btn primary" data-a="copy" title="Copiar texto para WhatsApp">📋 Copiar</button>
+                <button class="da-btn" data-a="copy-card" title="Copiar tarjeta completa para pegar en un espacio libre u otra hoja">📑 Copiar Tarjeta</button>
+                <button class="da-btn" data-a="edit" title="Editar contenido y diseño de la tarjeta">✏️ Editar</button>
+                <button class="da-btn" data-a="duplicate" title="Duplicar tarjeta">⧉ Duplicar</button>
+                <button class="da-btn" data-a="pin" title="Marcar / desmarcar como favorita">⭐</button>
+                <button class="da-btn danger" data-a="delete" title="Eliminar tarjeta">🗑</button>
             `;
             drawerActions.querySelector('[data-a="copy"]').addEventListener('click', () => copyCardBody(card));
+            drawerActions.querySelector('[data-a="copy-card"]').addEventListener('click', () => copyFullCard(card));
             drawerActions.querySelector('[data-a="edit"]').addEventListener('click', () => {
                 const d = state.drawer;
                 if (d) openCardEditor(d.sheetId, d.cardId);
@@ -6242,22 +7130,50 @@
         // ============================================================
         // ELIMINAR / DUPLICAR TARJETA
         // ============================================================
-        function confirmDeleteCard(sheetId, cardId) {
+        function confirmDeleteCard(sheetId, cardId, removeSlotCompletely = false) {
             const card = getCardById(sheetId, cardId);
             if (!card) return;
-            showConfirm(`¿Eliminar la tarjeta "${card.title || 'Sin título'}" permanentemente?`, () => {
+            const isSlot = !!card.isEmpty;
+            const promptMsg = isSlot
+                ? '¿Eliminar este espacio libre permanentemente?'
+                : `¿Eliminar la tarjeta "${card.title || 'Sin título'}" permanentemente?`;
+
+            showConfirm(promptMsg, () => {
                 const sheet = getSheetById(sheetId);
                 if (sheet) {
                     const idx = sheet.cards.findIndex(c => c.id === cardId);
                     if (idx !== -1) {
-                        sheet.cards.splice(idx, 1);
-                        if (sheet.mode === 'containers' && Array.isArray(sheet.rootOrder)) {
-                            sheet.rootOrder = sheet.rootOrder.filter(id => id !== cardId);
+                        const targetCard = sheet.cards[idx];
+                        if (targetCard.isEmpty || removeSlotCompletely) {
+                            // Eliminar por completo sin dejar slot en la visual
+                            sheet.cards.splice(idx, 1);
+                            if (Array.isArray(sheet.rootOrder)) {
+                                sheet.rootOrder = sheet.rootOrder.filter(id => id !== cardId);
+                            }
+                        } else if (sheet.mode === 'cards') {
+                            sheet.cards[idx] = createEmptySlot(null);
+                        } else if (sheet.mode === 'containers') {
+                            const origCont = targetCard.containerId || null;
+                            const emptySlot = createEmptySlot(origCont);
+                            sheet.cards[idx] = emptySlot;
+                            if (origCont === null && Array.isArray(sheet.rootOrder)) {
+                                const rIdx = sheet.rootOrder.indexOf(cardId);
+                                if (rIdx !== -1) {
+                                    sheet.rootOrder[rIdx] = emptySlot.id;
+                                } else {
+                                    sheet.rootOrder.push(emptySlot.id);
+                                }
+                            }
+                        } else {
+                            sheet.cards.splice(idx, 1);
+                        }
+                        if (typeof selectedCardIds !== 'undefined' && selectedCardIds && selectedCardIds.has(cardId)) {
+                            selectedCardIds.delete(cardId);
                         }
                         saveData();
                         if (state.drawer && state.drawer.cardId === cardId) { cancelDrawerTimer(); state.drawer = null; }
                         render();
-                        showToast('🗑 Tarjeta eliminada.', 'success');
+                        showToast(isSlot || removeSlotCompletely ? '🗑 Elemento eliminado de la visual.' : '🗑 Tarjeta eliminada (espacio libre disponible).', 'success');
                     }
                 }
             });
@@ -6290,22 +7206,8 @@
 
         function copyFullCard(card) {
             if (!card || card.isEmpty) return;
-            const fullCardData = {
-                __type: 'FAST_CARD',
-                version: 1,
-                title: card.title || '',
-                body: card.body || '',
-                color: card.color || '#fef3c7',
-                images: Array.isArray(card.images) ? JSON.parse(JSON.stringify(card.images)) : [],
-                links: Array.isArray(card.links) ? JSON.parse(JSON.stringify(card.links)) : [],
-                pinned: !!card.pinned,
-                notes: card.notes || '',
-                titleFontSize: card.titleFontSize || null,
-                bodyFontSize: card.bodyFontSize || null,
-                copiedAt: Date.now()
-            };
-
-            const jsonStr = JSON.stringify(fullCardData);
+            cacheCopiedCard(card);
+            const jsonStr = JSON.stringify(window.__lastCopiedCard);
 
             // 1. Guardar en localStorage (compartido entre todas las ventanas del Gestor)
             try {
@@ -6331,16 +7233,24 @@
         }
 
         function getCopiedCard() {
-            // 1. Intentar desde localStorage
+            // 1. Intentar desde memoria activa
+            if (window.__lastCopiedCard && window.__lastCopiedCard.__type === 'FAST_CARD') {
+                return window.__lastCopiedCard;
+            }
+
+            // 2. Intentar desde localStorage
             try {
                 const stored = localStorage.getItem(FAST_CLIPBOARD_KEY);
                 if (stored) {
                     const parsed = JSON.parse(stored);
-                    if (parsed && parsed.__type === 'FAST_CARD') return parsed;
+                    if (parsed && parsed.__type === 'FAST_CARD') {
+                        window.__lastCopiedCard = parsed;
+                        return parsed;
+                    }
                 }
             } catch (e) {}
 
-            // 2. Intentar desde el portapapeles del sistema
+            // 3. Intentar desde el portapapeles del sistema
             try {
                 let clipText = '';
                 if (clipboard && clipboard.readText) {
@@ -6348,7 +7258,10 @@
                 }
                 if (clipText && clipText.includes('FAST_CARD')) {
                     const parsed = JSON.parse(clipText);
-                    if (parsed && parsed.__type === 'FAST_CARD') return parsed;
+                    if (parsed && parsed.__type === 'FAST_CARD') {
+                        window.__lastCopiedCard = parsed;
+                        return parsed;
+                    }
                 }
             } catch (e) {}
 
@@ -6363,14 +7276,18 @@
             if (!btnPasteCard) return;
             const sheet = getActiveSheet();
             const isCardsOrImages = sheet && (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers');
-            if (isCardsOrImages && hasCopiedCard()) {
+            let hasClipText = false;
+            try {
+                if (clipboard && clipboard.readText && clipboard.readText().trim()) hasClipText = true;
+            } catch (e) {}
+            if (isCardsOrImages && (hasCopiedCard() || hasClipText)) {
                 btnPasteCard.style.display = '';
             } else {
                 btnPasteCard.style.display = 'none';
             }
         }
 
-        function pasteFullCard(targetSheetId, targetSlotOrCardId = null, targetContainerId = undefined) {
+        function pasteFullCard(targetSheetId, targetSlotOrCardId = null, targetContainerId = undefined, spatialTarget = null) {
             const sheet = getSheetById(targetSheetId);
             if (!sheet) return;
             if (sheet.mode !== 'cards' && sheet.mode !== 'images' && sheet.mode !== 'containers') {
@@ -6378,9 +7295,32 @@
                 return;
             }
 
-            const data = getCopiedCard();
+            let data = getCopiedCard();
             if (!data) {
-                showToast('⚠️ No hay ninguna tarjeta copiada en el portapapeles.', 'info');
+                // Intentar recuperar texto plano del portapapeles del sistema si no hay FAST_CARD
+                let clipText = '';
+                try {
+                    if (clipboard && clipboard.readText) clipText = clipboard.readText();
+                } catch (e) {}
+                if (clipText && clipText.trim()) {
+                    const trimmed = clipText.trim();
+                    const lines = trimmed.split('\n');
+                    const firstLine = lines[0].replace(/^[*#•\s-]+/, '').trim();
+                    const autoTitle = (firstLine.length > 0 && firstLine.length <= 50) ? firstLine : 'Tarjeta pegada';
+                    data = {
+                        title: autoTitle,
+                        body: trimmed,
+                        color: state.lastCardColor || '#fef3c7',
+                        images: [],
+                        links: [],
+                        pinned: false,
+                        notes: ''
+                    };
+                }
+            }
+
+            if (!data) {
+                showToast('⚠️ No hay ninguna tarjeta ni texto copiado en el portapapeles. Copia una tarjeta primero (Ctrl+C o 📑 Copiar tarjeta).', 'info', 3000);
                 return;
             }
 
@@ -6427,6 +7367,10 @@
                         newCard.containerId = targetCard.containerId || null;
                         if (targetCard.isEmpty) {
                             sheet.cards[targetIdx] = newCard;
+                            if (!newCard.containerId && Array.isArray(sheet.rootOrder)) {
+                                const rIdx = sheet.rootOrder.indexOf(targetCard.id);
+                                if (rIdx !== -1) sheet.rootOrder[rIdx] = newCard.id;
+                            }
                         } else {
                             sheet.cards.splice(targetIdx + 1, 0, newCard);
                             if (!newCard.containerId) {
@@ -6439,11 +7383,32 @@
                         sheet.cards.push(newCard);
                         if (Array.isArray(sheet.rootOrder)) sheet.rootOrder.push(newCard.id);
                     }
-                } else {
-                    // Pegar como tarjeta libre en el lienzo
+                } else if (spatialTarget && spatialTarget.targetId) {
                     sheet.cards.push(newCard);
-                    if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = [];
-                    if (!sheet.rootOrder.includes(newCard.id)) sheet.rootOrder.push(newCard.id);
+                    const rootOrder = getRootOrder(sheet);
+                    let tIdx = rootOrder.indexOf(spatialTarget.targetId);
+                    if (tIdx !== -1) {
+                        if (spatialTarget.pos === 'after') tIdx += 1;
+                        rootOrder.splice(tIdx, 0, newCard.id);
+                    } else {
+                        rootOrder.push(newCard.id);
+                    }
+                    sheet.rootOrder = rootOrder;
+                } else {
+                    // Pegar como tarjeta libre en el lienzo (rellena primer espacio libre de raíz si existe)
+                    const firstRootEmpty = sheet.cards.findIndex(c => c.isEmpty && !c.containerId);
+                    if (firstRootEmpty !== -1) {
+                        const emptyCard = sheet.cards[firstRootEmpty];
+                        sheet.cards[firstRootEmpty] = newCard;
+                        if (Array.isArray(sheet.rootOrder)) {
+                            const rIdx = sheet.rootOrder.indexOf(emptyCard.id);
+                            if (rIdx !== -1) sheet.rootOrder[rIdx] = newCard.id;
+                        }
+                    } else {
+                        sheet.cards.push(newCard);
+                        if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = [];
+                        if (!sheet.rootOrder.includes(newCard.id)) sheet.rootOrder.push(newCard.id);
+                    }
                 }
             } else {
                 // Modo cards o images
@@ -6652,7 +7617,7 @@
                 { icon: '📄', label: 'Copiar texto plano', fn: () => copyCardPlain(card) },
                 { icon: '📝', label: 'Copiar título + texto', fn: () => copyCardTitleBody(card) },
                 isCardsOrImages ? { icon: '📑', label: 'Copiar tarjeta completa', fn: () => copyFullCard(card) } : null,
-                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta aquí', fn: () => pasteFullCard(sheetId, cardId) } : null,
+                isCardsOrImages ? { icon: '📥', label: hasCopiedCard() ? `Pegar tarjeta aquí ("${(getCopiedCard()?.title || 'Tarjeta').slice(0, 20)}")` : 'Pegar tarjeta aquí', fn: () => pasteFullCard(sheetId, cardId) } : null,
                 null,
                 { icon: card.pinned ? '☆' : '⭐', label: card.pinned ? 'Quitar de favoritas' : 'Fijar como favorita', fn: () => {
                     card.pinned = !card.pinned; saveData(); render();
@@ -6664,9 +7629,26 @@
                     if (card) { card.color = c; saveData(); render(); showToast('🎨 Color actualizado.', 'success'); }
                 }, card.color) },
                 moveTo.length ? { icon: '➡', label: 'Mover a hoja', children: moveTo } : null,
-                null,
-                { icon: '🗑', label: 'Eliminar', danger: true, fn: () => confirmDeleteCard(sheetId, cardId) }
+                { icon: '🗑', label: 'Eliminar (dejar espacio libre)', danger: true, fn: () => confirmDeleteCard(sheetId, cardId, false) },
+                { icon: '❌', label: 'Eliminar definitivamente (quitar de la cuadrícula)', danger: true, fn: () => confirmDeleteCard(sheetId, cardId, true) }
             ].filter(Boolean);
+
+            if (selectedCardIds.size > 0) {
+                const selCount = selectedCardIds.size;
+                items.unshift(
+                    { icon: '🔲', label: `Crear ${selCount} espacio${selCount > 1 ? 's vacíos' : ' vacío'} (anclar al cursor)`, fn: () => startSlotPlacement(selCount, sheetId) },
+                    { icon: '📦', label: `Agregar las ${selCount} a nuevo contenedor`, fn: () => {
+                        if (sheet.mode !== 'containers') {
+                            sheet.mode = 'containers';
+                            if (!Array.isArray(sheet.containers)) sheet.containers = [];
+                            if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = (sheet.cards || []).map(c => c.id);
+                            sheet.containerTitleFontSize = sheet.containerTitleFontSize || 13;
+                        }
+                        openContainerModal(sheet.id, null, Array.from(selectedCardIds));
+                    }},
+                    null
+                );
+            }
 
             if (sheet.mode === 'containers' && Array.isArray(sheet.containers) && sheet.containers.length > 0) {
                 const moveContChildren = [];
@@ -6924,10 +7906,22 @@
             const slot = sheet?.cards?.find(c => c.id === slotId);
             const containerId = slot?.containerId || null;
 
+            const copied = getCopiedCard();
+            const pasteLabel = copied && copied.title
+                ? `Pegar tarjeta aquí ("${copied.title.slice(0, 22)}${copied.title.length > 22 ? '...' : ''}")`
+                : 'Pegar tarjeta aquí';
+
             const items = [
                 { icon: '➕', label: 'Crear tarjeta aquí', fn: () => openCardEditor(sheetId, null, slotId, containerId) },
-                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: 'Pegar tarjeta aquí', fn: () => pasteFullCard(sheetId, slotId) } : null,
+                isCardsOrImages ? {
+                    icon: '📥',
+                    label: pasteLabel,
+                    fn: () => pasteFullCard(sheetId, slotId, containerId)
+                } : null,
                 null,
+                (!containerId && sheet && sheet.mode === 'containers') ? { icon: '⬅', label: 'Mover espacio a la izquierda', fn: () => moveRootItem(sheet, slotId, -1) } : null,
+                (!containerId && sheet && sheet.mode === 'containers') ? { icon: '➡', label: 'Mover espacio a la derecha', fn: () => moveRootItem(sheet, slotId, 1) } : null,
+                (!containerId && sheet && sheet.mode === 'containers') ? null : null,
                 { icon: '🗑', label: 'Eliminar este espacio vacío', danger: true, fn: () => {
                     const sheet = getSheetById(sheetId);
                     if (sheet) {
@@ -6937,6 +7931,7 @@
                         }
                         saveData();
                         render();
+                        showToast('🗑 Espacio vacío eliminado de la visual.', 'info', 1200);
                     }
                 }},
                 containerId ? { icon: '🧹', label: 'Compactar este contenedor', fn: () => compactarContainer(sheetId, containerId) } : null,
@@ -6956,6 +7951,142 @@
             sheet.rootOrder = rootOrder;
             saveData();
             render();
+        }
+
+        function getSpatialRootTarget(sheet, clientX, clientY, excludeId = null) {
+            if (!sheet || sheet.mode !== 'containers') return null;
+            const rootOrder = getRootOrder(sheet);
+            if (!rootOrder.length) return null;
+
+            const rawItems = [];
+            Array.from(cardsContainer.children).forEach(el => {
+                if (!el.classList) return;
+                let id = null;
+                if (el.classList.contains('container-block')) {
+                    id = el.dataset.containerId;
+                } else if (el.classList.contains('card-item') && el.parentElement === cardsContainer) {
+                    id = el.dataset.cardId;
+                }
+                if (id && id !== excludeId) {
+                    const r = el.getBoundingClientRect();
+                    if (r.width > 0 && r.height > 0) {
+                        rawItems.push({ id, el, r });
+                    }
+                }
+            });
+
+            if (!rawItems.length) return null;
+
+            rawItems.sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left);
+
+            const rows = [];
+            rawItems.forEach(item => {
+                let placed = false;
+                for (const row of rows) {
+                    const first = row[0];
+                    const vertOverlap = Math.max(0, Math.min(item.r.bottom, first.r.bottom) - Math.max(item.r.top, first.r.top));
+                    const minH = Math.min(item.r.height, first.r.height);
+                    if (vertOverlap > minH * 0.45 || Math.abs(item.r.top - first.r.top) < 30) {
+                        row.push(item);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    rows.push([item]);
+                }
+            });
+
+            rows.forEach(row => {
+                row.sort((a, b) => a.r.left - b.r.left);
+            });
+
+            rows.sort((a, b) => a[0].r.top - b[0].r.top);
+
+            let targetRow = null;
+            if (clientY < rows[0][0].r.top) {
+                targetRow = rows[0];
+            } else if (clientY > rows[rows.length - 1][0].r.bottom) {
+                targetRow = rows[rows.length - 1];
+            } else {
+                for (const row of rows) {
+                    const top = Math.min(...row.map(i => i.r.top));
+                    const bottom = Math.max(...row.map(i => i.r.bottom));
+                    if (clientY >= top - 10 && clientY <= bottom + 10) {
+                        targetRow = row;
+                        break;
+                    }
+                }
+                if (!targetRow) {
+                    let minDist = Infinity;
+                    rows.forEach(row => {
+                        const midY = (row[0].r.top + row[0].r.bottom) / 2;
+                        const dist = Math.abs(clientY - midY);
+                        if (dist < minDist) {
+                            minDist = dist;
+                            targetRow = row;
+                        }
+                    });
+                }
+            }
+
+            if (!targetRow || !targetRow.length) return null;
+
+            const firstItem = targetRow[0];
+            const lastItem = targetRow[targetRow.length - 1];
+
+            if (clientX < firstItem.r.left) {
+                return { targetId: firstItem.id, pos: 'before', el: firstItem.el };
+            }
+
+            if (clientX > lastItem.r.right) {
+                return { targetId: lastItem.id, pos: 'after', el: lastItem.el };
+            }
+
+            for (let i = 0; i < targetRow.length; i++) {
+                const curr = targetRow[i];
+                if (clientX >= curr.r.left && clientX <= curr.r.right) {
+                    const isLeftHalf = clientX < (curr.r.left + curr.r.width / 2);
+                    return { targetId: curr.id, pos: isLeftHalf ? 'before' : 'after', el: curr.el };
+                }
+                if (i < targetRow.length - 1) {
+                    const next = targetRow[i + 1];
+                    if (clientX > curr.r.right && clientX < next.r.left) {
+                        const distToCurr = clientX - curr.r.right;
+                        const distToNext = next.r.left - clientX;
+                        if (distToCurr <= distToNext) {
+                            return { targetId: curr.id, pos: 'after', el: curr.el };
+                        } else {
+                            return { targetId: next.id, pos: 'before', el: next.el };
+                        }
+                    }
+                }
+            }
+
+            return { targetId: lastItem.id, pos: 'after', el: lastItem.el };
+        }
+
+        function createRootEmptySlotAt(sheetId, spatialTarget) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet) return;
+            const slot = createEmptySlot(null);
+            sheet.cards.push(slot);
+            const rootOrder = getRootOrder(sheet);
+            if (spatialTarget && spatialTarget.targetId) {
+                let tIdx = rootOrder.indexOf(spatialTarget.targetId);
+                if (tIdx !== -1) {
+                    if (spatialTarget.pos === 'after') tIdx += 1;
+                    rootOrder.splice(tIdx, 0, slot.id);
+                } else {
+                    rootOrder.push(slot.id);
+                }
+            } else {
+                rootOrder.push(slot.id);
+            }
+            sheet.rootOrder = rootOrder;
+            saveData();
+            render();
+            showToast('⬜ Espacio libre creado.', 'success', 1200);
         }
 
         function showContainerContextMenu(x, y, sheetId, containerId) {
@@ -7011,7 +8142,8 @@
         // ============================================================
         function onGlobalMove(e) {
             if (!pressInfo) return;
-            if (state.searchQuery.trim()) return;
+            // Solo bloqueamos arrastre si hay búsqueda activa en modo 'hide' (donde la lista es parcial)
+            if (state.searchQuery.trim() && state.searchFilterMode !== 'mark') return;
             if (!pressInfo.dragged) {
                 const dist = Math.hypot(e.clientX - pressInfo.startX, e.clientY - pressInfo.startY);
                 if (dist > 4) {
@@ -7021,7 +8153,7 @@
                     } else {
                         const sheet = getSheetById(pressInfo.sheetId);
                         const card = sheet ? sheet.cards.find(c => c.id === pressInfo.cardId) : null;
-                        if (card && !card.isEmpty) startDrag(pressInfo.sheetId, pressInfo.cardId, sheet.cards.indexOf(card), e);
+                        if (card) startDrag(pressInfo.sheetId, pressInfo.cardId, sheet.cards.indexOf(card), e);
                     }
                 }
                 return;
@@ -7034,6 +8166,9 @@
             document.removeEventListener('mouseup', onGlobalUp);
             document.removeEventListener('mouseleave', onGlobalLeave);
             const wasDragged = pressInfo ? pressInfo.dragged : false;
+            if (wasDragged) {
+                lastDragEndTime = Date.now();
+            }
             if (pressInfo && !wasDragged) {
                 if (pressInfo.type !== 'container') {
                     const { sheetId, cardId } = pressInfo;
@@ -7054,6 +8189,9 @@
             document.removeEventListener('mousemove', onGlobalMove);
             document.removeEventListener('mouseup', onGlobalUp);
             document.removeEventListener('mouseleave', onGlobalLeave);
+            if (pressInfo && pressInfo.dragged) {
+                lastDragEndTime = Date.now();
+            }
             pressInfo = null;
             if (dragState) onDragEnd();
         }
@@ -7099,7 +8237,7 @@
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
             const card = sheet.cards[index];
-            if (!card || card.isEmpty) return;
+            if (!card) return;
 
             const origEl = cardsContainer.querySelector(`.card-item[data-card-id="${cardId}"]`);
             if (origEl) origEl.classList.add('dragging');
@@ -7110,27 +8248,64 @@
                 fromIndex: index,
                 targetCardId: null,
                 targetSheetTabId: null,
+                dropAction: null,
                 origEl
             };
 
             const cs = sheet.cardSize || { w: 150, h: 190 };
             const ghost = document.createElement('div');
-            ghost.className = 'card-item ghost-card';
-            ghost.style.width = (cs.w || 150) + 'px';
-            ghost.style.height = (cs.h || 190) + 'px';
+            ghost.className = 'card-item ghost-card' + (sheet.mode === 'images' ? ' ghost-img-card' : '');
+            if (origEl && origEl.classList.contains('search-marked')) {
+                ghost.classList.add('search-marked');
+            }
+
+            let gw = cs.w || 150;
+            let gh = cs.h || 190;
+            if (sheet.mode === 'images') {
+                gw = Math.min(cardsContainer.clientWidth - 40, 380);
+                gh = 90;
+            }
+            ghost.style.width = gw + 'px';
+            ghost.style.height = gh + 'px';
             ghost.style.position = 'fixed';
             ghost.style.pointerEvents = 'none';
             ghost.style.zIndex = '10000';
-            ghost.style.opacity = '0.92';
+            ghost.style.opacity = '0.94';
             ghost.style.boxShadow = '0 14px 40px rgba(0,0,0,0.65)';
             ghost.style.border = '2px solid var(--primary)';
             ghost.style.transform = 'scale(1.03)';
             ghost.style.backgroundColor = card.color || 'var(--surface2)';
             ghost.style.color = card.color ? getContrastColor(card.color) : 'var(--text)';
-            ghost.innerHTML = `
-                <div class="card-top"><div class="card-title">${esc(card.title) || 'Sin título'}</div></div>
-                <div class="card-body-preview">${esc(waToPlain(card.body).slice(0, 80))}</div>
-            `;
+
+            if (card.isEmpty) {
+                ghost.style.backgroundColor = 'rgba(255, 255, 255, 0.06)';
+                ghost.style.border = '2px dashed rgba(255, 255, 255, 0.45)';
+                ghost.style.display = 'flex';
+                ghost.style.flexDirection = 'column';
+                ghost.style.alignItems = 'center';
+                ghost.style.justifyContent = 'center';
+                ghost.style.gap = '6px';
+                ghost.innerHTML = `<span style="font-size: 24px; opacity:0.85;">⬜</span><span style="font-size: 11px; font-weight:700; color:var(--text-muted, #aaa);">Espacio libre</span>`;
+            } else if (sheet.mode === 'images') {
+                const firstImg = (card.images && card.images.length) ? card.images[0].data : '';
+                ghost.style.display = 'flex';
+                ghost.style.flexDirection = 'row';
+                ghost.style.alignItems = 'center';
+                ghost.style.gap = '12px';
+                ghost.style.padding = '8px 14px';
+                ghost.innerHTML = `
+                    ${firstImg ? `<img src="${firstImg}" style="width:68px; height:68px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.15); flex-shrink:0;" />` : '<span style="font-size:28px; flex-shrink:0;">🖼️</span>'}
+                    <div style="flex:1; min-width:0; overflow:hidden;">
+                        <div style="font-weight:700; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:inherit;">${esc(card.title) || 'Sin título'}</div>
+                        <div style="font-size:11px; opacity:0.8; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:inherit;">${esc(waToPlain(card.body || ''))}</div>
+                    </div>
+                `;
+            } else {
+                ghost.innerHTML = `
+                    <div class="card-top"><div class="card-title">${esc(card.title) || 'Sin título'}</div></div>
+                    <div class="card-body-preview">${esc(waToPlain(card.body).slice(0, 80))}</div>
+                `;
+            }
             document.body.appendChild(ghost);
             dragState.ghost = ghost;
             updateGhostPosition(e.clientX, e.clientY);
@@ -7166,52 +8341,130 @@
                 }
 
                 // Limpiar resaltados previos
-                document.querySelectorAll('.container-block.drag-target-before, .container-block.drag-target-after, .card-item.drag-target-before, .card-item.drag-target-after').forEach(el => {
-                    el.classList.remove('drag-target-before', 'drag-target-after');
+                document.querySelectorAll('.container-block.drag-target-before, .container-block.drag-target-after, .card-item.drag-target-before, .card-item.drag-target-after, .card-item.drag-target-over').forEach(el => {
+                    el.classList.remove('drag-target-before', 'drag-target-after', 'drag-target-over');
                 });
 
                 const elements = document.elementsFromPoint(e.clientX, e.clientY);
-                let targetRootEl = elements.find(el => {
-                    if (!el.classList) return false;
-                    if (el.classList.contains('container-block') && el.dataset.containerId !== dragState.containerId) return true;
-                    if (el.classList.contains('card-item') && el.parentElement === cardsContainer) return true;
-                    return false;
-                });
+                let targetRootEl = null;
 
-                if (!targetRootEl) {
-                    const contBlock = elements.find(el => el.closest && el.closest('.container-block'));
-                    if (contBlock) {
-                        const b = contBlock.closest('.container-block');
-                        if (b && b.dataset.containerId !== dragState.containerId) targetRootEl = b;
+                // 1. Probar si el cursor está sobre una tarjeta o slot libre hijo directo de cardsContainer, o sobre otro contenedor
+                for (const el of elements) {
+                    const cardEl = el.closest ? el.closest('.card-item') : null;
+                    if (cardEl && cardEl.parentElement === cardsContainer) {
+                        targetRootEl = cardEl;
+                        break;
+                    }
+                    const contEl = el.closest ? el.closest('.container-block') : null;
+                    if (contEl && contEl.dataset.containerId !== dragState.containerId) {
+                        targetRootEl = contEl;
+                        break;
                     }
                 }
 
+                // 2. Si no se encontró por elemento directo (cursor en gap/borde), buscar mediante snapping espacial o por proximidad
                 if (!targetRootEl) {
-                    const isInsideCanvas = elements.some(el => el === cardsContainer || (el && el.id === 'content'));
-                    if (isInsideCanvas) {
-                        const rootEls = Array.from(cardsContainer.children).filter(el => {
-                            if (!el.classList) return false;
-                            if (el.classList.contains('container-block') && el.dataset.containerId !== dragState.containerId) return true;
-                            if (el.classList.contains('card-item') && el.parentElement === cardsContainer) return true;
-                            return false;
-                        });
-                        if (rootEls.length > 0) {
-                            targetRootEl = rootEls[rootEls.length - 1];
+                    const sheet = getSheetById(dragState.sheetId);
+                    const spatial = sheet ? getSpatialRootTarget(sheet, e.clientX, e.clientY, dragState.containerId) : null;
+                    if (spatial && spatial.el) {
+                        targetRootEl = spatial.el;
+                    } else {
+                        const isInsideCanvas = elements.some(el => el === cardsContainer || (el && (el.id === 'content' || el.id === 'cards-container')));
+                        if (isInsideCanvas) {
+                            const rootEls = Array.from(cardsContainer.children).filter(el => {
+                                if (!el.classList) return false;
+                                if (el.classList.contains('container-block') && el.dataset.containerId !== dragState.containerId) return true;
+                                if (el.classList.contains('card-item') && el.parentElement === cardsContainer) return true;
+                                return false;
+                            });
+                            if (rootEls.length > 0) {
+                                let closest = null;
+                                let minDist = Infinity;
+                                rootEls.forEach(el => {
+                                    const r = el.getBoundingClientRect();
+                                    const cx = r.left + r.width / 2;
+                                    const cy = r.top + r.height / 2;
+                                    const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+                                    if (dist < minDist) {
+                                        minDist = dist;
+                                        closest = el;
+                                    }
+                                });
+                                if (closest && minDist < 350) {
+                                    targetRootEl = closest;
+                                }
+                            }
                         }
                     }
                 }
 
                 if (targetRootEl) {
+                    const isSlot = targetRootEl.classList.contains('empty-slot');
                     const targetId = targetRootEl.dataset.containerId || targetRootEl.dataset.cardId;
                     const r = targetRootEl.getBoundingClientRect();
-                    const isLeftHalf = (e.clientX < r.left + r.width / 2);
-                    const pos = isLeftHalf ? 'before' : 'after';
 
-                    dragState.targetItemId = targetId;
-                    dragState.targetPosition = pos;
-                    targetRootEl.classList.add(pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+                    if (isSlot) {
+                        // El usuario está apuntando a un espacio libre o entre espacios libres.
+                        // Calculamos la posición relativa del cursor para permitir:
+                        // - 'before' (borde izquierdo o gap izquierdo): ubicar ANTES del espacio libre (entre celdas)
+                        // - 'after' (borde derecho o gap derecho): ubicar DESPUÉS del espacio libre (entre celdas)
+                        // - 'replace' (centro de la celda): ocupar / reemplazar el espacio libre
+                        const isDirectlyInside = (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
+                        let pos;
+                        if (isDirectlyInside) {
+                            const relX = (e.clientX - r.left) / r.width;
+                            if (relX < 0.32) {
+                                pos = 'before';
+                            } else if (relX > 0.68) {
+                                pos = 'after';
+                            } else {
+                                pos = 'replace';
+                            }
+                        } else {
+                            // Si está en el gap o margen entre celdas, decidir 'before' o 'after' según el centro
+                            pos = (e.clientX < r.left + r.width / 2) ? 'before' : 'after';
+                        }
+
+                        dragState.targetItemId = targetId;
+                        dragState.targetPosition = pos;
+
+                        if (pos === 'replace') {
+                            targetRootEl.classList.add('drag-target-over');
+
+                            // Resaltar visualmente los slots contiguos que ocupará según el ancho del contenedor
+                            const sheet = getSheetById(dragState.sheetId);
+                            if (sheet) {
+                                const rootOrder = getRootOrder(sheet);
+                                const tIdx = rootOrder.indexOf(targetId);
+                                const contCards = (sheet.cards || []).filter(c => c.containerId === dragState.containerId);
+                                const cardCount = Math.max(1, contCards.length);
+                                if (tIdx !== -1 && cardCount > 1) {
+                                    for (let i = 1; i < cardCount; i++) {
+                                        const nextId = rootOrder[tIdx + i];
+                                        if (nextId && isRootEmptySlot(sheet, nextId) && nextId !== dragState.containerId) {
+                                            const nextEl = cardsContainer.querySelector(`.card-item[data-card-id="${nextId}"]`);
+                                            if (nextEl) nextEl.classList.add('drag-target-over');
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            targetRootEl.classList.add(pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+                        }
+                    } else {
+                        // Es una tarjeta normal o un contenedor: ubicar antes o después
+                        const isLeftHalf = (e.clientX < r.left + r.width / 2);
+                        const pos = isLeftHalf ? 'before' : 'after';
+
+                        dragState.targetItemId = targetId;
+                        dragState.targetPosition = pos;
+                        targetRootEl.classList.add(pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+                    }
                 } else {
                     dragState.targetItemId = null;
+                    dragState.targetPosition = null;
                 }
                 return;
             }
@@ -7263,6 +8516,7 @@
                     const foundIdx = sheet.cards.findIndex(c => c.id === targetCardEl.dataset.cardId);
                     if (foundIdx !== -1) {
                         dragState.targetGridIdx = foundIdx;
+                        dragState.targetCardId = targetCardEl.dataset.cardId;
                         dragState.targetContainerId = targetCardEl.closest('.container-body')?.dataset.containerId || null;
                         dragState.targetRootItemId = null;
                         dragState.targetRootPos = null;
@@ -7272,15 +8526,36 @@
                     }
                 }
 
-                // Prioridad 2: Sobre el cuerpo de un contenedor (.container-body o .container-block)
-                const contBody = elements.find(el => el.classList && (el.classList.contains('container-body') || el.classList.contains('container-block')));
-                if (contBody) {
-                    const contBlock = contBody.closest('.container-block') || contBody;
+                // Prioridad 2: Sobre el cuerpo o bordes de un contenedor
+                const contBlock = elements.find(el => el.classList && el.classList.contains('container-block'));
+                if (contBlock && contBlock.dataset.containerId) {
                     const cId = contBlock.dataset.containerId;
-                    if (cId) {
+                    const r = contBlock.getBoundingClientRect();
+                    const edgeThreshold = 24;
+
+                    if (e.clientX < r.left + edgeThreshold) {
+                        dragState.targetContainerId = null;
+                        dragState.targetGridIdx = null;
+                        dragState.targetCardId = null;
+                        dragState.targetRootItemId = cId;
+                        dragState.targetRootPos = 'before';
+                        dragState.isFreeDrop = true;
+                        contBlock.classList.add('drag-target-before');
+                        return;
+                    } else if (e.clientX > r.right - edgeThreshold) {
+                        dragState.targetContainerId = null;
+                        dragState.targetGridIdx = null;
+                        dragState.targetCardId = null;
+                        dragState.targetRootItemId = cId;
+                        dragState.targetRootPos = 'after';
+                        dragState.isFreeDrop = true;
+                        contBlock.classList.add('drag-target-after');
+                        return;
+                    } else {
                         contBlock.classList.add('drag-over');
                         dragState.targetContainerId = cId;
                         dragState.targetGridIdx = null;
+                        dragState.targetCardId = null;
                         dragState.targetRootItemId = null;
                         dragState.targetRootPos = null;
                         dragState.isFreeDrop = false;
@@ -7288,7 +8563,7 @@
                     }
                 }
 
-                // Prioridad 3: Sobre el lienzo / entre elementos raíz (insertar antes/después de un contenedor o tarjeta libre)
+                // Prioridad 3: Sobre el lienzo / huecos libres entre elementos y filas (snapping espacial)
                 let targetRootEl = elements.find(el => {
                     if (!el.classList) return false;
                     if (el.classList.contains('container-block')) return true;
@@ -7304,6 +8579,7 @@
 
                     dragState.targetContainerId = null;
                     dragState.targetGridIdx = null;
+                    dragState.targetCardId = null;
                     dragState.targetRootItemId = targetId;
                     dragState.targetRootPos = pos;
                     dragState.isFreeDrop = true;
@@ -7311,12 +8587,122 @@
                     return;
                 }
 
+                // Snapping espacial para huecos libres de fila (ej. espacios tras el último contenedor)
+                const spatial = getSpatialRootTarget(sheet, e.clientX, e.clientY, dragState.cardId);
+                if (spatial && spatial.el) {
+                    dragState.targetContainerId = null;
+                    dragState.targetGridIdx = null;
+                    dragState.targetCardId = null;
+                    dragState.targetRootItemId = spatial.targetId;
+                    dragState.targetRootPos = spatial.pos;
+                    dragState.isFreeDrop = true;
+                    spatial.el.classList.add(spatial.pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+                    return;
+                }
+
                 // Área libre general
                 dragState.targetContainerId = null;
                 dragState.targetGridIdx = null;
+                dragState.targetCardId = null;
                 dragState.targetRootItemId = null;
                 dragState.targetRootPos = null;
                 dragState.isFreeDrop = true;
+                return;
+            }
+
+            if (sheet.mode === 'images') {
+                document.querySelectorAll('.card-item.drag-target-over, .card-item.drag-target-swap, .card-item.drag-target-before, .card-item.drag-target-after').forEach(el => {
+                    el.classList.remove('drag-target-over', 'drag-target-swap', 'drag-target-before', 'drag-target-after');
+                });
+
+                // 1. Buscar tarjeta bajo el cursor
+                const targetCardEl = elements.find(el => el.classList && el.classList.contains('card-item') && !el.classList.contains('ghost-card'));
+
+                if (targetCardEl && targetCardEl.dataset.cardId) {
+                    const targetId = targetCardEl.dataset.cardId;
+                    if (targetId === dragState.cardId) {
+                        dragState.targetCardId = null;
+                        dragState.dropAction = null;
+                        return;
+                    }
+
+                    const rect = targetCardEl.getBoundingClientRect();
+                    const relY = e.clientY - rect.top;
+                    const totalH = rect.height || 100;
+                    const zoneLimit = Math.max(35, Math.min(110, totalH * 0.28));
+
+                    let action = 'swap';
+                    if (relY < zoneLimit) {
+                        action = 'before';
+                    } else if (relY > totalH - zoneLimit) {
+                        action = 'after';
+                    } else {
+                        action = 'swap';
+                    }
+
+                    dragState.targetCardId = targetId;
+                    dragState.dropAction = action;
+
+                    if (action === 'before') {
+                        targetCardEl.classList.add('drag-target-before');
+                    } else if (action === 'after') {
+                        targetCardEl.classList.add('drag-target-after');
+                    } else {
+                        targetCardEl.classList.add('drag-target-swap');
+                    }
+                    return;
+                }
+
+                // 2. Si el cursor está en el área libre del contenedor pero no exactamente sobre una tarjeta
+                const allImgCards = Array.from(cardsContainer.querySelectorAll('.card-item.img-card:not(.ghost-card)'));
+                if (allImgCards.length > 0) {
+                    const firstCard = allImgCards[0];
+                    const lastCard = allImgCards[allImgCards.length - 1];
+                    const firstRect = firstCard.getBoundingClientRect();
+                    const lastRect = lastCard.getBoundingClientRect();
+
+                    if (e.clientY < firstRect.top) {
+                        if (firstCard.dataset.cardId !== dragState.cardId) {
+                            dragState.targetCardId = firstCard.dataset.cardId;
+                            dragState.dropAction = 'before';
+                            firstCard.classList.add('drag-target-before');
+                            return;
+                        }
+                    } else if (e.clientY > lastRect.bottom) {
+                        if (lastCard.dataset.cardId !== dragState.cardId) {
+                            dragState.targetCardId = lastCard.dataset.cardId;
+                            dragState.dropAction = 'after';
+                            lastCard.classList.add('drag-target-after');
+                            return;
+                        }
+                    } else {
+                        const matched = allImgCards.find(c => {
+                            const r = c.getBoundingClientRect();
+                            return e.clientY >= r.top && e.clientY <= r.bottom;
+                        });
+                        if (matched && matched.dataset.cardId && matched.dataset.cardId !== dragState.cardId) {
+                            const rect = matched.getBoundingClientRect();
+                            const relY = e.clientY - rect.top;
+                            const totalH = rect.height || 100;
+                            const zoneLimit = Math.max(35, Math.min(110, totalH * 0.28));
+
+                            let action = 'swap';
+                            if (relY < zoneLimit) action = 'before';
+                            else if (relY > totalH - zoneLimit) action = 'after';
+                            else action = 'swap';
+
+                            dragState.targetCardId = matched.dataset.cardId;
+                            dragState.dropAction = action;
+                            if (action === 'before') matched.classList.add('drag-target-before');
+                            else if (action === 'after') matched.classList.add('drag-target-after');
+                            else matched.classList.add('drag-target-swap');
+                            return;
+                        }
+                    }
+                }
+
+                dragState.targetCardId = null;
+                dragState.dropAction = null;
                 return;
             }
 
@@ -7359,8 +8745,8 @@
             stopSmoothScroll();
             if (dragState && dragState.ghost) dragState.ghost.remove();
             document.querySelectorAll('.container-block.dragging, .card-item.dragging').forEach(el => el.classList.remove('dragging'));
-            document.querySelectorAll('.container-block.drag-target-before, .container-block.drag-target-after, .card-item.drag-target-before, .card-item.drag-target-after, .card-item.drag-target-over, .sheet-tab.drag-sheet-over, .container-block.drag-over').forEach(el => {
-                el.classList.remove('drag-target-before', 'drag-target-after', 'drag-target-over', 'drag-sheet-over', 'drag-over');
+            document.querySelectorAll('.container-block.drag-target-before, .container-block.drag-target-after, .card-item.drag-target-before, .card-item.drag-target-after, .card-item.drag-target-over, .card-item.drag-target-swap, .sheet-tab.drag-sheet-over, .container-block.drag-over').forEach(el => {
+                el.classList.remove('drag-target-before', 'drag-target-after', 'drag-target-over', 'drag-target-swap', 'drag-sheet-over', 'drag-over');
             });
             document.body.style.userSelect = '';
 
@@ -7370,46 +8756,93 @@
                 const { sheetId, containerId, targetItemId, targetPosition } = dragState;
                 dragState = null;
 
-                if (targetItemId && targetItemId !== containerId) {
-                    const sheet = getSheetById(sheetId);
-                    if (sheet) {
-                        const rootOrder = getRootOrder(sheet);
-                        const fromIdx = rootOrder.indexOf(containerId);
-                        if (fromIdx !== -1) {
-                            // Contar cuántas tarjetas tiene el contenedor
-                            const contCards = sheet.cards.filter(c => c.containerId === containerId);
-                            const cardCount = contCards.length;
+                if (!targetItemId || targetItemId === containerId) {
+                    render();
+                    return;
+                }
 
-                            // Si el contenedor tiene al menos 1 tarjeta, deja 'cardCount' espacios vacíos visibles en el origen
-                            const newEmptySlots = [];
-                            if (cardCount >= 1) {
-                                for (let i = 0; i < cardCount; i++) {
-                                    const slot = createEmptySlot(null);
-                                    sheet.cards.push(slot);
-                                    newEmptySlots.push(slot.id);
-                                }
-                            }
+                const sheet = getSheetById(sheetId);
+                if (!sheet) return;
 
-                            // Reemplazar el contenedor en la posición de origen por los slots vacíos
-                            rootOrder.splice(fromIdx, 1, ...newEmptySlots);
+                const rootOrder = getRootOrder(sheet);
+                const fromIdx = rootOrder.indexOf(containerId);
+                if (fromIdx === -1) { render(); return; }
 
-                            let targetIdx = rootOrder.indexOf(targetItemId);
-                            if (targetIdx !== -1) {
-                                if (targetPosition === 'after') targetIdx += 1;
-                                rootOrder.splice(targetIdx, 0, containerId);
+                let targetIdx = rootOrder.indexOf(targetItemId);
+                if (targetIdx === -1) { render(); return; }
+
+                // Cantidad de tarjetas en el contenedor (mínimo 1 para el espacio del bloque)
+                const contCards = (sheet.cards || []).filter(c => c.containerId === containerId);
+                const cardCount = Math.max(1, contCards.length);
+
+                const isTargetEmpty = isRootEmptySlot(sheet, targetItemId);
+
+                if (targetPosition === 'replace' && isTargetEmpty) {
+                    // CASO 1: Soltado directamente en el centro de un espacio libre para ocuparlo / reemplazarlo
+                    // Consumir hasta cardCount slots vacíos CONSECUTIVOS HACIA ADELANTE partiendo exactamente desde targetIdx
+                    const consumedSlotIds = [];
+                    for (let i = 0; i < cardCount; i++) {
+                        const checkIdx = targetIdx + i;
+                        if (checkIdx < rootOrder.length) {
+                            const id = rootOrder[checkIdx];
+                            if (id === containerId) continue;
+                            if (isRootEmptySlot(sheet, id)) {
+                                consumedSlotIds.push(id);
                             } else {
-                                rootOrder.push(containerId);
+                                break;
                             }
-                            sheet.rootOrder = rootOrder;
-                            saveData();
-                            render();
                         }
                     }
+
+                    if (consumedSlotIds.length === 0 && isTargetEmpty) {
+                        consumedSlotIds.push(targetItemId);
+                    }
+
+                    // Eliminar los slots consumidos de sheet.cards
+                    if (consumedSlotIds.length > 0) {
+                        const consumedSet = new Set(consumedSlotIds);
+                        sheet.cards = sheet.cards.filter(c => !consumedSet.has(c.id));
+                    }
+
+                    // 1. Quitar el contenedor de su origen (SIN crear nuevos slots vacíos innecesarios)
+                    rootOrder.splice(fromIdx, 1);
+
+                    // 2. Insertar el contenedor en el lugar exacto del primer slot consumido
+                    const firstConsumedId = consumedSlotIds[0] || targetItemId;
+                    let newTargetIdx = rootOrder.indexOf(firstConsumedId);
+                    if (newTargetIdx !== -1) {
+                        const countInRoot = consumedSlotIds.filter(id => rootOrder.includes(id)).length;
+                        rootOrder.splice(newTargetIdx, Math.max(1, countInRoot), containerId);
+                    } else {
+                        const safeIdx = (fromIdx < targetIdx) ? targetIdx - 1 : targetIdx;
+                        rootOrder.splice(Math.max(0, safeIdx), 0, containerId);
+                    }
+
+                    sheet.rootOrder = rootOrder;
+                    saveData();
+                    render();
+                    return;
+                } else {
+                    // CASO 2: Soltado antes/después (incluso entre celdas vacías, o junto a contenedores y tarjetas)
+                    // Quitar de origen sin dejar slots vacíos ni alterar las celdas vacías existentes
+                    rootOrder.splice(fromIdx, 1);
+
+                    let newTargetIdx = rootOrder.indexOf(targetItemId);
+                    if (newTargetIdx !== -1) {
+                        if (targetPosition === 'after') newTargetIdx += 1;
+                        rootOrder.splice(newTargetIdx, 0, containerId);
+                    } else {
+                        rootOrder.push(containerId);
+                    }
+
+                    sheet.rootOrder = rootOrder;
+                    saveData();
+                    render();
+                    return;
                 }
-                return;
             }
 
-            const { sheetId, cardId, targetSheetTabId, targetGridIdx, targetRootItemId, targetRootPos } = dragState;
+            const { sheetId, cardId, targetSheetTabId, targetGridIdx, targetRootItemId, targetRootPos, targetCardId, dropAction } = dragState;
             const dropTargetCont = dragState.targetContainerId;
             const isFree = dragState.isFreeDrop;
             dragState = null;
@@ -7448,53 +8881,87 @@
 
                 const movedCard = sheet.cards[fromIdx];
                 const origContainerId = movedCard.containerId || null;
-                const originSlot = createEmptySlot(origContainerId);
 
-                // El origen SIEMPRE deja un espacio vacío (empty-slot)
-                sheet.cards[fromIdx] = originSlot;
-
-                if (origContainerId === null && Array.isArray(sheet.rootOrder)) {
-                    const rootIdx = sheet.rootOrder.indexOf(cardId);
-                    if (rootIdx !== -1) {
-                        sheet.rootOrder[rootIdx] = originSlot.id;
+                // Si la tarjeta arrastrada era un espacio vacío, no dejamos un nuevo originSlot en su lugar
+                let originSlot = null;
+                if (movedCard.isEmpty) {
+                    sheet.cards.splice(fromIdx, 1);
+                    if (origContainerId === null && Array.isArray(sheet.rootOrder)) {
+                        sheet.rootOrder = sheet.rootOrder.filter(id => id !== cardId);
+                    }
+                } else {
+                    originSlot = createEmptySlot(origContainerId);
+                    sheet.cards[fromIdx] = originSlot;
+                    if (origContainerId === null && Array.isArray(sheet.rootOrder)) {
+                        const rootIdx = sheet.rootOrder.indexOf(cardId);
+                        if (rootIdx !== -1) {
+                            sheet.rootOrder[rootIdx] = originSlot.id;
+                        }
                     }
                 }
 
                 // 1. Soltado sobre un slot vacío u otra tarjeta
-                if (targetGridIdx != null) {
-                    const targetCard = sheet.cards[targetGridIdx];
-                    if (targetCard && targetCard.isEmpty) {
-                        // El destino es un espacio vacío -> movedCard toma ese espacio
-                        movedCard.containerId = targetCard.containerId || null;
-                        sheet.cards[targetGridIdx] = movedCard;
+                const resolvedTargetCardId = targetCardId || (targetGridIdx != null && sheet.cards[targetGridIdx] ? sheet.cards[targetGridIdx].id : null);
+                if (resolvedTargetCardId) {
+                    const targetCard = sheet.cards.find(c => c.id === resolvedTargetCardId);
+                    const targetIdx = sheet.cards.findIndex(c => c.id === resolvedTargetCardId);
 
-                        if (targetCard.containerId === null && Array.isArray(sheet.rootOrder)) {
-                            const tRootIdx = sheet.rootOrder.indexOf(targetCard.id);
-                            if (tRootIdx !== -1) {
-                                sheet.rootOrder[tRootIdx] = movedCard.id;
+                    if (targetCard && targetIdx !== -1) {
+                        if (targetCard.isEmpty) {
+                            if (movedCard.isEmpty) {
+                                movedCard.containerId = targetCard.containerId || null;
+                                sheet.cards.splice(targetIdx, 0, movedCard);
+                                if (targetCard.containerId === null && Array.isArray(sheet.rootOrder)) {
+                                    const tRootIdx = sheet.rootOrder.indexOf(targetCard.id);
+                                    if (tRootIdx !== -1) sheet.rootOrder.splice(tRootIdx, 0, movedCard.id);
+                                    else sheet.rootOrder.push(movedCard.id);
+                                }
+                            } else {
+                                movedCard.containerId = targetCard.containerId || null;
+                                sheet.cards[targetIdx] = movedCard;
+                                if (targetCard.containerId === null && Array.isArray(sheet.rootOrder)) {
+                                    const tRootIdx = sheet.rootOrder.indexOf(targetCard.id);
+                                    if (tRootIdx !== -1) sheet.rootOrder[tRootIdx] = movedCard.id;
+                                }
                             }
-                        }
-                    } else if (targetCard) {
-                        // El destino es otra tarjeta -> Intercambio de lugares (Swap)
-                        const targetContId = targetCard.containerId || null;
-                        movedCard.containerId = targetContId;
-                        targetCard.containerId = origContainerId;
+                        } else {
+                            const targetContId = targetCard.containerId || null;
+                            movedCard.containerId = targetContId;
+                            targetCard.containerId = origContainerId;
 
-                        sheet.cards[targetGridIdx] = movedCard;
-                        sheet.cards[fromIdx] = targetCard;
+                            if (movedCard.isEmpty) {
+                                sheet.cards[targetIdx] = movedCard;
+                                sheet.cards.push(targetCard);
+                                if (Array.isArray(sheet.rootOrder)) {
+                                    if (origContainerId === null && targetContId === null) {
+                                        const rIdx = sheet.rootOrder.indexOf(targetCard.id);
+                                        if (rIdx !== -1) sheet.rootOrder[rIdx] = movedCard.id;
+                                        sheet.rootOrder.push(targetCard.id);
+                                    } else if (origContainerId === null) {
+                                        sheet.rootOrder.push(targetCard.id);
+                                    } else if (targetContId === null) {
+                                        const rIdx = sheet.rootOrder.indexOf(targetCard.id);
+                                        if (rIdx !== -1) sheet.rootOrder[rIdx] = movedCard.id;
+                                    }
+                                }
+                            } else {
+                                sheet.cards[targetIdx] = movedCard;
+                                sheet.cards[fromIdx] = targetCard;
 
-                        if (Array.isArray(sheet.rootOrder)) {
-                            if (origContainerId === null && targetContId === null) {
-                                const r1 = sheet.rootOrder.indexOf(originSlot.id);
-                                const r2 = sheet.rootOrder.indexOf(targetCard.id);
-                                if (r1 !== -1) sheet.rootOrder[r1] = targetCard.id;
-                                if (r2 !== -1) sheet.rootOrder[r2] = movedCard.id;
-                            } else if (origContainerId === null && targetContId !== null) {
-                                const r1 = sheet.rootOrder.indexOf(originSlot.id);
-                                if (r1 !== -1) sheet.rootOrder[r1] = targetCard.id;
-                            } else if (origContainerId !== null && targetContId === null) {
-                                const r2 = sheet.rootOrder.indexOf(targetCard.id);
-                                if (r2 !== -1) sheet.rootOrder[r2] = movedCard.id;
+                                if (Array.isArray(sheet.rootOrder)) {
+                                    if (origContainerId === null && targetContId === null) {
+                                        const r1 = sheet.rootOrder.indexOf(originSlot.id);
+                                        const r2 = sheet.rootOrder.indexOf(targetCard.id);
+                                        if (r1 !== -1) sheet.rootOrder[r1] = targetCard.id;
+                                        if (r2 !== -1) sheet.rootOrder[r2] = movedCard.id;
+                                    } else if (origContainerId === null && targetContId !== null) {
+                                        const r1 = sheet.rootOrder.indexOf(originSlot.id);
+                                        if (r1 !== -1) sheet.rootOrder[r1] = targetCard.id;
+                                    } else if (origContainerId !== null && targetContId === null) {
+                                        const r2 = sheet.rootOrder.indexOf(targetCard.id);
+                                        if (r2 !== -1) sheet.rootOrder[r2] = movedCard.id;
+                                    }
+                                }
                             }
                         }
                     }
@@ -7504,7 +8971,7 @@
                     movedCard.containerId = dropTargetCont;
                     sheet.cards.push(movedCard);
                 }
-                // 3. Soltado en la zona libre / lienzo
+                // 3. Soltado en la zona libre / lienzo (respetando posición espacial de inserción)
                 else if (isFree) {
                     movedCard.containerId = null;
                     sheet.cards.push(movedCard);
@@ -7529,7 +8996,72 @@
                 return;
             }
 
-            // Caso C: Mover dentro de la misma hoja (Modo tarjetas normal)
+            // Caso C: Modo Imágenes (Intercambio vs Inserción relativa arriba/abajo)
+            if (sheet.mode === 'images') {
+                if (!targetCardId || !dropAction || targetCardId === cardId) {
+                    render();
+                    return;
+                }
+
+                const fromIdx = sheet.cards.findIndex(c => c.id === cardId);
+                const targetIdx = sheet.cards.findIndex(c => c.id === targetCardId);
+
+                if (fromIdx === -1 || targetIdx === -1) {
+                    render();
+                    return;
+                }
+
+                if (dropAction === 'swap') {
+                    if (fromIdx === targetIdx) { render(); return; }
+                    const movedCard = sheet.cards[fromIdx];
+                    const targetCard = sheet.cards[targetIdx];
+
+                    if (targetCard && targetCard.isEmpty) {
+                        // Reemplazo directo: la tarjeta ocupa el espacio libre consumiéndolo (sin dejar vacío en origen)
+                        sheet.cards[targetIdx] = movedCard;
+                        sheet.cards.splice(fromIdx, 1);
+                        saveData();
+                        render();
+                        showToast('📥 Tarjeta ubicada en el espacio libre.', 'success', 1200);
+                        return;
+                    }
+
+                    sheet.cards[fromIdx] = targetCard;
+                    sheet.cards[targetIdx] = movedCard;
+                    saveData();
+                    render();
+                    showToast('🔄 Posiciones intercambiadas.', 'info', 1200);
+                    return;
+                }
+
+                if (dropAction === 'before' || dropAction === 'after') {
+                    if ((dropAction === 'before' && targetIdx === fromIdx + 1) ||
+                        (dropAction === 'after' && targetIdx === fromIdx - 1) ||
+                        (targetIdx === fromIdx)) {
+                        render();
+                        return;
+                    }
+
+                    const [movedCard] = sheet.cards.splice(fromIdx, 1);
+                    let newTargetIdx = sheet.cards.findIndex(c => c.id === targetCardId);
+                    if (newTargetIdx !== -1) {
+                        if (dropAction === 'after') newTargetIdx += 1;
+                        sheet.cards.splice(newTargetIdx, 0, movedCard);
+                    } else {
+                        sheet.cards.push(movedCard);
+                    }
+
+                    saveData();
+                    render();
+                    showToast(dropAction === 'before' ? '⬆ Tarjeta ubicada arriba.' : '⬇ Tarjeta ubicada abajo.', 'info', 1200);
+                    return;
+                }
+
+                render();
+                return;
+            }
+
+            // Caso D: Mover dentro de la misma hoja (Modo tarjetas normal)
             if (targetGridIdx == null) {
                 render();
                 return;
@@ -7572,14 +9104,18 @@
         let editingCard = null;
         let cardSnapshot = null;
 
-        function openCardEditor(sheetId, cardId, replaceSlotId = null, targetContainerId = null) {
+        function openCardEditor(sheetId, cardId, replaceSlotId = null, targetContainerId = null, spatialTarget = null) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
             let card;
             let isNew = false;
             if (cardId && !replaceSlotId) {
                 card = sheet.cards.find(c => c.id === cardId);
-                if (card && !card.isEmpty) cardSnapshot = JSON.parse(JSON.stringify(card));
+                if (card && !card.isEmpty) {
+                    if (!Array.isArray(card.images)) card.images = [];
+                    if (!Array.isArray(card.links)) card.links = [];
+                    cardSnapshot = JSON.parse(JSON.stringify(card));
+                }
             }
             if (!card || replaceSlotId) {
                 card = { id: generateId(), containerId: targetContainerId, title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
@@ -7590,9 +9126,26 @@
                     if (slotIdx !== -1) {
                         card.containerId = sheet.cards[slotIdx].containerId || targetContainerId || null;
                         sheet.cards[slotIdx] = card;
+                        if (sheet.mode === 'containers' && !card.containerId && Array.isArray(sheet.rootOrder)) {
+                            const rIdx = sheet.rootOrder.indexOf(replaceSlotId);
+                            if (rIdx !== -1) {
+                                sheet.rootOrder[rIdx] = card.id;
+                            }
+                        }
                     } else {
                         sheet.cards.push(card);
                     }
+                } else if (spatialTarget && spatialTarget.targetId && sheet.mode === 'containers' && !targetContainerId) {
+                    sheet.cards.push(card);
+                    const rootOrder = getRootOrder(sheet);
+                    let tIdx = rootOrder.indexOf(spatialTarget.targetId);
+                    if (tIdx !== -1) {
+                        if (spatialTarget.pos === 'after') tIdx += 1;
+                        rootOrder.splice(tIdx, 0, card.id);
+                    } else {
+                        rootOrder.push(card.id);
+                    }
+                    sheet.rootOrder = rootOrder;
                 } else {
                     sheet.cards.push(card);
                 }
@@ -7749,7 +9302,8 @@
         // ---------- Imágenes ----------
         function renderEditImages(images) {
             editImagesContainer.innerHTML = '';
-            images.forEach((img, idx) => {
+            const list = Array.isArray(images) ? images : [];
+            list.forEach((img, idx) => {
                 const div = document.createElement('div');
                 div.className = 'img-item';
                 div.innerHTML = `
@@ -7761,14 +9315,14 @@
                     const i = parseInt(e.target.dataset.index);
                     if (!isNaN(i) && editingCard) {
                         const card = getCardById(editingCard.sheetId, editingCard.cardId);
-                        if (card && card.images[i]) card.images[i].label = e.target.value;
+                        if (card && card.images && card.images[i]) card.images[i].label = e.target.value;
                     }
                 });
                 div.querySelector('.btn-remove').addEventListener('click', () => {
                     const i = parseInt(div.querySelector('.btn-remove').dataset.index);
                     if (!isNaN(i) && editingCard) {
                         const card = getCardById(editingCard.sheetId, editingCard.cardId);
-                        if (card) {
+                        if (card && card.images) {
                             card.images.splice(i, 1);
                             saveData();
                             renderEditImages(card.images);
@@ -7782,7 +9336,8 @@
         // ---------- Enlaces ----------
         function renderEditLinks(links) {
             editLinksContainer.innerHTML = '';
-            links.forEach((link, idx) => {
+            const list = Array.isArray(links) ? links : [];
+            list.forEach((link, idx) => {
                 const div = document.createElement('div');
                 div.className = 'link-item';
                 div.innerHTML = `
@@ -8080,7 +9635,14 @@
                         const idx = sheet.cards.findIndex(c => c.id === editingCard.cardId);
                         if (idx !== -1) {
                             if (editingCard.replacedSlotId) {
-                                sheet.cards[idx] = { id: editingCard.replacedSlotId, isEmpty: true };
+                                const origCont = sheet.cards[idx].containerId || null;
+                                sheet.cards[idx] = { id: editingCard.replacedSlotId, containerId: origCont, isEmpty: true };
+                                if (sheet.mode === 'containers' && !origCont && Array.isArray(sheet.rootOrder)) {
+                                    const rIdx = sheet.rootOrder.indexOf(editingCard.cardId);
+                                    if (rIdx !== -1) {
+                                        sheet.rootOrder[rIdx] = editingCard.replacedSlotId;
+                                    }
+                                }
                             } else {
                                 sheet.cards.splice(idx, 1);
                             }
@@ -8628,7 +10190,7 @@
         // ============================================================
         let editingContainer = null;
 
-        function openContainerModal(sheetId, containerId = null, cardIdsToGroup = null) {
+        function openContainerModal(sheetId, containerId = null, cardIdsToGroup = null, spatialTarget = null) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
             if (!Array.isArray(sheet.containers)) sheet.containers = [];
@@ -8655,6 +10217,7 @@
                 containerId: cont.id,
                 isNew,
                 cardIdsToGroup: Array.isArray(cardIdsToGroup) ? [...cardIdsToGroup] : null,
+                spatialTarget,
                 contData: JSON.parse(JSON.stringify(cont))
             };
 
@@ -8683,33 +10246,119 @@
             }
         }
 
-        function renderContColorRow(selectedColor) {
-            if (!contColorRow) return;
-            contColorRow.innerHTML = '';
-            CONTAINER_COLORS.forEach(c => {
-                const sw = document.createElement('div');
-                sw.className = 'cs' + (selectedColor === c ? ' sel' : '');
-                sw.style.backgroundColor = c;
-                sw.title = c;
-                sw.addEventListener('click', () => {
-                    if (editingContainer && editingContainer.contData) {
-                        editingContainer.contData.color = c;
-                    }
-                    renderContColorRow(c);
+        function applyContColor(newColor, skipHexInput = false, skipPicker = false) {
+            const norm = normalizeHexColor(newColor, '#3b82f6');
+            if (editingContainer && editingContainer.contData) {
+                editingContainer.contData.color = norm;
+            }
+
+            const presetsContainer = document.getElementById('cont-color-presets');
+            const pickerInput = document.getElementById('cont-color-picker');
+            const hexInput = document.getElementById('cont-color-hex-input');
+            const previewEl = document.getElementById('cont-color-preview');
+
+            if (presetsContainer) {
+                presetsContainer.querySelectorAll('.cs').forEach(sw => {
+                    sw.classList.toggle('sel', sw.dataset.color === norm.toLowerCase());
                 });
-                contColorRow.appendChild(sw);
-            });
-            const colorInput = document.createElement('input');
-            colorInput.type = 'color';
-            colorInput.value = selectedColor || '#3b82f6';
-            colorInput.title = 'Color personalizado';
-            colorInput.addEventListener('input', () => {
-                if (editingContainer && editingContainer.contData) {
-                    editingContainer.contData.color = colorInput.value;
-                }
-                renderContColorRow(colorInput.value);
-            });
-            contColorRow.appendChild(colorInput);
+            }
+
+            if (pickerInput && !skipPicker) {
+                pickerInput.value = norm;
+            }
+
+            if (hexInput && !skipHexInput) {
+                hexInput.value = norm.toUpperCase();
+            }
+
+            if (previewEl) {
+                previewEl.style.setProperty('--cont-preview-color', norm);
+                previewEl.style.setProperty('--cont-preview-bg', getContBgColor(norm, 0.25));
+            }
+        }
+
+        function renderContColorRow(selectedColor) {
+            const normColor = normalizeHexColor(selectedColor, '#3b82f6');
+            if (editingContainer && editingContainer.contData) {
+                editingContainer.contData.color = normColor;
+            }
+
+            const presetsContainer = document.getElementById('cont-color-presets');
+            const pickerInput = document.getElementById('cont-color-picker');
+            const hexInput = document.getElementById('cont-color-hex-input');
+            const previewEl = document.getElementById('cont-color-preview');
+            const previewText = previewEl ? previewEl.querySelector('.cont-preview-text') : null;
+
+            // 1. Construir presets solo si no existen todavía
+            if (presetsContainer && presetsContainer.children.length === 0) {
+                CONTAINER_COLORS.forEach(c => {
+                    const sw = document.createElement('div');
+                    sw.className = 'cs';
+                    sw.dataset.color = c.toLowerCase();
+                    sw.style.backgroundColor = c;
+                    sw.title = c;
+                    sw.addEventListener('click', () => {
+                        applyContColor(c);
+                    });
+                    presetsContainer.appendChild(sw);
+                });
+            }
+
+            // Sincronizar estado visual inicial
+            applyContColor(normColor);
+
+            // Conectar eventos una sola vez de forma idempotente
+            if (pickerInput && !pickerInput._hasContColorListener) {
+                pickerInput._hasContColorListener = true;
+                pickerInput.addEventListener('input', (e) => {
+                    applyContColor(e.target.value, false, true);
+                });
+                pickerInput.addEventListener('change', (e) => {
+                    applyContColor(e.target.value, false, false);
+                });
+            }
+
+            if (hexInput && !hexInput._hasContColorListener) {
+                hexInput._hasContColorListener = true;
+                hexInput.addEventListener('input', () => {
+                    let val = hexInput.value.trim();
+                    if (!val.startsWith('#')) val = '#' + val;
+                    if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+                        applyContColor(val, true, false);
+                    }
+                });
+                hexInput.addEventListener('blur', () => {
+                    let val = hexInput.value.trim();
+                    const currentContColor = (editingContainer && editingContainer.contData && editingContainer.contData.color) || '#3b82f6';
+                    const norm = normalizeHexColor(val, currentContColor);
+                    applyContColor(norm, false, false);
+                });
+                hexInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        let val = hexInput.value.trim();
+                        const currentContColor = (editingContainer && editingContainer.contData && editingContainer.contData.color) || '#3b82f6';
+                        const norm = normalizeHexColor(val, currentContColor);
+                        applyContColor(norm, false, false);
+                        if (containerModalSave) containerModalSave.click();
+                    }
+                });
+            }
+
+            if (contEditName && !contEditName._hasPreviewListener) {
+                contEditName._hasPreviewListener = true;
+                contEditName.addEventListener('input', () => {
+                    if (previewText) {
+                        const nameVal = contEditName.value.trim();
+                        previewText.textContent = nameVal ? nameVal.toUpperCase() : 'VISTA PREVIA';
+                    }
+                });
+            }
+
+            if (previewText && contEditName) {
+                const nameVal = contEditName.value.trim();
+                previewText.textContent = nameVal ? nameVal.toUpperCase() : 'VISTA PREVIA';
+            }
         }
 
         if (contEditName) {
@@ -8743,7 +10392,10 @@
                 if (!Array.isArray(sheet.containers)) sheet.containers = [];
 
                 const name = (contEditName ? contEditName.value.trim() : '') || 'Contenedor';
-                const color = (editingContainer.contData && editingContainer.contData.color) || '#3b82f6';
+                const hexInput = document.getElementById('cont-color-hex-input');
+                const pickerInput = document.getElementById('cont-color-picker');
+                let colorVal = (hexInput && hexInput.value.trim()) || (pickerInput && pickerInput.value) || (editingContainer.contData && editingContainer.contData.color) || '#3b82f6';
+                const color = normalizeHexColor(colorVal, '#3b82f6');
                 const titleFontSize = (contEditFontSize && contEditFontSize.value) ? contEditFontSize.value : '13px';
 
                 if (editingContainer.isNew) {
@@ -8789,6 +10441,16 @@
 
                         clearCardSelection();
                         showToast(`📦 Contenedor "${name}" creado con ${gCardIds.length} tarjeta(s).`, 'success');
+                    } else if (editingContainer.spatialTarget && editingContainer.spatialTarget.targetId) {
+                        if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = getRootOrder(sheet);
+                        let tIdx = sheet.rootOrder.indexOf(editingContainer.spatialTarget.targetId);
+                        if (tIdx !== -1) {
+                            if (editingContainer.spatialTarget.pos === 'after') tIdx += 1;
+                            sheet.rootOrder.splice(tIdx, 0, newCont.id);
+                        } else {
+                            sheet.rootOrder.push(newCont.id);
+                        }
+                        showToast('📦 Contenedor creado.', 'success');
                     } else {
                         if (!Array.isArray(sheet.rootOrder)) sheet.rootOrder = getRootOrder(sheet);
                         if (!sheet.rootOrder.includes(newCont.id)) sheet.rootOrder.push(newCont.id);
@@ -8844,6 +10506,397 @@
             btnFloatingClear.addEventListener('click', () => {
                 clearCardSelection();
             });
+        }
+
+        if (btnFloatingAddEmptySlots) {
+            btnFloatingAddEmptySlots.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const sheet = getActiveSheet();
+                if (!sheet) return;
+                const count = selectedCardIds.size;
+                if (count === 0) return;
+                startSlotPlacement(count, sheet.id);
+            });
+        }
+
+        // ============================================================
+        // MOTOR DE COLOCACIÓN DE ESPACIOS VACÍOS ANCLADOS AL CURSOR
+        // ============================================================
+        let slotPlacementState = null;
+
+        function startSlotPlacement(count, sheetId) {
+            if (!count || count <= 0) return;
+            if (slotPlacementState) cleanupSlotPlacement();
+
+            const targetSheetId = sheetId || state.activeSheetId;
+            const sheet = getSheetById(targetSheetId);
+            if (!sheet) return;
+
+            // Limpiar selección de tarjetas y ocultar la barra flotante
+            clearCardSelection();
+
+            // Crear el elemento fantasma que acompaña al cursor
+            const ghost = document.createElement('div');
+            ghost.className = 'slot-placement-ghost';
+            ghost.id = 'slot-placement-ghost';
+            ghost.innerHTML = `
+                <div class="slot-ghost-badge">
+                    <span class="slot-ghost-icon">🔲</span>
+                    <span>${count} espacio${count > 1 ? 's vacíos' : ' vacío'}</span>
+                </div>
+                <div class="slot-ghost-hint" id="slot-ghost-hint-text">Mueve el mouse y haz Clic para ubicar · Esc cancelar</div>
+            `;
+            ghost.style.left = '-9999px';
+            ghost.style.top = '-9999px';
+            document.body.appendChild(ghost);
+
+            slotPlacementState = {
+                count: count,
+                sheetId: targetSheetId,
+                ghost: ghost,
+                target: null,
+                canPlace: false
+            };
+
+            document.body.classList.add('placing-slots');
+
+            window.addEventListener('mousemove', onSlotPlacementMouseMove, true);
+            window.addEventListener('click', onSlotPlacementClick, true);
+            window.addEventListener('contextmenu', onSlotPlacementCancel, true);
+            window.addEventListener('keydown', onSlotPlacementKeyDown, true);
+
+            setTimeout(() => {
+                if (slotPlacementState) slotPlacementState.canPlace = true;
+            }, 100);
+
+            showToast(`🔲 ${count} espacio${count > 1 ? 's anclados' : ' anclado'} al cursor. Haz Clic donde quieras ubicarlo${count > 1 ? 's' : ''}.`, 'info', 3000);
+        }
+
+        function clearSlotPlacementHighlights() {
+            document.querySelectorAll('.drag-target-before, .drag-target-after, .drag-over, .drag-target-over').forEach(el => {
+                el.classList.remove('drag-target-before', 'drag-target-after', 'drag-over', 'drag-target-over');
+            });
+        }
+
+        function onSlotPlacementMouseMove(e) {
+            if (!slotPlacementState) return;
+
+            if (slotPlacementState.ghost) {
+                slotPlacementState.ghost.style.left = e.clientX + 'px';
+                slotPlacementState.ghost.style.top = e.clientY + 'px';
+            }
+
+            const rect = contentEl.getBoundingClientRect();
+            const threshold = 75;
+            const maxSpeed = 16;
+            if (e.clientY < rect.top + threshold && e.clientY >= rect.top - 50) {
+                const ratio = Math.min(1, Math.max(0.12, (rect.top + threshold - e.clientY) / threshold));
+                startSmoothScroll(-ratio * maxSpeed);
+            } else if (e.clientY > rect.bottom - threshold && e.clientY <= rect.bottom + 50) {
+                const ratio = Math.min(1, Math.max(0.12, (e.clientY - (rect.bottom - threshold)) / threshold));
+                startSmoothScroll(ratio * maxSpeed);
+            } else {
+                stopSmoothScroll();
+            }
+
+            clearSlotPlacementHighlights();
+
+            const sheet = getSheetById(slotPlacementState.sheetId) || getActiveSheet();
+            if (!sheet) return;
+
+            const elements = document.elementsFromPoint(e.clientX, e.clientY);
+            let target = null;
+            let hint = 'Mueve el cursor y haz Clic para ubicar';
+
+            // 1. Detectar tarjeta
+            const targetCardEl = elements.find(el => el.classList && el.classList.contains('card-item') && el.dataset.cardId);
+            if (targetCardEl) {
+                const cardId = targetCardEl.dataset.cardId;
+                const r = targetCardEl.getBoundingClientRect();
+                const contBody = targetCardEl.closest('.container-body');
+                const contBlock = targetCardEl.closest('.container-block');
+                const containerId = contBody?.dataset.containerId || contBlock?.dataset.containerId || null;
+
+                let pos = 'after';
+                if (e.clientY < r.top + r.height * 0.35) {
+                    pos = 'before';
+                } else if (e.clientY > r.bottom - r.height * 0.35) {
+                    pos = 'after';
+                } else {
+                    pos = (e.clientX < r.left + r.width / 2) ? 'before' : 'after';
+                }
+
+                target = {
+                    type: 'card',
+                    cardId: cardId,
+                    pos: pos,
+                    containerId: containerId
+                };
+
+                targetCardEl.classList.add(pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+
+                if (containerId) {
+                    const cont = (sheet.containers || []).find(c => c.id === containerId);
+                    hint = `Ubicar ${pos === 'before' ? 'antes' : 'después'} de tarjeta en "${cont ? cont.name : 'Contenedor'}"`;
+                } else {
+                    hint = `Ubicar ${pos === 'before' ? 'antes' : 'después'} de tarjeta`;
+                }
+            } else {
+                // 2. Detectar contenedor
+                const contBodyOrBlock = elements.find(el => el.classList && (el.classList.contains('container-body') || el.classList.contains('container-block')));
+                if (contBodyOrBlock) {
+                    const contBlock = contBodyOrBlock.closest('.container-block') || contBodyOrBlock;
+                    const contId = contBlock.dataset.containerId;
+                    if (contId) {
+                        target = {
+                            type: 'container',
+                            containerId: contId,
+                            pos: 'append'
+                        };
+                        contBlock.classList.add('drag-over');
+                        const cont = (sheet.containers || []).find(c => c.id === contId);
+                        hint = `Ubicar al final del contenedor "${cont ? cont.name : 'Contenedor'}"`;
+                    }
+                } else {
+                    // 3. Detectar lienzo general
+                    const isOverCanvas = elements.some(el => el === cardsContainer || el === contentEl || (el && (el.id === 'content' || el.id === 'cards-container')));
+                    if (isOverCanvas) {
+                        const rootChildren = Array.from(cardsContainer.children).filter(el => 
+                            el.classList && (el.classList.contains('container-block') || (el.classList.contains('card-item') && el.parentElement === cardsContainer))
+                        );
+
+                        if (rootChildren.length === 0) {
+                            target = { type: 'root_bottom' };
+                            hint = 'Ubicar en el lienzo';
+                        } else {
+                            const firstChild = rootChildren[0];
+                            const lastChild = rootChildren[rootChildren.length - 1];
+                            const firstRect = firstChild.getBoundingClientRect();
+                            const lastRect = lastChild.getBoundingClientRect();
+
+                            if (e.clientY < firstRect.top + 15) {
+                                target = { type: 'root_top' };
+                                firstChild.classList.add('drag-target-before');
+                                hint = 'Ubicar en la parte SUPERIOR (inicio)';
+                            } else if (e.clientY > lastRect.bottom - 15) {
+                                target = { type: 'root_bottom' };
+                                lastChild.classList.add('drag-target-after');
+                                hint = 'Ubicar en la parte INFERIOR (final)';
+                            } else {
+                                let closestChild = null;
+                                let minDist = Infinity;
+                                rootChildren.forEach(child => {
+                                    const cr = child.getBoundingClientRect();
+                                    const cx = cr.left + cr.width / 2;
+                                    const cy = cr.top + cr.height / 2;
+                                    const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+                                    if (dist < minDist) {
+                                        minDist = dist;
+                                        closestChild = child;
+                                    }
+                                });
+
+                                if (closestChild) {
+                                    const cr = closestChild.getBoundingClientRect();
+                                    let pos = 'after';
+                                    if (e.clientY < cr.top + cr.height * 0.35) {
+                                        pos = 'before';
+                                    } else if (e.clientY > cr.bottom - cr.height * 0.35) {
+                                        pos = 'after';
+                                    } else {
+                                        pos = (e.clientX < cr.left + cr.width / 2) ? 'before' : 'after';
+                                    }
+
+                                    const isCont = !!closestChild.dataset.containerId;
+                                    const rootId = closestChild.dataset.containerId || closestChild.dataset.cardId;
+                                    target = {
+                                        type: isCont ? 'root_container' : 'card',
+                                        cardId: closestChild.dataset.cardId || null,
+                                        containerId: closestChild.dataset.containerId || null,
+                                        rootItemId: rootId,
+                                        pos: pos
+                                    };
+                                    closestChild.classList.add(pos === 'before' ? 'drag-target-before' : 'drag-target-after');
+                                    hint = `Ubicar ${pos === 'before' ? 'antes' : 'después'} de ${isCont ? 'contenedor' : 'tarjeta'}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            slotPlacementState.target = target;
+            const hintEl = document.getElementById('slot-ghost-hint-text');
+            if (hintEl) hintEl.textContent = hint + ' · Clic ubicar · Esc cancelar';
+        }
+
+        function onSlotPlacementClick(e) {
+            if (!slotPlacementState) return;
+            if (!slotPlacementState.canPlace) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            executeSlotPlacement();
+        }
+
+        function onSlotPlacementCancel(e) {
+            if (!slotPlacementState) return;
+            e.preventDefault();
+            e.stopPropagation();
+            cancelSlotPlacement();
+        }
+
+        function onSlotPlacementKeyDown(e) {
+            if (!slotPlacementState) return;
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                e.preventDefault();
+                e.stopPropagation();
+                cancelSlotPlacement();
+            }
+        }
+
+        function cancelSlotPlacement() {
+            cleanupSlotPlacement();
+            showToast('Colocación de espacios cancelada.', 'info', 1500);
+        }
+
+        function cleanupSlotPlacement() {
+            stopSmoothScroll();
+            clearSlotPlacementHighlights();
+            document.body.classList.remove('placing-slots');
+
+            if (slotPlacementState && slotPlacementState.ghost) {
+                slotPlacementState.ghost.remove();
+            }
+
+            window.removeEventListener('mousemove', onSlotPlacementMouseMove, true);
+            window.removeEventListener('click', onSlotPlacementClick, true);
+            window.removeEventListener('contextmenu', onSlotPlacementCancel, true);
+            window.removeEventListener('keydown', onSlotPlacementKeyDown, true);
+
+            slotPlacementState = null;
+        }
+
+        function executeSlotPlacement() {
+            if (!slotPlacementState) return;
+            const { count, sheetId, target } = slotPlacementState;
+            const sheet = getSheetById(sheetId) || getActiveSheet();
+
+            if (!sheet || count <= 0) {
+                cleanupSlotPlacement();
+                return;
+            }
+
+            if (!Array.isArray(sheet.cards)) sheet.cards = [];
+
+            const targetContId = target?.containerId || (target?.type === 'container' ? target.containerId : null);
+
+            const newSlots = [];
+            for (let i = 0; i < count; i++) {
+                newSlots.push(createEmptySlot(targetContId));
+            }
+            const newSlotIds = newSlots.map(s => s.id);
+
+            if (sheet.mode === 'containers') {
+                if (!Array.isArray(sheet.rootOrder)) {
+                    sheet.rootOrder = getRootOrder(sheet);
+                }
+
+                if (targetContId) {
+                    if (target?.cardId) {
+                        const idx = sheet.cards.findIndex(c => c.id === target.cardId);
+                        if (idx !== -1) {
+                            const insertIdx = target.pos === 'before' ? idx : idx + 1;
+                            sheet.cards.splice(insertIdx, 0, ...newSlots);
+                        } else {
+                            sheet.cards.push(...newSlots);
+                        }
+                    } else {
+                        let lastContCardIdx = -1;
+                        for (let i = sheet.cards.length - 1; i >= 0; i--) {
+                            if (sheet.cards[i].containerId === targetContId) {
+                                lastContCardIdx = i;
+                                break;
+                            }
+                        }
+                        if (lastContCardIdx !== -1) {
+                            sheet.cards.splice(lastContCardIdx + 1, 0, ...newSlots);
+                        } else {
+                            sheet.cards.push(...newSlots);
+                        }
+                    }
+                } else {
+                    if (target?.type === 'root_top') {
+                        sheet.rootOrder.unshift(...newSlotIds);
+                        sheet.cards.unshift(...newSlots);
+                    } else if (target?.type === 'root_bottom' || !target || target.type === 'empty_canvas') {
+                        sheet.rootOrder.push(...newSlotIds);
+                        sheet.cards.push(...newSlots);
+                    } else if (target.rootItemId || target.cardId) {
+                        const refId = target.rootItemId || target.cardId;
+                        const rIdx = sheet.rootOrder.indexOf(refId);
+                        if (rIdx !== -1) {
+                            const insertIdx = target.pos === 'before' ? rIdx : rIdx + 1;
+                            sheet.rootOrder.splice(insertIdx, 0, ...newSlotIds);
+                        } else {
+                            sheet.rootOrder.push(...newSlotIds);
+                        }
+
+                        if (target.cardId) {
+                            const cIdx = sheet.cards.findIndex(c => c.id === target.cardId);
+                            if (cIdx !== -1) {
+                                const insertCIdx = target.pos === 'before' ? cIdx : cIdx + 1;
+                                sheet.cards.splice(insertCIdx, 0, ...newSlots);
+                            } else {
+                                sheet.cards.push(...newSlots);
+                            }
+                        } else if (target.rootItemId) {
+                            let contCardIdx = -1;
+                            if (target.pos === 'before') {
+                                contCardIdx = sheet.cards.findIndex(c => c.containerId === target.rootItemId);
+                            } else {
+                                for (let i = sheet.cards.length - 1; i >= 0; i--) {
+                                    if (sheet.cards[i].containerId === target.rootItemId) {
+                                        contCardIdx = i + 1;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (contCardIdx !== -1) {
+                                sheet.cards.splice(contCardIdx, 0, ...newSlots);
+                            } else {
+                                sheet.cards.push(...newSlots);
+                            }
+                        } else {
+                            sheet.cards.push(...newSlots);
+                        }
+                    } else {
+                        sheet.rootOrder.push(...newSlotIds);
+                        sheet.cards.push(...newSlots);
+                    }
+                }
+            } else {
+                if (target?.type === 'root_top') {
+                    sheet.cards.unshift(...newSlots);
+                } else if (target?.type === 'root_bottom' || !target || target.type === 'empty_canvas') {
+                    sheet.cards.push(...newSlots);
+                } else if (target.cardId) {
+                    const idx = sheet.cards.findIndex(c => c.id === target.cardId);
+                    if (idx !== -1) {
+                        const insertIdx = target.pos === 'before' ? idx : idx + 1;
+                        sheet.cards.splice(insertIdx, 0, ...newSlots);
+                    } else {
+                        sheet.cards.push(...newSlots);
+                    }
+                } else {
+                    sheet.cards.push(...newSlots);
+                }
+            }
+
+            saveData();
+            render();
+            cleanupSlotPlacement();
+            showToast(`✨ ${count} espacio${count > 1 ? 's vacíos creados' : ' vacío creado'} exitosamente.`, 'success', 2200);
         }
 
         document.getElementById('settings-close').addEventListener('click', () => settingsOverlay.classList.remove('show'));
@@ -9040,10 +11093,10 @@
             openCardEditor(sheet.id, null);
         });
         cardsContainer.addEventListener('dblclick', (e) => {
-            if (e.target.closest('.card-item') || e.target.closest('.card-actions') || e.target.closest('.card-copy-row')) return;
+            if (e.target.closest('.card-item') || e.target.closest('.card-actions') || e.target.closest('.card-copy-row') || e.target.closest('.container-block')) return;
             if (openDrawerTimer) { clearTimeout(openDrawerTimer); openDrawerTimer = null; }
             const sheet = getActiveSheet();
-            if (!sheet || sheet.mode === 'process') return;
+            if (!sheet || sheet.mode === 'process' || sheet.mode === 'containers') return;
             openCardEditor(sheet.id, null);
         });
 
@@ -9089,21 +11142,80 @@
         editPinned.addEventListener('change', autosaveCard);
         editSheet.addEventListener('change', autosaveCard);
 
-        // ============================================================
-        // BÚSQUEDA
-        // ============================================================
+        let searchInputRaf = null;
         searchInput.addEventListener('input', () => {
             state.searchQuery = searchInput.value;
             const sheet = getActiveSheet();
-            // En modo procesos re-resaltamos las celdas en sitio: mantiene scroll,
-            // selección y anchos de columna, sin reconstruir ni deformar la cuadrícula.
-            if (sheet && sheet.mode === 'process') {
-                exApplyHighlight();
+            if (!sheet) return;
+
+            if (searchInputRaf) cancelAnimationFrame(searchInputRaf);
+            searchInputRaf = requestAnimationFrame(() => {
+                // 1. En modo procesos: re-resaltamos celdas en sitio sin reconstruir cuadrícula
+                if (sheet.mode === 'process') {
+                    exApplyHighlight();
+                    updateResultCount();
+                    return;
+                }
+
+                // 2. En modo marcar búsqueda: actualización instantánea en sitio, sin parpadeos ni recreación del DOM
+                if (state.searchFilterMode === 'mark') {
+                    if (cardsContainer.querySelector('.empty-cards') || !cardsContainer.querySelector('.card-item')) {
+                        renderCards();
+                    } else {
+                        applyMarkSearchInPlace();
+                    }
+                    updateSearchNav();
+                    return;
+                }
+
+                // 3. En modo ocultar (hide): actualizamos las tarjetas sin reconstruir la barra inferior de hojas
+                renderCards();
                 updateResultCount();
-                return;
-            }
-            render();
+                collectVisibleCards();
+            });
         });
+        searchInput.addEventListener('keydown', (e) => {
+            if (state.searchFilterMode === 'mark' && (state.searchQuery || '').trim()) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    navigateSearchMatch(e.shiftKey ? -1 : 1);
+                } else if (e.key === 'F3') {
+                    e.preventDefault();
+                    navigateSearchMatch(e.shiftKey ? -1 : 1);
+                }
+            }
+        });
+        const searchWrap = document.getElementById('search-wrap');
+        if (searchWrap) {
+            searchWrap.addEventListener('click', (e) => {
+                if (e.target.closest('#search-mode-buttons') || e.target.closest('#search-nav-buttons')) return;
+                if (e.target !== searchInput) searchInput.focus();
+            });
+        }
+        if (btnSearchMark) {
+            btnSearchMark.addEventListener('click', (e) => {
+                e.stopPropagation();
+                setSearchFilterMode('mark');
+            });
+        }
+        if (btnSearchHide) {
+            btnSearchHide.addEventListener('click', (e) => {
+                e.stopPropagation();
+                setSearchFilterMode('hide');
+            });
+        }
+        if (btnSearchPrev) {
+            btnSearchPrev.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigateSearchMatch(-1);
+            });
+        }
+        if (btnSearchNext) {
+            btnSearchNext.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigateSearchMatch(1);
+            });
+        }
         btnFavFilter.addEventListener('click', () => {
             state.favOnly = !state.favOnly;
             render();
@@ -9116,7 +11228,7 @@
         });
         if (btnPasteCard) {
             btnPasteCard.addEventListener('click', () => {
-                const sheet = getActiveSheet();
+                const sheet = getSheetById(state.activeSheetId);
                 if (sheet && (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers')) {
                     pasteFullCard(sheet.id, null);
                 }
@@ -9136,11 +11248,43 @@
             const sheet = getActiveSheet();
             if (!sheet || sheet.mode === 'process') return;
             const isCardsOrImages = (sheet.mode === 'cards' || sheet.mode === 'images' || sheet.mode === 'containers');
+
+            let spatial = null;
+            if (sheet.mode === 'containers') {
+                spatial = getSpatialRootTarget(sheet, e.clientX, e.clientY);
+            }
+
+            const copied = getCopiedCard();
+            const pasteLabel = copied && copied.title
+                ? `Pegar tarjeta libre aquí ("${copied.title.slice(0, 20)}${copied.title.length > 20 ? '...' : ''}")`
+                : (sheet.mode === 'containers' ? 'Pegar tarjeta libre aquí' : 'Pegar tarjeta');
+
             const items = [
-                { icon: '➕', label: sheet.mode === 'containers' ? 'Nueva tarjeta libre' : 'Nueva tarjeta', fn: () => openCardEditor(sheet.id, null) },
-                sheet.mode === 'containers' ? { icon: '📦', label: 'Nuevo contenedor', fn: () => openContainerModal(sheet.id, null) } : null,
-                isCardsOrImages && hasCopiedCard() ? { icon: '📥', label: sheet.mode === 'containers' ? 'Pegar tarjeta libre' : 'Pegar tarjeta', fn: () => pasteFullCard(sheet.id, null) } : null,
-                (sheet.mode === 'cards' || sheet.mode === 'containers') ? { icon: '🧹', label: 'Compactar espacios vacíos', fn: () => compactarHoja(sheet.id) } : null
+                {
+                    icon: '➕',
+                    label: sheet.mode === 'containers' ? 'Nueva tarjeta libre aquí' : 'Nueva tarjeta',
+                    fn: () => openCardEditor(sheet.id, null, null, null, spatial)
+                },
+                sheet.mode === 'containers' ? {
+                    icon: '📦',
+                    label: 'Nuevo contenedor aquí',
+                    fn: () => openContainerModal(sheet.id, null, null, spatial)
+                } : null,
+                sheet.mode === 'containers' ? {
+                    icon: '⬜',
+                    label: 'Crear espacio vacío aquí',
+                    fn: () => createRootEmptySlotAt(sheet.id, spatial)
+                } : null,
+                isCardsOrImages && hasCopiedCard() ? {
+                    icon: '📥',
+                    label: pasteLabel,
+                    fn: () => pasteFullCard(sheet.id, null, null, spatial)
+                } : null,
+                (sheet.mode === 'cards' || sheet.mode === 'containers') ? {
+                    icon: '🧹',
+                    label: 'Compactar espacios vacíos',
+                    fn: () => compactarHoja(sheet.id)
+                } : null
             ].filter(Boolean);
             if (items.length) showContextMenu(e.clientX, e.clientY, items);
         });
@@ -9173,6 +11317,13 @@
         // ATAJOS DE TECLADO
         // ============================================================
         document.addEventListener('keydown', (e) => {
+            if (e.key === 'F3') {
+                if (state.searchFilterMode === 'mark' && (state.searchQuery || '').trim()) {
+                    e.preventDefault();
+                    navigateSearchMatch(e.shiftKey ? -1 : 1);
+                }
+                return;
+            }
             if (e.ctrlKey || e.metaKey) {
                 switch (e.key.toLowerCase()) {
                     case 'n':
@@ -9199,12 +11350,20 @@
                             compactarHoja(state.activeSheetId);
                         } else {
                             const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
-                            if (!typing && !modalOverlay.classList.contains('show') && selectedIndex >= 0 && visibleCards[selectedIndex]) {
-                                const sel = visibleCards[selectedIndex];
-                                const card = getCardById(sel.sheetId, sel.cardId);
-                                if (card) {
+                            if (!typing && !modalOverlay.classList.contains('show')) {
+                                let cardToCopy = null;
+                                if (selectedCardIds && selectedCardIds.size > 0) {
+                                    const firstId = Array.from(selectedCardIds)[0];
+                                    cardToCopy = getCardById(selectedSheetId || state.activeSheetId, firstId);
+                                } else if (state.drawer && state.drawer.cardId) {
+                                    cardToCopy = getCardById(state.drawer.sheetId, state.drawer.cardId);
+                                } else if (selectedIndex >= 0 && visibleCards[selectedIndex]) {
+                                    const sel = visibleCards[selectedIndex];
+                                    cardToCopy = getCardById(sel.sheetId, sel.cardId);
+                                }
+                                if (cardToCopy) {
                                     e.preventDefault();
-                                    copyFullCard(card);
+                                    copyFullCard(cardToCopy);
                                 }
                             }
                         }
@@ -9218,9 +11377,14 @@
                     case 'v':
                         if (e.shiftKey) {
                             e.preventDefault();
-                            state.view = state.view === 'list' ? 'grid' : 'list';
-                            saveData();
-                            render();
+                            const sheet = getActiveSheet();
+                            if (sheet && sheet.mode === 'cards') {
+                                state.view = state.view === 'list' ? 'grid' : 'list';
+                                saveData();
+                                render();
+                            } else {
+                                showToast('La vista de lista solo está disponible en modo Tarjetas', 'info', 1400);
+                            }
                         } else {
                             const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
                             if (!typing && !modalOverlay.classList.contains('show')) {
@@ -9249,13 +11413,37 @@
                 }
                 return;
             }
-            // Flechas + Enter copia (fuera de inputs/modal)
+            // Flechas + Enter copia + Delete/Backspace borrado (fuera de inputs/modal)
             const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
             if (typing || modalOverlay.classList.contains('show')) {
                 if (e.key === 'Escape' && modalOverlay.classList.contains('show')) {
                     e.preventDefault();
                     cancelCardEditor();
                 }
+                return;
+            }
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                let cardToDeleteId = null;
+                let targetSheetId = state.activeSheetId;
+                if (selectedCardIds && selectedCardIds.size > 0) {
+                    cardToDeleteId = Array.from(selectedCardIds)[0];
+                    targetSheetId = selectedSheetId || state.activeSheetId;
+                } else if (state.drawer && state.drawer.cardId) {
+                    cardToDeleteId = state.drawer.cardId;
+                    targetSheetId = state.drawer.sheetId;
+                } else if (selectedIndex >= 0 && visibleCards[selectedIndex]) {
+                    cardToDeleteId = visibleCards[selectedIndex].cardId;
+                    targetSheetId = visibleCards[selectedIndex].sheetId;
+                }
+                if (cardToDeleteId) {
+                    e.preventDefault();
+                    confirmDeleteCard(targetSheetId, cardToDeleteId, false);
+                    return;
+                }
+            }
+            if (selectedCardIds.size > 0 && (e.key === 'e' || e.key === 'E')) {
+                e.preventDefault();
+                startSlotPlacement(selectedCardIds.size, selectedSheetId || state.activeSheetId);
                 return;
             }
             if (visibleCards.length === 0) return;
@@ -9282,6 +11470,10 @@
         // ============================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                if (slotPlacementState) {
+                    cancelSlotPlacement();
+                    return;
+                }
                 if (containerModalOverlay && containerModalOverlay.classList.contains('show')) {
                     containerModalOverlay.classList.remove('show');
                     editingContainer = null;

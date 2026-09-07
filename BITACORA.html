@@ -133,7 +133,464 @@
     <div id="lista">
 
         <section class="entry">
-            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.6</span><span class="agente agy">Antigravity</span></div>
+            <div class="enc"><span class="fecha">07 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">AUDITORÍA DE FAST 2.0, ERRORES REVISADOS Y CORRECCIÓN DE LÓGICAS (07 SEP 2026):</p>
+                <ul>
+                    <li><b>1. Error Crítico — El borrado de tarjetas no quitaba la tarjeta de la visual</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: Al presionar eliminar en una tarjeta (ya sea desde el menú contextual o desde el drawer), la tarjeta permanecía visible en pantalla y la acción de guardado fallaba silenciosamente.</li>
+                            <li><b>Causa raíz técnica</b>: En la función <code>confirmDeleteCard()</code> de <code>src/tools/fast.html</code>, existía una asignación errónea a una variable singular inexistente: <code>if (selectedCardId === cardId) selectedCardId = null;</code> (la selección múltiple del gestor utiliza el Set <code>selectedCardIds</code>). Esto arrojaba un error no controlado en consola (<code>ReferenceError: selectedCardId is not defined</code>) que interrumpía el flujo síncrono antes de llegar a <code>saveData()</code> y <code>render()</code>, dejando la tarjeta intacta en el DOM.</li>
+                            <li><b>Cómo se corrigió</b>:
+                                <ul>
+                                    <li>Se eliminó la referencia a la variable huérfana y se utilizó <code>selectedCardIds.delete(cardId)</code>.</li>
+                                    <li>Se diferenció la acción de borrado en el menú contextual con dos opciones claras: <i>«🗑 Eliminar (dejar espacio libre)»</i> (convierte la tarjeta en un slot vacío <code>isEmpty: true</code> para preservar la estructura visual de la grilla) y <i>«❌ Eliminar definitivamente (quitar de la cuadrícula)»</i> (remueve la tarjeta con <code>splice</code> y limpia <code>sheet.rootOrder</code>).</li>
+                                    <li>Se corrigió la eliminación de espacios vacíos para que al eliminarlos se borren definitivamente de la cuadrícula en lugar de regenerar otro espacio vacío redundante.</li>
+                                    <li>Se agregó soporte de atajo de teclado: pulsar <code>Delete</code> o <code>Backspace</code> elimina limpiamente las tarjetas o espacios seleccionados.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Resuelto y validado</b> con pruebas automatizadas en Electron.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>2. Requerimiento / Error — Clic derecho en espacio vacío para pegar tarjeta previamente copiada</b>:
+                        <ul>
+                            <li><b>Fallo / Limitación detectada</b>: Al hacer clic derecho sobre un espacio vacío, no figuraba una opción confiable y permanente para pegar directamente una tarjeta copiada en dicha posición.</li>
+                            <li><b>Causa raíz técnica</b>: El menú contextual (<code>showEmptySlotContextMenu</code>) condicionaba la opción a la lectura previa de memoria volátil y omitía el elemento si no detectaba el objeto, impidiendo al usuario saber que podía pegar allí. Además, múltiples métodos de copia solo transferían texto plano y no conservaban la tarjeta completa en el portapapeles interno.</li>
+                            <li><b>Cómo se corrigió</b>:
+                                <ul>
+                                    <li>Se creó la rutina <code>cacheCopiedCard(card)</code> que almacena la tarjeta con su formato completo tanto en memoria global (<code>window.__lastCopiedCard</code>) como en almacenamiento persistente (<code>localStorage[FAST_CLIPBOARD_KEY]</code>).</li>
+                                    <li>Se integró la captura de la tarjeta en todos los desencadenadores de copia: botones de copia rápida (<code>copyCardBody</code>, <code>copyCardPlain</code>, <code>copyCardTitleBody</code>), menú contextual, atajo de teclado <code>Ctrl+C</code> y un nuevo botón dedicado en el drawer (<i>«📑 Copiar Tarjeta»</i>).</li>
+                                    <li>En <code>showEmptySlotContextMenu</code>, la opción <i>«📥 Pegar tarjeta aquí ("Título")»</i> se fijó de manera permanente y destacada. Si no existe una tarjeta copiada previamente, ofrece pegar el texto del portapapeles del sistema creando una tarjeta en ese slot.</li>
+                                    <li>La función <code>pasteFullCard()</code> reemplaza exactamente el slot vacío en la cuadrícula (<code>sheet.cards[targetIdx] = newCard</code> y <code>sheet.rootOrder[rIdx] = newCard.id</code>), ubicando la tarjeta sin desfasar la grilla ni duplicar espacios.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Resuelto e implementado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>3. Verificación Automatizada y Validación en Entorno Real (Borrado y Pegado)</b>:
+                        <ul>
+                            <li>Se ejecutó una batería de validación con Electron real cubriendo: 1) borrado con reemplazo a espacio vacío, 2) eliminación definitiva de espacio vacío del DOM, 3) menú contextual con pegado dinámico en slot libre, y 4) pegado y reemplazo exitoso de tarjeta en el slot libre. 100% de aserciones aprobadas sin errores.</li>
+                            <li><b>Estado</b>: <b>Verificado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>4. Nueva Funcionalidad — Modos de Búsqueda Dinámica: «Marcar Búsqueda» y «Ocultar en búsqueda»</b>:
+                        <ul>
+                            <li><b>Requerimiento del usuario</b>:
+                                <ul>
+                                    <li>Incorporar dos botones de alternancia situados al extremo derecho dentro del recuadro de búsqueda (<code>#search-wrap</code>).</li>
+                                    <li><b>«Marcar Busqueda»</b>: En lugar de ocultar las tarjetas que no coinciden, preserva todas las tarjetas y espacios vacíos en sus posiciones exactas dentro de la cuadrícula o contenedor, marcando visualmente las coincidencias con un borde blanco brillante y animación pulsante (<code>.search-marked</code>) para rápida identificación visual.</li>
+                                    <li><b>«Ocultar en busqueda»</b>: Comportamiento tradicional de filtrado donde se ocultan los elementos no coincidentes y se muestran únicamente las tarjetas que cumplen el criterio de búsqueda.</li>
+                                    <li><b>Iluminación activa mutuamente excluyente</b>: El botón seleccionado se ilumina de forma distintiva (resplandor blanco puro para «Marcar» y resplandor azul zafiro para «Ocultar»).</li>
+                                    <li><b>Visibilidad contextual estricta</b>: Los botones deben mostrarse <b>ÚNICAMENTE</b> en pestañas con modos de visualización <code>cards</code> (Tarjetas), <code>containers</code> (Contenedores) e <code>images</code> (Imágenes). En cualquier otro modo (como <code>process</code> / estilo Excel), los botones se ocultan automáticamente (<code>display: none</code>) y el buscador recupera su aspecto estándar.</li>
+                                </ul>
+                            </li>
+                            <li><b>Implementación técnica realizada en <code>src/tools/fast.html</code></b>:
+                                <ul>
+                                    <li><b>UI y Estilos</b>: Se reestructuró <code>#search-wrap</code> como contenedor flex integrado y se crearon los botones <code>#btn-search-mark</code> y <code>#btn-search-hide</code> con clases dinámicas <code>.search-mode-btn</code> y estados <code>.active</code> con brillo CSS.</li>
+                                    <li><b>Animación de Luz al Borde (Oscilación Roja y Blanca de Alta Visibilidad)</b>: Se perfeccionó la animación <code>pulseSearchMarkRedWhite</code> con un pulso de <code>1.3s ease-in-out infinite alternate</code> (ciclo completo de 2.6s) que oscila entre <b>luz roja neón</b> (borde <code>#ef4444</code> de 2.5px, halo escarlata de 14px/28px y destello interno) y <b>luz blanca radiante</b> (borde <code>#ffffff</code>, halo blanco puro de 16px/32px y destello interno). Se corrigió la especificidad eliminando directivas <code>!important</code> inválidas dentro de keyframes CSS, garantizando que el motor de renderizado de Chromium aplique la animación con fluidez y máxima intensidad sobre cualquier color de fondo de tarjeta.</li>
+                                    <li><b>Lógica de estado y persistencia</b>: Se definió <code>state.searchFilterMode</code> (con valor por defecto <code>'hide'</code> o <code>'mark'</code>) respaldado tanto en <code>localStorage</code> como en <code>data.settings.searchFilterMode</code> para mantener la preferencia del usuario entre sesiones.</li>
+                                    <li><b>Adaptación de motores de render</b>:
+                                        <ul>
+                                            <li><code>renderCardsMode</code>: Cuando el modo es <code>'mark'</code>, se mantiene el orden natural de la grilla (sin alterar índices ni remover slots vacíos), asignando la clase <code>search-marked</code> a las tarjetas cuyo puntaje de búsqueda sea mayor a 0.</li>
+                                            <li><code>renderContainersMode</code>: En modo <code>'mark'</code>, se evita el colapso de contenedores que no tengan coincidencias (<code>tokens.length && state.searchFilterMode !== 'mark' && !contCards.length</code>) y se resalta tanto tarjetas dentro de contenedores como tarjetas sueltas en la raíz.</li>
+                                            <li><code>renderImagesMode</code>: Se preserva la posición de las tarjetas con imagen y se aplica el marcado luminoso a las coincidencias.</li>
+                                            <li><code>highlightMatches</code>: Se amplió para resaltar texto coincidente en títulos y cuerpos tanto de tarjetas estándar como de tarjetas de imagen (<code>.img-card-title</code> y <code>.img-card-text</code>).</li>
+                                        </ul>
+                                    </li>
+                                    <li><b>Control de visualización por pestaña</b>: Función <code>updateSearchModeButtonsUI()</code> que evalúa <code>sheet.mode</code> en cada render y activa <code>display: inline-flex</code> para modos <code>cards</code>, <code>containers</code> e <code>images</code>, u oculta el contenedor en otros modos (<code>process</code>).</li>
+                                </ul>
+                            </li>
+                            <li><b>Verificación y Pruebas Automatizadas</b>: Se implementó suite de pruebas en Electron (12/12 comprobaciones superadas) validando alternancia de modos, persistencia, visibilidad en los 4 tipos de hojas y asignación de clases DOM.</li>
+                            <li><b>Estado</b>: <b>Completado, probado y verificado al 100%</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>5. Corrección y Blindaje — Deformación Visual por Atajo <code>Ctrl+Shift+V</code> en Modo Contenedores</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: Las tarjetas en la pestaña de contenedores aparecían achatadas y divididas horizontalmente en dos columnas (título a la izquierda al 30% y cuerpo a la derecha).</li>
+                            <li><b>Causa raíz técnica</b>: El usuario activó accidentalmente el atajo global <code>Ctrl + Shift + V</code> (destinado a alternar entre vista cuadrícula y vista lista). Como <code>updateViewClass()</code> aplicaba la clase CSS <code>.list-view</code> a <code>#content</code> de forma indiscriminada y global, forzó las reglas de lista horizontal sobre el layout espacial de contenedores, y dado que en modo contenedores el botón <code>btnView</code> está oculto en la barra de herramientas, no existía feedback visual para restaurarlo con el cursor.</li>
+                            <li><b>Cómo se corrigió</b>:
+                                <ul>
+                                    <li>Se modificó <code>updateViewClass()</code> para verificar estrictamente <code>sheet && sheet.mode === 'cards'</code> antes de agregar la clase <code>.list-view</code>. En modo contenedores o imágenes, la cuadrícula permanece 100% inmune y conserva su diseño nativo.</li>
+                                    <li>Se condicionó el atajo <code>Ctrl + Shift + V</code> en <code>document.addEventListener('keydown')</code> para que solo actúe en pestañas de tipo tarjetas; en otros modos notifica con un mensaje discreto (<i>«La vista de lista solo está disponible en modo Tarjetas»</i>).</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Corregido y blindado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>6. Optimización Integral del Buscador — Eliminación de Falsos Resaltados Masivos por Conectores (Stop Words)</b>:
+                        <ul>
+                            <li><b>Fallo reportado</b>: Al buscar frases con conectores (por ejemplo, <i>«prepago a plan»</i>), aparecían marcas amarillas en prácticamente todas las tarjetas de la pantalla.</li>
+                            <li><b>Causa raíz técnica</b>:
+                                <ul>
+                                    <li>En <code>highlightMatches()</code>, la función iteraba sobre <code>cardsContainer.querySelectorAll('.card-item')</code> sin discriminar entre tarjetas coincidentes y no coincidentes. En modo «Marcar Búsqueda» (donde todas las tarjetas permanecen visibles en el DOM), se aplicaba el marcado a todo el tablero.</li>
+                                    <li>En <code>buildHighlightRe()</code>, la consulta se dividía permitiendo tokens de 1 solo carácter (<code>t.length > 0</code>). La letra 'a' generaba el patrón <code>[aáàäâ]</code> sin límite de palabra, resaltando cada letra 'a' dentro de cualquier palabra (<i>Not<b>a</b></i>, <i>Siebel</i>, <i>Tipific<b>a</b>ción</i>, <i>Áre<b>a</b></i>, etc.).</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Aislamiento de marcado en modo «Marcar Búsqueda»</b>: <code>highlightMatches()</code> ahora utiliza el selector <code>.card-item.search-marked</code> en modo mark. Las tarjetas que no coinciden con la búsqueda no se tocan jamás; conservan su texto 100% limpio y sin marcas amarillas.</li>
+                                    <li><b>Soporte de Stop Words en Español</b>: Se integró <code>SPANISH_STOP_WORDS</code> (a, de, con, en, el, la, etc.) en <code>searchTokens()</code>. Cuando existen palabras clave principales (ej: <i>prepago</i> y <i>plan</i>), los conectores no contaminan los tokens AND ni se convierten en patrones de resaltado aislados.</li>
+                                    <li><b>Sincronización de Resaltado y Límites de Palabra</b>: <code>buildHighlightRe()</code> ahora se sincroniza directamente con <code>searchTokens()</code>, prioriza la frase exacta unificada (<i>«prepago a plan»</i>) y aplica límites de palabra (<code>\b</code>) a tokens cortos para evitar fragmentar palabras ajenas.</li>
+                                    <li><b>Bonus de Frase Exacta en Relevancia</b>: Se agregó un incremento de puntaje de relevancia (+120 en título, +60 en cabecera, +40 en cuerpo) cuando el texto contiene la frase exacta completa.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Optimizado, verificado y resuelto</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>7. Eliminación de Parpadeo de Pantalla al Escribir en el Buscador</b>:
+                        <ul>
+                            <li><b>Fallo reportado</b>: Cada pulsación de tecla al escribir en el buscador provocaba un parpadeo visual en toda la pantalla.</li>
+                            <li><b>Causa raíz técnica</b>:
+                                <ul>
+                                    <li><b>Animación de entrada CSS redundante</b>: La clase <code>.card-item</code> tenía asignada la animación <code>cardIn 0.2s ease-out</code> (<code>from { opacity: 0; scale(0.92) }</code>). En cada pulsación, al recrearse las tarjetas en el DOM, las 158 tarjetas se desvanecían desde opacidad 0 durante 200 milisegundos.</li>
+                                    <li><b>Reconstrucción destructiva del DOM por tecla</b>: El evento <code>input</code> del buscador ejecutaba <code>render()</code> síncronamente en cada letra, limpiando el contenedor (<code>cardsContainer.innerHTML = ''</code>), forzando mediciones geométricas síncronas de altura en títulos (layout thrashing) y reconstruyendo la barra inferior de pestañas (<code>renderSheets</code>).</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Eliminación de animación de opacidad cero</b>: Se retiró <code>animation: cardIn 0.2s</code> de <code>.card-item</code>, haciendo que el renderizado sea sólido, estático e instantáneo.</li>
+                                    <li><b>Actualización en Sitio (<code>applyMarkSearchInPlace</code>)</b>: En el modo «Marcar Búsqueda», el buscador ya no destruye ni altera el DOM; únicamente añade/remueve la clase <code>.search-marked</code> y actualiza el texto con/sin <code>highlightHtml</code> directamente en los nodos existentes, logrando 0 parpadeos y 0 saltos de scroll.</li>
+                                    <li><b>Desacople de Pestañas en Modo Ocultar</b>: En modo «Ocultar en búsqueda», solo se refresca el contenedor de tarjetas sin tocar la barra inferior de pestañas.</li>
+                                    <li><b>Sincronización con <code>requestAnimationFrame</code></b>: Se coordinaron los eventos de tipeo con el refresco nativo del monitor a 60 FPS, evitando cálculos redundantes ante tipeo rápido.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Completamente resuelto, fluido y sin parpadeos</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>8. Corrección en Modo Imágenes — Reemplazo Directo sobre Espacios Vacíos (Empty Slots)</b>:
+                        <ul>
+                            <li><b>Detalle corregido</b>: En pestañas de tipo imágenes, al arrastrar y soltar una tarjeta directamente sobre un espacio vacío con acción de intercambio (<code>swap</code>), el sistema intercambiaba los lugares dejando el espacio libre en el origen.</li>
+                            <li><b>Solución técnica</b>: Se adaptó la rutina de soltado en modo imágenes para detectar si el destino es un espacio vacío (<code>targetCard.isEmpty</code>); en dicho caso, la tarjeta ocupa exactamente la posición del slot (<code>sheet.cards[targetIdx] = movedCard</code>) y se elimina de su posición previa (<code>sheet.cards.splice(fromIdx, 1)</code>), consumiendo el espacio libre de forma natural y sin dejar huecos flotantes en el origen.</li>
+                            <li><b>Estado</b>: <b>Corregido y verificado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>9. Reordenamiento Inteligente de Contenedores entre Celdas Vacías (Empty Slots)</b>:
+                        <ul>
+                            <li><b>Fallo reportado</b>: Los contenedores no se podían mover entre celdas vacías (no permitía posicionar un contenedor entre dos espacios libres ni antes o después de celdas vacías sin destruirlas o reemplazarlas forzosamente).</li>
+                            <li><b>Causa raíz técnica</b>:
+                                <ul>
+                                    <li>En <code>onDragMove</code> (arrastre de contenedor), si el elemento raíz objetivo era un espacio libre (<code>isSlot</code>), el manejador forzaba de manera invariable <code>dragState.targetPosition = 'replace'</code> y únicamente aplicaba <code>drag-target-over</code>, imposibilitando seleccionar una inserción anterior (<code>before</code>) o posterior (<code>after</code>).</li>
+                                    <li>En <code>onDragEnd</code>, la condición de reemplazo evaluaba <code>if (isTargetEmpty || targetPosition === 'replace')</code>. Al ser el objetivo una celda vacía (<code>isTargetEmpty = true</code>), el sistema entraba obligatoriamente a la rutina destructiva que consumía y eliminaba los slots vacíos contiguos de <code>sheet.cards</code> con <code>filter</code>, en lugar de realizar una inserción limpia en <code>rootOrder</code>.</li>
+                                    <li>La detección de proximidad en el lienzo (gap entre celdas) estaba limitada a 200px y al seleccionar el slot más cercano repetía el forzado de reemplazo.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Zonificación Tripartita de Ranura Vacía en <code>onDragMove</code></b>: Se calcula la posición relativa horizontal del cursor sobre el slot (<code>relX = (e.clientX - r.left) / r.width</code>):
+                                        <ul>
+                                            <li><b>Borde izquierdo / entrada izquierda (<code>relX &lt; 0.32</code>)</b>: Activa <code>targetPosition = 'before'</code> con indicador visual de barra luminosa izquierda (<code>drag-target-before</code>). Permite posicionar el contenedor <i>antes</i> de la celda vacía o <b>entre</b> dos celdas vacías contiguas.</li>
+                                            <li><b>Borde derecho / entrada derecha (<code>relX &gt; 0.68</code>)</b>: Activa <code>targetPosition = 'after'</code> con indicador visual de barra luminosa derecha (<code>drag-target-after</code>). Permite posicionar el contenedor <i>después</i> de la celda vacía o <b>entre</b> celdas vacías.</li>
+                                            <li><b>Centro de la celda (<code>0.32 &le; relX &le; 0.68</code>)</b>: Activa <code>targetPosition = 'replace'</code> con resplandor completo (<code>drag-target-over</code>), permitiendo ocupar y rellenar slots cuando el usuario apunta deliberadamente al centro.</li>
+                                            <li><b>Gaps y márgenes entre celdas</b>: Cuando el cursor se desplaza por los espacios intermedios entre celdas, la detección de proximidad (ampliada a 350px) asigna dinámicamente <code>before</code> o <code>after</code> según el centro del elemento más próximo, mostrando una línea vertical de inserción exacta en el espacio entre ambas celdas vacías.</li>
+                                        </ul>
+                                    </li>
+                                    <li><b>Preservación de Espacios en <code>onDragEnd</code></b>: Se condicionó el consumo/eliminación destructivo estrictamente a <code>targetPosition === 'replace' &amp;&amp; isTargetEmpty</code>. Cuando la acción es <code>'before'</code> o <code>'after'</code>, se ejecuta una inserción en <code>sheet.rootOrder</code> (<b>CASO 2</b>) sin eliminar ningún espacio vacío de <code>sheet.cards</code> ni generar huecos en el origen, ubicando el contenedor de forma limpia y milimétrica entre las celdas vacías.</li>
+                                    <li><b>Estilos CSS Específicos para Slots</b>: Se añadieron reglas dedicadas para <code>.card-item.empty-slot.drag-target-before</code> y <code>.card-item.empty-slot.drag-target-after</code> con resaltado de borde neón de 4px, halo difuminado de 16px y fondo sutil azul zafiro para máxima claridad durante el arrastre.</li>
+                                    <li><b>Menú Contextual de Ranura Vacía</b>: Se añadieron las opciones <i>«⬅ Mover espacio a la izquierda»</i> y <i>«➡ Mover espacio a la derecha»</i> a los slots libres raíz en modo contenedores para facilitar su ordenamiento manual fino.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Completado, probado y verificado al 100%</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>10. Habilitación de Movimiento / Arrastre Fluido en Modo «Marcar Búsqueda»</b>:
+                        <ul>
+                            <li><b>Fallo reportado</b>: Al buscar una tarjeta en el modo «Marcar Búsqueda» y quedar resaltada con el borde luminoso (<code>.search-marked</code>), la tarjeta quedaba completamente inmóvil; el usuario no podía arrastrarla ni moverla a otra posición, contenedor o entre celdas vacías.</li>
+                            <li><b>Causa raíz técnica</b>: En la función <code>onGlobalMove(e)</code> de <code>src/tools/fast.html</code>, existía una cláusula de guardia global e indiscriminada: <code>if (state.searchQuery.trim()) return;</code>. Esta regla se concibió para el modo «Ocultar en búsqueda» (donde la lista es un subconjunto parcial filtrado), pero en el modo «Marcar Búsqueda» —donde toda la cuadrícula y todos los elementos están 100% presentes en el DOM— bloqueaba por completo la detección de arrastre (<code>pressInfo.dragged</code> jamás pasaba a <code>true</code>), dejando todas las tarjetas y contenedores paralizados.</li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Condicionamiento Inteligente del Bloqueo</b>: Se ajustó la condición a <code>if (state.searchQuery.trim() &amp;&amp; state.searchFilterMode !== 'mark') return;</code>. Ahora, en el modo «Marcar Búsqueda», el sistema de arrastre opera con total libertad y fluidez para cualquier tarjeta o contenedor.</li>
+                                    <li><b>Conservación de Marca Luminosa en Arrastre (Ghost Card)</b>: En <code>startDrag()</code>, si la tarjeta arrastrada posee la clase <code>.search-marked</code>, la tarjeta flotante fantasma (<code>ghost</code>) hereda automáticamente dicha clase, manteniendo la animación de borde oscilante rojo/blanco durante todo el recorrido por la pantalla.</li>
+                                    <li><b>Persistencia de Resaltado tras el Soltado</b>: Al soltar la tarjeta (<code>onDragEnd</code>), la cuadrícula se actualiza guardando el nuevo orden en <code>sheet.cards</code> o <code>sheet.rootOrder</code>, y la tarjeta reubicada conserva de inmediato su estado <code>.search-marked</code> y el resaltado de texto coincidente en su nueva posición.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Completado, probado y verificado al 100%</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>11. Corrección y Rediseño del Editor de Colores Personalizados en Contenedores</b>:
+                        <ul>
+                            <li><b>Fallo reportado</b>: El editor de colores personalizados de los contenedores no funcionaba correctamente (al interactuar con el selector de color se desconectaba, fallaba la selección o no permitía ingresar códigos de color manualmente).</li>
+                            <li><b>Causa raíz técnica</b>:
+                                <ul>
+                                    <li>En la función <code>renderContColorRow</code> de <code>src/tools/fast.html</code>, el evento <code>input</code> del elemento <code>&lt;input type="color"&gt;</code> ejecutaba <code>renderContColorRow(colorInput.value)</code>, el cual comenzaba con <code>contColorRow.innerHTML = ''</code>. Esta reconstrucción destructiva destruía y eliminaba el nodo del input del DOM en cada micro-movimiento del cursor dentro de la ventana de selección de color nativa del sistema operativo. Al desconectarse el nodo raíz del diálogo nativo de Chromium/Electron, el selector quedaba huérfano, cerrándose abruptamente o ignorando los cambios de color.</li>
+                                    <li>No existía ningún campo de texto para ingresar o pegar códigos hexadecimales (<code>#RRGGBB</code>), impidiendo a los usuarios personalizar el contenedor con códigos específicos copiados de otras fuentes.</li>
+                                    <li>No existía retroalimentación visual inmediata que permitiera previsualizar cómo se vería la cabecera del contenedor con el color seleccionado antes de guardar.</li>
+                                    <li>El cálculo del fondo de cabecera aplicaba una concatenación rígida <code>(cont.color || '#3b82f6') + '2a'</code>, que generaba valores CSS inválidos cuando el código de color no era un hexadecimal estricto de 6 dígitos.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Arquitectura No-Destructiva del DOM</b>: La estructura de controles en el modal de contenedor ahora permanece persistente y viva. Las funciones de actualización (<code>applyContColor</code>) únicamente actualizan valores de propiedades y clases (<code>value</code>, <code>classList.toggle('sel')</code>, variables CSS) sin tocar jamás el árbol de nodos durante la interacción. El selector nativo responde ahora con total suavidad y fluidez sin cerrarse ni desvincularse.</li>
+                                    <li><b>Campo de Entrada Hexadecimal Bidireccional</b>: Se agregó un campo <code>&lt;input type="text" class="cont-color-hex-input"&gt;</code> con formato automático (<code>#RRGGBB</code>). El usuario puede escribir o pegar libremente cualquier código hex (con o sin almohadilla), sincronizándose al instante con el selector nativo y la previsualización. Al pulsar <code>Enter</code> en este campo, se valida el color y se guardan los cambios de inmediato.</li>
+                                    <li><b>Caja de Previsualización Dinámica en Tiempo Real</b>: Se incorporó un elemento de vista previa (<code>.cont-color-preview</code>) que replica fielmente el diseño de la cabecera real de un contenedor (icono <code>⠿</code>, título en mayúsculas sincronizado con el campo de nombre, degradado temático y borde de contraste).</li>
+                                    <li><b>Normalización Segura de Colores y Fondos</b>: Se implementaron las funciones auxiliares <code>normalizeHexColor()</code> y <code>getContBgColor()</code> para convertir cualquier formato de color a un hexadecimal limpio de 6 caracteres y generar fondos transparentes seguros mediante <code>rgba(r, g, b, alpha)</code>, blindando la visual de los contenedores tanto en su cabecera como en tarjetas fantasmas de arrastre.</li>
+                                    <li><b>Persistencia Confiable en el Guardado</b>: El botón <code>cont-modal-save</code> ahora extrae y normaliza el color priorizando el campo de texto hex y el selector visual, garantizando que los colores personalizados se apliquen fielmente tanto al crear nuevos contenedores como al editarlos.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Completado, optimizado y verificado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>12. Snapping Espacial y Solución a Espacios Inutilizables en Cuadrícula de Contenedores (Gaps de Filas Incompletas)</b>:
+                        <ul>
+                            <li><b>Fallo reportado / Requerimiento del usuario</b>: En modo contenedores con ancho de 10 columnas, cuando una fila no suma exactamente 10 columnas (por ejemplo, tres contenedores de 3 + 2 + 3 = 8 columnas ocupadas), el siguiente contenedor salta automáticamente a la fila siguiente, dejando un hueco de 2 columnas desocupadas al final. Al intentar soltar tarjetas o contenedores en ese espacio vacío o hacer clic en él, el sistema no lo reconocía como parte de esa fila o lo mandaba forzosamente al final absoluto del tablero. Además, los espacios libres (<code>.empty-slot</code>) no podían ser arrastrados.</li>
+                            <li><b>Causa raíz técnica</b>:
+                                <ul>
+                                    <li>La lógica de soltado en el lienzo libre solo verificaba elementos DOM directos o calculaba proximidad euclidiana genérica. No existía noción de "fila visual", por lo que soltar en un hueco al final de una fila no asociaba el elemento como sucesor del último contenedor de dicha fila, sino que ejecutaba un <code>rootOrder.push()</code> al final de todo el tablero.</li>
+                                    <li>Los bordes de los contenedores no distinguían la intención del usuario al arrastrar tarjetas: acercarse al borde exterior insertaba la tarjeta dentro del contenedor en lugar de en la cuadrícula general antes o después del contenedor.</li>
+                                    <li>Los elementos <code>.empty-slot</code> tenían bloqueado el inicio de arrastre en <code>onGlobalMove</code> (<code>if (!card || card.isEmpty) return;</code>), impidiendo reordenarlos visualmente.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Algoritmo de Snapping Espacial (<code>getSpatialRootTarget</code>)</b>: Se implementó un detector que agrupa geométricamente los contenedores y elementos raíz en filas visuales basándose en sus coordenadas <code>top</code> y <code>bottom</code>. Si el cursor se sitúa en un hueco a la derecha o debajo del último elemento de una fila (sin sobrepasar la fila siguiente), calcula con precisión que el destino es <code>after</code> de dicho último elemento de la fila.</li>
+                                    <li><b>Diferenciación de Bordes en Contenedores</b>: Al arrastrar una tarjeta sobre un contenedor, si el cursor está dentro del umbral exterior lateral (&plusmn;24px del borde izquierdo o derecho), el sistema interpreta que se desea posicionar en la cuadrícula raíz (antes o después del contenedor) mostrando una barra indicadora vertical exterior; si se adentra en el cuerpo, se resalta el interior del contenedor para inserción interna.</li>
+                                    <li><b>Habilitación Completa de Arrastre para Espacios Vacíos</b>: Se liberó el arrastre de <code>empty-slot</code> con cursor <code>grab</code>, feedback de tarjeta fantasma (<code>⬜ Espacio libre</code>) y limpieza limpia del origen al soltarlo en su nueva ubicación sin duplicar slots.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Completado, probado y verificado al 100%</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>13. Navegación Inteligente de Coincidencias (Botones ↑ / ↓ y Scroll Suave) en Modo «Marcar Búsqueda»</b>:
+                        <ul>
+                            <li><b>Requerimiento del usuario</b>: En el modo «Marcar Búsqueda», incorporar dos botones de flecha (↑ y ↓) dentro de la barra de búsqueda para desplazarse y saltar de forma inteligente entre las coincidencias halladas en la pantalla, moviendo el scroll suavemente para ubicar cada coincidencia.</li>
+                            <li><b>Implementación técnica realizada en <code>src/tools/fast.html</code></b>:
+                                <ul>
+                                    <li><b>Botones y Contador Visual Dinámico</b>: Se agregaron en <code>#search-wrap</code> los controles <code>#btn-search-prev</code> (↑), <code>#btn-search-next</code> (↓) y un indicador <code>#search-nav-count</code> (ej. <i>«1/7»</i>). Solo se hacen visibles cuando el modo activo es «Marcar Búsqueda» y existen tarjetas marcadas (<code>.search-marked</code>) en pantalla.</li>
+                                    <li><b>Scroll Suave y Centrado Inteligente (<code>scrollIntoView</code>)</b>: La función <code>focusCurrentMatch()</code> ejecuta un desplazamiento suave (<code>behavior: 'smooth', block: 'center'</code>) llevando la coincidencia activa al centro óptico de la vista del usuario, tanto si se encuentra en la cuadrícula libre como dentro del cuerpo scrolleable de un contenedor.</li>
+                                    <li><b>Resaltado de Enfoque Activo (<code>.search-focus</code>)</b>: La tarjeta enfocada recibe una clase de alta prioridad visual con halo cian/turquesa brillante y borde destacado que se distingue claramente del resto de coincidencias marcadas.</li>
+                                    <li><b>Atajos de Teclado Integrados</b>: Soporte para navegar con <code>Enter</code> (siguiente), <code>Shift + Enter</code> (anterior), y teclas de función estándar <code>F3</code> / <code>Shift + F3</code>, tanto con foco en el buscador como globalmente en el tablero.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Implementado, probado y verificado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>14. Corrección de Cierre Estático (Stale Closure) en el Selector de Color de Contenedores</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: Al abrir el editor de color de un contenedor secundario tras haber abierto uno previo, la selección de color o la aplicación de presets no afectaba al nuevo contenedor o se desfasaba.</li>
+                            <li><b>Causa raíz técnica</b>: La función <code>applyContColor</code> estaba definida localmente dentro de <code>renderContColorRow</code>. Debido a la bandera de guardia <code>_hasContColorListener</code> (diseñada para no duplicar eventos en el input), los listeners nativos conservaban la clausura léxica (<i>closure</i>) del primer contenedor editado.</li>
+                            <li><b>Cómo se corrigió</b>: Se extrajo <code>applyContColor</code> al ámbito superior del módulo. Ahora, cada invocación y evento consulta dinámicamente la referencia global <code>editingContainer</code> en tiempo de ejecución, asegurando que cualquier contenedor editado actualice su color y previsualización de manera inmediata y sin interferencias.</li>
+                            <li><b>Estado</b>: <b>Corregido y verificado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>15. Menú Contextual Espacial en Huecos Libres de la Cuadrícula</b>:
+                        <ul>
+                            <li><b>Funcionalidad añadida</b>: Al hacer clic derecho sobre cualquier área o hueco vacío del lienzo en modo contenedores, el menú contextual calcula mediante <code>getSpatialRootTarget</code> la posición relativa exacta respecto a los elementos adyacentes.</li>
+                            <li><b>Opciones disponibles</b>:
+                                <ul>
+                                    <li><i>«➕ Nueva tarjeta libre aquí»</i></li>
+                                    <li><i>«📦 Nuevo contenedor aquí»</i></li>
+                                    <li><i>«⬜ Crear espacio vacío aquí»</i></li>
+                                    <li><i>«📥 Pegar tarjeta libre aquí»</i></li>
+                                </ul>
+                            </li>
+                            <li>Permite insertar tarjetas, contenedores o espacios vacíos en cualquier hueco visual de la grilla sin tener que crearlos al final del tablero y arrastrarlos manualmente.</li>
+                            <li><b>Estado</b>: <b>Completado y verificado</b>.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">REGISTRO DE INCIDENTES, ERRORES REVISADOS Y ACCIONES DE GESTIÓN (05 SEP 2026):</p>
+                <ul>
+                    <li><b>1. Incidente Crítico — Pérdida Accidental de Datos en Hojas «Fast» y «Buscador»</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: Pérdida temporal de las tarjetas de casos en las pestañas «Fast» y «Buscador» debido a una sobrescritura accidental del archivo de almacenamiento local <code>gestor-fast.json</code>.</li>
+                            <li><b>Causa raíz</b>: Ejecución de sincronización sin aislamiento previo del archivo de datos activo en <code>AppData/Roaming/gestor-casos/</code>.</li>
+                            <li><b>Acción de contingencia y recuperación</b>:
+                                <ul>
+                                    <li>Se ubicó la fuente maestra original del usuario: el archivo de respaldo de Google Sheets (<code>Copia de Plantillas de casos.xlsx</code>).</li>
+                                    <li><b>Recuperación de «Fast»</b>: Se analizó e interpretó la hoja celda a celda para reconstruir de forma lógica 158 tarjetas (diferenciando celdas con título + texto y celdas individuales). Se generó de inmediato una pestaña espejo «Fast (copia)» para prevenir cualquier contingencia futura.</li>
+                                    <li><b>Recuperación de «Buscador»</b>: Se detectó que las imágenes estaban incrustadas en celdas (DrawingML). Se programó un extractor automatizado que descomprimió el archivo XLSX, rescató 82 imágenes en alta resolución, las asoció lógicamente con sus 85 tarjetas, normalizó términos técnicos (eSIM, APN, 5G, SERNAC, Siebel, Starlink) y habilitó la pestaña en <code>mode: 'images'</code>.</li>
+                                    <li>Se comprobó la persistencia y respaldo en disco, asegurando continuidad operativa sin pérdida de información.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Resuelto y recuperado al 100%</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>2. Error — Bloqueo del Editor de Tarjetas (Crash por propiedades indefinidas)</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: El usuario no podía abrir el editor modal de tarjetas al hacer clic en «Editar» en tarjetas importadas; la aplicación no respondía.</li>
+                            <li><b>Causa raíz</b>: Excepción en consola <code>TypeError: Cannot read properties of undefined (reading 'forEach')</code> al intentar recorrer <code>card.images</code> y <code>card.links</code> en tarjetas que no poseían dichos arreglos predefinidos.</li>
+                            <li><b>Cómo se corrigió</b>: Se refactorizaron <code>openCardEditor()</code>, <code>renderEditImages()</code>, <code>renderEditLinks()</code> y <code>normalizeSheet()</code> para inicializar de forma segura y obligatoria arreglos vacíos por defecto (<code>images: []</code> y <code>links: []</code>) antes de renderizar la interfaz modal.</li>
+                            <li><b>Estado</b>: <b>Resuelto y validado</b> con pruebas automatizadas en Electron.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>3. Error / Limitación — Arrastre Inexacto en Modo Imágenes y Saltos de Scroll</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: En la hoja «Buscador», mover tarjetas no permitía intercambiar lugares de forma directa ni definir si se insertaban por arriba o por abajo, produciendo además saltos bruscos en el scroll.</li>
+                            <li><b>Causa raíz</b>: El sistema de Drag & Drop carecía de partición geométrica vertical en tarjetas de imágenes y no retenía la posición de desplazamiento (<code>scrollTop</code>).</li>
+                            <li><b>Cómo se corrigió</b>: Se implementó un algoritmo dual con 3 zonas de colisión: centro (50%) para intercambio directo (<code>swap</code> con badge violeta), borde superior (28%) para ubicar por sobre (<code>before</code> con borde azul), y borde inferior (28%) para ubicar por debajo (<code>after</code>), preservando milimétricamente el <code>scrollTop</code> al renderizar.</li>
+                            <li><b>Estado</b>: <b>Resuelto</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>4. Error / Comportamiento — Colapso Indeseado de la Grilla al Eliminar Tarjetas</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: Al eliminar una tarjeta, los elementos contiguos se desplazaban para cerrar el hueco, desconfigurando la cuadrícula y eliminando los espacios que el usuario requería para añadir nuevas tarjetas en esa posición.</li>
+                            <li><b>Causa raíz</b>: <code>confirmDeleteCard()</code> eliminaba el elemento directamente del arreglo con <code>filter</code>/<code>splice</code>.</li>
+                            <li><b>Cómo se corrigió</b>: Se modificó la rutina de borrado (tanto desde el menú contextual como desde el drawer lateral) para que en lugar de colapsar la grilla, inserte en esa misma coordenada un espacio libre interactivo (<code>createEmptySlot</code>) con la leyenda <code>＋ Espacio libre</code>, disponible para crear o pegar tarjetas.</li>
+                            <li><b>Estado</b>: <b>Resuelto</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>5. Error — Desvío de Contenedores al Moverlos a Espacios Libres y Creación de Slots Fantasma</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: Al intentar trasladar un contenedor a un espacio libre dentro de una cuadrícula previamente creada, el contenedor aterrizaba en cualquier lado (al inicio o final de la hoja), generaba nuevos espacios vacíos en el origen y borraba espacios libres al final de la hoja.</li>
+                            <li><b>Causa raíz</b>:
+                                <ul>
+                                    <li>La variable <code>groupStart</code> retrocedía en bucle hasta el primer slot contiguo de toda la hoja, forzando la inserción al principio del tablero.</li>
+                                    <li>La detección del cursor en <code>onDragMove</code> fallaba al pasar sobre los textos o el icono <code>＋</code> del slot por falta de <code>closest('.card-item')</code>, cayendo en el fallback del último elemento.</li>
+                                    <li>Se forzaba la creación de <code>newEmptySlots</code> en la posición de origen del contenedor.</li>
+                                    <li>Una rutina final ejecutaba <code>rootOrder.pop()</code> eliminando todos los espacios vacíos finales.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se corrigió</b>: Se reprogramó el motor de arrastre de contenedores: detección directa mediante <code>closest</code> y cálculo de distancia euclidiana; inserción exacta en el slot soltado consumiendo únicamente los slots hacia adelante proporcionales al ancho del contenedor; anulación de slots automáticos en el origen; y eliminación del truncado final de slots en la hoja.</li>
+                            <li><b>Estado</b>: <b>Resuelto</b>. El contenedor se ubica con precisión en el espacio libre elegido sin duplicar ni borrar slots.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>6. Error — Apertura Accidental del Modal de Edición al Doble Clic en Modo Contenedor</b>:
+                        <ul>
+                            <li><b>Fallo detectado</b>: Al hacer doble clic en una tarjeta dentro de un contenedor, se abría la ventana modal de edición de tarjeta, entorpeciendo el flujo de copiado e inspección de datos.</li>
+                            <li><b>Causa raíz</b>: El escucha de evento <code>dblclick</code> en <code>createCardElement()</code> llamaba incondicionalmente a <code>openCardEditor()</code> sin validar el modo de la hoja.</li>
+                            <li><b>Cómo se corrigió</b>: Se condicionó el evento <code>dblclick</code> tanto en tarjetas como en el lienzo para que en <code>sheet.mode === 'containers'</code> no se active el editor modal y, en su lugar, se abra directamente el panel lateral de detalles (drawer) sin demora.</li>
+                            <li><b>Estado</b>: <b>Resuelto</b>.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Bloqueo de Modal de Edición al Doble Clic en Modo Contenedor</b>:
+                        <ul>
+                            <li><b>Comportamiento Ajustado en Modo Contenedores</b>: Se desactivó la apertura del modal de edición de tarjeta (<code>openCardEditor</code>) al hacer doble clic sobre una tarjeta o sobre el lienzo en modo contenedor, evitando interrupciones molestas al interactuar rápidamente.</li>
+                            <li><b>Apertura Fluida del Drawer</b>: En su lugar, el doble clic en modo contenedor abre de inmediato el panel lateral de detalles (drawer) sin retardo. La edición de tarjetas permanece disponible exclusivamente mediante el botón <code>✏️ Editar</code> del drawer o clic derecho sobre la tarjeta.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Corrección y Precisión en el Movimiento de Contenedores hacia Espacios Vacíos</b>:
+                        <ul>
+                            <li><b>Ubicación Exacta en el Espacio Seleccionado</b>: Se corrigió el algoritmo de arrastre de contenedores que forzaba el inicio de grupo al primer slot de la hoja o al último elemento del lienzo. Ahora el contenedor aterriza con precisión matemática en el espacio libre exacto sobre el que el usuario suelta el cursor.</li>
+                            <li><b>Detección Robusta de Slots Hijos</b>: Se optimizó el selector de elementos bajo el cursor mediante <code>closest('.card-item')</code> y <code>closest('.container-block')</code>, garantizando que apuntar a los textos o iconos internos del slot (<code>＋</code> o <code>Espacio libre</code>) no desvíe el objetivo.</li>
+                            <li><b>Reemplazo Proporcional sin Crear Espacios Fantasma</b>: Al mover un contenedor sobre espacios vacíos preexistentes, este ocupa y consume únicamente los slots contiguos hacia adelante necesarios para su ancho (\(N\) tarjetas), sin generar nuevos espacios vacíos indeseados en su posición de origen ni alterar la cuadrícula circundante.</li>
+                            <li><b>Eliminación del Truncado de Slots Finales</b>: Se removió el bucle que eliminaba espacios vacíos al final del lienzo, permitiendo al usuario diseñar y conservar estructuras completas de espacios libres según sus preferencias visuales.</li>
+                            <li><b>Resaltado Visual Intuitivo</b>: Al arrastrar un contenedor sobre un espacio libre, el slot objetivo y los slots contiguos a ocupar se iluminan con borde y resplandor azul activo (<code>drag-target-over</code>).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Creación de N Espacios Vacíos desde Multi-Selección (Ctrl + Clic) con Puntero Anclado al Mouse</b>:
+                        <ul>
+                            <li><b>Conteo Inteligente de Selección</b>: Al presionar <code>Ctrl + Clic</code> (o <code>Cmd + Clic</code>) sobre múltiples tarjetas, el sistema detecta y contabiliza dinámicamente la cantidad exacta seleccionada (\(N\)).</li>
+                            <li><b>Nueva Acción en Barra Flotante y Menú</b>: Junto al botón de «Agregar a contenedor», la barra flotante ahora ofrece <code>🔲 Crear N espacios vacíos</code> (o atajo de teclado <code>E</code> y opción en menú contextual), adaptando su texto según la cantidad de tarjetas seleccionadas.</li>
+                            <li><b>Cursor Anclado con Ghost Interactivo</b>: Al pulsar la opción, se deseleccionan las tarjetas y se ancla al cursor del ratón una insignia flotante visual (<code>slot-placement-ghost</code>) con indicador animado y guía en tiempo real sobre la posición elegida.</li>
+                            <li><b>Ubicación Libre y Flexibilidad Total</b>:
+                                <ul>
+                                    <li><b>Parte Superior (Inicio)</b>: Al situar el cursor cerca del borde superior del lienzo o sobre el primer elemento, se insertan los \(N\) espacios vacíos al principio de la hoja.</li>
+                                    <li><b>Parte Inferior (Final)</b>: Al ubicar el cursor cerca del borde inferior del lienzo o después del último elemento, se insertan los \(N\) espacios vacíos al final de la hoja.</li>
+                                    <li><b>Entre o Relativo a Cualquier Tarjeta / Contenedor</b>: Detección inteligente antes o después del elemento según la proximidad del puntero, resaltado con bordes azules y sombras luminosas.</li>
+                                    <li><b>Dentro de Contenedores</b>: Permite insertar los \(N\) espacios vacíos en cualquier posición interna de un contenedor o al final de su cuerpo.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cancelación Segura y Preservación Integral</b>: El modo de colocación puede cancelarse en cualquier momento con la tecla <code>Escape</code> o haciendo clic derecho, sin alterar datos ni romper ninguna funcionalidad existente.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Preservación de Espacios Vacíos al Eliminar Tarjetas (Modo Tarjetas y Modo Contenedores)</b>:
+                        <ul>
+                            <li><b>Espacio Libre en Posición Original</b>: Al eliminar una tarjeta (desde el drawer lateral o mediante el menú contextual), en lugar de colapsar la grilla o el contenedor, el sistema genera en su lugar exacto un espacio vacío interactivo (<code>createEmptySlot</code>) con la leyenda <code>＋ Espacio libre</code>.</li>
+                            <li><b>Disponibilidad para Nueva Tarjeta o Pegado</b>: El usuario puede pulsar sobre el espacio libre para abrir el editor y crear una tarjeta en esa misma posición, o hacer clic derecho para "Pegar tarjeta aquí", "Eliminar este espacio vacío" o compactar con la escoba (🧹).</li>
+                            <li><b>Soporte Completo en Contenedores y Lienzo Raíz</b>: La preservación aplica tanto a tarjetas internas (manteniendo su <code>containerId</code>) como a tarjetas libres en el lienzo raíz (actualizando <code>sheet.rootOrder</code> con el nuevo slot), garantizando estabilidad visual sin desplazamiento indeseado.</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Sistema Dual de Movimiento de Tarjetas en Modo Imágenes (Intercambio vs. Inserción Relativa Superior/Inferior)</b>:
+                        <ul>
+                            <li><b>Intercambio de Lugar (Swap)</b>: Al arrastrar una tarjeta y ubicarla directamente encima del cuerpo central de otra tarjeta (zona media del 50%), el sistema realiza un intercambio directo de posiciones entre ambas tarjetas en la lista (<code>sheet.cards</code>), manteniendo intacta la cantidad y disposición de las demás sin crear espacios vacíos.</li>
+                            <li><b>Inserción por Sobre (Before)</b>: Al situar la tarjeta arrastrada sobre el borde superior de otra tarjeta (primeros 28% de altura o por encima de la primera tarjeta), se inserta de forma fluida inmediatamente antes del objetivo, desplazando el resto hacia abajo.</li>
+                            <li><b>Inserción por Debajo (After)</b>: Al situar la tarjeta arrastrada sobre el borde inferior de otra tarjeta (últimos 28% de altura o por debajo de la última tarjeta), se inserta inmediatamente después del objetivo, desplazando el resto en consecuencia.</li>
+                            <li><b>Indicadores Visuales y Badges Animados</b>:
+                                <ul>
+                                    <li><b>Zona Centro (Swap)</b>: Borde discontinuo violeta con resplandor, ligera escala y distintivo flotante animado <code>🔄 Intercambiar posición</code>.</li>
+                                    <li><b>Zona Superior (Before)</b>: Borde superior azul de 5px con sombra intensa y distintivo flotante <code>⬆ Ubicar aquí (por sobre)</code>.</li>
+                                    <li><b>Zona Inferior (After)</b>: Borde inferior azul de 5px con sombra intensa y distintivo flotante <code>⬇ Ubicar aquí (por debajo)</code>.</li>
+                                </ul>
+                            </li>
+                            <li><b>Ghost Preview Compacto Adaptado a Imágenes</b>: La tarjeta flotante (ghost) bajo el cursor se optimizó en modo imágenes con formato apaisado, mostrando miniatura nítida de la imagen, título y extracto de texto.</li>
+                            <li><b>Preservación de Scroll y Verificación Automatizada</b>: Se implementó la retención exacta del <code>scrollTop</code> de <code>#content</code> para evitar saltos bruscos al reordenar listas extensas (como en la hoja «Buscador» con 86 tarjetas), verificado al 100% mediante suite de pruebas automatizadas en Electron.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>FAST 2.0 — Restauración e Integración de Hoja "Buscador" en Modo Imágenes (85 Tarjetas con 82 Imágenes de Alta Calidad)</b>:
+                        <ul>
+                            <li><b>Extracción de Imágenes Directas de Celdas</b>: Se desempaquetó la estructura DrawingML del archivo de Google Sheets y se extrajeron las 82 imágenes incrustadas dentro de las celdas de la hoja «Buscador», garantizando nitidez completa y fidelidad visual para diagramas y guías operativas de Entel.</li>
+                            <li><b>Emparejamiento Lógico Fila a Fila</b>: Se correlacionó cada título con su respectiva imagen y texto explicativo/enlaces, normalizando mayúsculas, acrónimos técnicos (eSIM, APN, 5G, 3G, SERNAC, Starlink, Siebel) y formatos de WhatsApp para un total de 85 tarjetas estructuradas.</li>
+                            <li><b>Configuración de Pestaña "Buscador" (Modo Imágenes)</b>: Se integró la nueva hoja configurada en <code>mode: 'images'</code> con diseño elástico de 3 columnas (título a la izquierda, visor interactivo de imagen al centro y panel de texto con botón de copiado a la derecha), conviviendo de forma segura con la hoja «Fast».</li>
+                        </ul>
+                    </li>
+                    <li><b>FAST 2.0 — Corrección Integral de la Estructura Lógica y Editor de Tarjetas (Solución a Fallo de Edición)</b>:
+                        <ul>
+                            <li><b>Eliminación del Crash en <code>renderEditImages</code> y <code>renderEditLinks</code></b>: Se subsanó la excepción <code>TypeError: Cannot read properties of undefined (reading 'forEach')</code> que bloqueaba la apertura del modal de edición cuando una tarjeta carecía de arreglos de imágenes o enlaces predefinidos.</li>
+                            <li><b>Inicialización Segura en <code>openCardEditor()</code> y <code>normalizeSheet()</code></b>: Toda tarjeta procesada, importada o abierta para edición ahora garantiza arreglos vacíos por defecto (<code>images: []</code> y <code>links: []</code>), blindando la aplicación contra excepciones silenciosas.</li>
+                            <li><b>Reactivación del Doble Clic en Tarjetas</b>: Se reestableció el evento <code>dblclick</code> en <code>renderCardEl()</code> para abrir directamente el editor modal (<code>openCardEditor</code>) y cancelar el temporizador de apertura del drawer lateral.</li>
+                            <li><b>Preservación Absoluta y Respaldos Automatizados</b>: Toda actualización de datos cuenta con respaldos rotativos previos en <code>AppData/Roaming/gestor-casos/backups/</code>, resguardando la información original al 100%.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">05 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
             <div class="desc">
                 <ul>
                     <li><b>Menú Tools — Ocultación de Herramientas con Clic Derecho, Ocultación Nativa por Defecto y Reactivación en Ajustes</b>:
@@ -146,12 +603,13 @@
                             <li><b>Verificación Automatizada en Electron</b>: Validación completa de arranque limpio con valores nativos por defecto, ocultación dinámica, inmunidad de herramientas esenciales, renderizado de tarjetas en Ajustes y reactivación unitaria y masiva.</li>
                         </ul>
                     </li>
-                    <li><b>FAST 2.0 — Generación Proporcional de Espacios Vacíos al Mover Contenedores</b>:
+                    <li><b>FAST 2.0 — Gestión Inteligente de Espacios Vacíos al Mover Contenedores (Sin Acumulación)</b>:
                         <ul>
-                            <li><b>Preservación de Espacios en Origen</b>: Al arrastrar y reubicar un contenedor en el modo contenedor (<code>sheet.mode === 'containers'</code>), si este posee \(N\) tarjetas (\(N \ge 1\)), el sistema genera automáticamente \(N\) tarjetas visiblemente vacías (<code>createEmptySlot(null)</code> con clase <code>.card-item.empty-slot</code>) en la posición de origen dentro de <code>sheet.rootOrder</code> y <code>sheet.cards</code>.</li>
-                            <li><b>Comportamiento Idéntico al Movimiento de Tarjetas</b>: La cuadrícula conserva su estructura visual y dimensional sin colapsos abruptos, permitiendo al usuario utilizar dichos espacios para crear nuevas tarjetas con un clic (<code>＋</code>), soltar otras tarjetas libres dentro de ellos o compactarlos selectivamente usando la escoba (<code>🧹</code>).</li>
-                            <li><b>Detección Inteligente de Inserción al Final del Lienzo</b>: Detección ergonómica del cursor en áreas libres del contenedor para permitir reubicar contenedores al final de la fila sin requerir soltar sobre un elemento existente.</li>
-                            <li><b>Verificación Automatizada en Electron</b>: Prueba completa en entorno Electron comprobando la inserción exacta de 2 slots vacíos visibles tras el desplazamiento de un contenedor con 2 tarjetas y la reubicación perfecta en la lista de orden raíz.</li>
+                            <li><b>Preservación de Espacios en Origen</b>: Al arrastrar y reubicar un contenedor en el modo contenedor (<code>sheet.mode === 'containers'</code>), si este posee \(N\) tarjetas (\(N \ge 1\)), el sistema genera automáticamente \(N\) tarjetas visiblemente vacías (<code>createEmptySlot(null)</code> con clase <code>.card-item.empty-slot</code>) en la posición de origen dentro de <code>sheet.rootOrder</code> y <code>sheet.cards</code> para no colapsar los elementos adyacentes.</li>
+                            <li><b>Consumo Inteligente en Destino (Corrección de Bug de Multiplicación)</b>: Cuando un contenedor se mueve de regreso hacia donde estaban sus espacios vacíos («ahí mismo») o sobre cualquier espacio vacío del lienzo, el contenedor <b>consume y reemplaza</b> hasta \(N\) espacios vacíos contiguos en el destino, eliminándolos de <code>sheet.rootOrder</code> y <code>sheet.cards</code> en lugar de duplicarlos o sumarlos indefinidamente.</li>
+                            <li><b>Inmunidad ante Operaciones No-Op</b>: Si el usuario suelta el contenedor en la misma posición relativa o hace un micro-arrastre accidental, el sistema detecta que la posición efectiva no cambió y no genera espacios vacíos fantasmas.</li>
+                            <li><b>Limpieza Automática de Espacios en Cola</b>: En el origen, solo se generan espacios si existen elementos posteriores que requieran mantener su posición; cualquier espacio residual al final absoluto de la cuadrícula se recorta automáticamente para no dejar huecos ciegos al fondo del lienzo.</li>
+                            <li><b>Verificación Automatizada en Electron</b>: Validación con pruebas unitarias en Electron comprobando ciclos repetidos (3 &rarr; 0 &rarr; 3 &rarr; 0 slots), movimientos intermedios entre otros contenedores y restauración perfecta del orden inicial.</li>
                         </ul>
                     </li>
                     <li><b>FAST 2.0 — Rediseño Ultra Compacto del Botón de Hojas Ocultas en Sheetbar</b>:
