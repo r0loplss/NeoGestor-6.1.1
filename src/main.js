@@ -76,8 +76,39 @@ function ensureBackupDir() {
 
 function writeFileAtomic(filePath, content) {
   const tmpPath = filePath + '.tmp';
-  fs.writeFileSync(tmpPath, content, 'utf8');
-  fs.renameSync(tmpPath, filePath);
+  try {
+    fs.writeFileSync(tmpPath, content, 'utf8');
+    let renamed = false;
+    for (let i = 0; i < 4; i++) {
+      try {
+        fs.renameSync(tmpPath, filePath);
+        renamed = true;
+        break;
+      } catch (err) {
+        if (err.code === 'EPERM' || err.code === 'EBUSY' || err.code === 'EACCES') {
+          // Breve espera síncrona para que el antivirus o indexador de Windows libere el handle
+          const start = Date.now();
+          while (Date.now() - start < 30) {}
+        } else {
+          throw err;
+        }
+      }
+    }
+    if (!renamed) {
+      // Fallback seguro: escribir directamente sobre el archivo destino si Windows bloquea el renombrado
+      fs.writeFileSync(filePath, content, 'utf8');
+      try { fs.unlinkSync(tmpPath); } catch {}
+    }
+  } catch (err) {
+    // Si falló el archivo temporal, intentar escritura directa como último recurso
+    try {
+      fs.writeFileSync(filePath, content, 'utf8');
+      try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch {}
+    } catch (fallbackErr) {
+      console.error(`Error crítico escribiendo en ${filePath}:`, fallbackErr);
+      throw fallbackErr;
+    }
+  }
 }
 
 // Copia el estado actual a backups/ y rota manteniendo solo las últimas MAX_BACKUPS
@@ -157,19 +188,43 @@ function saveData(patch) {
   processSaveQueue(); 
 }
 
+let pendingPosPatch = {};
+let savePosTimer = null;
+
 function loadPos() { 
   try { return JSON.parse(fs.readFileSync(POS_FILE, 'utf8')); } 
   catch { return {}; } 
 }
 
+function flushSavePos() {
+  if (savePosTimer) {
+    clearTimeout(savePosTimer);
+    savePosTimer = null;
+  }
+  if (!pendingPosPatch || Object.keys(pendingPosPatch).length === 0) return;
+  const toSave = Object.assign({}, pendingPosPatch);
+  pendingPosPatch = {};
+  try {
+    const p = loadPos(); 
+    Object.assign(p, toSave); 
+    writeFileAtomic(POS_FILE, JSON.stringify(p));
+  } catch (err) {
+    console.warn('Error no fatal al persistir posiciones en gestor-pos.json:', err && err.message ? err.message : err);
+  }
+}
+
 function savePos(patch) { 
-  const p = loadPos(); 
-  Object.assign(p, patch); 
-  writeFileAtomic(POS_FILE, JSON.stringify(p));
+  if (!patch) return;
+  Object.assign(pendingPosPatch, patch);
+  if (savePosTimer) clearTimeout(savePosTimer);
+  savePosTimer = setTimeout(() => {
+    flushSavePos();
+  }, 300);
 }
 
 function getPos(key, defaults) { 
-  return loadPos()[key] || defaults; 
+  const p = Object.assign({}, loadPos(), pendingPosPatch);
+  return p[key] || defaults; 
 }
 
 // ── SOPORTE PARA "ALWAYS ON TOP" ──
@@ -318,6 +373,7 @@ function getFastWin() {
     if (fastWin && !fastWin.isDestroyed()) {
       const b = fastWin.getBounds();
       savePos({ fast: { x: b.x, y: b.y, width: b.width, height: b.height } });
+      flushSavePos();
     }
   });
   toolWins.set('fast', fastWin);
@@ -649,7 +705,11 @@ app.whenReady().then(() => {
 });
 
 // ── IPC: CIERRE Y MINIMIZAR ──
-ipcMain.on('confirm-close', () => { isQuitting = true; app.quit(); });
+ipcMain.on('confirm-close', () => { 
+  try { flushSavePos(); } catch (e) {}
+  isQuitting = true; 
+  app.quit(); 
+});
 ipcMain.on('close-main', () => { 
   if (mainWin && !mainWin.isDestroyed()) {
     mainWin.webContents.send('request-close-confirm'); 
@@ -965,6 +1025,7 @@ function openTool(id) {
     if (win && !win.isDestroyed()) {
       const b = win.getBounds();
       savePos({ [id]: { x: b.x, y: b.y, width: b.width, height: b.height } });
+      flushSavePos();
     }
   });
 
@@ -1252,6 +1313,7 @@ function openNote(id, isPreview = false) {
     if (win && !win.isDestroyed()) { 
       const b = win.getBounds(); 
       savePos({ [`note-${id}`]: { x: b.x, y: b.y, width: b.width, height: b.height } }); 
+      flushSavePos();
     }
   }); 
   win.on('closed', () => { 
@@ -1271,5 +1333,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
+  try { flushSavePos(); } catch (e) {}
   try { globalShortcut.unregisterAll(); } catch (err) { console.warn(err); }
 });

@@ -4310,10 +4310,34 @@
                     rotateFastBackup();
                 }
 
-                // Escritura atómica vía archivo temporal
+                // Escritura atómica vía archivo temporal con reintentos y fallback para Windows/Antivirus
+                const content = JSON.stringify(dataToSave, null, 2);
                 const tmpPath = state.dataPath + '.tmp';
-                fs.writeFileSync(tmpPath, JSON.stringify(dataToSave, null, 2), 'utf8');
-                fs.renameSync(tmpPath, state.dataPath);
+                let renamed = false;
+                try {
+                    fs.writeFileSync(tmpPath, content, 'utf8');
+                    for (let i = 0; i < 4; i++) {
+                        try {
+                            fs.renameSync(tmpPath, state.dataPath);
+                            renamed = true;
+                            break;
+                        } catch (err) {
+                            if (err.code === 'EPERM' || err.code === 'EBUSY' || err.code === 'EACCES') {
+                                const start = Date.now();
+                                while (Date.now() - start < 30) {}
+                            } else {
+                                throw err;
+                            }
+                        }
+                    }
+                    if (!renamed) {
+                        fs.writeFileSync(state.dataPath, content, 'utf8');
+                        try { fs.unlinkSync(tmpPath); } catch (_) {}
+                    }
+                } catch (writeErr) {
+                    fs.writeFileSync(state.dataPath, content, 'utf8');
+                    try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (_) {}
+                }
             } catch (e) {
                 showToast('❌ Error al guardar datos: ' + e.message, 'error');
             } finally {
@@ -7107,6 +7131,62 @@
             copyCardBody(card);
         });
 
+        // Menú contextual dentro del drawer (permite copiar texto seleccionado o completo)
+        drawer.addEventListener('contextmenu', (e) => {
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const d = state.drawer;
+            if (!d) return;
+            const card = getCardById(d.sheetId, d.cardId);
+            if (!card) return;
+
+            const selection = (window.getSelection ? window.getSelection().toString() : '').trim();
+            const items = [];
+
+            if (selection.length > 0) {
+                items.push({
+                    icon: '📋',
+                    label: 'Copiar texto seleccionado',
+                    fn: () => copyText(selection)
+                });
+                items.push({
+                    icon: '📄',
+                    label: 'Copiar todo el contenido (WhatsApp)',
+                    fn: () => copyCardBody(card)
+                });
+                items.push({
+                    icon: '📑',
+                    label: 'Copiar tarjeta completa',
+                    fn: () => copyFullCard(card)
+                });
+            } else {
+                items.push({
+                    icon: '📄',
+                    label: 'Copiar texto (WhatsApp)',
+                    fn: () => copyCardBody(card)
+                });
+                items.push({
+                    icon: '📑',
+                    label: 'Copiar tarjeta completa',
+                    fn: () => copyFullCard(card)
+                });
+                items.push(null);
+                items.push({
+                    icon: '✏️',
+                    label: 'Editar tarjeta',
+                    fn: () => openCardEditor(d.sheetId, card.id)
+                });
+                items.push({
+                    icon: '⭐',
+                    label: card.pinned ? 'Desmarcar favorita' : 'Marcar favorita',
+                    fn: () => togglePinCard(d.sheetId, card.id)
+                });
+            }
+            showContextMenu(e.clientX, e.clientY, items);
+        });
+
         function openImageBig(img) {
             if (!img || !img.data) return;
             const probe = new Image();
@@ -7217,18 +7297,22 @@
             }
 
             // 2. Guardar en el portapapeles del sistema (Electron clipboard / Web clipboard)
+            // Se guarda el texto normal/legible de la tarjeta (body o title) para que al pegar en WhatsApp,
+            // Siebel, correo o Bloc de Notas se pegue texto limpio y NUNCA código JSON.
+            // La estructura completa de la tarjeta queda preservada en window.__lastCopiedCard y localStorage para pegar en Fast.
             try {
+                const textToClip = card.body || card.title || '';
                 if (clipboard && clipboard.writeText) {
-                    clipboard.writeText(jsonStr);
+                    clipboard.writeText(textToClip);
                 } else if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(jsonStr);
+                    navigator.clipboard.writeText(textToClip);
                 }
             } catch (e) {
                 console.warn('Error al guardar en portapapeles:', e);
             }
 
             const previewTitle = card.title ? `"${card.title.slice(0, 24)}${card.title.length > 24 ? '...' : ''}"` : 'Tarjeta';
-            showToast(`📑 ${previewTitle} copiada al portapapeles (lista para pegar)`, 'success', 2200);
+            showToast(`📑 ${previewTitle} copiada (lista para pegar)`, 'success', 2200);
             updatePasteButtonState();
         }
 
@@ -7423,20 +7507,28 @@
                             sheet.cards.splice(targetIdx + 1, 0, newCard);
                         }
                     } else {
-                        sheet.cards.push(newCard);
+                        if (sheet.mode === 'images') sheet.cards.unshift(newCard);
+                        else sheet.cards.push(newCard);
                     }
                 } else {
                     const firstEmptyIdx = sheet.cards.findIndex(c => c.isEmpty);
                     if (firstEmptyIdx !== -1) {
                         sheet.cards[firstEmptyIdx] = newCard;
                     } else {
-                        sheet.cards.push(newCard);
+                        if (sheet.mode === 'images') {
+                            sheet.cards.unshift(newCard);
+                        } else {
+                            sheet.cards.push(newCard);
+                        }
                     }
                 }
             }
 
             saveData();
             render();
+            if (sheet.mode === 'images' && contentEl && !targetSlotOrCardId) {
+                contentEl.scrollTop = 0;
+            }
 
             const titleDesc = newCard.title ? `"${newCard.title.slice(0, 24)}${newCard.title.length > 24 ? '...' : ''}"` : 'Tarjeta';
             showToast(`📥 ${titleDesc} pegada con éxito.`, 'success', 2200);
@@ -7698,7 +7790,11 @@
             const idx = from.cards.findIndex(c => c.id === cardId);
             if (idx === -1) return;
             const [moved] = from.cards.splice(idx, 1);
-            to.cards.push(moved);
+            if (to.mode === 'images') {
+                to.cards.unshift(moved);
+            } else {
+                to.cards.push(moved);
+            }
             if (state.drawer && state.drawer.cardId === cardId) state.drawer = null;
             saveData();
             render();
@@ -9133,7 +9229,8 @@
                             }
                         }
                     } else {
-                        sheet.cards.push(card);
+                        if (sheet.mode === 'images') sheet.cards.unshift(card);
+                        else sheet.cards.push(card);
                     }
                 } else if (spatialTarget && spatialTarget.targetId && sheet.mode === 'containers' && !targetContainerId) {
                     sheet.cards.push(card);
@@ -9147,7 +9244,11 @@
                     }
                     sheet.rootOrder = rootOrder;
                 } else {
-                    sheet.cards.push(card);
+                    if (sheet.mode === 'images') {
+                        sheet.cards.unshift(card);
+                    } else {
+                        sheet.cards.push(card);
+                    }
                 }
                 saveData();
             }
@@ -9701,16 +9802,24 @@
                 if (from && to) {
                     const idx = from.cards.indexOf(card);
                     if (idx !== -1) from.cards.splice(idx, 1);
-                    to.cards.push(card);
+                    if (to.mode === 'images') {
+                        to.cards.unshift(card);
+                    } else {
+                        to.cards.push(card);
+                    }
                 }
             }
 
             const isNew = editingCard.isNew;
+            const targetSheet = getSheetById(newSheetId || editingCard.sheetId);
             cardSnapshot = null;
             editingCard = null;
             modalOverlay.classList.remove('show');
             saveData();
             render();
+            if (isNew && targetSheet && targetSheet.mode === 'images' && contentEl) {
+                contentEl.scrollTop = 0;
+            }
             showToast(isNew ? '✅ Tarjeta creada.' : '✅ Cambios guardados.', 'success');
         }
 
@@ -11349,21 +11458,37 @@
                             e.preventDefault();
                             compactarHoja(state.activeSheetId);
                         } else {
+                            // 1. Si el usuario tiene texto seleccionado manualmente (con el ratón o teclado),
+                            // NUNCA interceptar ni cancelar: permitir la copia normal nativa del navegador.
+                            const selection = window.getSelection ? window.getSelection().toString() : '';
+                            if (selection && selection.length > 0) {
+                                return;
+                            }
+
                             const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT' || e.target.isContentEditable);
                             if (!typing && !modalOverlay.classList.contains('show')) {
+                                // 2. Si el drawer está abierto y NO hay texto seleccionado, copiar el texto normal de la tarjeta (WhatsApp)
+                                if (state.drawer && state.drawer.cardId) {
+                                    const drawerCard = getCardById(state.drawer.sheetId, state.drawer.cardId);
+                                    if (drawerCard) {
+                                        e.preventDefault();
+                                        copyCardBody(drawerCard);
+                                        return;
+                                    }
+                                }
+
+                                // 3. Si hay tarjetas seleccionadas en la cuadrícula o tarjeta enfocada, copiar texto normal para WhatsApp
                                 let cardToCopy = null;
                                 if (selectedCardIds && selectedCardIds.size > 0) {
                                     const firstId = Array.from(selectedCardIds)[0];
                                     cardToCopy = getCardById(selectedSheetId || state.activeSheetId, firstId);
-                                } else if (state.drawer && state.drawer.cardId) {
-                                    cardToCopy = getCardById(state.drawer.sheetId, state.drawer.cardId);
                                 } else if (selectedIndex >= 0 && visibleCards[selectedIndex]) {
                                     const sel = visibleCards[selectedIndex];
                                     cardToCopy = getCardById(sel.sheetId, sel.cardId);
                                 }
                                 if (cardToCopy) {
                                     e.preventDefault();
-                                    copyFullCard(cardToCopy);
+                                    copyCardBody(cardToCopy);
                                 }
                             }
                         }

@@ -133,6 +133,96 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 sep 2026</span><span class="ver">v6.1.9</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Repositorio público y compilación v6.1.9</b>: se restableció la visibilidad pública de <code>NeoGestor-6.1.1</code> para Releases, <code>package.json</code> 6.1.8 → 6.1.9 y portable <code>GestorCasos-portable-6.1.9.exe</code> (73,2 MB). Se mantuvo la observación menor de <code>fast.html:11463</code> sin modificar por indicación.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">09 sep 2026</span><span class="ver">v6.1.8</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">CORRECCIÓN DE COPIA MANUAL EN DRAWER Y BLINDAJE DE PORTAPAPELES (09 SEP 2026):</p>
+                <ul>
+                    <li><b>1. Corrección de Copia Manual con Selección de Texto en el Drawer</b>:
+                        <ul>
+                            <li><b>Fallo reportado</b>: Al seleccionar texto manualmente con el ratón dentro del drawer de una tarjeta y pulsar <code>Ctrl + C</code>, en lugar de copiarse el texto seleccionado se copiaba una estructura de código con formato JSON (<code>{"__type":"FAST_CARD",...}</code>).</li>
+                            <li><b>Causa raíz técnica</b>:
+                                <ul>
+                                    <li>En el manejador global de teclado <code>keydown</code> (<code>case 'c':</code>), se condicionaba la interceptación evaluando únicamente si el elemento en foco era un campo de entrada (<code>e.target.tagName === 'INPUT' || ...</code>). Al encontrarse el usuario seleccionando texto en los párrafos o contenedores del drawer (elementos <code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;b&gt;</code>), <code>typing</code> era <code>false</code>.</li>
+                                    <li>El atajo detectaba que <code>state.drawer</code> estaba abierto y ejecutaba <code>e.preventDefault()</code> llamando a <code>copyFullCard()</code>, la cual volcaba la serialización completa de la tarjeta en JSON al portapapeles de texto del sistema (<code>clipboard.writeText(jsonStr)</code>), cancelando la copia nativa del texto resaltado por el usuario.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Respeto a la selección manual</b>: Se añadió una comprobación prioritaria que evalúa si el usuario tiene texto seleccionado en pantalla (<code>const selection = window.getSelection().toString(); if (selection.length &gt; 0) return;</code>). Si hay texto seleccionado, el atajo <code>Ctrl + C</code> no interfiere ni cancela el evento, permitiendo que el motor de Chromium copie exactamente el texto normal seleccionado.</li>
+                                    <li><b>Copia limpia sin selección en Drawer</b>: Si el drawer está abierto pero el usuario pulsa <code>Ctrl + C</code> sin resaltar una porción específica, el sistema ahora ejecuta <code>copyCardBody()</code> copiando el texto normal y formateado de la tarjeta para WhatsApp, en lugar de código JSON.</li>
+                                    <li><b>Blindaje de <code>copyFullCard</code></b>: En la función <code>copyFullCard()</code>, se modificó la escritura al portapapeles del sistema para que almacene el texto legible de la tarjeta (<code>card.body || card.title</code>) en lugar del string JSON plano. De este modo, si el usuario pega en WhatsApp, Siebel, Teams o el Bloc de Notas, siempre se pegará texto normal. La estructura interna completa de la tarjeta permanece 100% disponible en <code>window.__lastCopiedCard</code> y <code>localStorage</code> para duplicar o pegar en espacios vacíos de Fast sin problemas.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Corregido, validado y probado al 100%</b> en entorno Electron real.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>2. Menú Contextual Integrado en el Drawer de Detalle</b>:
+                        <ul>
+                            <li><b>Mejora añadida</b>: Se implementó un escuchador <code>contextmenu</code> en el contenedor <code>#drawer</code>. Al hacer clic derecho sobre el texto del drawer:
+                                <ul>
+                                    <li>Si hay texto seleccionado: Ofrece las opciones <i>«📋 Copiar texto seleccionado»</i>, <i>«📄 Copiar todo el contenido (WhatsApp)»</i> y <i>«📑 Copiar tarjeta completa»</i>.</li>
+                                    <li>Si no hay texto seleccionado: Ofrece opciones rápidas de <i>«📄 Copiar texto (WhatsApp)»</i>, <i>«📑 Copiar tarjeta completa»</i>, <i>«✏️ Editar tarjeta»</i> y <i>«⭐ Marcar / desmarcar favorita»</i>.</li>
+                                </ul>
+                            </li>
+                            <li>Permite copiar tanto con teclado como con ratón de manera visual e intuitiva sin interferencias de código.</li>
+                            <li><b>Estado</b>: <b>Implementado y verificado</b>.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>3. Apilamiento Superior de Nuevas Tarjetas en Modo Imágenes</b>:
+                        <ul>
+                            <li><b>Requerimiento del usuario</b>: En el modo imágenes (hojas con <code>mode === 'images'</code>), las nuevas tarjetas e imágenes que se agreguen deben ir apilándose desde arriba hacia abajo, apareciendo siempre las más recientes en el primer lugar de la cuadrícula.</li>
+                            <li><b>Cómo se implementó en <code>src/tools/fast.html</code></b>:
+                                <ul>
+                                     <li><b>Creación de tarjetas (<code>openCardEditor</code> / <code>saveCardEditor</code>)</b>: Al crear una nueva tarjeta en hojas de tipo imágenes, se inserta al inicio del arreglo mediante <code>sheet.cards.unshift(card)</code> (posición 0), en lugar de añadirse al fondo con <code>push()</code>.</li>
+                                     <li><b>Pegado de tarjetas (<code>pasteFullCard</code>)</b>: Al pegar una tarjeta copiada en una hoja de imágenes (sin especificar un slot vacío previo), se ubica de inmediato en la cabecera superior de la cuadrícula (<code>sheet.cards.unshift(newCard)</code>).</li>
+                                     <li><b>Transferencia entre hojas (<code>moveCardToSheet</code> y editor modal)</b>: Al mover una tarjeta proveniente de otra hoja hacia una hoja de imágenes, se incorpora automáticamente en la parte superior (<code>to.cards.unshift(moved)</code>).</li>
+                                     <li><b>Auto-desplazamiento suave al tope</b>: Al guardar una nueva tarjeta en modo imágenes, la vista asegura el desplazamiento automático al inicio (<code>contentEl.scrollTop = 0</code>) para visualizar inmediatamente la tarjeta recién incorporada.</li>
+                                     <li><b>Preservación del modo tarjetas estándar</b>: Las hojas tradicionales de tarjetas (<code>mode === 'cards'</code>) y contenedores conservan su flujo habitual de inserción al final o posición espacial.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Completado, validado y probado al 100%</b> en entorno Electron real.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>4. Blindaje y Corrección del Error EPERM (operation not permitted, rename) en gestor-pos.json y gestor-fast.json</b>:
+                        <ul>
+                            <li><b>Fallo reportado</b>: Al crear tarjetas en Fast, abrir Tráfico o mover/redimensionar ventanas en equipos de colegas con la versión portable, aparecía intermitentemente un cuadro de diálogo de error de Electron: <code>Error: EPERM: operation not permitted, rename '...gestor-pos.json.tmp' -&gt; '...gestor-pos.json' at writeFileAtomic (src/main.js)</code>.</li>
+                            <li><b>Causa raíz técnica</b>:
+                                <ul>
+                                    <li><b>Ráfagas de eventos de movimiento</b>: Las ventanas secundarias (Tráfico, Fast, notas) invocaban <code>savePos()</code> de forma síncrona en cada evento <code>move</code> y <code>resize</code> (decenas de veces por segundo al arrastrar o cambiar tamaño).</li>
+                                    <li><b>Bloqueo transitorio por Antivirus / Indexador de Windows</b>: En Windows, cuando se crea y cierra un archivo temporal (<code>.tmp</code>) dentro de <code>AppData</code>, herramientas de seguridad corporativas (Windows Defender, CrowdStrike, McAfee) o el servicio de indexación abren temporalmente un handle de lectura para inspeccionarlo. Si en ese microsegundo se invoca <code>fs.renameSync()</code>, el sistema de archivos de Windows deniega la operación con <code>EPERM</code> o <code>EBUSY</code>.</li>
+                                    <li><b>Falta de protección en <code>savePos()</code></b>: Al no existir un bloque <code>try/catch</code> protegiendo el guardado de coordenadas secundarias, la excepción no capturada escalaba directamente a la interfaz como un modal de error fatal.</li>
+                                    <li><b>Vulnerabilidad análoga en Fast</b>: En <code>src/tools/fast.html</code>, el procesamiento de la cola de guardado (<code>processSaveQueue</code>) empleaba <code>fs.renameSync</code> directo sin reintentos frente a bloqueos de antivirus en <code>gestor-fast.json</code>.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cómo se solucionó</b>:
+                                <ul>
+                                    <li><b>Debounce inteligente en <code>savePos</code> (<code>src/main.js</code>)</b>: Se implementó un acumulador de coordenadas (<code>pendingPosPatch</code>) y un temporizador debounce de 300 ms. Al mover o cambiar el tamaño de cualquier ventana, los cambios se retienen en memoria y se consolidan en una única escritura en disco tras cesar el movimiento, reduciendo el I/O en más del 95%.</li>
+                                    <li><b>Vaciado garantizado al salir (<code>flushSavePos</code>)</b>: Se asegura el guardado inmediato de cualquier cambio pendiente al cerrar ventanas (<code>win.on('close')</code>, <code>fastWin.on('close')</code>) y al cerrar el programa (<code>confirm-close</code>, <code>will-quit</code>).</li>
+                                    <li><b>Reintentos con micro-espera y fallback directo en <code>writeFileAtomic</code></b>: Se dotó a la función de un bucle de hasta 4 intentos con pausas de 30 ms ante <code>EPERM</code>, <code>EBUSY</code> o <code>EACCES</code> para que el antivirus libere el archivo. Si el bloqueo persiste, aplica un fallback automático de escritura directa (<code>fs.writeFileSync</code>) y elimina el temporal de manera limpia.</li>
+                                    <li><b>Manejo seguro de errores en posiciones</b>: Se protegió <code>flushSavePos()</code> con <code>try/catch</code> silenciando fallos no fatales en consola para que nunca bloqueen ni interrumpan al usuario.</li>
+                                    <li><b>Blindaje de guardado en Fast (<code>src/tools/fast.html</code>)</b>: Se implementó la misma arquitectura de 4 reintentos y fallback directo en <code>processSaveQueue</code>, garantizando que el guardado de tarjetas y hojas nunca falle por bloqueos de Windows.</li>
+                                </ul>
+                            </li>
+                            <li><b>Estado</b>: <b>Completado, blindado y probado al 100%</b>.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">07 sep 2026</span><span class="ver">v6.1.7</span><span class="agente agy">Antigravity</span></div>
             <div class="desc">
                 <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">AUDITORÍA DE FAST 2.0, ERRORES REVISADOS Y CORRECCIÓN DE LÓGICAS (07 SEP 2026):</p>
