@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipificaciones — Liquid Glass</title>
+    <link rel="stylesheet" href="../styles/ambient-glow.css">
+    <link rel="stylesheet" href="../styles/liquid-glass.css">
+    <style>
+        .tipif-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tipif-nav {
+            width: 260px;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: var(--blur-card);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 14px;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .tipif-nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            border-radius: var(--radius-card);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all var(--anim-fast);
+            text-align: left;
+        }
+
+        .tipif-nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .tipif-nav-item.active {
+            color: #ffffff;
+            background: var(--ios-purple);
+            box-shadow: 0 4px 14px rgba(var(--ios-purple-rgb), 0.45);
+        }
+
+        .tipif-content {
+            flex: 1;
+            padding: 18px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            overflow-y: auto;
+        }
+
+        .tree-card {
+            background: var(--glass-card);
+            backdrop-filter: var(--blur-card);
+            border: var(--border-glass);
+            border-radius: var(--radius-widget);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-card), var(--glow-inner);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tree-level {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tree-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--text-secondary);
+        }
+
+        .tree-value-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="ambient-orb ambient-orb-1" style="background: radial-gradient(circle, rgba(191, 90, 242, 0.35) 0%, transparent 70%);"></div>
+        <div class="ambient-orb ambient-orb-2" style="background: radial-gradient(circle, rgba(0, 240, 255, 0.35) 0%, transparent 70%);"></div>
+    </div>
+    <div class="ambient-noise"></div>
+
+    <div class="glass-window">
+
+        <!-- Header con Dynamic Island -->
+        <header class="dynamic-island-bar">
+            <div class="window-controls">
+                <button class="win-dot close" onclick="ipcRenderer.send('close-window')"></button>
+                <button class="win-dot min" onclick="ipcRenderer.send('minimize-window')"></button>
+                <button class="win-dot max" onclick="ipcRenderer.send('maximize-window')"></button>
+            </div>
+
+            <div class="island-capsule">
+                <span class="island-sensor-dot" style="background:#bf5af2; box-shadow: 0 0 8px #bf5af2;"></span>
+                <span>Tipificaciones Siebel</span>
+                <span class="glass-badge purple" style="font-size:9px; padding: 1px 7px;">iPad Settings</span>
+            </div>
+
+            <span style="font-size: 11px; color: var(--text-tertiary); -webkit-app-region: no-drag;">Maqueta Visual</span>
+        </header>
+
+        <!-- Layout iPad Settings -->
+        <div class="tipif-layout">
+
+            <!-- Navegación lateral -->
+            <aside class="tipif-nav">
+                <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; color:var(--text-tertiary); padding:4px 8px;">Áreas de Gestión</div>
+                <button class="tipif-nav-item active">
+                    <span>📶 Datos e Internet</span>
+                    <span class="glass-badge blue" style="font-size:9px;">12</span>
+                </button>
+                <button class="tipif-nav-item">
+                    <span>💵 Facturación y Cobros</span>
+                    <span class="glass-badge green" style="font-size:9px;">18</span>
+                </button>
+                <button class="tipif-nav-item">
+                    <span>🔄 Modificaciones de Plan</span>
+                    <span class="glass-badge orange" style="font-size:9px;">6</span>
+                </button>
+                <button class="tipif-nav-item">
+                    <span>✈️ Servicios Roaming</span>
+                    <span class="glass-badge rose" style="font-size:9px;">8</span>
+                </button>
+                <button class="tipif-nav-item">
+                    <span>📱 Configuración de Terminal</span>
+                    <span class="glass-badge blue" style="font-size:9px;">5</span>
+                </button>
+            </aside>
+
+            <!-- Contenido del árbol de tipificación -->
+            <main class="tipif-content">
+                <div class="spotlight-bar" style="margin-top:0;">
+                    <span class="spotlight-icon">🔍</span>
+                    <input type="text" class="spotlight-input" placeholder="Filtrar motivo, submotivo o solución en Siebel..." value="Navegación lenta / Cuota agotada" readonly />
+                    <span class="spotlight-shortcut">Enter</span>
+                </div>
+
+                <div class="tree-card">
+                    <div class="tree-level">
+                        <span class="tree-label">Motivo Principal (Siebel)</span>
+                        <div class="tree-value-box">
+                            <span>Consulta > Consumo de Datos Móviles</span>
+                            <button class="btn-apple glass" style="font-size:10px; padding:2px 8px;" onclick="copyVal(this, 'Consulta > Consumo de Datos Móviles')">Copiar</button>
+                        </div>
+                    </div>
+
+                    <div class="tree-level">
+                        <span class="tree-label">Submotivo / Causa</span>
+                        <div class="tree-value-box">
+                            <span>Explicación de cuota y navegación reducida</span>
+                            <button class="btn-apple glass" style="font-size:10px; padding:2px 8px;" onclick="copyVal(this, 'Explicación de cuota y navegación reducida')">Copiar</button>
+                        </div>
+                    </div>
+
+                    <div class="tree-level">
+                        <span class="tree-label">Solución Aplicada</span>
+                        <div class="tree-value-box">
+                            <span style="color:#5deb82;">Información entregada al cliente y ofrecimiento de bolsa adicional</span>
+                            <button class="btn-apple glass" style="font-size:10px; padding:2px 8px;" onclick="copyVal(this, 'Información entregada al cliente y ofrecimiento de bolsa adicional')">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function copyVal(btn, text) {
+            const orig = btn.innerText;
+            btn.innerText = 'Copiado';
+            btn.style.borderColor = '#30d158';
+            setTimeout(() => {
+                btn.innerText = orig;
+                btn.style.borderColor = '';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

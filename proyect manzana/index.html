@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoGestor — Proyect Manzana (Liquid Glass)</title>
+    <link rel="stylesheet" href="styles/ambient-glow.css">
+    <link rel="stylesheet" href="styles/liquid-glass.css">
+    <style>
+        /* Estilos específicos de la pantalla principal */
+        .springboard-content {
+            flex: 1;
+            padding: 16px 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        /* Saludo y Spotlight */
+        .hero-banner {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hero-title {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #ffffff 30%, rgba(255, 255, 255, 0.65) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Buscador Spotlight de cristal */
+        .spotlight-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.42);
+            backdrop-filter: var(--blur-island);
+            -webkit-backdrop-filter: var(--blur-island);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: var(--radius-pill);
+            padding: 10px 18px;
+            gap: 12px;
+            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            transition: all var(--anim-normal);
+            margin-top: 4px;
+        }
+
+        .spotlight-bar:focus-within {
+            border-color: rgba(10, 132, 255, 0.6);
+            box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(10, 132, 255, 0.25);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .spotlight-icon {
+            font-size: 15px;
+            color: var(--text-tertiary);
+        }
+
+        .spotlight-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 13.5px;
+            font-family: var(--font-ios);
+        }
+
+        .spotlight-input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .spotlight-shortcut {
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-secondary);
+        }
+
+        /* Tablero de Widgets (Grid estilo iOS) */
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .widget-metric-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin: 10px 0 6px;
+        }
+
+        .widget-metric-big {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+        }
+
+        /* Barra de progreso de cristal líquido */
+        .liquid-progress-track {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 8px;
+        }
+
+        .liquid-progress-fill {
+            height: 100%;
+            border-radius: var(--radius-pill);
+            position: relative;
+            transition: width 1s var(--ease-spring);
+        }
+
+        .liquid-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* DOCK FLOTANTE ESTILO IPADOS */
+        .dock-container {
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            padding-top: 14px;
+        }
+
+        .liquid-dock {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(18, 22, 38, 0.65);
+            backdrop-filter: var(--blur-island);
+            -webkit-backdrop-filter: var(--blur-island);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            padding: 10px 18px;
+            position: relative;
+        }
+
+        .dock-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+            outline: none;
+        }
+
+        .dock-icon-squircle {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            box-shadow: 0 8px 18px -2px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+            transition: all 0.25s var(--ease-spring);
+            overflow: hidden;
+        }
+
+        .dock-icon-squircle::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 60%);
+            border-radius: inherit;
+        }
+
+        .dock-item:hover {
+            transform: translateY(-8px) scale(1.12);
+        }
+
+        .dock-item:hover .dock-icon-squircle {
+            box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.6), 0 0 20px var(--dock-glow, rgba(10, 132, 255, 0.5));
+        }
+
+        .dock-item:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .dock-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.75);
+            box-shadow: 0 0 6px #ffffff;
+            opacity: 0.9;
+        }
+
+        .dock-label-tooltip {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: var(--radius-pill);
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(6px);
+            pointer-events: none;
+            transition: all 0.18s var(--ease-spring);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        }
+
+        .dock-item:hover .dock-label-tooltip {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Gradientes de íconos */
+        .icon-fast { background: linear-gradient(135deg, #ff9f0a 0%, #ff375f 100%); --dock-glow: rgba(255, 159, 10, 0.5); }
+        .icon-trafico { background: linear-gradient(135deg, #0a84ff 0%, #00f0ff 100%); --dock-glow: rgba(0, 240, 255, 0.5); }
+        .icon-ciclos { background: linear-gradient(135deg, #30d158 0%, #20e3b2 100%); --dock-glow: rgba(48, 209, 88, 0.5); }
+        .icon-tipif { background: linear-gradient(135deg, #bf5af2 0%, #5e5ce6 100%); --dock-glow: rgba(191, 90, 242, 0.5); }
+        .icon-enlaces { background: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%); --dock-glow: rgba(10, 132, 255, 0.5); }
+        .icon-occ { background: linear-gradient(135deg, #30d158 0%, #ffd60a 100%); --dock-glow: rgba(48, 209, 88, 0.5); }
+        .icon-notas { background: linear-gradient(135deg, #ffd60a 0%, #ff9f0a 100%); --dock-glow: rgba(255, 214, 10, 0.5); }
+    </style>
+</head>
+<body>
+
+    <!-- Capas ambientales -->
+    <div class="ambient-canvas">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+        <div class="ambient-orb ambient-orb-3"></div>
+    </div>
+    <div class="ambient-noise"></div>
+
+    <!-- Ventana Principal -->
+    <div class="glass-window">
+
+        <!-- Barra Superior con Dynamic Island -->
+        <header class="dynamic-island-bar">
+            <!-- Semáforo Apple -->
+            <div class="window-controls">
+                <button class="win-dot close" onclick="ipcRenderer.send('close-window')" title="Cerrar">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+                <button class="win-dot min" onclick="ipcRenderer.send('minimize-window')" title="Minimizar">
+                    <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+                </button>
+                <button class="win-dot max" onclick="ipcRenderer.send('maximize-window')" title="Expandir">
+                    <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                </button>
+            </div>
+
+            <!-- Dynamic Island -->
+            <div class="island-capsule">
+                <span class="island-sensor-dot"></span>
+                <span id="islandClock">--:--</span>
+                <span style="opacity: 0.35;">•</span>
+                <span style="color: rgba(255,255,255,0.85);">NeoGestor · Liquid Glass UI</span>
+                <span class="glass-badge blue" style="font-size: 9px; padding: 1px 7px;">Prototipo</span>
+            </div>
+
+            <!-- Acceso rápido / Info -->
+            <div style="display: flex; align-items: center; gap: 10px; -webkit-app-region: no-drag;">
+                <span class="glass-badge green">🟢 En Línea</span>
+            </div>
+        </header>
+
+        <!-- Contenido Central -->
+        <main class="springboard-content">
+
+            <!-- Hero & Buscador Spotlight -->
+            <section class="hero-banner">
+                <h1 class="hero-title">Centro de Mando Móvil</h1>
+                <p class="hero-subtitle">
+                    <span>✨ Experiencia visual de alta definición</span>
+                    <span>•</span>
+                    <span>Maqueta interactiva no funcional</span>
+                </p>
+
+                <div class="spotlight-bar">
+                    <span class="spotlight-icon">🔍</span>
+                    <input type="text" class="spotlight-input" placeholder="Buscar caso, cliente, herramienta o script..." readonly />
+                    <span class="spotlight-shortcut">⌘K</span>
+                </div>
+            </section>
+
+            <!-- Grid de Widgets estilo iOS -->
+            <section class="widgets-grid">
+
+                <!-- Widget 1: Meta del Día -->
+                <div class="glass-card" style="--card-glow: rgba(10, 132, 255, 0.3);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="glass-badge blue">📊 Gestión del Día</span>
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Turno Tarde</span>
+                    </div>
+                    <div class="widget-metric-row">
+                        <span class="widget-metric-big" style="color: #ffffff;">42</span>
+                        <span style="font-size: 13px; color: var(--text-secondary);">/ 50 casos</span>
+                    </div>
+                    <div class="liquid-progress-track">
+                        <div class="liquid-progress-fill" style="width: 84%; background: linear-gradient(90deg, #0a84ff, #00f0ff);"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size: 11px; color: var(--text-secondary); margin-top: 8px;">
+                        <span>Eficiencia: <strong>96.4%</strong></span>
+                        <span>TMO Promedio: <strong>3m 45s</strong></span>
+                    </div>
+                </div>
+
+                <!-- Widget 2: Estado de Plataformas -->
+                <div class="glass-card" style="--card-glow: rgba(48, 209, 88, 0.3);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="glass-badge green">⚡ Sistemas Entel</span>
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Live</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 12px;">
+                        <div style="display:flex; justify-content:space-between; font-size: 11.5px;">
+                            <span style="color: var(--text-secondary);">Siebel CRM Móvil</span>
+                            <span style="color: #30d158; font-weight: 600;">● Conectado</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size: 11.5px;">
+                            <span style="color: var(--text-secondary);">OneTouch</span>
+                            <span style="color: #30d158; font-weight: 600;">● Operativo</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size: 11.5px;">
+                            <span style="color: var(--text-secondary);">Plataforma Tráfico</span>
+                            <span style="color: #00f0ff; font-weight: 600;">● Standby</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widget 3: Próximo Descanso -->
+                <div class="glass-card" style="--card-glow: rgba(255, 159, 10, 0.3);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="glass-badge orange">⏱️ Cronograma</span>
+                        <span style="font-size: 11px; color: var(--text-tertiary);">Pausa</span>
+                    </div>
+                    <div class="widget-metric-row">
+                        <span class="widget-metric-big" style="color: #ff9f0a;">18:30</span>
+                    </div>
+                    <p style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4;">
+                        Próximo descanso programado (15 min). Cola activa: <strong>14 llamadas en espera</strong>.
+                    </p>
+                </div>
+
+            </section>
+
+            <!-- Dock Flotante estilo iPadOS -->
+            <div class="dock-container">
+                <div class="liquid-dock">
+
+                    <!-- FAST -->
+                    <button class="dock-item" onclick="openTool('fast')" title="Abrir FAST">
+                        <div class="dock-label-tooltip">FAST · Gestor de Casos</div>
+                        <div class="dock-icon-squircle icon-fast">⚡</div>
+                        <span class="dock-dot"></span>
+                    </button>
+
+                    <!-- TRÁFICO -->
+                    <button class="dock-item" onclick="openTool('trafico')" title="Abrir Tráfico">
+                        <div class="dock-label-tooltip">Tráfico Móvil PRO</div>
+                        <div class="dock-icon-squircle icon-trafico">📶</div>
+                        <span class="dock-dot"></span>
+                    </button>
+
+                    <!-- CAMBIO DE CICLO -->
+                    <button class="dock-item" onclick="openTool('ciclos')" title="Abrir Cambio de Ciclo">
+                        <div class="dock-label-tooltip">Cambio de Ciclo</div>
+                        <div class="dock-icon-squircle icon-ciclos">🔄</div>
+                        <span class="dock-dot"></span>
+                    </button>
+
+                    <!-- TIPIFICACIONES -->
+                    <button class="dock-item" onclick="openTool('tipificaciones')" title="Abrir Tipificaciones">
+                        <div class="dock-label-tooltip">Tipificaciones</div>
+                        <div class="dock-icon-squircle icon-tipif">🏷️</div>
+                        <span class="dock-dot"></span>
+                    </button>
+
+                    <!-- ENLACES -->
+                    <button class="dock-item" onclick="showToast('Enlaces Rápidos · Próximamente')" title="Enlaces">
+                        <div class="dock-label-tooltip">Enlaces Rápidos</div>
+                        <div class="dock-icon-squircle icon-enlaces">🔗</div>
+                    </button>
+
+                    <!-- OCC -->
+                    <button class="dock-item" onclick="showToast('Calculadora OCC · Próximamente')" title="OCC">
+                        <div class="dock-label-tooltip">Ajustes OCC</div>
+                        <div class="dock-icon-squircle icon-occ">💵</div>
+                    </button>
+
+                    <!-- NOTAS -->
+                    <button class="dock-item" onclick="showToast('Bóveda de Notas · Próximamente')" title="Notas">
+                        <div class="dock-label-tooltip">Bóveda de Notas</div>
+                        <div class="dock-icon-squircle icon-notas">📝</div>
+                    </button>
+
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Toast Notification estilo iOS Island -->
+    <div id="iosToast" style="position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-60px); background: rgba(0,0,0,0.85); backdrop-filter: var(--blur-island); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-pill); padding: 8px 18px; font-size: 12px; font-weight: 600; color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transition: all 0.35s var(--ease-spring); z-index: 100; pointer-events: none;"></div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Reloj dinámico estilo Apple
+        function updateClock() {
+            const now = new Date();
+            const hrs = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const el = document.getElementById('islandClock');
+            if (el) el.textContent = `${hrs}:${mins}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function openTool(toolId) {
+            ipcRenderer.send('open-mock-tool', toolId);
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const t = document.getElementById('iosToast');
+            if (!t) return;
+            t.textContent = msg;
+            t.style.opacity = '1';
+            t.style.transform = 'translateX(-50%) translateY(0)';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateX(-50%) translateY(-60px)';
+            }, 2400);
+        }
+    </script>
+</body>
+</html>

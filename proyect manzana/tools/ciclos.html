@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambio de Ciclo — Liquid Glass</title>
+    <link rel="stylesheet" href="../styles/ambient-glow.css">
+    <link rel="stylesheet" href="../styles/liquid-glass.css">
+    <style>
+        .ciclos-body {
+            flex: 1;
+            padding: 16px 22px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Selector de Ciclos estilo Segmented Control de Apple */
+        .cycles-selector-card {
+            background: rgba(0, 0, 0, 0.32);
+            backdrop-filter: var(--blur-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-card);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cycle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* TIMELINE LÍQUIDO */
+        .liquid-timeline-container {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-card);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .timeline-bar {
+            height: 14px;
+            border-radius: var(--radius-pill);
+            display: flex;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-segment {
+            height: 100%;
+            position: relative;
+            transition: all var(--anim-normal);
+        }
+
+        .timeline-segment.old {
+            background: linear-gradient(90deg, #0a84ff, #5e5ce6);
+        }
+
+        .timeline-segment.new {
+            background: linear-gradient(90deg, #30d158, #20e3b2);
+        }
+
+        /* TARJETAS DE BOLETA ESTILO APPLE WALLET */
+        .wallet-passes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .wallet-pass {
+            background: var(--glass-card);
+            backdrop-filter: var(--blur-card);
+            border: var(--border-glass);
+            border-radius: var(--radius-card);
+            padding: 14px 16px;
+            box-shadow: var(--shadow-card), var(--glow-inner);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            transition: all var(--anim-normal);
+        }
+
+        .wallet-pass:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.24);
+        }
+
+        .wallet-pass-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .wallet-pass-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .wallet-field-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .wallet-field-row strong {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="ambient-orb ambient-orb-1" style="background: radial-gradient(circle, rgba(48, 209, 88, 0.35) 0%, transparent 70%);"></div>
+        <div class="ambient-orb ambient-orb-2" style="background: radial-gradient(circle, rgba(10, 132, 255, 0.35) 0%, transparent 70%);"></div>
+    </div>
+    <div class="ambient-noise"></div>
+
+    <div class="glass-window">
+
+        <!-- Header con Dynamic Island -->
+        <header class="dynamic-island-bar">
+            <div class="window-controls">
+                <button class="win-dot close" onclick="ipcRenderer.send('close-window')"></button>
+                <button class="win-dot min" onclick="ipcRenderer.send('minimize-window')"></button>
+                <button class="win-dot max" onclick="ipcRenderer.send('maximize-window')"></button>
+            </div>
+
+            <div class="island-capsule">
+                <span class="island-sensor-dot" style="background:#30d158; box-shadow: 0 0 8px #30d158;"></span>
+                <span>Cambio de Ciclo</span>
+                <span class="glass-badge green" style="font-size:9px; padding: 1px 7px;">PRO_POS_032</span>
+            </div>
+
+            <span style="font-size: 11px; color: var(--text-tertiary); -webkit-app-region: no-drag;">Maqueta Visual</span>
+        </header>
+
+        <!-- Contenido -->
+        <main class="ciclos-body">
+
+            <!-- Selector de Ciclos -->
+            <section class="cycles-selector-card">
+                <div class="cycle-row">
+                    <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Ciclo Actual:</span>
+                    <div class="glass-pill-bar">
+                        <button class="glass-pill-item">50</button>
+                        <button class="glass-pill-item">51</button>
+                        <button class="glass-pill-item active">52 (08 al 07)</button>
+                        <button class="glass-pill-item">53</button>
+                        <button class="glass-pill-item">54</button>
+                    </div>
+                </div>
+
+                <div class="cycle-row">
+                    <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Nuevo Ciclo:</span>
+                    <div class="glass-pill-bar">
+                        <button class="glass-pill-item">50</button>
+                        <button class="glass-pill-item">51</button>
+                        <button class="glass-pill-item">52</button>
+                        <button class="glass-pill-item active" style="background: var(--ios-green);">53 (16 al 15 · Vence 06)</button>
+                        <button class="glass-pill-item">54</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timeline Gráfico Líquido -->
+            <section class="liquid-timeline-container">
+                <div style="display:flex; justify-content:space-between; font-size: 11.5px; color: var(--text-secondary);">
+                    <span>Línea de Facturación Proporcional</span>
+                    <span class="glass-badge blue" style="font-size: 9px;">Caso 1 (2 Boletas)</span>
+                </div>
+
+                <div class="timeline-bar">
+                    <div class="timeline-segment old" style="width: 35%;" title="13 días Ciclo 52"></div>
+                    <div class="timeline-segment new" style="width: 65%;" title="25 días Ciclo 53"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; font-size: 10.5px; color: var(--text-tertiary);">
+                    <span>🔵 13 días Ciclo 52 (08/04 → 20/04)</span>
+                    <span>🟢 25 días Ciclo 53 (21/04 → 15/05)</span>
+                </div>
+            </section>
+
+            <!-- Tarjetas de Boleta estilo Apple Wallet -->
+            <section class="wallet-passes-grid">
+                <!-- Boleta 1 -->
+                <div class="wallet-pass" style="border-top: 3px solid #0a84ff;">
+                    <div class="wallet-pass-header">
+                        <span class="wallet-pass-title" style="color: #70b4ff;">Primera Boleta</span>
+                        <span class="glass-badge blue">13 Días</span>
+                    </div>
+                    <div class="wallet-field-row"><span>Tramo:</span><strong>08/04 al 20/04</strong></div>
+                    <div class="wallet-field-row"><span>Emisión est.:</span><strong>08/05/2026</strong></div>
+                    <div class="wallet-field-row"><span>Vencimiento:</span><strong style="color:#ffb84d;">28/05/2026</strong></div>
+                </div>
+
+                <!-- Boleta 2 -->
+                <div class="wallet-pass" style="border-top: 3px solid #30d158;">
+                    <div class="wallet-pass-header">
+                        <span class="wallet-pass-title" style="color: #5deb82;">Segunda Boleta</span>
+                        <span class="glass-badge green">25 Días</span>
+                    </div>
+                    <div class="wallet-field-row"><span>Tramo:</span><strong>21/04 al 15/05</strong></div>
+                    <div class="wallet-field-row"><span>Emisión est.:</span><strong>16/05/2026</strong></div>
+                    <div class="wallet-field-row"><span>Vencimiento:</span><strong style="color:#5deb82;">06/06/2026</strong></div>
+                </div>
+            </section>
+
+            <!-- Speech Generado -->
+            <section class="glass-card" style="padding: 14px 16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                    <span style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-secondary);">Speech Explicativo al Cliente</span>
+                    <button class="btn-apple" style="font-size: 11px; padding: 4px 12px;" onclick="copySpeech(this)">📋 Copiar</button>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; font-size: 11.5px; line-height: 1.5; color: var(--text-primary); white-space: pre-line;">
+*[nombre cliente]* ya realicé el cambio de ciclo de su plan móvil del Ciclo 52 al Ciclo 53.
+
+Debido a este cambio, se emitirán dos boletas con cobros proporcionales según los días de servicio utilizados:
+
+• Primera boleta: Por los 13 días de consumo correspondientes desde el 08/04 hasta el 20/04, con fecha estimada de emisión el 08/05 y vencimiento el 28/05/2026.
+
+• Segunda boleta: Por los 25 días de servicio de su nuevo ciclo desde el 21/04 hasta el 15/05, con fecha estimada de emisión el 16/05 y vencimiento el 06/06/2026.
+
+A partir de ese momento, su período de facturación quedará fijado de forma regular desde el 16 al 15 de cada mes, con vencimiento los días 06 de cada mes.
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function copySpeech(btn) {
+            btn.innerHTML = '✅ ¡Copiado!';
+            setTimeout(() => btn.innerHTML = '📋 Copiar', 1800);
+        }
+    </script>
+</body>
+</html>

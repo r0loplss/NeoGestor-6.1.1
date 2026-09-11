@@ -133,6 +133,170 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">11 sep 2026</span><span class="ver">v6.1.9</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Git y compilación v6.1.9</b>: subida a GitHub de los cambios de Antigravity del 11 sep (Radar Contingencias pruebas 99 casos, limpieza comunas/estados Siebel), repositorio <code>NeoGestor-6.1.1</code> restablecido a público y portable <code>GestorCasos-portable-6.1.9.exe</code> (73,2 MB) verificado. Se omitió corrección menor <code>fast.html:11463</code> por indicación.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">11 sep 2026</span><span class="ver">v6.1.9</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">PRUEBAS DE CAMPO MASIVAS Y OPTIMIZACIÓN DEL PARSER — RADAR DE CONTINGENCIAS PRO (11 SEP 2026):</p>
+                <ul>
+                    <li><b>Pruebas de Campo con Dataset Real Masivo (99 casos)</b>: Se ejecutó una auditoría y batería de pruebas exhaustivas sobre un lote real de 99 tickets exportados de Siebel CRM / plataformas Entel, abarcando fallas de red, cortes de fibra óptica, trabajos programados, degradaciones y afectaciones de sistemas.</li>
+                    <li><b>Sanitización Inteligente de Comunas (<code>limpiarZona</code>)</b>:
+                        <ul>
+                            <li>Normalización inmediata de falsas comunas como <code>A-Nacional</code> hacia <code>Nacional</code>.</li>
+                            <li>Limpieza de errores de digitación en origen (ej. <code>XCamiña</code> corregido a <code>Camiña</code>).</li>
+                            <li>Eliminación de sufijos regionales y códigos POP pegados (ej. <code>Longaví, VII Región</code> → <code>Longaví</code>, <code>Curanilahue GVB013</code> → <code>Curanilahue</code>).</li>
+                            <li>Normalización de tildes en comunas chilenas frecuentes (<code>Hualaihué</code>, <code>Longaví</code>, <code>Pucón</code>, <code>Maipú</code>, <code>Chañaral</code>, <code>Valparaíso</code>, <code>Concepción</code>, <code>Curicó</code>, <code>Chillán</code>, etc.).</li>
+                        </ul>
+                    </li>
+                    <li><b>Limpieza de Cadenas de Estados Siebel (<code>limpiarPrefijoEstadosSiebel</code>)</b>: Remoción recursiva de cadenas repetitivas de transición de tickets (ej: <code>Cerrado - Nacional - Recaud externos - Resuelto - ...</code>) para rescatar la descripción operacional genuina. Corrección de erratas de origen como <code>Dicultad</code> → <code>Dificultad</code>.</li>
+                    <li><b>Extracción de Causa Raíz y Supresión de Basura Técnica (<code>extraerDetallePuntual</code> y <code>limpiarColasTecnicas</code>)</b>:
+                        <ul>
+                            <li>Eliminación total de volcados de tablas técnicas y cabeceras (<code>TEC SITIO NOMBRE SITIO...</code>, <code>&lt;Nemónico</code>, <code>Tecnologías Impactadas:</code>).</li>
+                            <li>Corrección de regex en detección de causas raíz (<code>debido a...</code> y <code>Causa:...</code>) eliminando truncamientos indebidos.</li>
+                            <li>Estandarización de fallas y causas en formato limpio: <code>[Tipo de Falla] — [Causa Real]</code> (ej. <i>Caída de Sitios — Doble corte de F.O</i>, <i>Degradación de Sitios — Falla de HW</i>).</li>
+                            <li>Detección robusta de <code>Contingencia Preventiva</code> incluso con faltas de ortografía de Siebel (<code>CONTINGNECIA</code>).</li>
+                        </ul>
+                    </li>
+                    <li><b>Perfeccionamiento de Salidas (Copia Breve y Copia Detallada)</b>:
+                        <ul>
+                            <li><b>Copia Breve</b>: Separación estricta de comunas de red alfabéticas (<code>📍 *Comuna* 1-XXXXXXXXXXXX</code>) de las incidencias nacionales/sistemas (<code>📍 *Detalle sintetizado* 1-XXXXXXXXXXXX</code>), sin textos sobredimensionados ni basura técnica.</li>
+                            <li><b>Copia Detallada</b>: Conteo exacto de comunas únicas afectadas y detalle limpio con POPs extraídos, fecha formateada y síntesis clara del incidente.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p style="margin: 16px 0 8px 0; font-weight: 700; color: #93c5fd;">CAMBIO DE CICLO REALISTA — BOLETA ÚNICA CONSOLIDADA Y SPEECH EN LENGUAJE TÉCNICO SENCILLO (11 SEP 2026):</p>
+                <ul>
+                    <li><b>Modelado de Facturación Real en Terreno (Boleta Consolidada)</b>:
+                        <ul>
+                            <li>Basado en el análisis de casos reales de clientes (ej. orden cursada el 08/07 pasando de ciclo 53 a 52), se incorporó el comportamiento real de los sistemas de facturación de Entel (BSCS / OneTouch), donde frecuentemente se unifican ambos tramos proporcionales en una <b>Boleta Única Consolidada</b> con un período facturado extendido (ej. 53 días de servicio facturados en un solo documento), emitida en la fecha del nuevo ciclo.</li>
+                            <li><b>Selector de Modalidad de Facturación (Segmented Control)</b>: Se integró un control interactivo que permite al ejecutivo alternar instantáneamente entre <code>Boleta Única Consolidada</code> (modelo unificado más frecuente) y <code>Boletas Separadas</code> (emisión en 2 o 3 boletas individuales).</li>
+                            <li><b>Tarjeta Visual de Boleta Consolidada</b>: Despliegue enriquecido con etiqueta distintiva, desglose de días del ciclo anterior (Tramo 1), días del nuevo ciclo (Tramo 2), días totales facturados, fecha de emisión consolidada, vencimiento y fecha límite de corte (+5 días hábiles).</li>
+                        </ul>
+                    </li>
+                    <li><b>Optimización de Speeches para WhatsApp & Guía Rápida para el Agente</b>:
+                        <ul>
+                            <li><b>Guía Interna de Comprensión Inmediata (<code>.agent-guidance-box</code>)</b>: Bloque de resumen ejecutivo situado directamente sobre el mensaje, explicando al agente en 3 viñetas concisas la causa raíz del cobro, qué días se agruparon y el argumento clave a transmitir, evitando confusiones internas.</li>
+                            <li><b>Explicación Directa Formateada para WhatsApp</b>: Se eliminaron los formalismos epistolares innecesarios (<i>«Estimado/a cliente, comprendo completamente su inquietud...»</i>), dejando un texto conciso, ágil y visualmente optimizado con formato nativo de WhatsApp (<code>*negrita*</code>, viñetas limpias <code>•</code> y llamadas de atención <code>⚠️</code> / <code>📅</code>) para que el ejecutivo pegue la explicación directa y añada su saludo habitual de forma natural.</li>
+                            <li><b>Botón dedicado <code>📋 Copiar Mensaje para WhatsApp</code></b>: Copia exclusivamente el mensaje destinado al cliente sin mezclar las notas internas del agente.</li>
+                            <li><b>Erradicación estricta del término "prorrateo"</b>: En todo el código y en los textos generados se eliminó cualquier mención a "prorrateo", utilizando conceptos profesionales y comprensibles como <i>cobro proporcional según los días de servicio utilizados</i> y <i>período facturado extendido</i>.</li>
+                        </ul>
+                    </li>
+                    <li><b>Auditoría Integral y Batería de Pruebas de Campo (20 Casos Prácticos)</b>:
+                        <ul>
+                            <li><b>Corrección Crítica de Fecha de Emisión en Días de Inicio (Bug <code>&lt;=</code>)</b>: Se detectó que si una orden se cursaba en la misma fecha de corte/emisión del ciclo saliente (ej. el día 08 para ciclo 52, 16 para ciclo 53 o 23 para ciclo 54), el operador <code>&lt;</code> hacía que la boleta saliente figurara con fecha de emisión en ese mismo día, cuando en realidad el consumo del día de inicio corresponde al nuevo período y se emite al mes siguiente. Se corrigió a <code>fEmision &lt;= fFin</code> en todas las ramas de cálculo, garantizando que ninguna boleta se emita antes o en el mismo día del cierre de consumo.</li>
+                            <li><b>Batería de 20 Casos Prácticos Validados</b>: Se ejecutó una auditoría exhaustiva cubriendo el caso real de Claudia Reyes (53 a 52 el 08/07), el caso 2 oficial del manual (51 a 52 el 03/05 con 3 boletas), cambios a mitad de ciclo, límites exactos de inicio y fin de mes (31 de julio, 31 de diciembre), años bisiestos (29 de febrero) y fronteras de Caso 2 a Caso 1 (05 de enero vs 06 de enero).</li>
+                            <li><b>Estabilidad Visual de la Línea de Tiempo</b>: Se acotó la proporción del segmento de la barra de tiempo entre 15% y 85% para evitar que tramos de 1 o 2 días colapsen visualmente o recorten el texto del desglose.</li>
+                        </ul>
+                    </li>
+                    <li><b>Persistencia de Preferencias</b>: Guardado en tiempo real de la modalidad seleccionada y de la pestaña de speech activa tanto en <code>localStorage</code> como a través de IPC hacia el proceso principal.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">10 sep 2026</span><span class="ver">v6.1.9</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">PROYECT MANZANA — MAQUETA VISUAL NO FUNCIONAL ESTILO APPLE / IPADOS LIQUID GLASS (10 SEP 2026):</p>
+                <ul>
+                    <li><b>Concepto & Propósito</b>: Creación de un entorno prototipo 100% visual y desacoplado en la carpeta aislada <code>proyect manzana/</code>, emulando la estética de alta gama de Apple (iOS / iPadOS Liquid Glass), con soporte para ventanas flotantes independientes, efectos de refracción y translucidez real.</li>
+                    <li><b>Sistema de Diseño Liquid Glass (CSS)</b>:
+                        <ul>
+                            <li><code>styles/ambient-glow.css</code>: Lienzo ambiental con orbes flotantes cromáticos (azul cian, morado, ámbar) y textura de ruido microscópico.</li>
+                            <li><code>styles/liquid-glass.css</code>: Variables de diseño Apple (desenfoque gaussiano <code>backdrop-filter</code> de 20px a 32px, bordes ultra-delgados con brillo especular, esquinas redondeadas tipo squircle y botón de acción flotante).</li>
+                        </ul>
+                    </li>
+                    <li><b>Centro de Mando Springboard (index.html)</b>:
+                        <ul>
+                            <li><b>Barra de Control con Dynamic Island</b>: Cápsula estilo iPhone con sensor frontal pulsante, reloj dinámico en tiempo real e indicador de estado del sistema.</li>
+                            <li><b>Buscador Spotlight</b>: Barra flotante con ícono de búsqueda, atajo ⌘K e interfaz de cristal líquido pulido.</li>
+                            <li><b>Widgets iPadOS</b>: Medidores visuales de Gestión del Día (barra de progreso de neón cian), Conexión de Sistemas (Entel, Siebel CRM, OneTouch) y Cronograma de turno.</li>
+                            <li><b>Dock Flotante Estilo iPadOS</b>: Íconos 3D con degradados vibrantes, reflejos de luz y micro-interacciones hover/active con resortes físicos taptic para lanzar cada herramienta.</li>
+                        </ul>
+                    </li>
+                    <li><b>Herramientas Maquetadas (Cáscara Visual)</b>:
+                        <ul>
+                            <li><code>tools/trafico.html</code>: Tráfico Móvil PRO con 4 widget cards estilo Apple (Datos 14.2 GB, Voz 185 min, SMS 12, Saldo $12.690) y tabla de cobros adicionales.</li>
+                            <li><code>tools/fast.html</code>: FAST Quick Case Pro con diseño iPadOS de 3 columnas (barra lateral de categorías, listado central y visor estilo Apple Notes con botón de copiado háptico).</li>
+                            <li><code>tools/ciclos.html</code>: Cambio de Ciclo con selectores segmented control, barra temporal de tramos proporcionales y pases Apple Wallet para 1ª y 2ª boleta.</li>
+                            <li><code>tools/tipificaciones.html</code>: Tipificaciones Siebel inspiradas en la app Ajustes de iPadOS, con buscador Spotlight y tarjetas jerárquicas de motivo, submotivo y solución.</li>
+                        </ul>
+                    </li>
+                    <li><b>Ejecución Independiente</b>:
+                        <ul>
+                            <li><code>main.js</code>: Proceso Electron independiente que abre las ventanas sin bordes con transparencia y sombras nativas en cascada tipo Stage Manager.</li>
+                            <li><code>Abrir Maqueta.bat</code>: Lanzador en 1 clic para que el usuario explore el diseño inmediatamente sin afectar el código de producción.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">10 sep 2026</span><span class="ver">v6.1.9</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">REDISEÑO INTEGRAL Y ALINEACIÓN DE CAMBIO DE CICLO A NORMATIVA ENTEL PRO_POS_032 (10 SEP 2026):</p>
+                <ul>
+                    <li><b>1. Motor de Cálculo Inteligente de Facturación Proporcional</b>:
+                        <ul>
+                            <li><b>Detección dinámica de 2 vs 3 Boletas (Casos 1 y 2 del manual)</b>: Se implementó la lógica estricta del procedimiento oficial <code>PRO_POS_032</code>.
+                                <ul>
+                                    <li><b>Caso 1 (Estándar - 2 Boletas)</b>: Transición regular calculando los días proporcionales de la boleta saliente (hasta el día de la orden) y de la boleta entrante (desde el día siguiente hasta el cierre del nuevo ciclo).</li>
+                                    <li><b>Caso 2 (Transición Temprana - 3 Boletas)</b>: Si el cliente proviene de ciclos calendario (50 o 51) y la orden se cursa a inicios de mes (días 1 al 5), el sistema detecta y desglosa las 3 boletas concurrentes (Boleta 1: mes anterior cerrado en trámite; Boleta 2: remanente saliente de 1 a N días; Boleta 3: proporcional inicial del nuevo ciclo).</li>
+                                    <li><b>Alerta visual de facturación</b>: En el Caso 2, se advierte explícitamente al ejecutivo que <i>la Boleta 2 llegará al cliente DESPUÉS de la Boleta 3</i> debido a las ventanas de emisión del ciclo anterior, evitando reclamos por aparente desorden.</li>
+                                </ul>
+                            </li>
+                            <li><b>Cálculo exacto de Fecha de Corte (+5 días hábiles)</b>: Se integró el cómputo automático de suspensión por no pago exigido en One Touch, saltando fines de semana (lunes a viernes).</li>
+                            <li><b>Alineación de Fechas de Emisión</b>: Sincronizadas al estándar oficial de cierre de tráfico (Ciclo 52: día 08; Ciclo 53: día 16; Ciclo 54: día 23).</li>
+                        </ul>
+                    </li>
+
+                    <li><b>2. Nueva Interfaz de Usuario y Experiencia Visual (UI/UX Móvil)</b>:
+                        <ul>
+                            <li><b>Enfoque Exclusivo Móvil Postpago</b>: Se retiraron selectores de Hogar y campos innecesarios (como nombre del titular) para agilizar al máximo la atención del ejecutivo en Call Center Móvil.</li>
+                            <li><b>Guía visual de vencimientos en la selección</b>: Cada opción del nuevo ciclo informa de inmediato el día de pago del cliente (<i>Ciclo 52: Vence 28</i>, <i>Ciclo 53: Vence 06</i>, <i>Ciclo 54: Vence 13</i>), permitiendo asesorar al cliente al instante según su fecha preferida.</li>
+                            <li><b>Línea de Tiempo Gráfica (Timeline)</b>: Barra visual segmentada con código de colores que ilustra la proporción exacta de días cubiertos por cada ciclo y el punto de corte.</li>
+                            <li><b>Tarjetas Dinámicas de Boleta</b>: Presentación de 2 o 3 tarjetas con badges semánticos, días a cobrar, tramo de fechas, emisión, vencimiento y fecha de corte (+5 días hábiles).</li>
+                            <li><b>Botones de Fecha Rápida</b>: Accesos de 1 clic para fijar <i>«Hoy»</i> o <i>«Ayer»</i>.</li>
+                            <li><b>Mini-guía One Touch colapsable</b>: Resumen paso a paso del procedimiento oficial en el aplicativo para rápida referencia del ejecutivo.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>3. Speech Explicativo Claro y Directo (Sin la palabra "prorrateo")</b>:
+                        <ul>
+                            <li><b>Claridad Absoluta para el Cliente</b>: Explica detalladamente el cambio de ciclo realizado, las fechas estimadas de emisión de cada boleta, los días proporcionales exactos a cobrar en cada período y las fechas de vencimiento definitivas.</li>
+                            <li><b>Eliminación del término "Prorrateo"</b>: Se suprimió por completo la palabra "prorrateo" / "prorrateado", reemplazándola por explicaciones transparentes de <i>días proporcionales de consumo</i> y confirmación de que no existe duplicidad de cobro.</li>
+                            <li><b>Interfaz Simplificada</b>: Se eliminó la pestaña de registro en Siebel, dejando el contenedor del speech listo para lectura o copiado inmediato con 1 clic.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>4. Ajuste de Ventana en el Proceso Principal</b>:
+                        <ul>
+                            <li>En <code>src/main.js</code> se optimizó el tamaño de la ventana de ciclos a <code>520 x 680 px</code> para un despliegue espacioso y cómodo.</li>
+                        </ul>
+                    </li>
+
+                    <li><b>5. Corrección de Visualización y Desbloqueo del Scroll en Tráfico Móvil PRO</b>:
+                        <ul>
+                            <li><b>Corrección Crítica de Compresión Flexbox (Scroll al Resumen General)</b>: Se solucionó el bug donde el bloque <code>.simple-summary-table-box</code> se comprimía a 2px invisibles debido a <code>overflow: hidden</code> y <code>flex-shrink: 1</code> por defecto dentro del contenedor flex <code>#main</code>. Se aplicó <code>flex-shrink: 0</code> y <code>min-height: min-content</code> para garantizar que la tabla conserve siempre su altura íntegra y que el scroll vertical alcance fluidamente el final de la tabla y la fila de totales (<i>TOTAL SALDO / COBROS</i>).</li>
+                            <li><b>Espaciado de fondo seguro</b>: Se asignó <code>padding-bottom: 48px</code> a <code>#main</code> para que el borde inferior de la ventana o las notificaciones tipo toast no tapen la fila de totales ni los datos del desglose.</li>
+                            <li><b>Rediseño y Alineación de Filtros de Fecha</b>: Se eliminó el desborde horizontal en el panel de Filtros separando <i>«Desde»</i> y <i>«Hasta»</i> en dos filas independientes con etiquetas de ancho fijo (42px) e inputs proporcionados.</li>
+                            <li><b>Distribución de Tabla de Resumen y Scroll Horizontal de Respaldo</b>: Se incorporó el contenedor <code>.simple-table-wrapper</code> con <code>overflow-x: auto</code> y <code>table-layout: fixed</code>, optimizando los encabezados (<i>Servicio, Consumo, En Plan, Con Cobro, Monto ($)</i>) para prevenir cualquier corte o superposición de texto.</li>
+                            <li><b>Ampliación de Ventana en <code>src/main.js</code></b>: Se redimensionó la herramienta de <code>450 x 600</code> a <code>580 x 700 px</code> (con actualización automática de ventanas con posición guardada previa menor a 560px), permitiendo desplegar los controles en 2 columnas equilibradas y las 4 tarjetas de métricas en cuadrícula 2x2.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 sep 2026</span><span class="ver">v6.1.9</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

@@ -1,0 +1,88 @@
+/* ============================================================
+   PROYECT MANZANA — AMBIENT LIQUID GLOW & ATMOSPHERE
+   Efectos de iluminación ambiental, mallas de color y refracción
+   ============================================================ */
+
+:root {
+    --ambient-blue: #0a84ff;
+    --ambient-purple: #bf5af2;
+    --ambient-cyan: #5ac8fa;
+    --ambient-emerald: #30d158;
+    --ambient-rose: #ff375f;
+    --ambient-amber: #ff9f0a;
+}
+
+/* Lienzo ambiental con mallas de gradiente líquido */
+.ambient-canvas {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    background: #06080e;
+}
+
+/* Orbes de luz líquida difusa */
+.ambient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    will-change: transform, opacity;
+    animation: orbFloat 18s ease-in-out infinite alternate;
+}
+
+.ambient-orb-1 {
+    width: 480px;
+    height: 480px;
+    top: -120px;
+    left: -80px;
+    background: radial-gradient(circle, rgba(10, 132, 255, 0.7) 0%, rgba(94, 92, 230, 0.35) 55%, transparent 75%);
+    animation-duration: 20s;
+}
+
+.ambient-orb-2 {
+    width: 420px;
+    height: 420px;
+    bottom: -100px;
+    right: -60px;
+    background: radial-gradient(circle, rgba(191, 90, 242, 0.65) 0%, rgba(255, 55, 95, 0.3) 60%, transparent 80%);
+    animation-duration: 24s;
+    animation-delay: -6s;
+}
+
+.ambient-orb-3 {
+    width: 380px;
+    height: 380px;
+    top: 45%;
+    left: 35%;
+    background: radial-gradient(circle, rgba(0, 240, 255, 0.45) 0%, rgba(48, 209, 88, 0.2) 60%, transparent 80%);
+    animation-duration: 16s;
+    animation-delay: -3s;
+}
+
+@keyframes orbFloat {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.32;
+    }
+    50% {
+        transform: translate(40px, 30px) scale(1.1);
+        opacity: 0.45;
+    }
+    100% {
+        transform: translate(-30px, 50px) scale(0.95);
+        opacity: 0.28;
+    }
+}
+
+/* Grano sutil para sensación de película orgánica / Apple display */
+.ambient-noise {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+    background-size: 24px 24px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 1;
+}

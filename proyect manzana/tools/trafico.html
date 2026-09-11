@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tráfico Móvil PRO — Liquid Glass</title>
+    <link rel="stylesheet" href="../styles/ambient-glow.css">
+    <link rel="stylesheet" href="../styles/liquid-glass.css">
+    <style>
+        .trafico-body {
+            flex: 1;
+            padding: 16px 20px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Panel de Controles Superior */
+        .controls-glass-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .control-subcard {
+            background: rgba(0, 0, 0, 0.28);
+            backdrop-filter: var(--blur-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-card);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-subcard-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* 4 WIDGETS DE MÉTRICAS ESTILO APPLE (2x2) */
+        .metrics-quadrant {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .liquid-metric-card {
+            background: var(--glass-card);
+            backdrop-filter: var(--blur-card);
+            border: var(--border-glass);
+            border-radius: var(--radius-widget);
+            padding: 16px;
+            box-shadow: var(--shadow-card), var(--glow-inner);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--anim-normal);
+        }
+
+        .liquid-metric-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.24);
+            box-shadow: var(--shadow-card-hover), 0 0 24px var(--metric-glow);
+        }
+
+        .metric-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-icon-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 0 16px var(--metric-glow);
+        }
+
+        .metric-number-big {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            line-height: 1.1;
+        }
+
+        .metric-pill-desglose {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .desglose-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .desglose-item .val {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Colores de métricas */
+        .card-datos { --metric-glow: rgba(255, 159, 10, 0.4); }
+        .card-datos .metric-number-big { color: #ffb84d; }
+        .card-voz { --metric-glow: rgba(48, 209, 88, 0.4); }
+        .card-voz .metric-number-big { color: #5deb82; }
+        .card-sms { --metric-glow: rgba(0, 240, 255, 0.4); }
+        .card-sms .metric-number-big { color: #66f4ff; }
+        .card-saldo { --metric-glow: rgba(255, 55, 95, 0.45); }
+        .card-saldo .metric-number-big { color: #ff6b8b; }
+
+        /* TABLA RESUMEN EN CRISTAL LÍQUIDO */
+        .glass-table-container {
+            background: var(--glass-card);
+            backdrop-filter: var(--blur-card);
+            border: var(--border-glass);
+            border-radius: var(--radius-widget);
+            box-shadow: var(--shadow-card), var(--glow-inner);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass-table-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11.5px;
+            table-layout: fixed;
+        }
+
+        .glass-table th {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            padding: 9px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-table td {
+            padding: 10px 12px;
+            color: var(--text-primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .glass-table tr:hover td {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .glass-table th:last-child,
+        .glass-table td:last-child {
+            text-align: right;
+            padding-right: 18px;
+        }
+
+        .table-total-bar {
+            padding: 12px 18px;
+            background: rgba(255, 55, 95, 0.08);
+            border-top: 1px solid rgba(255, 55, 95, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="ambient-orb ambient-orb-1" style="background: radial-gradient(circle, rgba(0, 240, 255, 0.4) 0%, transparent 70%);"></div>
+        <div class="ambient-orb ambient-orb-2" style="background: radial-gradient(circle, rgba(255, 159, 10, 0.4) 0%, transparent 70%);"></div>
+    </div>
+    <div class="ambient-noise"></div>
+
+    <div class="glass-window">
+
+        <!-- Header con Dynamic Island -->
+        <header class="dynamic-island-bar">
+            <div class="window-controls">
+                <button class="win-dot close" onclick="ipcRenderer.send('close-window')"></button>
+                <button class="win-dot min" onclick="ipcRenderer.send('minimize-window')"></button>
+                <button class="win-dot max" onclick="ipcRenderer.send('maximize-window')"></button>
+            </div>
+
+            <div class="island-capsule">
+                <span class="island-sensor-dot" style="background:#ff9f0a; box-shadow: 0 0 8px #ff9f0a;"></span>
+                <span>Tráfico Móvil PRO</span>
+                <span class="glass-badge orange" style="font-size:9px; padding: 1px 7px;">Liquid Glass</span>
+            </div>
+
+            <span style="font-size: 11px; color: var(--text-tertiary); -webkit-app-region: no-drag;">Maqueta Visual</span>
+        </header>
+
+        <!-- Cuerpo con Scroll -->
+        <main class="trafico-body">
+
+            <!-- Panel de Controles -->
+            <section class="controls-glass-panel">
+                <!-- Carga de Datos -->
+                <div class="control-subcard">
+                    <span class="control-subcard-title">📂 Carga de Tráfico</span>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn-apple glass" style="flex:1; font-size:11px; padding: 6px 10px;" onclick="simulateAction('Cargar Excel')">📄 Subir Excel</button>
+                        <button class="btn-apple" style="flex:1; font-size:11px; padding: 6px 10px;" onclick="simulateAction('Ingresar TSV')">📋 Pegar Siebel</button>
+                    </div>
+                </div>
+
+                <!-- Filtros y Ciclos -->
+                <div class="control-subcard">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="control-subcard-title">🔍 Ciclo de Facturación</span>
+                        <span style="font-size:10.5px; color: var(--ios-cyan);">Ciclo 53</span>
+                    </div>
+                    <div class="glass-pill-bar" style="width: 100%; justify-content: space-between;">
+                        <button class="glass-pill-item" onclick="selectCycle(this, '50')">50</button>
+                        <button class="glass-pill-item" onclick="selectCycle(this, '51')">51</button>
+                        <button class="glass-pill-item" onclick="selectCycle(this, '52')">52</button>
+                        <button class="glass-pill-item active" onclick="selectCycle(this, '53')">53</button>
+                        <button class="glass-pill-item" onclick="selectCycle(this, '54')">54</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4 Tarjetas de Métricas estilo Widgets de iOS -->
+            <section class="metrics-quadrant">
+
+                <!-- 1. DATOS -->
+                <div class="liquid-metric-card card-datos">
+                    <div class="metric-card-top">
+                        <span class="glass-badge orange">📶 Datos Móviles</span>
+                        <div class="metric-icon-circle" style="color: #ff9f0a;">🌐</div>
+                    </div>
+                    <div class="metric-number-big">14.2 GB</div>
+                    <div class="metric-pill-desglose">
+                        <div class="desglose-item"><span>Libre navegación:</span><span class="val">12.0 GB</span></div>
+                        <div class="desglose-item"><span>Redes Sociales:</span><span class="val">2.2 GB</span></div>
+                        <div class="desglose-item"><span>Roaming Int.:</span><span class="val">0 MB</span></div>
+                    </div>
+                </div>
+
+                <!-- 2. VOZ -->
+                <div class="liquid-metric-card card-voz">
+                    <div class="metric-card-top">
+                        <span class="glass-badge green">📞 Minutos / Voz</span>
+                        <div class="metric-icon-circle" style="color: #30d158;">📞</div>
+                    </div>
+                    <div class="metric-number-big">185 min</div>
+                    <div class="metric-pill-desglose">
+                        <div class="desglose-item"><span>Nacionales:</span><span class="val">150 min</span></div>
+                        <div class="desglose-item"><span>LDI Internacional:</span><span class="val">35 min</span></div>
+                        <div class="desglose-item"><span>Roaming Voz:</span><span class="val">0 min</span></div>
+                    </div>
+                </div>
+
+                <!-- 3. SMS -->
+                <div class="liquid-metric-card card-sms">
+                    <div class="metric-card-top">
+                        <span class="glass-badge blue">💬 Mensajería</span>
+                        <div class="metric-icon-circle" style="color: #00f0ff;">💬</div>
+                    </div>
+                    <div class="metric-number-big">12 SMS</div>
+                    <div class="metric-pill-desglose">
+                        <div class="desglose-item"><span>Nacionales:</span><span class="val">10 SMS</span></div>
+                        <div class="desglose-item"><span>Internacionales:</span><span class="val">2 SMS</span></div>
+                        <div class="desglose-item"><span>Roaming SMS:</span><span class="val">0 SMS</span></div>
+                    </div>
+                </div>
+
+                <!-- 4. SALDO CONSUMIDO -->
+                <div class="liquid-metric-card card-saldo">
+                    <div class="metric-card-top">
+                        <span class="glass-badge rose">💰 Saldo Consumido</span>
+                        <div class="metric-icon-circle" style="color: #ff375f;">💳</div>
+                    </div>
+                    <div class="metric-number-big">$12.690</div>
+                    <div class="metric-pill-desglose">
+                        <div class="desglose-item"><span>Exceso de Voz:</span><span class="val" style="color:#ff6b8b;">$2.100</span></div>
+                        <div class="desglose-item"><span>Suscripciones VAS:</span><span class="val" style="color:#ff6b8b;">$5.990</span></div>
+                        <div class="desglose-item"><span>Paquetes Adicionales:</span><span class="val" style="color:#ff6b8b;">$4.500</span></div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Tabla Resumen en Cristal Líquido -->
+            <section class="glass-table-container">
+                <div class="glass-table-hdr">
+                    <div style="display:flex; align-items:center; gap: 8px;">
+                        <span style="font-size:12px; font-weight:700;">📊 Resumen General de Servicios</span>
+                        <span class="glass-badge blue" style="font-size:9px;">Consolidado</span>
+                    </div>
+                    <button class="btn-apple glass" style="font-size: 10.5px; padding: 4px 10px;" onclick="simulateAction('Desplegar todo')">
+                        🔽 Desplegar Todo
+                    </button>
+                </div>
+
+                <table class="glass-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 32%;">Servicio</th>
+                            <th style="width: 17%;">Consumo</th>
+                            <th style="width: 17%;">En Plan</th>
+                            <th style="width: 17%;">Con Cobro</th>
+                            <th style="width: 17%;">Monto ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong style="color:#ffb84d;">📶 Datos Móviles</strong></td>
+                            <td>14.2 GB</td>
+                            <td>12.0 GB</td>
+                            <td>2.2 GB</td>
+                            <td>$4.500</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color:#5deb82;">📞 Llamadas (Voz)</strong></td>
+                            <td>185 min</td>
+                            <td>150 min</td>
+                            <td>35 min</td>
+                            <td>$2.100</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color:#66f4ff;">💬 SMS / Mensajería</strong></td>
+                            <td>12 SMS</td>
+                            <td>10 SMS</td>
+                            <td>2 SMS</td>
+                            <td>$100</td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color:#ff6b8b;">🛒 Otros (VAS / Suscripciones)</strong></td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>3 suscrip.</td>
+                            <td>$5.990</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="table-total-bar">
+                    <span style="color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Total Saldo / Cobros Adicionales:</span>
+                    <span style="color: #ff375f; font-size: 15px; font-weight: 800; letter-spacing: -0.02em;">$12.690</span>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function selectCycle(btn, ciclo) {
+            document.querySelectorAll('.glass-pill-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function simulateAction(msg) {
+            // Feedback háptico visual
+            const island = document.querySelector('.island-capsule');
+            if (island) {
+                island.style.transform = 'scale(1.05)';
+                setTimeout(() => island.style.transform = '', 200);
+            }
+        }
+    </script>
+</body>
+</html>

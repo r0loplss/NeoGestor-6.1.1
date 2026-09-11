@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAST — Liquid Glass</title>
+    <link rel="stylesheet" href="../styles/ambient-glow.css">
+    <link rel="stylesheet" href="../styles/liquid-glass.css">
+    <style>
+        .fast-layout {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* BARRA LATERAL (SIDEBAR ESTILO IPADOS) */
+        .fast-sidebar {
+            width: 230px;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: var(--blur-card);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 14px 12px;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            font-size: 10.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-tertiary);
+            padding: 6px 10px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all var(--anim-fast);
+            text-align: left;
+        }
+
+        .sidebar-item:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-item.active {
+            color: #ffffff;
+            background: var(--ios-blue);
+            box-shadow: 0 4px 14px rgba(var(--ios-blue-rgb), 0.45);
+        }
+
+        /* ÁREA CENTRAL: TARJETAS Y SPOTLIGHT */
+        .fast-center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 20px;
+            gap: 14px;
+            overflow-y: auto;
+        }
+
+        .fast-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .fast-card {
+            background: var(--glass-card);
+            backdrop-filter: var(--blur-card);
+            border: var(--border-glass);
+            border-radius: var(--radius-card);
+            padding: 14px;
+            box-shadow: var(--shadow-card), var(--glow-inner);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            transition: all var(--anim-normal);
+            position: relative;
+        }
+
+        .fast-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.22);
+            box-shadow: var(--shadow-card-hover), 0 0 16px rgba(10, 132, 255, 0.25);
+        }
+
+        .fast-card.selected {
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 2px var(--ios-blue), 0 8px 24px rgba(0,0,0,0.4);
+        }
+
+        .fast-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .fast-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .fast-card-body {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* PANEL DERECHO: VISOR DE SPEECH (HOJA ESTILO NOTAS DE APPLE) */
+        .fast-preview-panel {
+            width: 340px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: var(--blur-card);
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            padding: 16px 18px;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        .speech-sheet {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-card);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+            overflow-y: auto;
+        }
+
+        .speech-bubble {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-primary);
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-canvas">
+        <div class="ambient-orb ambient-orb-1" style="background: radial-gradient(circle, rgba(255, 159, 10, 0.35) 0%, transparent 70%);"></div>
+        <div class="ambient-orb ambient-orb-2" style="background: radial-gradient(circle, rgba(191, 90, 242, 0.35) 0%, transparent 70%);"></div>
+    </div>
+    <div class="ambient-noise"></div>
+
+    <div class="glass-window">
+
+        <!-- Header con Dynamic Island -->
+        <header class="dynamic-island-bar">
+            <div class="window-controls">
+                <button class="win-dot close" onclick="ipcRenderer.send('close-window')"></button>
+                <button class="win-dot min" onclick="ipcRenderer.send('minimize-window')"></button>
+                <button class="win-dot max" onclick="ipcRenderer.send('maximize-window')"></button>
+            </div>
+
+            <div class="island-capsule">
+                <span class="island-sensor-dot" style="background:#ff9f0a; box-shadow: 0 0 8px #ff9f0a;"></span>
+                <span>FAST · Quick Case Pro</span>
+                <span class="glass-badge orange" style="font-size:9px; padding: 1px 7px;">iPadOS Stage</span>
+            </div>
+
+            <span style="font-size: 11px; color: var(--text-tertiary); -webkit-app-region: no-drag;">Maqueta Visual</span>
+        </header>
+
+        <!-- Layout Stage Manager -->
+        <div class="fast-layout">
+
+            <!-- Sidebar -->
+            <aside class="fast-sidebar">
+                <div class="sidebar-title">Categorías</div>
+                <button class="sidebar-item active"><span>🔥</span> Favoritos</button>
+                <button class="sidebar-item"><span>📶</span> Datos Móviles</button>
+                <button class="sidebar-item"><span>📞</span> Facturación y Cobros</button>
+                <button class="sidebar-item"><span>🔄</span> Cambio de Ciclo</button>
+                <button class="sidebar-item"><span>✈️</span> Roaming Internacional</button>
+                <button class="sidebar-item"><span>📱</span> Reposición de SIM</button>
+                <button class="sidebar-item"><span>🛒</span> Bolsas y Paquetes</button>
+            </aside>
+
+            <!-- Centro: Spotlight + Cards -->
+            <main class="fast-center">
+                <div class="spotlight-bar" style="margin-top: 0;">
+                    <span class="spotlight-icon">🔍</span>
+                    <input type="text" class="spotlight-input" placeholder="Buscar en FAST: palabras clave, scripts, tipificaciones..." value="explicación cobro" readonly />
+                    <span class="spotlight-shortcut">3 resultados</span>
+                </div>
+
+                <div class="fast-cards-grid">
+                    <!-- Tarjeta 1 -->
+                    <div class="fast-card selected">
+                        <div class="fast-card-header">
+                            <span class="fast-card-title">Cobro Proporcional Ciclo</span>
+                            <span class="glass-badge blue">Móvil</span>
+                        </div>
+                        <p class="fast-card-body">
+                            Speech explicativo para clientes con cambio de ciclo reciente y emisión de 2 boletas proporcionales sin cobro duplicado.
+                        </p>
+                    </div>
+
+                    <!-- Tarjeta 2 -->
+                    <div class="fast-card">
+                        <div class="fast-card-header">
+                            <span class="fast-card-title">Agotamiento de Cuota GB</span>
+                            <span class="glass-badge orange">Tráfico</span>
+                        </div>
+                        <p class="fast-card-body">
+                            Información sobre consumo total de datos libres, bolsas de redes sociales activas y opciones de recarga inmediata.
+                        </p>
+                    </div>
+
+                    <!-- Tarjeta 3 -->
+                    <div class="fast-card">
+                        <div class="fast-card-header">
+                            <span class="fast-card-title">Suscripciones VAS de Terceros</span>
+                            <span class="glass-badge rose">Saldo</span>
+                        </div>
+                        <p class="fast-card-body">
+                            Explicación y procedimiento de bloqueo para cargos adicionales por mensajería premium o servicios de entretenimiento.
+                        </p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Panel Derecho: Visor de Speech estilo Apple Notes -->
+            <aside class="fast-preview-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Vista de Mensaje</span>
+                    <span class="glass-badge green">WhatsApp Ready</span>
+                </div>
+
+                <div class="speech-sheet">
+                    <div class="speech-bubble">
+*[nombre cliente]* ya revisé el detalle de su cuenta.
+
+Debido al cambio de ciclo gestionado, se emitirán dos boletas con cobros proporcionales según los días de servicio utilizados:
+
+• *Primera boleta:* Por los 13 días de consumo del ciclo saliente, con fecha estimada de emisión el 08/05 y vencimiento el 28/05/2026.
+
+• *Segunda boleta:* Por los 25 días de su nuevo ciclo, con fecha estimada de emisión el 16/05 y vencimiento el 06/06/2026.
+
+A partir de ese momento, su período de facturación queda regularizado de forma definitiva.
+                    </div>
+                </div>
+
+                <button class="btn-apple" onclick="copyMockSpeech(this)">
+                    📋 Copiar al Portapapeles
+                </button>
+            </aside>
+
+        </div>
+
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function copyMockSpeech(btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '✅ ¡Copiado!';
+            btn.style.background = '#30d158';
+            setTimeout(() => {
+                btn.innerHTML = orig;
+                btn.style.background = '';
+            }, 1800);
+        }
+    </script>
+</body>
+</html>

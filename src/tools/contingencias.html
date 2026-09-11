@@ -805,27 +805,68 @@
             if (!zonaRaw || typeof zonaRaw !== 'string') return 'Nacional';
             let z = zonaRaw.trim();
 
-            // 1. Quitar prefijos como "Comuna:", "Sector:", "Zona:", "Localidad:", "Distrito:", "Ciudad:"
-            z = z.replace(/^(?:comuna|sector|zona|localidad|distrito|ciudad)\s*[:—–-]\s*/i, '');
+            // 1. Quitar prefijo "A-" (ej: "A-Nacional" -> "Nacional")
+            z = z.replace(/^A\s*[-–]\s*/i, '');
 
-            // 2. Si es placeholder genérico "XX", "N/A", "Desconocida", "Sin comuna", "Varias", "Por definir" -> "Nacional"
+            // 2. Normalizar Nacional / Cobertura general
+            if (/^(?:nacional|a-nacional|todo\s+el\s+pa[íi]s|pa[íi]s|chile)$/i.test(z)) {
+                return 'Nacional';
+            }
+
+            // 3. Quitar prefijos como "Comuna:", "Sector:", "Zona:", "Localidad:", "Distrito:", "Ciudad:"
+            z = z.replace(/^(?:comunas?|sectores?|zonas?|localidades?|distritos?|ciudades?)\s*[:—–-]\s*/i, '');
+
+            // 4. Si es placeholder genérico "XX", "N/A", "Desconocida", "Sin comuna", "Varias", "Por definir" -> "Nacional"
             if (/^(?:xx|n\/?a|desconocida|sin\s+comuna|por\s+definir|\?+)$/i.test(z)) {
                 return 'Nacional';
             }
 
-            // 3. Quitar sufijos de región como ", XIV Región", ", RM", ", III R", ", V Región", ", Región Metropolitana", etc.
+            // 5. Quitar sufijos de región como ", XIV Región", ", RM", ", III R", ", V Región", ", Región Metropolitana", etc.
             z = z.replace(/[,\s-]+(?:\b[IVXLCDM]+\b(?:\s*R\b|\s*Regi[oó]n\b)?|\bRM\b|\bRegi[oó]n\s+Metropolitana\b|\bR\.?M\.?\b|\bRegi[oó]n\b).*$/i, '');
 
-            // 4. Quitar códigos de POP/sitio pegados al final (ej: "Curanilahue GVB013" -> "Curanilahue")
+            // 6. Quitar códigos de POP/sitio pegados al final (ej: "Curanilahue GVB013" -> "Curanilahue")
             z = z.replace(/\s+[A-Z]{2,3}[0-9]{1,4}\b.*$/i, '');
 
-            // 5. Quitar paréntesis o acotaciones secundarias
+            // 7. Quitar paréntesis o acotaciones secundarias
             z = z.replace(/\s*\([^)]*\)/g, '');
 
-            // 6. Quitar caracteres extraños o puntuación sobrante
+            // 8. Quitar prefijo 'X' por typo delante de comunas (ej: "XCamiña" -> "Camiña")
+            if (/^X[A-ZÁÉÍÓÚ][a-záéíóúñ]+/.test(z) && !/^Xan\b/i.test(z)) {
+                z = z.substring(1);
+            }
+
+            // 9. Quitar caracteres extraños o puntuación sobrante
             z = z.replace(/^[*#📍📌>–-]\s*/, '').replace(/[–—,;:\.\-]+$/, '').trim();
 
             if (!z || z.length < 2) return 'Nacional';
+
+            // Normalizaciones de tildes en comunas chilenas frecuentes
+            const tildesMap = {
+                'hualaihue': 'Hualaihué',
+                'longavi': 'Longaví',
+                'treguaco': 'Treguaco',
+                'trehuaco': 'Treguaco',
+                'pucon': 'Pucón',
+                'maipu': 'Maipú',
+                'alhue': 'Alhué',
+                'concepcion': 'Concepción',
+                'curico': 'Curicó',
+                'chanaral': 'Chañaral',
+                'chañaral': 'Chañaral',
+                'antofagasta': 'Antofagasta',
+                'valparaiso': 'Valparaíso',
+                'chillan': 'Chillán',
+                'vallenar': 'Vallenar',
+                'copiapo': 'Copiapó',
+                'combarbala': 'Combarbalá',
+                'quillon': 'Quillón',
+                'vicuna': 'Vicuña',
+                'tarapaca': 'Tarapacá'
+            };
+            const lowZ = z.toLowerCase();
+            if (tildesMap[lowZ]) {
+                return tildesMap[lowZ];
+            }
 
             // Capitalizar si viene todo en mayúsculas o minúsculas
             if (z === z.toUpperCase() || z === z.toLowerCase()) {
@@ -844,7 +885,8 @@
                 'serv. voz y datos congestion', 'servicio tv', 'canal premium no disponible', 'dificultad canal digital',
                 'gestionar mis recargas', 'no puede recargar', 'servicio de recarga', 'activación de móviles',
                 'activacion de moviles', 'sistemas de atencion', 'sistemas de atención', 'dificultad sistema de atención',
-                'escalamiento a sistema', 'trabajo programado', 'entel', 'integración', 'integracion'
+                'escalamiento a sistema', 'trabajo programado', 'trabajo programado móvil', 'trabajo programado sistemas',
+                'entel', 'integración', 'integracion', 'nacional', 'a-nacional', 'recaud externos'
             ];
             return genericos.includes(t);
         }
@@ -861,85 +903,188 @@
             return [...new Set(pops)].sort();
         }
 
-        function extraerDetallePuntual(chunk, id, zona, inc) {
-            if (!chunk) return 'Incidencia operacional en curso';
-            const lines = chunk.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        // Limpiar prefijo de estados de Siebel (ej: "Cerrado - Nacional - Recaud externos - Resuelto - ... - ")
+        function limpiarPrefijoEstadosSiebel(texto, zona = '') {
+            if (!texto) return '';
+            let t = texto.trim();
 
-            // 1. Alta prioridad: Líneas explícitas de contingencia preventiva o falla
-            for (const line of lines) {
-                if (/^CONTINGENCIA\s+PREVENTIVA\s*[-–:]/i.test(line)) return line.trim();
-                if (/^CONTINGENCIA\s*[-–:]/i.test(line)) return line.trim();
-                if (/^INCIDENCIA\s*[-–:]/i.test(line)) return line.trim();
-                if (/^FALLA\s*[-–:]/i.test(line)) return line.trim();
-            }
+            // Normalizar variantes de A-Nacional a Nacional para evitar cortes indeseados por guion
+            t = t.replace(/\bA\s*[-–]\s*Nacional\b/gi, 'Nacional');
 
-            // 2. Líneas descriptivas independientes en renglones posteriores (ej: "Dificultad para visualizar TNT Sports en applicativo HBO MAX")
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                if (/^INC\d+/i.test(line) && line.includes(' - ')) {
-                    // Es una línea técnica de INC de red (ej: "INC000009408613 - Caída de Sitios...")
-                    const fallaMatch = line.match(/(?:-\s*)([A-Za-záéíóúÁÉÍÓÚñÑ\s]+?)(?=\s+en\s+Comuna|\s+en\s+[A-Z]|\s+Causa:|\s+Lista\s+de|\s*$)/i);
-                    const causaMatch = line.match(/Causa:\s*([^L\n]+?)(?=\s+Lista\s+de|\s+TEC|\s*$)/i);
-                    const tipoFalla = fallaMatch ? fallaMatch[1].trim() : '';
-                    let causa = causaMatch ? causaMatch[1].trim() : '';
-                    if (/^\(causa por definir\)$/i.test(causa) || /^por definir$/i.test(causa)) causa = '';
-                    if (tipoFalla && causa) return `${tipoFalla} — ${causa}`;
-                    if (tipoFalla) return tipoFalla;
-                    if (causa) return causa;
-                    continue;
-                }
+            // Palabras / categorías de metadatos de Siebel que componen la cadena de estados repetidos
+            const metaTokens = [
+                'cerrado', 'resuelto', 'abierto', 'cancelado', 'pendiente', 'en proceso',
+                'nacional', 'a-nacional',
+                'recaud externos', 'recaud. externos',
+                'sistemas de atencion', 'sistemas de atención',
+                'trabajo programado móvil', 'trabajo programado movil',
+                'trabajo programado sistemas', 'trabajo programado',
+                'activación de móviles', 'activacion de moviles',
+                'servicio de recarga', 'gestionar mis recargas',
+                'serv. voz y datos congestión', 'serv. voz y datos congestion',
+                'comunicación voz', 'comunicacion voz', 'problemas de cobertura',
+                'redes', 'sistema'
+            ];
 
-                // Descartar renglones de sólo ID, sólo INC, sólo fechas, scripts de atención o derivación
-                if (/^\s*INC\d+\s*$/i.test(line)) continue;
-                if (/^\s*\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(line)) continue;
-                if (/^Hola\s+\(/i.test(line) || /^Estimado\b/i.test(line) || /^Hola\s+[a-zA-Z]/i.test(line)) continue;
-                if (/^Derivar\s+al\s+cliente/i.test(line)) continue;
+            const lowZona = (zona || '').toLowerCase().trim();
 
-                // Limpiar tabs y pipes
-                const cleanLine = line.replace(/[\t|]+/g, ' ').replace(/^[*#📍📌>–-]\s*/, '').trim();
-                if (cleanLine.length >= 8 && !cleanLine.startsWith('<') && !cleanLine.startsWith('INC000')) {
-                    return cleanLine;
-                }
-            }
-
-            // 3. Si sólo hay una línea (o no se encontró en renglones posteriores), examinar columnas tabuladas
-            const candidates = [];
-            for (const line of lines) {
-                const parts = (line.includes('\t') ? line.split('\t') : line.split('|')).map(p => p.trim()).filter(p => p.length > 0);
-                for (const part of parts) {
-                    if (part === id || part.includes(id)) continue;
-                    if (/^\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(part)) continue;
-                    if (/^INC\d+/i.test(part)) continue;
-                    if (/^POPs?:/i.test(part)) continue;
-                    if (/^\d{1,2}\s+d[íi]as?/i.test(part)) continue;
-                    if (/^(Abierto|Cerrado|En Proceso|Pendiente|Cancelado)$/i.test(part)) continue;
-                    if (/^(Movil|Hogar|Movil\/Hogar|Fija|Empresas|Pyme)$/i.test(part)) continue;
-                    if (/^(Nacional|RM|Santiago|Valparaíso|Concepción|Varias|Desconocida)$/i.test(part)) continue;
-                    if (/^EJEC\.\s+/i.test(part) || /^EJECUTIVO\b/i.test(part) || /^INTEGRACI[ÓO]N\b/i.test(part)) continue;
-                    if (/^Hola\s+\(/i.test(part) || /^Estimado\b/i.test(part) || /^Hola\s+[a-zA-Z]/i.test(part)) continue;
-                    if (/^En estos momentos el servicio/i.test(part)) continue;
-                    if (/^Derivar\s+al\s+cliente/i.test(part)) continue;
-                    if (/^(Servicio TV|Comunicación Voz|Problemas de cobertura|Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion|No puede recargar|Canal premium no disponible|Dificultad Canal Digital)$/i.test(part)) continue;
-                    if (/^Serv\.\s+Voz/i.test(part) || /^Trabajo\s+Programado/i.test(part) || /^Entel$/i.test(part)) continue;
-
-                    const clean = part.replace(/^[*#📍📌>–-]\s*/, '').trim();
-                    if (clean.length >= 6 && !clean.startsWith('<')) {
-                        candidates.push(clean);
+            // Iterativamente remover prefijos de metadata: "[Token] - "
+            let cambio = true;
+            while (cambio && t.length > 0) {
+                cambio = false;
+                const match = t.match(/^([^–-]+?)\s*[-–]\s*(.+)$/);
+                if (match) {
+                    const token = match[1].trim().toLowerCase();
+                    if (
+                        metaTokens.includes(token) ||
+                        token.startsWith('a-nacional') ||
+                        token === lowZona ||
+                        /^(?:cerrado|resuelto|abierto|cancelado|pendiente|en proceso)$/i.test(token)
+                    ) {
+                        t = match[2].trim();
+                        cambio = true;
                     }
                 }
             }
 
-            if (candidates.length > 0) {
-                return candidates[0];
+            // Corregir posibles erratas comunes en la descripción resultante
+            t = t.replace(/\bDicultad\b/gi, 'Dificultad');
+            t = t.replace(/\bintermitencias\b/gi, 'intermitencia');
+
+            return t;
+        }
+
+        // Limpiar colas técnicas de sitios / tablas (ej: "Lista de sitios TEC SITIO...")
+        function limpiarColasTecnicas(texto) {
+            if (!texto) return '';
+            let t = texto;
+            t = t.replace(/\s*(?:Lista\s+de\s+[sS]itios|TEC\s+SITIO|TEC\s+NEM|<Nemónico|Lista\s+de\s+Sitios).*$/i, '');
+            t = t.replace(/\s*Tecnolog[íi]as\s+Impactadas:.*$/i, '');
+            return t.trim();
+        }
+
+        function extraerDetallePuntual(chunk, id, zona, inc) {
+            if (!chunk) return 'Incidencia operacional en curso';
+            const rawLines = chunk.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            // 1. Filtrar líneas de script de atención, derivaciones o cabeceras tabuladas iniciales
+            const cleanLines = rawLines.filter(line => {
+                if (/^Hola\s+\(/i.test(line) || /^Estimado\b/i.test(line) || /^Hola\s+[a-zA-Z]/i.test(line)) return false;
+                if (/^En estos momentos el servicio/i.test(line)) return false;
+                if (/^Debido al cambio de hora/i.test(line)) return false;
+                if (/^Derivar\s+al\s+cliente/i.test(line)) return false;
+                if (/^\s*INC\d+\s*$/i.test(line)) return false;
+                if (/^\s*\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(line)) return false;
+                if (line.startsWith(id) || /^1-\d{11,12}\b/.test(line)) return false;
+                if (/^(?:Serv\.\s+Voz|Comunicación\s+Voz|Problemas\s+de\s+cobertura|Sistemas\s+de\s+Atenci[oó]n|Activación\s+de\s+móviles|Servicio\s+de\s+Recarga|Trabajo\s+Programado\s+Móvil|Trabajo\s+Programado\s+Sistemas|Entel|Integración)$/i.test(line)) return false;
+                return true;
+            });
+
+            // 2. Buscar líneas con Contingencia Preventiva explícita (incluso con typos de Siebel como CONTINGNECIA o entre corchetes)
+            for (const line of cleanLines) {
+                const cpMatch = line.match(/(?:\[?CONTING(?:EN|NE)CIA\s+PREVENTIVA\]?|CONTINGENCIA)\s*[-–:]\s*(.+)/i);
+                if (cpMatch) {
+                    let desc = cpMatch[1].trim();
+                    desc = limpiarPrefijoEstadosSiebel(desc, zona);
+                    desc = limpiarColasTecnicas(desc);
+                    if (desc.length > 5) {
+                        return `Contingencia Preventiva: ${desc}`;
+                    }
+                }
             }
 
-            // 4. Si hay categorías de CRM concatenadas
+            // 3. Buscar líneas técnicas de INC de Red (ej: INC000009433631, INC000009408613, etc.)
+            for (const line of cleanLines) {
+                const incIdx = line.search(/\bINC\d{8,14}\b/i);
+                if (incIdx !== -1) {
+                    let textoInc = line.substring(incIdx).trim();
+                    const guionIdx = textoInc.indexOf(' - ');
+                    if (guionIdx !== -1) {
+                        let cuerpo = textoInc.substring(guionIdx + 3).trim();
+                        cuerpo = limpiarColasTecnicas(cuerpo);
+
+                        // A. Extraer causa (debido a ... o Causa: ...)
+                        let causa = '';
+                        const debidoMatch = cuerpo.match(/debido\s+a\s+([^\n\r]+?)(?=\s+Lista\s+de|\s+TEC|\s*<Nemónico|\s*$)/i);
+                        if (debidoMatch) {
+                            causa = debidoMatch[1].trim();
+                        } else {
+                            const causaMatch = cuerpo.match(/Causa\s*[:\s]+([^\n\r]+?)(?=\s+Lista\s+de|\s+TEC|\s*<Nemónico|\s*$)/i);
+                            if (causaMatch) causa = causaMatch[1].trim();
+                        }
+
+                        // Limpiar repeticiones o placeholders en causa
+                        if (causa) {
+                            if (causa.includes('Lista de') || causa.includes('Caída de')) {
+                                causa = causa.split(/(?:Lista\s+de|Ca[íi]da\s+de)/i)[0].trim();
+                            }
+                            if (/^\(causa por definir\)$/i.test(causa) || /^por definir$/i.test(causa)) {
+                                causa = '';
+                            }
+                            if (causa.length > 0) {
+                                causa = causa.charAt(0).toUpperCase() + causa.slice(1);
+                            }
+                        }
+
+                        // B. Extraer tipo de falla principal
+                        let tipoFalla = '';
+                        if (/Perdida\s+de\s+conectividad/i.test(cuerpo)) {
+                            tipoFalla = 'Pérdida de conectividad';
+                        } else if (/Degradaci[oó]n/i.test(cuerpo)) {
+                            tipoFalla = 'Degradación de Sitios';
+                        } else if (/Aumento\s+(?:de\s+)?reclamos/i.test(cuerpo)) {
+                            tipoFalla = 'Aumento de Reclamos';
+                        } else if (/Ca[íi]da\s+de\s+Sitios/i.test(cuerpo)) {
+                            tipoFalla = 'Caída de Sitios';
+                        } else {
+                            const genericoMatch = cuerpo.match(/^([A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]+?)(?=\s+en\s+Comunas?|\s+en\s+[A-Z]|\s*Causa:|\s*$)/i);
+                            if (genericoMatch) tipoFalla = genericoMatch[1].trim();
+                        }
+
+                        if (tipoFalla && causa) return `${tipoFalla} — ${causa}`;
+                        if (tipoFalla) return tipoFalla;
+                        if (causa) return causa;
+                        if (cuerpo && cuerpo.length < 80) return cuerpo;
+                    }
+                }
+            }
+
+            // 4. Buscar líneas de Trabajo Programado
+            for (const line of cleanLines) {
+                if (/Trabajo\s+Programado/i.test(line)) {
+                    let tp = limpiarPrefijoEstadosSiebel(line, zona);
+                    tp = limpiarColasTecnicas(tp);
+                    if (tp && !esDetalleGenerico(tp)) return tp;
+                }
+            }
+
+            // 5. Buscar en líneas de estados de Siebel (sistemas, comerciales, front)
+            for (const line of cleanLines) {
+                const limpia = limpiarPrefijoEstadosSiebel(line, zona);
+                const sinTablas = limpiarColasTecnicas(limpia);
+                if (sinTablas && sinTablas.length >= 6 && !esDetalleGenerico(sinTablas) && !sinTablas.startsWith('<') && !sinTablas.startsWith('INC000')) {
+                    return sinTablas;
+                }
+            }
+
+            // 6. Si hay columnas tabuladas o candidatos sueltos
+            for (const line of cleanLines) {
+                const parts = line.split('\t').map(p => p.trim()).filter(p => p.length > 0);
+                for (const part of parts) {
+                    const cleanPart = limpiarColasTecnicas(limpiarPrefijoEstadosSiebel(part, zona));
+                    if (cleanPart.length >= 6 && !esDetalleGenerico(cleanPart) && !cleanPart.startsWith('<') && !cleanPart.startsWith('INC000')) {
+                        return cleanPart;
+                    }
+                }
+            }
+
+            // 7. Si hay categorías de CRM concatenadas
             const catMatch = chunk.match(/(?:Gestionar mis recargas|Escalamiento a sistema|Dificultad sistema de atención|Servicio de Recarga|Activación de móviles|Sistemas de Atencion|Servicio TV|Canal premium no disponible|Dificultad Canal Digital)/gi);
             if (catMatch && catMatch.length > 0) {
                 return [...new Set(catMatch)].join(' — ');
             }
 
-            // 5. Buscar descripciones técnicas de red
+            // 8. Buscar descripciones técnicas de red
             const redDesc = chunk.match(/(?:Lentitud en OT|Caída de Sitios|Corte de Energía|Corte Energía|Intermitencia|Corte de fibra|Corte de Fibra|Falla HW)/i);
             if (redDesc) return redDesc[0];
 
@@ -1002,7 +1147,8 @@
                     const inc = incMatch ? incMatch[1].toUpperCase() : '';
 
                     // Detalle puntual
-                    const detalle = extraerDetallePuntual(chunk, id, zona, inc);
+                    let detalle = extraerDetallePuntual(chunk, id, zona, inc);
+                    if (detalle) detalle = detalle.replace(/[.\s]+$/, '').trim();
 
                     nuevasContingencias.push({
                         id,
@@ -1062,6 +1208,7 @@
 
                     zona = limpiarZona(zona);
                     if (!detalle) detalle = extraerDetallePuntual(linea, id, zona, '');
+                    if (detalle) detalle = detalle.replace(/[.\s]+$/, '').trim();
                     const dtObj = parseFechaContingencia(fecha);
                     const fechaDisplay = dtObj ? formatearFechaDisplay(dtObj, fecha) : fecha;
 
@@ -1197,7 +1344,7 @@
             const newId = document.getElementById('edit-c-id').value.trim();
             const newZona = document.getElementById('edit-c-zona').value.trim() || 'Nacional';
             const newFecha = document.getElementById('edit-c-fecha').value.trim();
-            const newDetalle = document.getElementById('edit-c-detalle').value.trim();
+            const newDetalle = document.getElementById('edit-c-detalle').value.trim().replace(/[.\s]+$/, '');
             const rawPops = document.getElementById('edit-c-pops').value;
             const newPops = rawPops.split(',').map(p => p.trim().toUpperCase()).filter(p => p.length > 0);
             const newInc = document.getElementById('edit-c-inc').value.trim().toUpperCase();
@@ -1265,7 +1412,7 @@
             }
 
             const conComuna = contingencias.filter(c =>
-                c.zona && !['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
+                c.zona && !['Desconocida', 'Nacional', 'A-Nacional', 'Varias'].includes(c.zona)
             );
             const comunasUnicas = [...new Set(conComuna.map(c => c.zona))].sort();
             const totalComunas = comunasUnicas.length;
@@ -1330,10 +1477,10 @@
             }
 
             const conComuna = contingencias.filter(c =>
-                c.zona && !['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
+                c.zona && !['Desconocida', 'Nacional', 'A-Nacional', 'Varias'].includes(c.zona)
             );
             const sinComuna = contingencias.filter(c =>
-                !c.zona || ['Desconocida', 'Nacional', 'Varias'].includes(c.zona)
+                !c.zona || ['Desconocida', 'Nacional', 'A-Nacional', 'Varias'].includes(c.zona)
             );
 
             // Ordenar comunas alfabéticamente
@@ -1365,7 +1512,7 @@
 
             // 2. Contingencias que no son de red (sistemas / comerciales / nacional)
             sortedSinComuna.forEach(c => {
-                const detalleLimpio = (c.detalle || '').replace(/\s+/g, ' ').replace(/[*]/g, '').trim();
+                const detalleLimpio = (c.detalle || '').replace(/\s+/g, ' ').replace(/[*]/g, '').replace(/\.+$/, '').trim();
                 const textoMostrar = detalleLimpio || c.zona || 'Nacional';
                 lines.push(`📍 *${textoMostrar}* ${c.id}`);
             });

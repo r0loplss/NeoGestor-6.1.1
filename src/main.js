@@ -54,10 +54,10 @@ const TOOLS_CONFIG = {
   'occ':           { file: HTML.occ,           w: 320, h: 650, resize: false, top: false },
   'enlaces':       { file: HTML.enlaces,       w: 320, h: 600, resize: true,  top: false },
   'contingencias': { file: HTML.contingencias, w: 340, h: 500, resize: true,  top: true  },
-  'trafico':       { file: HTML.trafico,       w: 450, h: 600, resize: true,  top: false },
+  'trafico':       { file: HTML.trafico,       w: 580, h: 700, resize: true,  top: false },
   // NUEVAS HERRAMIENTAS
   'calculadora-dias': { file: HTML.calculadora, w: 380, h: 480, resize: true, top: false },
-  'ciclos':           { file: HTML.ciclos,     w: 480, h: 580, resize: true, top: false },
+  'ciclos':           { file: HTML.ciclos,     w: 520, h: 680, resize: true, top: false },
   'tipificaciones':   { file: HTML.tipificaciones, w: 1000, h: 700, resize: true, top: false },
   'fast':             { file: HTML.fast,       w: 1000, h: 900, resize: true, top: false },
   'notas-vault':      { file: HTML.vault,      w: 460, h: 560, resize: true,  top: false },
@@ -950,8 +950,12 @@ function openTool(id) {
   }
 
   const saved = loadPos()[id];
-  const sw = (saved && saved.width > 0) ? saved.width : conf.w;
-  const sh = (saved && saved.height > 0) ? saved.height : conf.h;
+  let sw = (saved && saved.width > 0) ? saved.width : conf.w;
+  let sh = (saved && saved.height > 0) ? saved.height : conf.h;
+  if (id === 'trafico' && sw < 560) {
+    sw = conf.w;
+    sh = conf.h;
+  }
   const pos = toolPos(id, sw);
   const win = new BrowserWindow({
     width: sw, height: sh, x: pos.x, y: pos.y,

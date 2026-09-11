@@ -2,81 +2,93 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <title>Cambio de Ciclo</title>
+    <title>Cambio de Ciclo — Móvil Postpago (Entel PRO_POS_032)</title>
     <style>
         /* ============================================================
-               ROOT – Tema oscuro consistente con la app
-               ============================================================ */
+           ROOT – Tema oscuro consistente y estilizado
+           ============================================================ */
         :root {
             --bg: #0f1117;
             --surface: #161b27;
             --surface2: #1c2333;
             --surface3: #232c3f;
-            --border: rgba(255, 255, 255, 0.07);
-            --border2: rgba(255, 255, 255, 0.12);
+            --border: rgba(255, 255, 255, 0.08);
+            --border2: rgba(255, 255, 255, 0.14);
             --text: #e2e8f0;
             --muted: #8892a4;
             --faint: #4a5568;
             --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --primary-glow: rgba(59, 130, 246, 0.25);
             --success: #22c55e;
+            --success-glow: rgba(34, 197, 94, 0.2);
             --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.18);
             --danger: #ef4444;
-            --font: 'Segoe UI', system-ui, sans-serif;
-            --radius: 5px;
+            --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            --radius-sm: 4px;
+            --radius: 6px;
+            --radius-lg: 10px;
         }
 
-        /* ============================================================
-               RESET Y ESTRUCTURA BASE
-               ============================================================ */
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        html,
-        body {
+        html, body {
             height: 100%;
             overflow: hidden;
             background: var(--bg);
             font-family: var(--font);
-            font-size: 13px;
+            font-size: 12.5px;
             color: var(--text);
+            line-height: 1.45;
         }
 
         body {
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border2);
-            border-radius: 6px;
+            border-radius: 8px;
         }
 
         /* ============================================================
-               HEADER (frameless + drag)
-               ============================================================ */
+           HEADER (frameless + drag)
+           ============================================================ */
         #hdr {
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 0 8px;
-            height: 32px;
+            gap: 8px;
+            padding: 0 10px;
+            height: 34px;
             flex-shrink: 0;
             background: #0d1220;
             border-bottom: 1px solid var(--border);
-            border-radius: 6px 6px 0 0;
+            border-radius: 8px 8px 0 0;
             -webkit-app-region: drag;
             user-select: none;
+        }
+
+        .hdr-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: rgba(59, 130, 246, 0.18);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            padding: 1px 6px;
+            border-radius: 999px;
+            text-transform: uppercase;
         }
 
         #hdr-title {
             flex: 1;
             font-size: 11px;
             font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: var(--text);
+            letter-spacing: 0.3px;
         }
 
         .hbtn {
@@ -84,196 +96,441 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: var(--faint);
+            color: var(--muted);
             font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 3px;
+            padding: 2px 7px;
+            border-radius: 4px;
             transition: all 0.15s;
-            font-family: var(--font);
         }
 
         .hbtn:hover {
-            color: var(--text);
+            color: #fff;
             background: rgba(255, 255, 255, 0.08);
         }
 
         .hbtn.danger:hover {
-            color: var(--danger);
+            color: #fff;
+            background: var(--danger);
         }
 
         /* ============================================================
-               CUERPO PRINCIPAL (scroll vertical)
-               ============================================================ */
+           MAIN CONTAINER & SCROLLBAR
+           ============================================================ */
         #main {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 20px;
+            padding: 14px 16px 20px;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        ::-webkit-scrollbar {
-            width: 9px;
-            height: 9px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--faint);
-            border-radius: 5px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--muted);
-        }
-
-        #main::-webkit-scrollbar {
-            width: 9px;
-            height: 9px;
-        }
-        #main::-webkit-scrollbar-thumb {
-            background: var(--faint);
-            border-radius: 5px;
-        }
-        #main::-webkit-scrollbar-thumb:hover {
-            background: var(--muted);
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
         /* ============================================================
-               CAMPOS DE ENTRADA
-               ============================================================ */
-        .field-row {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .field-row label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .field-row select,
-        .field-row input[type="date"] {
-            padding: 7px 10px;
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text);
-            font-size: 13px;
-            font-family: var(--font);
-            outline: none;
-            transition: border-color 0.15s;
-            color-scheme: dark;
-        }
-
-        .field-row select:focus,
-        .field-row input[type="date"]:focus {
-            border-color: var(--primary);
-        }
-
-        /* ============================================================
-               BOTÓN CALCULAR
-               ============================================================ */
-        .btn-calc {
-            padding: 10px 0;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius);
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.15s;
-            font-family: var(--font);
-            margin-top: 4px;
-        }
-
-        .btn-calc:hover {
-            background: #2563eb;
-        }
-
-        .btn-calc:active {
-            transform: scale(0.98);
-        }
-
-        /* ============================================================
-               RESULTADOS – DOS CUADROS LADO A LADO
-               ============================================================ */
-        .result-box {
+           SECCIONES Y TARJETAS
+           ============================================================ */
+        .section-box {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            display: none;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .result-box.show {
-            display: flex;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .card-boleta {
-            background: var(--surface2);
-            border: 1px solid var(--border2);
-            border-radius: var(--radius);
-            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            padding: 12px 14px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 10px;
         }
 
-        .card-boleta .titulo {
-            font-size: 13px;
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title {
+            font-size: 11px;
             font-weight: 700;
-            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--muted);
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .card-boleta .titulo .icon {
-            font-size: 16px;
-        }
-
-        .card-boleta .campo {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            padding: 3px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .card-boleta .campo .label {
-            color: var(--muted);
-        }
-
-        .card-boleta .campo .valor {
-            color: var(--text);
+        .section-tag {
+            font-size: 10px;
+            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.12);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(59, 130, 246, 0.25);
             font-weight: 600;
         }
 
-        .card-boleta .campo .valor.destacado {
-            color: var(--warning);
+        /* ============================================================
+           GRID DE CONTROLES
+           ============================================================ */
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-group label {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .field-group select,
+        .field-group input {
+            padding: 7px 9px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 12.5px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            color-scheme: dark;
+            width: 100%;
+        }
+
+        .field-group select:focus,
+        .field-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        .field-hint {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 1px;
+        }
+
+        /* Quick dates bar */
+        .date-container {
+            display: flex;
+            gap: 6px;
+        }
+
+        .date-container input {
+            flex: 1;
+        }
+
+        .quick-btn {
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 10.5px;
+            padding: 0 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-weight: 600;
+        }
+
+        .quick-btn:hover {
+            color: var(--text);
+            border-color: var(--primary);
+        }
+
+        /* Botón de Cálculo Principal */
+        .btn-calc-main {
+            padding: 9px 0;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 12.5px;
+            cursor: pointer;
+            transition: all 0.18s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 3px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-calc-main:hover {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-calc-main:active {
+            transform: translateY(0);
         }
 
         /* ============================================================
-               SPEECH Y BOTÓN COPIAR
-               ============================================================ */
-        .speech-box {
+           BANNER DE ESCENARIO DETECTADO
+           ============================================================ */
+        .scenario-banner {
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            font-size: 11.5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            border: 1px solid transparent;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .scenario-banner.case1 {
+            background: rgba(34, 197, 94, 0.12);
+            border-color: rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .scenario-banner.case2 {
+            background: rgba(245, 158, 11, 0.14);
+            border-color: rgba(245, 158, 11, 0.35);
+            color: #fcd34d;
+        }
+
+        .scenario-tag {
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            letter-spacing: 0.4px;
+        }
+
+        .case1 .scenario-tag {
+            background: var(--success);
+            color: #052e16;
+        }
+
+        .case2 .scenario-tag {
+            background: var(--warning);
+            color: #451a03;
+        }
+
+        /* ============================================================
+           TIMELINE VISUAL
+           ============================================================ */
+        .timeline-wrapper {
             background: var(--surface2);
             border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10.5px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .timeline-bar {
+            height: 18px;
+            background: var(--surface3);
+            border-radius: 999px;
+            display: flex;
+            overflow: hidden;
+            border: 1px solid var(--border2);
+            position: relative;
+        }
+
+        .tl-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #fff;
+            transition: width 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 4px;
+        }
+
+        .tl-segment.ant {
+            background: linear-gradient(90deg, #475569, #64748b);
+        }
+
+        .tl-segment.mid {
+            background: linear-gradient(90deg, #d97706, #f59e0b);
+            color: #111;
+        }
+
+        .tl-segment.nue {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+        }
+
+        .timeline-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* ============================================================
+           CUADRÍCULA DE TARJETAS DE BOLETA
+           ============================================================ */
+        .boletas-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .boleta-card {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+
+        .boleta-card:hover {
+            border-color: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+        }
+
+        .boleta-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            align-self: flex-start;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .badge-ant { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+        .badge-mid { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
+        .badge-nue { background: rgba(59, 130, 246, 0.18); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
+
+        .b-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: 11px;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .b-lbl { color: var(--muted); }
+        .b-val { color: var(--text); font-weight: 600; }
+        .b-val.highlight { color: var(--warning); font-weight: 700; }
+        .b-val.due { color: #38bdf8; font-weight: 700; }
+        .b-val.cutoff { color: #f87171; font-weight: 700; }
+
+        .boleta-alert {
+            font-size: 9.5px;
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.08);
+            border-left: 2px solid var(--warning);
+            padding: 4px 6px;
+            border-radius: 0 4px 4px 0;
+            margin-top: 4px;
+            line-height: 1.35;
+        }
+
+        /* ============================================================
+           SPEECH EXPLICATIVO (SIN PESTAÑAS)
+           ============================================================ */
+        .speech-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .speech-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .agent-guidance-box {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-left: 3px solid var(--primary);
+            border-radius: var(--radius);
+            padding: 8px 11px;
+            font-size: 11px;
+            line-height: 1.45;
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .agent-guidance-box.resolutivo {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.25);
+            border-left-color: var(--warning);
+        }
+
+        .agent-guidance-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 2px;
+        }
+
+        .agent-guidance-box.resolutivo .agent-guidance-title {
+            color: var(--warning);
+        }
+
+        .speech-box {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
             border-radius: var(--radius);
             padding: 12px 14px;
             font-size: 12px;
@@ -281,264 +538,530 @@
             color: var(--text);
             white-space: pre-wrap;
             word-break: break-word;
-            max-height: 120px;
+            max-height: 160px;
             overflow-y: auto;
+            font-family: inherit;
         }
 
-        .speech-box::-webkit-scrollbar {
-            width: 9px;
-            height: 9px;
-        }
-        .speech-box::-webkit-scrollbar-thumb {
-            background: var(--faint);
-            border-radius: 5px;
-        }
-        .speech-box::-webkit-scrollbar-thumb:hover {
-            background: var(--muted);
-        }
-
-        .btn-copy {
+        .btn-copy-speech {
             padding: 8px 0;
             background: var(--surface3);
-            border: 1px solid var(--border);
+            border: 1px solid var(--border2);
             border-radius: var(--radius);
             color: var(--text);
             font-weight: 600;
             font-size: 12px;
             cursor: pointer;
             transition: all 0.15s;
-            font-family: var(--font);
-            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
-        .btn-copy:hover {
+        .btn-copy-speech:hover {
             background: var(--surface2);
             border-color: var(--primary);
+            color: #fff;
         }
 
-        .btn-copy.copiado {
-            background: rgba(34, 197, 94, 0.15);
+        .btn-copy-speech.copied {
+            background: rgba(34, 197, 94, 0.18);
             border-color: var(--success);
             color: var(--success);
         }
 
         /* ============================================================
-               TOAST (notificación emergente)
-               ============================================================ */
+           SELECTOR DE MODALIDAD (CONSOLIDADA VS SEPARADAS)
+           ============================================================ */
+        .modalidad-selector-wrapper {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modalidad-label {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .segmented-control {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .seg-btn {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+        }
+
+        .seg-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .seg-btn.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+        }
+
+        .seg-pill {
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .seg-btn.active .seg-pill {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        /* Estilos de Tarjeta Consolidada */
+        .boleta-card.consolidada {
+            grid-column: 1 / -1;
+            background: linear-gradient(145deg, #182236 0%, #17243c 100%);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+            padding: 12px 14px;
+            gap: 7px;
+        }
+
+        .consolidada-breakdown {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 8px 10px;
+            margin: 4px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .breakdown-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #93c5fd;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text);
+            padding: 3px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Pestañas de Speech */
+        .speech-tabs {
+            display: inline-flex;
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: var(--radius);
+            padding: 2px;
+            border: 1px solid var(--border);
+        }
+
+        .speech-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+
+        .speech-tab-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .speech-tab-btn.active {
+            background: var(--surface3);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            font-weight: 700;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        /* ============================================================
+           GUÍA RÁPIDA ONE TOUCH (ACORDEÓN COLAPSABLE)
+           ============================================================ */
+        .accordion-guide {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: rgba(22, 27, 39, 0.6);
+            overflow: hidden;
+        }
+
+        .accordion-toggle {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .accordion-toggle:hover {
+            color: var(--text);
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 10px 12px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.6;
+            background: var(--surface2);
+        }
+
+        .accordion-content.open {
+            display: block;
+        }
+
+        .step-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .step-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .step-num {
+            font-size: 9px;
+            font-weight: 700;
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ============================================================
+           TOAST NOTIFICATIONS
+           ============================================================ */
         #toast-container {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 16px;
+            right: 16px;
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             pointer-events: none;
         }
 
         .toast {
             pointer-events: auto;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 500;
             color: #fff;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-            animation: toastIn 0.3s ease-out;
-            max-width: 320px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.25s ease-out;
         }
 
-        .toast.success {
-            background: var(--success);
-        }
-        .toast.warning {
-            background: var(--warning);
-            color: #000;
-        }
-        .toast.error {
-            background: var(--danger);
-        }
+        .toast.success { background: #15803d; border: 1px solid #22c55e; }
+        .toast.warning { background: #b45309; border: 1px solid #f59e0b; }
+        .toast.error { background: #b91c1c; border: 1px solid #ef4444; }
 
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ============================================================
-               RESPONSIVE
-               ============================================================ */
-        @media (max-width: 500px) {
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    HEADER
-    ============================================================ -->
+    <!-- HEADER -->
     <div id="hdr">
-        <span id="hdr-title">🔄 Cambio de Ciclo de Facturación</span>
+        <span class="hdr-badge">PRO_POS_032</span>
+        <span id="hdr-title">Cambio de Ciclo — Móvil Postpago</span>
         <button class="hbtn" onclick="ipcRenderer.send('minimize-tool','ciclos')" title="Minimizar">—</button>
-        <button class="hbtn" onclick="ipcRenderer.send('close-tool','ciclos')">✕</button>
+        <button class="hbtn danger" onclick="ipcRenderer.send('close-tool','ciclos')" title="Cerrar">✕</button>
     </div>
 
-    <!-- ============================================================
-    CUERPO
-    ============================================================ -->
+    <!-- MAIN BODY -->
     <div id="main">
 
-        <!-- Ciclo Actual -->
-        <div class="field-row">
-            <label for="ciclo-actual">📌 Ciclo Actual</label>
-            <select id="ciclo-actual">
-                <option value="50">50</option>
-                <option value="51">51</option>
-                <option value="52" selected>52</option>
-                <option value="53">53</option>
-                <option value="54">54</option>
-            </select>
-        </div>
+        <!-- PARÁMETROS DE ENTRADA -->
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-title">⚙️ Parámetros de la Solicitud</span>
+                <span class="section-tag">📱 Servicio Móvil</span>
+            </div>
 
-        <!-- Nuevo Ciclo -->
-        <div class="field-row">
-            <label for="ciclo-nuevo">🔄 Nuevo Ciclo</label>
-            <select id="ciclo-nuevo">
-                <option value="52">52</option>
-                <option value="53" selected>53</option>
-                <option value="54">54</option>
-            </select>
-        </div>
-
-        <!-- Fecha de la orden -->
-        <div class="field-row">
-            <label for="fecha-orden">📅 Fecha de la orden</label>
-            <input type="date" id="fecha-orden" />
-        </div>
-
-        <!-- Botón Calcular -->
-        <button class="btn-calc" id="btn-calcular">🔍 Calcular</button>
-
-        <!-- Resultados (ocultos por defecto) -->
-        <div class="result-box" id="resultados">
-
-            <!-- Dos cuadros -->
-            <div class="cards-grid">
-                <!-- Boleta anterior -->
-                <div class="card-boleta" id="card-anterior">
-                    <div class="titulo"><span class="icon">📄</span> Boleta anterior</div>
-                    <div class="campo"><span class="label">Ciclo</span><span class="valor" id="res-ciclo-ant">—</span></div>
-                    <div class="campo"><span class="label">Período</span><span class="valor" id="res-periodo-ant">—</span></div>
-                    <div class="campo"><span class="label">Días a cobrar</span><span class="valor destacado" id="res-dias-ant">—</span></div>
-                    <div class="campo"><span class="label">Emisión</span><span class="valor" id="res-emision-ant">—</span></div>
-                    <div class="campo"><span class="label">Vencimiento</span><span class="valor" id="res-vencimiento-ant">—</span></div>
+            <div class="grid-inputs">
+                <!-- Ciclo Actual -->
+                <div class="field-group">
+                    <label for="ciclo-actual">Ciclo Actual</label>
+                    <select id="ciclo-actual">
+                        <option value="50">Ciclo 50 (01 al 30/31)</option>
+                        <option value="51">Ciclo 51 (01 al 30/31)</option>
+                        <option value="52" selected>Ciclo 52 (08 al 07)</option>
+                        <option value="53">Ciclo 53 (16 al 15)</option>
+                        <option value="54">Ciclo 54 (23 al 22)</option>
+                    </select>
+                    <span class="field-hint" id="hint-actual">Período: 08 al 07 • Vence: 28</span>
                 </div>
 
-                <!-- Boleta nueva -->
-                <div class="card-boleta" id="card-nueva">
-                    <div class="titulo"><span class="icon">📄</span> Boleta nueva</div>
-                    <div class="campo"><span class="label">Ciclo</span><span class="valor" id="res-ciclo-nue">—</span></div>
-                    <div class="campo"><span class="label">Período</span><span class="valor" id="res-periodo-nue">—</span></div>
-                    <div class="campo"><span class="label">Días a cobrar</span><span class="valor destacado" id="res-dias-nue">—</span></div>
-                    <div class="campo"><span class="label">Emisión</span><span class="valor" id="res-emision-nue">—</span></div>
-                    <div class="campo"><span class="label">Vencimiento</span><span class="valor" id="res-vencimiento-nue">—</span></div>
-                    <div class="campo"><span class="label">Reinicio plan</span><span class="valor" id="res-reinicio-nue">—</span></div>
+                <!-- Nuevo Ciclo -->
+                <div class="field-group">
+                    <label for="ciclo-nuevo">Nuevo Ciclo</label>
+                    <select id="ciclo-nuevo">
+                        <!-- Generado dinámicamente según reglas -->
+                    </select>
+                    <span class="field-hint" id="hint-nuevo">Vence: 06 de cada mes</span>
                 </div>
             </div>
 
-            <!-- Speech -->
-            <div class="speech-box" id="speech-box">
-                💬 Speech sugerido:
-                <span id="speech-text">(Realiza un cálculo para generar el speech)</span>
+            <div class="field-group">
+                <label for="fecha-orden">Fecha de la Orden (One Touch)</label>
+                <div class="date-container">
+                    <input type="date" id="fecha-orden" />
+                    <button type="button" class="quick-btn" id="btn-hoy">Hoy</button>
+                    <button type="button" class="quick-btn" id="btn-ayer">Ayer</button>
+                </div>
             </div>
 
-            <!-- Botón Copiar Speech -->
-            <button class="btn-copy" id="btn-copy-speech">📋 Copiar Speech</button>
+            <button type="button" class="btn-calc-main" id="btn-calcular">
+                ⚡ Calcular Proporcionales y Fechas
+            </button>
+        </div>
 
+        <!-- RESULTADOS (Visibles tras calcular) -->
+        <div id="contenedor-resultados" style="display: none; flex-direction: column; gap: 12px;">
+
+            <!-- BANNER DEL ESCENARIO -->
+            <div id="scenario-banner" class="scenario-banner case1">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="scenario-icon">🟢</span>
+                    <div>
+                        <strong id="scenario-title">Caso 1: Transición de Ciclo</strong>
+                        <div style="font-size: 10.5px; opacity: 0.9;" id="scenario-desc">
+                            El cliente recibirá su cobro proporcional por los días utilizados, sin duplicidad de cobro.
+                        </div>
+                    </div>
+                </div>
+                <span class="scenario-tag" id="scenario-tag">2 Boletas</span>
+            </div>
+
+            <!-- SELECTOR DE MODALIDAD DE FACTURACIÓN -->
+            <div class="modalidad-selector-wrapper" id="modalidad-wrapper">
+                <div class="modalidad-label">
+                    <span>🧾 Formato de Emisión del Sistema:</span>
+                </div>
+                <div class="segmented-control" id="modalidad-control">
+                    <button type="button" class="seg-btn active" data-modalidad="consolidada" id="btn-mod-consolidada" title="Muestra la boleta consolidada de período extendido emitida por el sistema">
+                        <span>📄 Boleta Única Consolidada</span>
+                        <span class="seg-pill">Realidad Operativa</span>
+                    </button>
+                    <button type="button" class="seg-btn" data-modalidad="separadas" id="btn-mod-separadas" title="Muestra dos boletas independientes según el modelo teórico del manual">
+                        <span>📑 Boletas Separadas</span>
+                        <span class="seg-pill">Modelo Teórico</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- LÍNEA DE TIEMPO VISUAL -->
+            <div class="timeline-wrapper">
+                <div class="timeline-header">
+                    <span>Línea de Tiempo de Cobros y Consumo</span>
+                    <span id="tl-total-dias">0 días totales</span>
+                </div>
+                <div class="timeline-bar" id="timeline-bar">
+                    <!-- Segmentos dinámicos inyectados por JS -->
+                </div>
+                <div class="timeline-legend" id="timeline-legend">
+                    <!-- Leyenda dinámica -->
+                </div>
+            </div>
+
+            <!-- DETALLE DE BOLETAS -->
+            <div class="boletas-container" id="boletas-grid">
+                <!-- Tarjetas inyectadas dinámicamente (1 consolidada, o 2/3 tarjetas) -->
+            </div>
+
+            <!-- EXPLICACIÓN WHATSAPP CON GUÍA INTERNA PARA EL AGENTE -->
+            <div class="speech-container">
+                <div class="speech-header">
+                    <span>💬 Explicación WhatsApp</span>
+                    <div class="speech-tabs" id="speech-tabs">
+                        <button type="button" class="speech-tab-btn active" data-tab="preventivo" id="tab-speech-preventivo" title="Mensaje al momento de gestionar el cambio de ciclo">
+                            💬 Al Gestionar Cambio (Preventivo)
+                        </button>
+                        <button type="button" class="speech-tab-btn" data-tab="resolutivo" id="tab-speech-resolutivo" title="Explicación cuando el cliente consulta por una boleta más alta">
+                            🛡️ Consulta de Boleta Emitida (Dudas)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resumen interno para que el agente comprenda lo sucedido de un vistazo -->
+                <div class="agent-guidance-box" id="agent-guidance">
+                    <!-- Generado dinámicamente -->
+                </div>
+
+                <!-- Mensaje para el cliente formateado para WhatsApp -->
+                <div class="speech-box" id="speech-text">
+                    <!-- Texto generado dinámicamente -->
+                </div>
+                <button type="button" class="btn-copy-speech" id="btn-copiar-speech">
+                    📋 Copiar Mensaje para WhatsApp
+                </button>
+            </div>
+
+        </div>
+
+        <!-- MINI GUÍA DE PASOS EN ONE TOUCH -->
+        <div class="accordion-guide">
+            <button type="button" class="accordion-toggle" id="btn-toggle-guide">
+                <span>📖 Pasos en One Touch (Procedimiento Oficial)</span>
+                <span id="guide-arrow">▼</span>
+            </button>
+            <div class="accordion-content" id="guide-content">
+                <ol class="step-list">
+                    <li><span class="step-num">1</span> <b>Perfiles de facturación</b>: Entrar a la pestaña en el panel del cliente.</li>
+                    <li><span class="step-num">2</span> <b>Cambiar ciclo</b>: Presionar el botón sobre la cuenta correspondiente.</li>
+                    <li><span class="step-num">3</span> <b>Validar identidad</b>: Seleccionar <i>Titular</i> e ingresar el <b>N.º de Serie del Carnet</b>.</li>
+                    <li><span class="step-num">4</span> <b>Elegir vencimiento</b>: Marcar la nueva fecha y verificar que aplique de inmediato.</li>
+                    <li><span class="step-num">5</span> <b>Revisar con el cliente</b>: Confirmar Emisión, Vencimiento y Fecha de Corte (+5 días hábiles).</li>
+                    <li><span class="step-num">6</span> <b>Cerrar y Notificar</b>: Registrar ID Carrito/Orden y leer el speech oficial al cliente.</li>
+                </ol>
+            </div>
         </div>
 
     </div>
 
-    <!-- ============================================================
-    TOAST CONTAINER (notificaciones)
-    ============================================================ -->
+    <!-- TOAST CONTAINER -->
     <div id="toast-container"></div>
 
-    <!-- ============================================================
-    SCRIPT
-    ============================================================ -->
     <script>
         const { ipcRenderer } = require('electron');
 
-        // Referencias DOM
-        const cicloActual = document.getElementById('ciclo-actual');
-        const cicloNuevo = document.getElementById('ciclo-nuevo');
-        const fechaOrden = document.getElementById('fecha-orden');
-        const btnCalcular = document.getElementById('btn-calcular');
-        const resultados = document.getElementById('resultados');
-        const speechText = document.getElementById('speech-text');
-        const btnCopySpeech = document.getElementById('btn-copy-speech');
-
         // ============================================================
-        // TABLA DE CICLOS (con mesVenc)
+        // DEFINICIÓN DE CICLOS MÓVILES SEGÚN PRO_POS_032
         // ============================================================
-        const CICLOS = {
+        const CICLOS_DATA = {
             50: {
+                nombre: 'Ciclo 50 (Legado)',
+                tipo: 'legado',
                 inicio: 1,
                 fin: 31,
-                reinicio: 1,
-                emision: 5,
-                vencimiento: [21, 25, 30],
-                vencimientoTxt: '21, 25 o 30',
-                mesVenc: 0 // 0 = mismo mes, 1 = mes siguiente
+                emisionDia: 1,
+                vencimiento: 28,
+                vencimientosPosibles: [21, 25, 30],
+                mesVenc: 0,
+                desc: 'Del 01 al último día • Vencimiento 21, 25 o 30'
             },
             51: {
+                nombre: 'Ciclo 51 (Legado)',
+                tipo: 'legado',
                 inicio: 1,
                 fin: 31,
-                reinicio: 1,
-                emision: 13,
-                vencimiento: [5, 8, 10, 12],
-                vencimientoTxt: '5, 8, 10 o 12',
-                mesVenc: 1
+                emisionDia: 1,
+                vencimiento: 8,
+                vencimientosPosibles: [5, 8, 10, 15],
+                mesVenc: 1,
+                desc: 'Del 01 al último día • Vencimiento 05, 08, 10 o 15'
             },
             52: {
+                nombre: 'Ciclo 52',
+                tipo: 'nuevo',
                 inicio: 8,
                 fin: 7,
-                reinicio: 8,
-                emision: 17,
-                vencimiento: [28],
-                vencimientoTxt: '28',
-                mesVenc: 0
+                emisionDia: 8,
+                vencimiento: 28,
+                vencimientosPosibles: [28],
+                mesVenc: 0,
+                desc: 'Del 08 al 07 del mes sgte • Vence 28'
             },
             53: {
+                nombre: 'Ciclo 53',
+                tipo: 'nuevo',
                 inicio: 16,
                 fin: 15,
-                reinicio: 16,
-                emision: 23,
-                vencimiento: [6],
-                vencimientoTxt: '06',
-                mesVenc: 1
+                emisionDia: 16,
+                vencimiento: 6,
+                vencimientosPosibles: [6],
+                mesVenc: 1,
+                desc: 'Del 16 al 15 del mes sgte • Vence 06'
             },
             54: {
+                nombre: 'Ciclo 54',
+                tipo: 'nuevo',
                 inicio: 23,
                 fin: 22,
-                reinicio: 26,
-                emision: 27,
-                vencimiento: [13],
-                vencimientoTxt: '13',
-                mesVenc: 1
+                emisionDia: 23,
+                vencimiento: 13,
+                vencimientosPosibles: [13],
+                mesVenc: 1,
+                desc: 'Del 23 al 22 del mes sgte • Vence 13'
             }
         };
 
-        // Ciclos disponibles para "nuevo" según el actual
+        // Reglas de negocio: 50 y 51 pueden ir a 52, 53, 54. Los nuevos solo entre ellos.
         const NUEVOS_PERMITIDOS = {
             50: [52, 53, 54],
             51: [52, 53, 54],
@@ -547,282 +1070,892 @@
             54: [52, 53]
         };
 
+        // Estado de la app
+        let state = {
+            actual: 52,
+            nuevo: 53,
+            fecha: '',
+            modalidad: 'consolidada', // 'consolidada' | 'separadas'
+            speechTab: 'preventivo',   // 'preventivo' | 'resolutivo'
+            ultimoCalculo: null
+        };
+
+        // Referencias DOM
+        const selectActual = document.getElementById('ciclo-actual');
+        const selectNuevo = document.getElementById('ciclo-nuevo');
+        const hintActual = document.getElementById('hint-actual');
+        const hintNuevo = document.getElementById('hint-nuevo');
+        const inputFecha = document.getElementById('fecha-orden');
+        const btnHoy = document.getElementById('btn-hoy');
+        const btnAyer = document.getElementById('btn-ayer');
+        const btnCalcular = document.getElementById('btn-calcular');
+
+        const resultadosBox = document.getElementById('contenedor-resultados');
+        const bannerScenario = document.getElementById('scenario-banner');
+        const scenarioIcon = document.getElementById('scenario-icon');
+        const scenarioTitle = document.getElementById('scenario-title');
+        const scenarioDesc = document.getElementById('scenario-desc');
+        const scenarioTag = document.getElementById('scenario-tag');
+
+        const modalidadWrapper = document.getElementById('modalidad-wrapper');
+        const btnModConsolidada = document.getElementById('btn-mod-consolidada');
+        const btnModSeparadas = document.getElementById('btn-mod-separadas');
+
+        const timelineBar = document.getElementById('timeline-bar');
+        const timelineLegend = document.getElementById('timeline-legend');
+        const tlTotalDias = document.getElementById('tl-total-dias');
+        const boletasGrid = document.getElementById('boletas-grid');
+
+        const agentGuidance = document.getElementById('agent-guidance');
+        const speechText = document.getElementById('speech-text');
+        const btnCopiarSpeech = document.getElementById('btn-copiar-speech');
+        const tabSpeechPreventivo = document.getElementById('tab-speech-preventivo');
+        const tabSpeechResolutivo = document.getElementById('tab-speech-resolutivo');
+
+        const btnToggleGuide = document.getElementById('btn-toggle-guide');
+        const guideContent = document.getElementById('guide-content');
+        const guideArrow = document.getElementById('guide-arrow');
+
         // ============================================================
-        // TOAST
+        // UTILIDADES DE FECHAS Y DÍAS HÁBILES
         // ============================================================
-        function showToast(msg, tipo = 'success', duracion = 2500) {
-            const container = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            el.className = 'toast ' + tipo;
-            el.textContent = msg;
-            container.appendChild(el);
+        function pad2(n) { return String(n).padStart(2, '0'); }
+
+        function formatDM(date) {
+            if (!date || isNaN(date)) return '—';
+            return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}`;
+        }
+
+        function formatDMY(date) {
+            if (!date || isNaN(date)) return '—';
+            return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+        }
+
+        function parseLocalDate(dateStr) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d, 12, 0, 0);
+        }
+
+        function formatDateISO(date) {
+            return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+        }
+
+        // Suma 5 días hábiles reales (lunes a viernes) a partir de la fecha de vencimiento
+        function calcularFechaCorte(fechaVenc, diasHabiles = 5) {
+            const res = new Date(fechaVenc);
+            let agregados = 0;
+            while (agregados < diasHabiles) {
+                res.setDate(res.getDate() + 1);
+                const diaSemana = res.getDay();
+                // 0 = Domingo, 6 = Sábado
+                if (diaSemana !== 0 && diaSemana !== 6) {
+                    agregados++;
+                }
+            }
+            return res;
+        }
+
+        function showToast(msg, tipo = 'success') {
+            const cont = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast ' + tipo;
+            t.textContent = msg;
+            cont.appendChild(t);
             setTimeout(() => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(10px)';
-                el.style.transition = 'opacity 0.3s, transform 0.3s';
-                setTimeout(() => el.remove(), 400);
-            }, duracion);
+                t.style.opacity = '0';
+                t.style.transform = 'translateY(8px)';
+                t.style.transition = 'all 0.25s ease';
+                setTimeout(() => t.remove(), 300);
+            }, 2400);
         }
 
         // ============================================================
-        // PERSISTENCIA (localStorage + IPC central)
+        // CONFIGURACIÓN DE OPCIONES DINÁMICAS
         // ============================================================
-        const STORAGE_KEY = 'ciclos-estado';
+        function actualizarOpcionesNuevo() {
+            const actual = parseInt(selectActual.value, 10);
+            const permitidos = NUEVOS_PERMITIDOS[actual] || [52, 53, 54];
+            const valorPrevio = parseInt(selectNuevo.value, 10);
+
+            selectNuevo.innerHTML = '';
+            permitidos.forEach(c => {
+                const info = CICLOS_DATA[c];
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = `Ciclo ${c} (Vence día ${pad2(info.vencimiento)})`;
+                selectNuevo.appendChild(opt);
+            });
+
+            if (permitidos.includes(valorPrevio)) {
+                selectNuevo.value = valorPrevio;
+            } else {
+                selectNuevo.value = permitidos[0];
+            }
+
+            actualizarHints();
+        }
+
+        function actualizarHints() {
+            const infoAct = CICLOS_DATA[selectActual.value];
+            const infoNue = CICLOS_DATA[selectNuevo.value];
+            if (infoAct) hintActual.textContent = infoAct.desc;
+            if (infoNue) hintNuevo.textContent = infoNue.desc;
+        }
+
+        // ============================================================
+        // CÁLCULO PRINCIPAL SEGÚN PRO_POS_032
+        // ============================================================
+        function calcularCiclos() {
+            const actual = parseInt(selectActual.value, 10);
+            const nuevo = parseInt(selectNuevo.value, 10);
+            const fechaStr = inputFecha.value;
+
+            if (!fechaStr) {
+                showToast('⚠️ Por favor ingresa la fecha de la orden.', 'warning');
+                inputFecha.focus();
+                return;
+            }
+
+            const fechaBase = parseLocalDate(fechaStr);
+            const diaOrden = fechaBase.getDate();
+            const infoAct = CICLOS_DATA[actual];
+            const infoNue = CICLOS_DATA[nuevo];
+
+            // Detección de Caso 2 (Página 4 del manual):
+            // Si el cliente viene de ciclos calendario (50 o 51) y la orden se cursa
+            // en los primeros días del mes (días 1 al 5), existe una boleta del mes anterior
+            // en tránsito + boleta residual de 1 a N días + boleta del nuevo ciclo.
+            const esCaso2 = (actual === 50 || actual === 51) && diaOrden <= 5;
+
+            let boletas = [];
+
+            if (!esCaso2) {
+                // ============================================================
+                // CASO 1: 2 Boletas con Días Proporcionales (Transición Estándar)
+                // ============================================================
+                // 1. Boleta Anterior: Desde el inicio del ciclo actual hasta el día de la orden
+                let fInicioAnt = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), infoAct.inicio, 12);
+                if (fInicioAnt > fechaBase) {
+                    fInicioAnt = new Date(fechaBase.getFullYear(), fechaBase.getMonth() - 1, infoAct.inicio, 12);
+                }
+                const fFinAnt = new Date(fechaBase); // Día de la orden
+                const diasAnt = Math.floor((fFinAnt - fInicioAnt) / (1000 * 60 * 60 * 24)) + 1;
+
+                // Emisión de boleta anterior
+                let fEmisionAnt = new Date(fFinAnt.getFullYear(), fFinAnt.getMonth(), infoAct.emisionDia, 12);
+                if (fEmisionAnt <= fFinAnt) {
+                    fEmisionAnt = new Date(fFinAnt.getFullYear(), fFinAnt.getMonth() + 1, infoAct.emisionDia, 12);
+                }
+                const fVencAnt = new Date(fEmisionAnt.getFullYear(), fEmisionAnt.getMonth() + infoAct.mesVenc, infoAct.vencimiento, 12);
+                const fCorteAnt = calcularFechaCorte(fVencAnt, 5);
+
+                // 2. Boleta Nueva: Desde el día siguiente hasta el fin del nuevo ciclo
+                const fInicioNue = new Date(fechaBase);
+                fInicioNue.setDate(fInicioNue.getDate() + 1);
+
+                let fFinNue;
+                if (infoNue.inicio <= 1) {
+                    fFinNue = new Date(fInicioNue.getFullYear(), fInicioNue.getMonth() + 1, 0, 12);
+                } else {
+                    fFinNue = new Date(fInicioNue.getFullYear(), fInicioNue.getMonth(), infoNue.fin, 12);
+                    if (fFinNue < fInicioNue) {
+                        fFinNue = new Date(fInicioNue.getFullYear(), fInicioNue.getMonth() + 1, infoNue.fin, 12);
+                    }
+                }
+                const diasNue = Math.floor((fFinNue - fInicioNue) / (1000 * 60 * 60 * 24)) + 1;
+
+                let fEmisionNue = new Date(fFinNue.getFullYear(), fFinNue.getMonth(), infoNue.emisionDia, 12);
+                if (fEmisionNue <= fFinNue) {
+                    fEmisionNue = new Date(fFinNue.getFullYear(), fFinNue.getMonth() + 1, infoNue.emisionDia, 12);
+                }
+                const fVencNue = new Date(fEmisionNue.getFullYear(), fEmisionNue.getMonth() + infoNue.mesVenc, infoNue.vencimiento, 12);
+                const fCorteNue = calcularFechaCorte(fVencNue, 5);
+
+                boletas = [
+                    {
+                        tipo: 'ant',
+                        titulo: 'Primera Boleta (Ciclo Anterior)',
+                        badge: `Ciclo ${actual}`,
+                        badgeClass: 'badge-ant',
+                        fInicio: fInicioAnt,
+                        fFin: fFinAnt,
+                        dias: diasAnt,
+                        fEmision: fEmisionAnt,
+                        fVenc: fVencAnt,
+                        fCorte: fCorteAnt,
+                        aviso: null
+                    },
+                    {
+                        tipo: 'nue',
+                        titulo: 'Segunda Boleta (Nuevo Ciclo)',
+                        badge: `Ciclo ${nuevo}`,
+                        badgeClass: 'badge-nue',
+                        fInicio: fInicioNue,
+                        fFin: fFinNue,
+                        dias: diasNue,
+                        fEmision: fEmisionNue,
+                        fVenc: fVencNue,
+                        fCorte: fCorteNue,
+                        aviso: null
+                    }
+                ];
+
+            } else {
+                // ============================================================
+                // CASO 2: 3 Boletas (Ej: 03/05 del 51 al 52, Pág 4 manual)
+                // ============================================================
+                // Boleta 1: Mes anterior cerrado completo
+                const fInicioB1 = new Date(fechaBase.getFullYear(), fechaBase.getMonth() - 1, 1, 12);
+                const fFinB1 = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), 0, 12);
+                const diasB1 = Math.floor((fFinB1 - fInicioB1) / (1000 * 60 * 60 * 24)) + 1;
+                const fEmisionB1 = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), infoAct.emisionDia, 12);
+                const fVencB1 = new Date(fEmisionB1.getFullYear(), fEmisionB1.getMonth() + infoAct.mesVenc, infoAct.vencimiento, 12);
+                const fCorteB1 = calcularFechaCorte(fVencB1, 5);
+
+                // Boleta 2: Días residuales del ciclo anterior antes del cambio (ej: 01 al 03)
+                const fInicioB2 = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), 1, 12);
+                const fFinB2 = new Date(fechaBase); // Día de la orden
+                const diasB2 = Math.floor((fFinB2 - fInicioB2) / (1000 * 60 * 60 * 24)) + 1;
+                const fEmisionB2 = new Date(fechaBase.getFullYear(), fechaBase.getMonth() + 1, infoAct.emisionDia, 12);
+                const fVencB2 = new Date(fEmisionB2.getFullYear(), fEmisionB2.getMonth() + infoAct.mesVenc, infoAct.vencimiento, 12);
+                const fCorteB2 = calcularFechaCorte(fVencB2, 5);
+
+                // Boleta 3: Tramo nuevo desde día siguiente hasta fin ciclo nuevo (ej: 04 al 07)
+                const fInicioB3 = new Date(fechaBase);
+                fInicioB3.setDate(fInicioB3.getDate() + 1);
+                let fFinB3 = new Date(fInicioB3.getFullYear(), fInicioB3.getMonth(), infoNue.fin, 12);
+                if (fFinB3 < fInicioB3) {
+                    fFinB3 = new Date(fInicioB3.getFullYear(), fInicioB3.getMonth() + 1, infoNue.fin, 12);
+                }
+                const diasB3 = Math.floor((fFinB3 - fInicioB3) / (1000 * 60 * 60 * 24)) + 1;
+                let fEmisionB3 = new Date(fFinB3.getFullYear(), fFinB3.getMonth(), infoNue.emisionDia, 12);
+                if (fEmisionB3 <= fFinB3) {
+                    fEmisionB3 = new Date(fFinB3.getFullYear(), fFinB3.getMonth() + 1, infoNue.emisionDia, 12);
+                }
+                const fVencB3 = new Date(fEmisionB3.getFullYear(), fEmisionB3.getMonth() + infoNue.mesVenc, infoNue.vencimiento, 12);
+                const fCorteB3 = calcularFechaCorte(fVencB3, 5);
+
+                boletas = [
+                    {
+                        tipo: 'ant',
+                        titulo: 'Boleta 1 (Mes Anterior)',
+                        badge: `Ciclo ${actual} Regular`,
+                        badgeClass: 'badge-ant',
+                        fInicio: fInicioB1,
+                        fFin: fFinB1,
+                        dias: diasB1,
+                        fEmision: fEmisionB1,
+                        fVenc: fVencB1,
+                        fCorte: fCorteB1,
+                        aviso: 'Facturación regular del mes cerrado en proceso de pago.'
+                    },
+                    {
+                        tipo: 'mid',
+                        titulo: 'Boleta 2 (Días Restantes Ciclo Anterior)',
+                        badge: `Ciclo ${actual} Restante`,
+                        badgeClass: 'badge-mid',
+                        fInicio: fInicioB2,
+                        fFin: fFinB2,
+                        dias: diasB2,
+                        fEmision: fEmisionB2,
+                        fVenc: fVencB2,
+                        fCorte: fCorteB2,
+                        aviso: '⚠️ Llegará al cliente DESPUÉS de la Boleta 3.'
+                    },
+                    {
+                        tipo: 'nue',
+                        titulo: 'Boleta 3 (Inicio Nuevo Ciclo)',
+                        badge: `Ciclo ${nuevo} Inicial`,
+                        badgeClass: 'badge-nue',
+                        fInicio: fInicioB3,
+                        fFin: fFinB3,
+                        dias: diasB3,
+                        fEmision: fEmisionB3,
+                        fVenc: fVencB3,
+                        fCorte: fCorteB3,
+                        aviso: 'Primer cobro del nuevo ciclo asignado.'
+                    }
+                ];
+            }
+
+            let boletaConsolidada = null;
+            if (!esCaso2 && boletas.length === 2) {
+                const b1 = boletas[0];
+                const b2 = boletas[1];
+                const diasTotales = b1.dias + b2.dias;
+                boletaConsolidada = {
+                    titulo: 'Boleta Única Consolidada (Período Extendido)',
+                    badge: `Ciclos ${actual} + ${nuevo}`,
+                    badgeClass: 'badge-nue',
+                    fInicio: b1.fInicio,
+                    fFin: b2.fFin,
+                    diasTotales: diasTotales,
+                    fEmision: b2.fEmision,
+                    fVenc: b2.fVenc,
+                    fCorte: b2.fCorte,
+                    tramo1: {
+                        ciclo: actual,
+                        nombre: `Ciclo ${actual} (Anterior)`,
+                        fInicio: b1.fInicio,
+                        fFin: b1.fFin,
+                        dias: b1.dias
+                    },
+                    tramo2: {
+                        ciclo: nuevo,
+                        nombre: `Ciclo ${nuevo} (Nuevo)`,
+                        fInicio: b2.fInicio,
+                        fFin: b2.fFin,
+                        dias: b2.dias
+                    },
+                    aviso: 'ℹ️ El motor de facturación retiene la emisión intermedia y consolida ambos tramos de consumo en un único documento con vencimiento en la fecha del nuevo ciclo.'
+                };
+            }
+
+            state.ultimoCalculo = {
+                esCaso2,
+                actual,
+                nuevo,
+                fechaBase,
+                infoAct,
+                infoNue,
+                boletas,
+                boletaConsolidada
+            };
+
+            renderResultados(state.ultimoCalculo);
+            guardarEstado();
+        }
+
+        // ============================================================
+        // RENDERIZADO VISUAL
+        // ============================================================
+        function renderResultados(calc) {
+            if (!calc) return;
+            resultadosBox.style.display = 'flex';
+
+            // Actualizar botones de modalidad
+            if (btnModConsolidada && btnModSeparadas) {
+                if (state.modalidad === 'consolidada') {
+                    btnModConsolidada.classList.add('active');
+                    btnModSeparadas.classList.remove('active');
+                } else {
+                    btnModSeparadas.classList.add('active');
+                    btnModConsolidada.classList.remove('active');
+                }
+            }
+
+            // Actualizar pestañas de speech
+            if (tabSpeechPreventivo && tabSpeechResolutivo) {
+                if (state.speechTab === 'preventivo') {
+                    tabSpeechPreventivo.classList.add('active');
+                    tabSpeechResolutivo.classList.remove('active');
+                } else {
+                    tabSpeechResolutivo.classList.add('active');
+                    tabSpeechPreventivo.classList.remove('active');
+                }
+            }
+
+            // 1. Banner de Escenario
+            if (calc.esCaso2) {
+                if (modalidadWrapper) modalidadWrapper.style.display = 'none';
+                bannerScenario.className = 'scenario-banner case2';
+                scenarioIcon.textContent = '🟠';
+                scenarioTitle.textContent = 'Caso 2: Transición Temprana (3 Boletas en Tránsito)';
+                scenarioDesc.textContent = 'Atención: Debido a los calendarios de facturación, la Boleta 2 llegará DESPUÉS de la Boleta 3.';
+                scenarioTag.textContent = '3 Boletas';
+            } else {
+                if (modalidadWrapper) modalidadWrapper.style.display = 'flex';
+                if (state.modalidad === 'consolidada' && calc.boletaConsolidada) {
+                    bannerScenario.className = 'scenario-banner case1';
+                    scenarioIcon.textContent = '🟢';
+                    scenarioTitle.textContent = 'Caso 1: Transición de Ciclo (Boleta Única Consolidada)';
+                    scenarioDesc.textContent = 'El sistema unifica los consumos de ambos ciclos en un solo documento tributario al inicio del nuevo ciclo.';
+                    scenarioTag.textContent = '1 Boleta (Período Extendido)';
+                } else {
+                    bannerScenario.className = 'scenario-banner case1';
+                    scenarioIcon.textContent = '🟢';
+                    scenarioTitle.textContent = 'Caso 1: Transición Regular (2 Boletas Separadas)';
+                    scenarioDesc.textContent = 'El cliente recibirá 2 boletas independientes con cobro proporcional por los días utilizados.';
+                    scenarioTag.textContent = '2 Boletas';
+                }
+            }
+
+            // 2. Timeline Bar
+            timelineBar.innerHTML = '';
+            timelineLegend.innerHTML = '';
+
+            if (!calc.esCaso2 && state.modalidad === 'consolidada' && calc.boletaConsolidada) {
+                const bc = calc.boletaConsolidada;
+                const totalDias = bc.diasTotales;
+                tlTotalDias.textContent = `${totalDias} días totales continuos`;
+
+                const rawPct1 = Math.round((bc.tramo1.dias / totalDias) * 100);
+                const pct1 = Math.min(85, Math.max(15, rawPct1));
+                const pct2 = 100 - pct1;
+
+                const seg1 = document.createElement('div');
+                seg1.className = 'tl-segment ant';
+                seg1.style.width = pct1 + '%';
+                seg1.textContent = `${formatDM(bc.tramo1.fInicio)} → ${formatDM(bc.tramo1.fFin)} (${bc.tramo1.dias}d)`;
+                timelineBar.appendChild(seg1);
+
+                const seg2 = document.createElement('div');
+                seg2.className = 'tl-segment nue';
+                seg2.style.width = pct2 + '%';
+                seg2.textContent = `${formatDM(bc.tramo2.fInicio)} → ${formatDM(bc.tramo2.fFin)} (${bc.tramo2.dias}d)`;
+                timelineBar.appendChild(seg2);
+
+                const leg1 = document.createElement('div');
+                leg1.className = 'legend-item';
+                leg1.innerHTML = `<span class="legend-dot" style="background:#64748b"></span><span>Tramo Ciclo ${calc.actual} (Anterior): <b>${bc.tramo1.dias} días</b></span>`;
+                timelineLegend.appendChild(leg1);
+
+                const leg2 = document.createElement('div');
+                leg2.className = 'legend-item';
+                leg2.innerHTML = `<span class="legend-dot" style="background:#3b82f6"></span><span>Tramo Ciclo ${calc.nuevo} (Nuevo): <b>${bc.tramo2.dias} días</b></span>`;
+                timelineLegend.appendChild(leg2);
+
+            } else {
+                const totalDias = calc.boletas.reduce((acc, b) => acc + b.dias, 0);
+                tlTotalDias.textContent = `${totalDias} días cubiertos`;
+
+                calc.boletas.forEach(b => {
+                    const pct = Math.max(12, Math.round((b.dias / totalDias) * 100));
+                    const seg = document.createElement('div');
+                    seg.className = `tl-segment ${b.tipo}`;
+                    seg.style.width = pct + '%';
+                    seg.textContent = `${formatDM(b.fInicio)} → ${formatDM(b.fFin)} (${b.dias}d)`;
+                    timelineBar.appendChild(seg);
+
+                    const leg = document.createElement('div');
+                    leg.className = 'legend-item';
+                    const color = b.tipo === 'ant' ? '#64748b' : (b.tipo === 'mid' ? '#f59e0b' : '#3b82f6');
+                    leg.innerHTML = `<span class="legend-dot" style="background:${color}"></span><span>${b.titulo}: <b>${b.dias} días</b></span>`;
+                    timelineLegend.appendChild(leg);
+                });
+            }
+
+            // 3. Tarjetas de Boleta
+            boletasGrid.innerHTML = '';
+
+            if (!calc.esCaso2 && state.modalidad === 'consolidada' && calc.boletaConsolidada) {
+                const bc = calc.boletaConsolidada;
+                const card = document.createElement('div');
+                card.className = 'boleta-card consolidada';
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span class="boleta-badge badge-nue">Boleta Única • Período Extendido</span>
+                        <span style="font-size: 10px; color: #93c5fd; font-weight: 600;">Realidad Operativa</span>
+                    </div>
+                    <strong style="font-size: 12.5px; color: #fff; margin-top: 1px;">Boleta Electrónica de Transición</strong>
+                    <div class="b-row">
+                        <span class="b-lbl">Período de Consumo Total:</span>
+                        <span class="b-val" style="color:#93c5fd;">${formatDM(bc.fInicio)} al ${formatDM(bc.fFin)} (${bc.diasTotales} días continuos)</span>
+                    </div>
+                    
+                    <div class="consolidada-breakdown">
+                        <div class="breakdown-title">📊 Desglose Proporcional Interno:</div>
+                        <div class="breakdown-item">
+                            <span>• Tramo Ciclo ${calc.actual} (Anterior): ${formatDM(bc.tramo1.fInicio)} al ${formatDM(bc.tramo1.fFin)}</span>
+                            <b style="color:var(--warning); font-size: 11px;">${bc.tramo1.dias} días</b>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>• Tramo Ciclo ${calc.nuevo} (Nuevo): ${formatDM(bc.tramo2.fInicio)} al ${formatDM(bc.tramo2.fFin)}</span>
+                            <b style="color:#38bdf8; font-size: 11px;">${bc.tramo2.dias} días</b>
+                        </div>
+                    </div>
+
+                    <div class="b-row">
+                        <span class="b-lbl">Fecha de Emisión:</span>
+                        <span class="b-val">${formatDM(bc.fEmision)} (Primer corte Ciclo ${calc.nuevo})</span>
+                    </div>
+                    <div class="b-row">
+                        <span class="b-lbl">Fecha de Vencimiento:</span>
+                        <span class="b-val due">${formatDMY(bc.fVenc)}</span>
+                    </div>
+                    <div class="b-row">
+                        <span class="b-lbl">Fecha de Corte (+5d hábiles):</span>
+                        <span class="b-val cutoff">${formatDMY(bc.fCorte)}</span>
+                    </div>
+                    <div class="boleta-alert">
+                        ${bc.aviso}
+                    </div>
+                `;
+                boletasGrid.appendChild(card);
+
+            } else {
+                calc.boletas.forEach(b => {
+                    const card = document.createElement('div');
+                    card.className = 'boleta-card';
+                    card.innerHTML = `
+                        <span class="boleta-badge ${b.badgeClass}">${b.badge}</span>
+                        <strong style="font-size: 11.5px; margin-top: 2px;">${b.titulo}</strong>
+                        <div class="b-row">
+                            <span class="b-lbl">Período:</span>
+                            <span class="b-val">${formatDM(b.fInicio)} → ${formatDM(b.fFin)}</span>
+                        </div>
+                        <div class="b-row">
+                            <span class="b-lbl">Días a cobrar:</span>
+                            <span class="b-val highlight">${b.dias} días</span>
+                        </div>
+                        <div class="b-row">
+                            <span class="b-lbl">Emisión est.:</span>
+                            <span class="b-val">${formatDM(b.fEmision)}</span>
+                        </div>
+                        <div class="b-row">
+                            <span class="b-lbl">Vencimiento:</span>
+                            <span class="b-val due">${formatDMY(b.fVenc)}</span>
+                        </div>
+                        <div class="b-row">
+                            <span class="b-lbl">Corte (+5d hábiles):</span>
+                            <span class="b-val cutoff">${formatDMY(b.fCorte)}</span>
+                        </div>
+                        ${b.aviso ? `<div class="boleta-alert">${b.aviso}</div>` : ''}
+                    `;
+                    boletasGrid.appendChild(card);
+                });
+            }
+
+            // 4. Generación del Speech Explicativo Claro
+            renderSpeech(calc);
+        }
+
+        // ============================================================
+        // GUÍA RÁPIDA DE ENTENDIMIENTO PARA EL AGENTE (RESUMEN INTERNO)
+        // ============================================================
+        function generarGuiaAgente(calc) {
+            if (!calc) return '';
+            const tab = state.speechTab || 'preventivo';
+            const modalidad = state.modalidad || 'consolidada';
+            const infoNue = calc.infoNue;
+            const fOrden = calc.fechaBase;
+
+            if (tab === 'resolutivo') {
+                if (calc.esCaso2) {
+                    const b1 = calc.boletas[0];
+                    const b2 = calc.boletas[1];
+                    const b3 = calc.boletas[2];
+                    return `
+                        <div class="agent-guidance-title">💡 Resumen Clave para el Agente:</div>
+                        <div>• <b>Qué ocurrió:</b> Cliente cambió desde Ciclo ${calc.actual} el ${formatDM(fOrden)} (inicios de mes). Por eso se emitieron 3 boletas.</div>
+                        <div>• <b>Desglose:</b> Boleta 1 (${b1.dias}d mes anterior) + Boleta 2 (${b2.dias}d remanente saliente) + Boleta 3 (${b3.dias}d nuevo ciclo).</div>
+                        <div>• <b>Aclarar al cliente:</b> NO hay cobro doble. La 2ª boleta puede llegar después de la 3ª por calendario de emisión. La próxima boleta vuelve a los 30 días habituales.</div>
+                    `;
+                } else if (modalidad === 'consolidada' && calc.boletaConsolidada) {
+                    const bc = calc.boletaConsolidada;
+                    return `
+                        <div class="agent-guidance-title">💡 Resumen Clave para el Agente:</div>
+                        <div>• <b>Qué ocurrió:</b> Cliente cambió del Ciclo ${calc.actual} al ${calc.nuevo} el ${formatDM(fOrden)}.</div>
+                        <div>• <b>Por qué el total es más alto:</b> El sistema unificó ${bc.diasTotales} días continuos de servicio en una sola boleta (${bc.tramo1.dias}d ciclo ${calc.actual} + ${bc.tramo2.dias}d ciclo ${calc.nuevo}).</div>
+                        <div>• <b>Aclarar al cliente:</b> NO hay cobro doble. Solo se sumaron los días consumidos de ambos ciclos. Su próxima boleta vuelve a los 30 días normales con vencimiento el día ${pad2(infoNue.vencimiento)}.</div>
+                    `;
+                } else {
+                    const b1 = calc.boletas[0];
+                    const b2 = calc.boletas[1];
+                    return `
+                        <div class="agent-guidance-title">💡 Resumen Clave para el Agente:</div>
+                        <div>• <b>Qué ocurrió:</b> Cambio de Ciclo ${calc.actual} al ${calc.nuevo} cursado el ${formatDM(fOrden)}.</div>
+                        <div>• <b>Desglose:</b> Se emitieron 2 boletas independientes (${b1.dias}d ciclo anterior + ${b2.dias}d nuevo ciclo).</div>
+                        <div>• <b>Aclarar al cliente:</b> Cada boleta cobra estrictamente sus días de servicio. Luego la cuenta queda regularizada al día ${pad2(infoNue.vencimiento)}.</div>
+                    `;
+                }
+            } else {
+                // Preventivo
+                if (calc.esCaso2) {
+                    return `
+                        <div class="agent-guidance-title">💡 Resumen Clave para el Agente:</div>
+                        <div>• <b>Acción:</b> Cambio ingresado a inicios de mes hacia Ciclo ${calc.nuevo} (nueva fecha de pago: día ${pad2(infoNue.vencimiento)}).</div>
+                        <div>• <b>Aviso clave:</b> Se emitirán 3 boletas. Adviértele que la 2ª boleta llegará después de la 3ª para que no piense que hay desorden.</div>
+                        <div>• <b>Regularización:</b> Posteriormente su ciclo queda normalizado por 30 días.</div>
+                    `;
+                } else if (modalidad === 'consolidada' && calc.boletaConsolidada) {
+                    const bc = calc.boletaConsolidada;
+                    return `
+                        <div class="agent-guidance-title">💡 Resumen Clave para el Agente:</div>
+                        <div>• <b>Acción:</b> Cambio ingresado al Ciclo ${calc.nuevo} (nueva fecha de pago habitual: día ${pad2(infoNue.vencimiento)}).</div>
+                        <div>• <b>Aviso clave:</b> Su siguiente boleta llegará el ${formatDM(bc.fEmision)} por ${bc.diasTotales} días acumulados. Importante avisarle para que no asuma cobro duplicado.</div>
+                        <div>• <b>Regularización:</b> La boleta posterior vuelve a los 30 días normales de su plan.</div>
+                    `;
+                } else {
+                    const b1 = calc.boletas[0];
+                    const b2 = calc.boletas[1];
+                    return `
+                        <div class="agent-guidance-title">💡 Resumen Clave para el Agente:</div>
+                        <div>• <b>Acción:</b> Cambio ingresado al Ciclo ${calc.nuevo} (nueva fecha de pago habitual: día ${pad2(infoNue.vencimiento)}).</div>
+                        <div>• <b>Aviso clave:</b> Recibirá 2 boletas proporcionales por los días de cada período (${b1.dias}d y ${b2.dias}d).</div>
+                        <div>• <b>Regularización:</b> La siguiente factura queda regularizada al día ${pad2(infoNue.vencimiento)}.</div>
+                    `;
+                }
+            }
+        }
+
+        // ============================================================
+        // EXPLICACIÓN DIRECTA PARA WHATSAPP (LENGUAJE TÉCNICO SENCILLO)
+        // ============================================================
+        function generarSpeechClaro(calc) {
+            if (!calc) return '';
+            const tab = state.speechTab || 'preventivo';
+            const modalidad = state.modalidad || 'consolidada';
+            const infoNue = calc.infoNue;
+            const diaVenc = `${pad2(infoNue.vencimiento)}`;
+
+            let s = '';
+
+            if (tab === 'resolutivo') {
+                // ============================================================
+                // CONSULTA DE BOLETA EMITIDA (DUDAS / RECLAMO)
+                // ============================================================
+                if (calc.esCaso2) {
+                    const b1 = calc.boletas[0];
+                    const b2 = calc.boletas[1];
+                    const b3 = calc.boletas[2];
+                    s = `*Sobre tus boletas por cambio de ciclo:*\n\n`;
+                    s += `Al haberse solicitado el cambio a inicios de mes, se generaron 3 boletas según los días de servicio utilizados:\n\n`;
+                    s += `• *1ª Boleta (Mes anterior):* ${b1.dias} días (${formatDM(b1.fInicio)} al ${formatDM(b1.fFin)}) | Vence: ${formatDMY(b1.fVenc)}\n`;
+                    s += `• *2ª Boleta (Días previos al cambio):* ${b2.dias} días (${formatDM(b2.fInicio)} al ${formatDM(b2.fFin)}) | Vence: ${formatDMY(b2.fVenc)}\n`;
+                    s += `• *3ª Boleta (Inicio nuevo ciclo):* ${b3.dias} días (${formatDM(b3.fInicio)} al ${formatDM(b3.fFin)}) | Vence: ${formatDMY(b3.fVenc)}\n\n`;
+                    s += `⚠️ *No hay cobro duplicado:* cada boleta cobra únicamente días de servicio efectivos. Por tiempos de facturación, la 2ª boleta puede emitirse después de la 3ª.\n\n`;
+                    s += `A partir de tu siguiente facturación, tu cobro vuelve al valor mensual normal de tu plan por 30 días, con vencimiento fijo los días *${diaVenc}*.`;
+                } else if (modalidad === 'consolidada' && calc.boletaConsolidada) {
+                    const bc = calc.boletaConsolidada;
+                    s = `*Sobre tu boleta por cambio de ciclo:*\n\n`;
+                    s += `Tu boleta emitida el *${formatDM(bc.fEmision)}* contempla un período extendido de *${bc.diasTotales} días de servicio* debido a tu cambio al *Ciclo ${calc.nuevo}*:\n\n`;
+                    s += `• *Ciclo anterior (${calc.actual}):* ${bc.tramo1.dias} días (${formatDM(bc.tramo1.fInicio)} al ${formatDM(bc.tramo1.fFin)})\n`;
+                    s += `• *Nuevo ciclo (${calc.nuevo}):* ${bc.tramo2.dias} días (${formatDM(bc.tramo2.fInicio)} al ${formatDM(bc.tramo2.fFin)})\n\n`;
+                    s += `⚠️ *No hay cobro duplicado:* el monto total es mayor solo porque se reunieron los días utilizados en ambos ciclos para dar inicio a tu nueva fecha de pago.\n\n`;
+                    s += `📅 *Vencimiento de esta boleta:* ${formatDMY(bc.fVenc)}\n\n`;
+                    s += `A partir de tu próxima boleta, pagarás el valor mensual normal de tu plan por los 30 días habituales, venciendo siempre los días *${diaVenc}*.`;
+                } else {
+                    const b1 = calc.boletas[0];
+                    const b2 = calc.boletas[1];
+                    s = `*Sobre tus boletas por cambio de ciclo:*\n\n`;
+                    s += `Debido a tu cambio al *Ciclo ${calc.nuevo}*, el sistema emitió 2 boletas correspondientes a los días utilizados en cada período:\n\n`;
+                    s += `• *Boleta ciclo anterior (${calc.actual}):* ${b1.dias} días (${formatDM(b1.fInicio)} al ${formatDM(b1.fFin)}) | Vence: ${formatDMY(b1.fVenc)}\n`;
+                    s += `• *Boleta nuevo ciclo (${calc.nuevo}):* ${b2.dias} días (${formatDM(b2.fInicio)} al ${formatDM(b2.fFin)}) | Vence: ${formatDMY(b2.fVenc)}\n\n`;
+                    s += `⚠️ *No hay cobro duplicado:* cada boleta cobra únicamente los días en que tuviste activo el servicio en cada ciclo.\n\n`;
+                    s += `A partir de tu siguiente boleta, tu cuenta queda regularizada y pagarás tu plan normal por 30 días, con vencimiento fijo los días *${diaVenc}*.`;
+                }
+            } else {
+                // ============================================================
+                // AL GESTIONAR EL CAMBIO (PREVENTIVO)
+                // ============================================================
+                if (calc.esCaso2) {
+                    const b1 = calc.boletas[0];
+                    const b2 = calc.boletas[1];
+                    const b3 = calc.boletas[2];
+                    s = `*Sobre tu cambio de ciclo:*\n\n`;
+                    s += `Tu solicitud de cambio al *Ciclo ${calc.nuevo}* ya quedó ingresada. Tu nueva fecha límite de pago habitual será el día *${diaVenc} de cada mes*.\n\n`;
+                    s += `*Sobre tus próximas boletas:*\n`;
+                    s += `Al gestionarse a inicios de mes, se emitirán 3 boletas según los días utilizados:\n`;
+                    s += `• *1ª Boleta (Mes anterior):* ${b1.dias} días (${formatDM(b1.fInicio)} al ${formatDM(b1.fFin)}) | Vence: ${formatDMY(b1.fVenc)}\n`;
+                    s += `• *2ª Boleta (Días previos al cambio):* ${b2.dias} días (${formatDM(b2.fInicio)} al ${formatDM(b2.fFin)}) | Vence: ${formatDMY(b2.fVenc)}\n`;
+                    s += `• *3ª Boleta (Inicio nuevo ciclo):* ${b3.dias} días (${formatDM(b3.fInicio)} al ${formatDM(b3.fFin)}) | Vence: ${formatDMY(b3.fVenc)}\n\n`;
+                    s += `⚠️ *Aviso de emisión:* Por tiempos del sistema, la 2ª boleta llegará después de la 3ª boleta. Posteriormente, tu cobro queda fijado de forma regular por 30 días con vencimiento los días *${diaVenc}*.`;
+                } else if (modalidad === 'consolidada' && calc.boletaConsolidada) {
+                    const bc = calc.boletaConsolidada;
+                    s = `*Sobre tu cambio de ciclo:*\n\n`;
+                    s += `Tu solicitud de cambio al *Ciclo ${calc.nuevo}* ya quedó ingresada. Tu nueva fecha límite de pago habitual será el día *${diaVenc} de cada mes*.\n\n`;
+                    s += `*Sobre tu próxima boleta:*\n`;
+                    s += `Por la transición de ciclo, tu siguiente boleta se emitirá el *${formatDM(bc.fEmision)}* y reunirá un total de *${bc.diasTotales} días de servicio*:\n`;
+                    s += `• *Ciclo anterior (${calc.actual}):* ${bc.tramo1.dias} días (${formatDM(bc.tramo1.fInicio)} al ${formatDM(bc.tramo1.fFin)})\n`;
+                    s += `• *Nuevo ciclo (${calc.nuevo}):* ${bc.tramo2.dias} días (${formatDM(bc.tramo2.fInicio)} al ${formatDM(bc.tramo2.fFin)})\n\n`;
+                    s += `📅 *Vencimiento de esta boleta:* ${formatDMY(bc.fVenc)}\n`;
+                    s += `⚠️ *Tranquilidad:* No hay cobro duplicado; solo se suman los días de servicio de cada ciclo durante el cambio.\n\n`;
+                    s += `A partir de la boleta posterior, tu facturación queda normalizada por los 30 días habituales de tu plan, venciendo siempre los días *${diaVenc}*.`;
+                } else {
+                    const b1 = calc.boletas[0];
+                    const b2 = calc.boletas[1];
+                    s = `*Sobre tu cambio de ciclo:*\n\n`;
+                    s += `Tu solicitud de cambio al *Ciclo ${calc.nuevo}* ya quedó ingresada. Tu nueva fecha límite de pago habitual será el día *${diaVenc} de cada mes*.\n\n`;
+                    s += `*Sobre tus próximas boletas:*\n`;
+                    s += `Por la transición de ciclo, recibirás 2 boletas proporcionales según los días utilizados:\n`;
+                    s += `• *1ª Boleta (Ciclo anterior ${calc.actual}):* ${b1.dias} días (${formatDM(b1.fInicio)} al ${formatDM(b1.fFin)}) | Vence: ${formatDMY(b1.fVenc)}\n`;
+                    s += `• *2ª Boleta (Nuevo ciclo ${calc.nuevo}):* ${b2.dias} días (${formatDM(b2.fInicio)} al ${formatDM(b2.fFin)}) | Vence: ${formatDMY(b2.fVenc)}\n\n`;
+                    s += `Desde la boleta posterior, tu cobro vuelve a la normalidad de 30 días con vencimiento los días *${diaVenc}*.`;
+                }
+            }
+
+            return s;
+        }
+
+        function renderSpeech(calc) {
+            if (agentGuidance) {
+                agentGuidance.className = 'agent-guidance-box' + (state.speechTab === 'resolutivo' ? ' resolutivo' : '');
+                agentGuidance.innerHTML = generarGuiaAgente(calc);
+            }
+            if (speechText) {
+                speechText.textContent = generarSpeechClaro(calc);
+            }
+        }
+
+        // ============================================================
+        // EVENTOS Y CONTROLES
+        // ============================================================
+        selectActual.addEventListener('change', () => {
+            actualizarOpcionesNuevo();
+            guardarEstado();
+        });
+
+        selectNuevo.addEventListener('change', () => {
+            actualizarHints();
+            guardarEstado();
+        });
+
+        inputFecha.addEventListener('change', guardarEstado);
+
+        // Controles de Modalidad (Consolidada vs Separadas)
+        if (btnModConsolidada) {
+            btnModConsolidada.addEventListener('click', () => {
+                if (state.modalidad === 'consolidada') return;
+                state.modalidad = 'consolidada';
+                if (state.ultimoCalculo) renderResultados(state.ultimoCalculo);
+                guardarEstado();
+            });
+        }
+        if (btnModSeparadas) {
+            btnModSeparadas.addEventListener('click', () => {
+                if (state.modalidad === 'separadas') return;
+                state.modalidad = 'separadas';
+                if (state.ultimoCalculo) renderResultados(state.ultimoCalculo);
+                guardarEstado();
+            });
+        }
+
+        // Pestañas de Speech (Preventivo vs Resolutivo)
+        if (tabSpeechPreventivo) {
+            tabSpeechPreventivo.addEventListener('click', () => {
+                if (state.speechTab === 'preventivo') return;
+                state.speechTab = 'preventivo';
+                tabSpeechPreventivo.classList.add('active');
+                tabSpeechResolutivo.classList.remove('active');
+                if (state.ultimoCalculo) renderSpeech(state.ultimoCalculo);
+                guardarEstado();
+            });
+        }
+        if (tabSpeechResolutivo) {
+            tabSpeechResolutivo.addEventListener('click', () => {
+                if (state.speechTab === 'resolutivo') return;
+                state.speechTab = 'resolutivo';
+                tabSpeechResolutivo.classList.add('active');
+                tabSpeechPreventivo.classList.remove('active');
+                if (state.ultimoCalculo) renderSpeech(state.ultimoCalculo);
+                guardarEstado();
+            });
+        }
+
+        btnHoy.addEventListener('click', () => {
+            inputFecha.value = formatDateISO(new Date());
+            guardarEstado();
+            calcularCiclos();
+        });
+
+        btnAyer.addEventListener('click', () => {
+            const ayer = new Date();
+            ayer.setDate(ayer.getDate() - 1);
+            inputFecha.value = formatDateISO(ayer);
+            guardarEstado();
+            calcularCiclos();
+        });
+
+        btnCalcular.addEventListener('click', calcularCiclos);
+
+        // Atajo Enter para calcular
+        inputFecha.addEventListener('keydown', (e) => { if (e.key === 'Enter') calcularCiclos(); });
+
+        // Copiar Mensaje para WhatsApp
+        btnCopiarSpeech.addEventListener('click', () => {
+            const texto = speechText.textContent;
+            if (!texto) return;
+
+            navigator.clipboard.writeText(texto).then(() => {
+                btnCopiarSpeech.textContent = '✅ ¡Mensaje para WhatsApp Copiado!';
+                btnCopiarSpeech.classList.add('copied');
+                showToast('📋 Mensaje para WhatsApp copiado al portapapeles', 'success');
+                setTimeout(() => {
+                    btnCopiarSpeech.textContent = '📋 Copiar Mensaje para WhatsApp';
+                    btnCopiarSpeech.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                showToast('❌ Error al copiar', 'error');
+            });
+        });
+
+        // Toggle Guía
+        btnToggleGuide.addEventListener('click', () => {
+            const isOpen = guideContent.classList.contains('open');
+            if (isOpen) {
+                guideContent.classList.remove('open');
+                guideArrow.textContent = '▼';
+            } else {
+                guideContent.classList.add('open');
+                guideArrow.textContent = '▲';
+            }
+        });
+
+        // ============================================================
+        // PERSISTENCIA
+        // ============================================================
+        const STORAGE_KEY = 'neogestor_ciclos_pro_pos_032';
 
         function guardarEstado() {
             try {
-                const data = {
-                    actual: cicloActual.value,
-                    nuevo: cicloNuevo.value,
-                    fecha: fechaOrden.value
+                const d = {
+                    actual: selectActual.value,
+                    nuevo: selectNuevo.value,
+                    fecha: inputFecha.value,
+                    modalidad: state.modalidad,
+                    speechTab: state.speechTab
                 };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
                 if (typeof ipcRenderer !== 'undefined') {
-                    ipcRenderer.send('save-ciclos', data);
+                    ipcRenderer.send('save-ciclos', d);
                 }
-            } catch (e) {}
+            } catch (_) {}
         }
 
         function cargarEstado() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (!raw) return;
-                const data = JSON.parse(raw);
-                if (data.actual) cicloActual.value = data.actual;
-                if (data.nuevo) cicloNuevo.value = data.nuevo;
-                if (data.fecha) fechaOrden.value = data.fecha;
-            } catch (e) {}
+                const d = JSON.parse(raw);
+                if (d.actual && CICLOS_DATA[d.actual]) selectActual.value = d.actual;
+                actualizarOpcionesNuevo();
+                if (d.nuevo && CICLOS_DATA[d.nuevo]) selectNuevo.value = d.nuevo;
+                if (d.fecha) inputFecha.value = d.fecha;
+                if (d.modalidad) state.modalidad = d.modalidad;
+                if (d.speechTab) state.speechTab = d.speechTab;
+                actualizarHints();
+            } catch (_) {}
         }
 
         if (typeof ipcRenderer !== 'undefined') {
-            ipcRenderer.on('init-ciclos', (e, state) => {
-                if (state) {
-                    if (state.actual) cicloActual.value = state.actual;
-                    if (state.nuevo) cicloNuevo.value = state.nuevo;
-                    if (state.fecha) fechaOrden.value = state.fecha;
+            ipcRenderer.on('init-ciclos', (e, saved) => {
+                if (saved) {
+                    if (saved.actual) selectActual.value = saved.actual;
                     actualizarOpcionesNuevo();
-                    if (fechaOrden.value && cicloActual.value && cicloNuevo.value) {
-                        calcular();
-                    }
+                    if (saved.nuevo) selectNuevo.value = saved.nuevo;
+                    if (saved.fecha) inputFecha.value = saved.fecha;
+                    if (saved.modalidad) state.modalidad = saved.modalidad;
+                    if (saved.speechTab) state.speechTab = saved.speechTab;
+                    actualizarHints();
+                    if (inputFecha.value) calcularCiclos();
                 }
             });
         }
-
-        // Prellenar fecha de hoy
-        function setFechaHoy() {
-            if (fechaOrden.value) return;
-            const hoy = new Date();
-            const y = hoy.getFullYear();
-            const m = String(hoy.getMonth() + 1).padStart(2, '0');
-            const d = String(hoy.getDate()).padStart(2, '0');
-            fechaOrden.value = `${y}-${m}-${d}`;
-        }
-
-        // ============================================================
-        // ACTUALIZAR OPCIONES DE NUEVO CICLO SEGÚN ACTUAL
-        // ============================================================
-        function actualizarOpcionesNuevo() {
-            const actual = parseInt(cicloActual.value);
-            const permitidos = NUEVOS_PERMITIDOS[actual] || [52, 53, 54];
-            const actualValue = parseInt(cicloNuevo.value);
-
-            cicloNuevo.innerHTML = '';
-            permitidos.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                cicloNuevo.appendChild(opt);
-            });
-
-            if (!permitidos.includes(actualValue)) {
-                cicloNuevo.value = permitidos[0] || 52;
-            }
-        }
-
-        // ============================================================
-        // CALCULAR
-        // ============================================================
-        function calcular() {
-            const actual = parseInt(cicloActual.value);
-            const nuevo = parseInt(cicloNuevo.value);
-            const fechaOrd = fechaOrden.value;
-
-            if (!fechaOrd) {
-                showToast('⚠️ Por favor selecciona la fecha de la orden.', 'warning');
-                return;
-            }
-
-            const fechaBase = new Date(fechaOrd + 'T12:00:00');
-            const fechaEfectiva = new Date(fechaBase);
-            fechaEfectiva.setDate(fechaEfectiva.getDate() + 1); // cambio al día siguiente
-
-            const infoActual = CICLOS[actual];
-            const infoNuevo = CICLOS[nuevo];
-
-            // ============================================================
-            // Período anterior
-            // ============================================================
-            let fechaInicioAnt = new Date(fechaBase.getFullYear(), fechaBase.getMonth(), infoActual.inicio);
-            if (fechaInicioAnt > fechaBase) {
-                fechaInicioAnt = new Date(fechaBase.getFullYear(), fechaBase.getMonth() - 1, infoActual.inicio);
-            }
-            const fechaFinAnt = new Date(fechaBase); // hasta el día de la orden
-
-            // Días del período anterior
-            const diffAnt = Math.floor((fechaFinAnt - fechaInicioAnt) / (1000 * 60 * 60 * 24)) + 1;
-
-            // ============================================================
-            // Período nuevo
-            // ============================================================
-            const fechaInicioNue = new Date(fechaEfectiva);
-            const diaInicioNue = infoNuevo.inicio;
-
-            let fechaFinNue;
-            if (diaInicioNue <= 1) {
-                // Ciclos que inician el 1: terminan el último día del mes actual
-                fechaFinNue = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth() + 1, 0);
-            } else {
-                // Ciclos que inician después del día 1: terminan en (diaInicio - 1)
-                fechaFinNue = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth(), diaInicioNue - 1);
-                if (fechaFinNue < fechaInicioNue) {
-                    fechaFinNue = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth() + 1, diaInicioNue - 1);
-                }
-            }
-
-            const diffNue = Math.floor((fechaFinNue - fechaInicioNue) / (1000 * 60 * 60 * 24)) + 1;
-
-            // ============================================================
-            // Calcular fechas de emisión y vencimiento
-            // ============================================================
-            // Para la boleta anterior: se emite según el ciclo actual
-            let fechaEmisionAnt = new Date(fechaFinAnt.getFullYear(), fechaFinAnt.getMonth(), infoActual.emision);
-            if (fechaEmisionAnt < fechaFinAnt) {
-                fechaEmisionAnt = new Date(fechaFinAnt.getFullYear(), fechaFinAnt.getMonth() + 1, infoActual.emision);
-            }
-
-            // Vencimiento anterior:
-            const diaVencAnt = infoActual.vencimiento[0];
-            let fechaVencAnt = new Date(fechaEmisionAnt.getFullYear(), fechaEmisionAnt.getMonth() + infoActual.mesVenc, diaVencAnt);
-
-            // Para la boleta nueva: se emite según el nuevo ciclo
-            let fechaEmisionNue = new Date(fechaFinNue.getFullYear(), fechaFinNue.getMonth(), infoNuevo.emision);
-            if (fechaEmisionNue < fechaFinNue) {
-                fechaEmisionNue = new Date(fechaFinNue.getFullYear(), fechaFinNue.getMonth() + 1, infoNuevo.emision);
-            }
-
-            // Vencimiento nuevo:
-            const diaVencNue = infoNuevo.vencimiento[0];
-            let fechaVencNue = new Date(fechaEmisionNue.getFullYear(), fechaEmisionNue.getMonth() + infoNuevo.mesVenc, diaVencNue);
-
-            // Reinicio del nuevo ciclo
-            let fechaReinicio = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth(), infoNuevo.reinicio);
-            if (fechaReinicio < fechaInicioNue) {
-                fechaReinicio = new Date(fechaInicioNue.getFullYear(), fechaInicioNue.getMonth() + 1, infoNuevo.reinicio);
-            }
-
-            // ============================================================
-            // RENDERIZAR RESULTADOS (sin año en la interfaz)
-            // ============================================================
-            function fmtDM(fecha) {
-                if (!fecha || isNaN(fecha)) return '—';
-                const d = String(fecha.getDate()).padStart(2, '0');
-                const m = String(fecha.getMonth() + 1).padStart(2, '0');
-                return `${d}/${m}`;
-            }
-
-            function fmtDMY(fecha) {
-                if (!fecha || isNaN(fecha)) return '—';
-                const d = String(fecha.getDate()).padStart(2, '0');
-                const m = String(fecha.getMonth() + 1).padStart(2, '0');
-                const y = fecha.getFullYear();
-                return `${d}/${m}/${y}`;
-            }
-
-            // Boleta anterior
-            document.getElementById('res-ciclo-ant').textContent = actual;
-            document.getElementById('res-periodo-ant').textContent = `${fmtDM(fechaInicioAnt)} → ${fmtDM(fechaFinAnt)}`;
-            document.getElementById('res-dias-ant').textContent = diffAnt;
-            document.getElementById('res-emision-ant').textContent = fmtDM(fechaEmisionAnt);
-            document.getElementById('res-vencimiento-ant').textContent = fmtDM(fechaVencAnt);
-
-            // Boleta nueva
-            document.getElementById('res-ciclo-nue').textContent = nuevo;
-            document.getElementById('res-periodo-nue').textContent = `${fmtDM(fechaInicioNue)} → ${fmtDM(fechaFinNue)}`;
-            document.getElementById('res-dias-nue').textContent = diffNue;
-            document.getElementById('res-emision-nue').textContent = fmtDM(fechaEmisionNue);
-            document.getElementById('res-vencimiento-nue').textContent = fmtDM(fechaVencNue);
-            document.getElementById('res-reinicio-nue').textContent = fmtDM(fechaReinicio);
-
-            // ============================================================
-            // GENERAR SPEECH (con año)
-            // ============================================================
-            const speech = `
-        Su cambio de ciclo quedará aplicado desde el ${fmtDMY(fechaEfectiva)}.
-        La boleta anterior considerará los consumos hasta el ${fmtDMY(fechaFinAnt)}.
-        Luego, el nuevo ciclo comenzará el ${fmtDMY(fechaInicioNue)} y cubrirá el período hasta el ${fmtDMY(fechaFinNue)}.
-        El vencimiento de la nueva boleta es el ${fmtDMY(fechaVencNue)}.
-        `.trim();
-
-            speechText.textContent = speech;
-
-            // Mostrar resultados
-            resultados.classList.add('show');
-
-            // Guardar estado
-            guardarEstado();
-        }
-
-        // ============================================================
-        // COPIAR SPEECH
-        // ============================================================
-        function copiarSpeech() {
-            const texto = speechText.textContent;
-            if (!texto || texto === '(Realiza un cálculo para generar el speech)') {
-                showToast('⚠️ No hay speech para copiar.', 'warning');
-                return;
-            }
-            navigator.clipboard.writeText(texto).then(() => {
-                btnCopySpeech.textContent = '✅ ¡Copiado!';
-                btnCopySpeech.classList.add('copiado');
-                setTimeout(() => {
-                    btnCopySpeech.textContent = '📋 Copiar Speech';
-                    btnCopySpeech.classList.remove('copiado');
-                }, 2000);
-                showToast('📋 Speech copiado al portapapeles.', 'success');
-            }).catch(() => {
-                showToast('❌ Error al copiar.', 'error');
-            });
-        }
-
-        // ============================================================
-        // EVENTOS
-        // ============================================================
-        cicloActual.addEventListener('change', () => {
-            actualizarOpcionesNuevo();
-            guardarEstado();
-        });
-
-        cicloNuevo.addEventListener('change', guardarEstado);
-        fechaOrden.addEventListener('change', guardarEstado);
-
-        btnCalcular.addEventListener('click', calcular);
-        btnCopySpeech.addEventListener('click', copiarSpeech);
-
-        // Enter en campos -> calcular
-        fechaOrden.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') calcular();
-        });
 
         // ============================================================
         // INICIALIZACIÓN
         // ============================================================
-        cargarEstado();
         actualizarOpcionesNuevo();
-        setFechaHoy();
+        cargarEstado();
 
-        // Si hay datos guardados y fecha, calcular al abrir
-        if (fechaOrden.value && cicloActual.value && cicloNuevo.value) {
-            calcular();
+        if (!inputFecha.value) {
+            inputFecha.value = formatDateISO(new Date());
+        }
+
+        // Auto-calcular al inicio para mostrar de inmediato la interfaz viva
+        if (inputFecha.value && selectActual.value && selectNuevo.value) {
+            calcularCiclos();
         }
     </script>
 </body>
