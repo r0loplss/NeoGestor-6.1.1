@@ -133,6 +133,96 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">13 sep 2026</span><span class="ver">v6.1.9</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Git 13 sep (sin compilación)</b>: subida a GitHub de los cambios de Antigravity del 13 sep (optimización macro de escalabilidad con cambio instantáneo de hojas, rendimiento/fluidez en Fast y sistema de respaldos con importación aditiva). Auditoría Open Code sin errores críticos; datos de usuario intactos.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">13 sep 2026</span><span class="ver">v6.1.9</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">OPTIMIZACIÓN MACRO DE ESCALABILIDAD Y CAMBIO INSTANTÁNEO DE HOJAS EN FAST (13 SEP 2026):</p>
+                <ul>
+                    <li><b>Respaldo Criptográfico de Seguridad</b>: Respaldo verificado con SHA-256 (<code>1ebaed4bd93dcac4...</code>) de la base de datos de producción (85 MB, 429 tarjetas, 110 imágenes) en <code>COPIA_SEGURIDAD_PROTEGIDA_FAST_2026-09-13_MACRO</code> sin alterar datos del usuario.</li>
+                    <li><b>Cambio Instantáneo de Hojas (<code>switchActiveSheet</code>)</b>: Eliminada la llamada síncrona a <code>saveData()</code> al alternar pestañas que congelaba el hilo de UI durante ~630 ms (debido a 170 MB de I/O en Base64). Se implementó actualización de estado en memoria inmediata (&lt; 15 ms), persistencia debounced a 4 segundos de inactividad, y memorización en <code>localStorage</code> (<code>FAST_LAST_ACTIVE_SHEET</code>) con salvaguarda inmediata en <code>cerrarFast()</code>.</li>
+                    <li><b>Actualización Liviana de Pestañas (<code>updateActiveSheetTabUI</code>)</b>: Al cambiar de hoja ya no se destruye ni reconstruye el DOM del tabstrip con <code>innerHTML = ''</code>, simplemente se actualiza la clase activa de forma instantánea.</li>
+                    <li><b>Batch Rendering con <code>DocumentFragment</code></b>: En los tres modos de visualización (<code>renderCardsMode</code>, <code>renderContainersMode</code>, <code>renderImagesMode</code>) se agrupan los cientos de nodos en un fragmento de documento antes de insertarlos al DOM, reduciendo el layout thrashing de cientos de reflows a 1 solo reflow por vista.</li>
+                    <li><b>Virtualización CSS Nativa (<code>content-visibility: auto</code>)</b>: Incorporadas directivas <code>content-visibility: auto; contain-intrinsic-size: 150px 190px;</code> en <code>.card-item</code>, permitiendo a Chromium omitir el pintado y layout de tarjetas fuera de la pantalla.</li>
+                    <li><b>Optimización de Ajuste de Títulos (<code>autofitTitle</code>)</b>: Detección temprana para títulos cortos (&le; 18 caracteres) o elementos desconectados del DOM, eliminando bucles de recálculo de fuente cuando <code>clientWidth === 0</code>.</li>
+                    <li><b>Indexación en Memoria para Búsquedas (<code>getCardSearchIndex</code>)</b>: Creación de índices en memoria mediante propiedades no enumerables (no se serializan a disco ni aumentan el JSON) que aceleran radicalmente la búsqueda ponderada (<code>cardSearchScore</code>).</li>
+                    <li><b>Throttling en Backups Rotativos (<code>rotateFastBackup</code>)</b>: Limitada la generación de archivos con timestamp en <code>backups/</code> a intervalos mínimos de 10 minutos (salvo respaldos manuales o forzados), conservando el guardado rápido del <code>.bak</code> y ahorrando cientos de megabytes de escritura innecesaria.</li>
+                    <li><b>Pestaña "🩺 Salud y Diagnóstico" en el Centro de Respaldos</b>: Nueva vista que calcula y muestra en tiempo real el desglose exacto de almacenamiento (MB de imágenes Base64 vs KB de texto, cantidad de tarjetas y slots libres), medidor visual de composición, y herramienta de optimización y regeneración de índices.</li>
+                    <li><b>Auditoría Exhaustiva de Lógica y Refinamientos</b>:
+                        <ul>
+                            <li>Unificación del ámbito léxico de <code>debouncedActiveSheetTimer</code> y cancelación automática dentro de <code>saveData()</code> para prevenir escrituras redundantes o desfasadas a disco.</li>
+                            <li>Ajuste en <code>getCardSearchIndex</code> para tarjetas sin propiedad <code>.updated</code> (p. ej. slots libres o importaciones antiguas), asegurando tasa de acierto del 100% en caché de búsqueda.</li>
+                            <li>Escalado proporcional inteligente en <code>autofitTitle</code> para tarjetas desconectadas durante el batch rendering, evitando que títulos largos (de 80-90 caracteres) desborden o congelen la medición en memoria.</li>
+                            <li>Directiva de contención exacta <code>contain-intrinsic-size: 100% 420px;</code> en tarjetas multimedia (<code>.card-item.img-card</code>), asegurando desplazamiento continuo y sin saltos del scrollbar en modo imágenes.</li>
+                            <li><b>Aprovisionamiento Limpio de Tarjeta de Bienvenida (Opción A)</b>: Se eliminó la inyección reiterada en <code>init()</code> basada en el nombre literal <code>'Hoja 1'</code>, evitando el efecto de "tarjeta fantasma" si el usuario decidía vaciar deliberadamente su hoja. La tarjeta de bienvenida ahora se aprovisiona exclusivamente en <code>loadData()</code> durante la primera ejecución de fábrica cuando el archivo <code>gestor-fast.json</code> no existe en disco.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">13 sep 2026</span><span class="ver">v6.1.9</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <p style="margin: 0 0 8px 0; font-weight: 700; color: #93c5fd;">OPTIMIZACIÓN DE RENDIMIENTO Y FLUIDEZ EN FAST (13 SEP 2026):</p>
+                <ul>
+                    <li><b>Respaldo manual verificado</b>: Generación previa de copia íntegra con hash SHA-256 de todas las bases de datos en <code>AppData/Roaming/gestor-casos/COPIA_SEGURIDAD_MANUAL_PROTEGIDA_2026-09-13</code>.</li>
+                    <li><b>Eliminación de bloqueo al abrir editor de tarjetas (<code>openCardEditor</code>)</b>: Removida la llamada síncrona prematura a <code>saveData()</code> al abrir el modal de creación ("➕ Tarjeta"), eliminando el congelamiento previo a la escritura de la tarjeta.</li>
+                    <li><b>Escritura fluida e instantánea en el editor (<code>autosaveCard</code>)</b>: Se desacopló la sincronización en memoria de la escritura a disco durante la digitación (<code>editTitle</code>, <code>editBody</code>, controles de fuente). Se reemplazó el guardado síncrono a disco cada 400ms por actualización en memoria inmediata (0 ms) con autosave a disco en segundo plano debounced a 5 segundos de inactividad, conservando el guardado directo al pulsar "Guardar" o Ctrl+S.</li>
+                    <li><b>Buscador de tarjetas e imágenes ultra-rápido en sitio (<code>applyHideSearchInPlace</code>)</b>: Implementada filtración y ordenamiento por relevancia vía CSS Grid (<code>order</code> y <code>display: none</code>) en lugar de destruir y regenerar el DOM con <code>innerHTML = ''</code>, evitando decodificar de nuevo las más de 100 imágenes Base64 en cada letra.</li>
+                    <li><b>Debounce en caja de búsqueda (<code>searchDebounceTimer</code>)</b>: Incorporado debounce de 200 ms con ejecución inmediata al presionar Enter en <code>searchInput</code> para asegurar suavidad total al tipear sin saturar el hilo principal de la interfaz.</li>
+                    <li><b>Carga diferida y decodificación asíncrona de imágenes</b>: Incorporados atributos <code>loading="lazy"</code> y <code>decoding="async"</code> en todas las etiquetas <code>&lt;img&gt;</code> de tarjetas de imagen, miniaturas del editor y galería del drawer, delegando la decodificación fuera del hilo de UI y solo para elementos visibles.</li>
+                </ul>
+                <p style="margin: 14px 0 8px 0; font-weight: 700; color: #93c5fd;">SISTEMA AVANZADO DE COPIAS DE SEGURIDAD, EXPORTACIÓN E IMPORTACIÓN ADITIVA EN FAST (13 SEP 2026):</p>
+                <ul>
+                    <li><b>Acceso Superior Dedicado (<code>#hdr-backup</code>)</b>: Añadido botón con indicador de estado ("🛡️ Copias de Seguridad") en la barra superior de FAST para configurar políticas de respaldo y exportación/importación en cualquier momento.</li>
+                    <li><b>Ruta de Almacenamiento Personalizable y Explorador Directo</b>: Selector nativo de carpetas con Electron dialog (<code>abrirSelectorCarpetaBackup</code>) permitiendo al usuario elegir cualquier directorio local o en red, con botón para abrir la carpeta directamente en el explorador de Windows (<code>shell.openPath</code>).</li>
+                    <li><b>Planificador y Automatización en Segundo Plano (<code>iniciarPlanificadorBackups</code>, <code>chequearAutoBackup</code>)</b>: Programación flexible con soporte para:
+                        <ul>
+                            <li>Frecuencia por horas (cada 1, 2, 4, 8, 12 o 24 horas).</li>
+                            <li>Frecuencia por intervalo de días (cada N días).</li>
+                            <li>Días específicos de la semana (Lunes a Domingo seleccionables).</li>
+                            <li>Modo manual bajo demanda.</li>
+                            <li>Monitoreo no bloqueante cada 60s sin ralentizar la interfaz de usuario.</li>
+                        </ul>
+                    </li>
+                    <li><b>Gestión y Retención Inteligente de Archivos (<code>purgarCopiasAntiguas</code>)</b>: Rotación automática configurable (de 3 a 50 copias) para prevenir consumo excesivo de disco, purgando las copias automáticas más antiguas y reteniendo las más recientes.</li>
+                    <li><b>Exportación Portátil y Empaquetado Inteligente (<code>.fastbackup</code>)</b>:
+                        <ul>
+                            <li>Generación de un archivo único ligero y transportable (formato <code>.fastbackup</code> / <code>.json</code>) optimizado para compartir fácilmente entre compañeros de equipo.</li>
+                            <li>Alcance seleccionable: base de datos completa o selección granular de hojas específicas.</li>
+                            <li>Empaquetado inteligente de dependencias: se empaquetan únicamente las imágenes Base64 referenciadas por las tarjetas del alcance seleccionado.</li>
+                        </ul>
+                    </li>
+                    <li><b>Motor de Importación Aditiva y No Destructiva (<code>ejecutarImportacionConfirmada</code>)</b>:
+                        <ul>
+                            <li><b>Protección Total de Datos Preexistentes</b>: La importación NUNCA sobrescribe, reemplaza ni borra la información existente del usuario; suma y fusiona de forma estrictamente aditiva.</li>
+                            <li><b>Asistente de Importación con Vista Previa (<code>#import-wizard-overlay</code>)</b>: Inspección previa de metadatos (fecha de creación, origen, total de hojas, tarjetas e imágenes) con selección individual de hojas a importar.</li>
+                            <li><b>Resolución de Conflictos Inteligente</b>: El usuario puede elegir entre crear la hoja con nombre no colisionante (ej. <i>General (Importado DD-MM)</i>) o fusionar las tarjetas importadas dentro de la hoja local existente sin tocar las tarjetas preexistentes.</li>
+                            <li><b>Regeneración Total de Identificadores</b>: Cada hoja, tarjeta y contenedor importado recibe nuevos IDs únicos (<code>generateId()</code>) garantizando consistencia relacional y compatibilidad total entre distintos usuarios.</li>
+                        </ul>
+                    </li>
+                    <li><b>Auditoría Integral y Blindaje de Lógica (13 SEP 2026)</b>:
+                        <ul>
+                            <li><b>Protección Estricta de Respaldos Manuales</b>: La purga automática por retención (<code>purgarCopiasAntiguas</code>) se restringió a archivos <code>Fast_Backup_Auto_</code>, blindando los respaldos manuales y exportaciones para que jamás sean eliminados por rotación.</li>
+                            <li><b>Soporte de Alcance Personalizado en Auto-Backups</b>: <code>chequearAutoBackup</code> evalúa fielmente si el usuario configuró hojas específicas y genera el respaldo automático solo con dichas hojas.</li>
+                            <li><b>Integridad Espacial y Fusión de Contenedores</b>: Unificado el diccionario <code>idMap</code> para contenedores y tarjetas libres en <code>rootOrder</code>, permitiendo además fusionar hojas de contenedores preservando grupos y notas sin romper la jerarquía.</li>
+                            <li><b>Deduplicación Recursiva de Nombres (<code>generarNombreHojaUnico</code>)</b>: Previene nombres duplicados en pestañas al importar varias veces en un mismo día mediante correlativos automáticos <code>(2)</code>, <code>(3)</code>.</li>
+                            <li><b>Badge de Estado en Tiempo Real en Header</b>: Incorporado badge interactivo <code>ON</code> (verde) / <code>OFF</code> (gris) en el botón superior <code>#hdr-backup</code>.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">11 sep 2026</span><span class="ver">v6.1.9</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

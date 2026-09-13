@@ -318,6 +318,8 @@
             overflow: hidden;
             user-select: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            content-visibility: auto;
+            contain-intrinsic-size: 150px 190px;
         }
         .card-item:hover {
             border-color: var(--primary);
@@ -625,6 +627,7 @@
         .card-item.img-card {
             grid-column: 1 / -1;
             width: 100%;
+            contain-intrinsic-size: 100% 420px;
             display: grid;
             grid-template-columns: minmax(110px, 200px) minmax(0, 1fr) minmax(140px, 28%);
             gap: 10px;
@@ -3434,6 +3437,497 @@
             from { opacity: 0; transform: scale(0.92); }
             to { opacity: 1; transform: scale(1); }
         }
+        /* ============================================================
+           BOTÓN SUPERIOR: COPIAS DE SEGURIDAD
+           ============================================================ */
+        #hdr-backup {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            font-family: var(--font);
+        }
+        #hdr-backup:hover {
+            background: rgba(59, 130, 246, 0.22);
+            color: #fff;
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+        }
+        .hdr-backup-badge {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 999px;
+            font-weight: 700;
+            margin-left: 2px;
+            letter-spacing: 0.2px;
+            display: inline-block;
+            line-height: 1.2;
+            transition: all 0.2s ease;
+        }
+        .hdr-backup-badge.on {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+        .hdr-backup-badge.off {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ============================================================
+           MODALES: CENTRO DE RESPALDOS Y ASISTENTE DE IMPORTACIÓN
+           ============================================================ */
+        #backup-modal-overlay, #import-wizard-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.78);
+            z-index: 650;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        #import-wizard-overlay { z-index: 660; }
+        #backup-modal-overlay.show, #import-wizard-overlay.show { display: flex; }
+
+        .backup-modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            width: 740px;
+            max-width: 95vw;
+            max-height: 88vh;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            animation: modalPop 0.18s ease-out;
+            overflow: hidden;
+        }
+
+        .import-wizard-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            width: 780px;
+            max-width: 96vw;
+            max-height: 88vh;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            animation: modalPop 0.18s ease-out;
+            overflow: hidden;
+        }
+
+        .backup-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+            flex-shrink: 0;
+        }
+        .backup-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .backup-title-icon { font-size: 26px; }
+        .backup-modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
+        .backup-modal-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+        /* TABS */
+        .backup-nav-tabs {
+            display: flex;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 16px;
+            gap: 4px;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+        .backup-nav-tab {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            font-family: var(--font);
+        }
+        .backup-nav-tab:hover { color: var(--text); }
+        .backup-nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(59, 130, 246, 0.06);
+        }
+
+        /* CUERPO Y SECCIONES */
+        .backup-tab-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .backup-section-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .backup-sec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .backup-sec-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .backup-sec-desc {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.45;
+        }
+
+        /* SELECTOR DE CARPETA */
+        .backup-folder-picker {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .backup-folder-picker input {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+        }
+
+        /* TOGGLE SWITCH */
+        .switch-toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .switch-input { display: none; }
+        .switch-track {
+            width: 44px;
+            height: 24px;
+            background: var(--faint);
+            border-radius: 12px;
+            position: relative;
+            transition: background 0.2s ease;
+        }
+        .switch-track::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+        .switch-input:checked + .switch-track { background: var(--accent); }
+        .switch-input:checked + .switch-track::after { transform: translateX(20px); }
+
+        /* FRECUENCIA */
+        .backup-freq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .backup-freq-option {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text);
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .backup-freq-option:hover { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+        .backup-freq-option input[type="radio"] { accent-color: var(--primary); cursor: pointer; }
+        .backup-freq-config-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.15);
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 12px;
+        }
+        .backup-freq-config-row select, .backup-freq-config-row input[type="time"] {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border2);
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+        }
+
+        /* DIAS SEMANA */
+        .backup-weekdays-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .backup-day-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 11.5px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+        }
+        .backup-day-chip input { accent-color: var(--primary); cursor: pointer; }
+        .backup-day-chip.active {
+            border-color: var(--primary);
+            background: rgba(59,130,246,0.12);
+            color: #93c5fd;
+            font-weight: 600;
+        }
+
+        /* ESTADO DE RESPALDO */
+        .backup-status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(59,130,246,0.08);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 11.5px;
+            color: #93c5fd;
+        }
+
+        /* ACCIONES DE EXPORTAR / CREAR */
+        .backup-actions-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .backup-act-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.15s;
+        }
+        .backup-act-card:hover { border-color: var(--border2); }
+        .backup-act-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .backup-act-icon { font-size: 24px; }
+        .backup-act-title { font-size: 14px; font-weight: 700; color: var(--text); }
+        .backup-act-desc { font-size: 12px; color: var(--muted); line-height: 1.4; flex: 1; }
+
+        /* LISTA DE HOJAS CON CHECKBOXES */
+        .backup-sheets-box {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            max-height: 160px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .backup-sheet-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .backup-sheet-item:hover { background: rgba(255,255,255,0.04); }
+        .backup-sheet-item input { accent-color: var(--primary); cursor: pointer; }
+        .backup-sheet-badge {
+            font-size: 10.5px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            color: var(--muted);
+            margin-left: auto;
+        }
+
+        /* IMPORT HERO CARD */
+        .import-hero-box {
+            background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(34,197,94,0.08) 100%);
+            border: 1px solid rgba(59,130,246,0.25);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .import-hero-icon { font-size: 42px; flex-shrink: 0; }
+        .import-hero-texts h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+        .import-hero-texts p { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+
+        .import-info-box {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .import-info-box h4 { font-size: 13px; color: var(--text); margin-bottom: 6px; }
+        .import-info-box ul { margin-left: 18px; color: var(--muted); }
+        .import-info-box li { margin-bottom: 4px; }
+
+        /* TABLA DE ASISTENTE DE IMPORTACIÓN */
+        .import-meta-box {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            font-size: 12px;
+        }
+        .import-meta-item { display: flex; align-items: center; gap: 6px; color: var(--text); }
+        .import-meta-item b { color: #93c5fd; }
+        .import-table-wrap {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .import-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+        .import-table th {
+            background: var(--surface2);
+            padding: 9px 12px;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .import-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+        .import-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .badge-status {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 10.5px;
+            font-weight: 600;
+        }
+        .badge-status.new { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        .badge-status.conflict { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+
+        .import-mode-select {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border2);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            outline: none;
+            width: 100%;
+            max-width: 220px;
+        }
+
+        /* HISTORIAL */
+        .backup-history-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .backup-history-item {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 12px;
+        }
+        .backup-history-item:hover { border-color: var(--border2); }
+        .backup-file-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .backup-file-name { font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .backup-file-sub { font-size: 11px; color: var(--muted); }
+        .backup-file-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+        /* FOOTER MODAL */
+        .backup-modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -3442,6 +3936,7 @@
     <div id="hdr">
         <span id="hdr-title">⚡ Fast 2.0</span>
         <div id="hdr-side">
+            <button class="hbtn" id="hdr-backup" onclick="abrirModalBackup()" title="Copias de Seguridad (Automáticas, Manuales, Exportar/Importar)">🛡️ Copias de Seguridad <span id="hdr-backup-badge" class="hdr-backup-badge off">OFF</span></button>
             <button class="hbtn" id="hdr-settings" onclick="abrirAjustesHoja()" title="Ajustes de esta hoja (modo, tamaño, color)">⚙️</button>
             <button class="hbtn danger" onclick="cerrarFast()" title="Cerrar (Ctrl+Shift+F)">✕</button>
         </div>
@@ -3852,11 +4347,343 @@
         <button class="btn-floating-cancel" id="btn-floating-clear" title="Deseleccionar todas (Esc)">✕</button>
     </div>
 
+    <!-- MODAL CENTRO DE COPIAS DE SEGURIDAD Y RESPALDOS -->
+    <div id="backup-modal-overlay">
+        <div class="backup-modal-box">
+            <div class="backup-modal-header">
+                <div class="backup-title-wrap">
+                    <span class="backup-title-icon">🛡️</span>
+                    <div>
+                        <div class="backup-modal-title">Centro de Copias de Seguridad</div>
+                        <div class="backup-modal-subtitle">Respaldos automáticos programados, exportación y sincronización segura</div>
+                    </div>
+                </div>
+                <button class="hbtn" onclick="cerrarModalBackup()" style="font-size: 16px; padding: 4px 8px;" title="Cerrar (Esc)">✕</button>
+            </div>
+
+            <!-- TABS -->
+            <div class="backup-nav-tabs">
+                <button type="button" class="backup-nav-tab active" data-tab="auto" onclick="cambiarPestanaBackup('auto')">⏰ Programación Automática</button>
+                <button type="button" class="backup-nav-tab" data-tab="manual" onclick="cambiarPestanaBackup('manual')">💾 Crear y Exportar</button>
+                <button type="button" class="backup-nav-tab" data-tab="import" onclick="cambiarPestanaBackup('import')">📥 Importar y Compartir</button>
+                <button type="button" class="backup-nav-tab" data-tab="history" onclick="cambiarPestanaBackup('history')">📂 Historial de Respaldos</button>
+                <button type="button" class="backup-nav-tab" data-tab="health" onclick="cambiarPestanaBackup('health')">🩺 Salud y Diagnóstico</button>
+            </div>
+
+            <!-- CUERPO DE PESTAÑAS -->
+            <div class="backup-tab-body">
+                <!-- PESTAÑA 1: PROGRAMACIÓN AUTOMÁTICA -->
+                <div id="backup-pane-auto" class="backup-pane" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="backup-section-card">
+                        <div class="backup-sec-header">
+                            <div class="backup-sec-title">📂 Carpeta de Destino de Respaldos</div>
+                        </div>
+                        <div class="backup-sec-desc">Define la carpeta donde se guardarán las copias automáticas y manuales directas. Puedes elegir cualquier disco local, pendrive o carpeta en red.</div>
+                        <div class="backup-folder-picker">
+                            <input type="text" id="backup-folder-path" readonly placeholder="C:\Ruta\A\Respaldos..." />
+                            <button type="button" class="tb-btn" onclick="abrirSelectorCarpetaBackup()">📁 Elegir carpeta...</button>
+                            <button type="button" class="tb-btn" onclick="abrirCarpetaBackupEnExplorador()" title="Abrir en el Explorador de Windows">↗️ Abrir</button>
+                        </div>
+                    </div>
+
+                    <div class="backup-section-card">
+                        <div class="backup-sec-header">
+                            <div>
+                                <div class="backup-sec-title">⏰ Respaldos Automáticos Programados</div>
+                                <div class="backup-sec-desc">Guarda copias en segundo plano periódicamente sin congelar la aplicación ni interrumpir tu digitación.</div>
+                            </div>
+                            <label class="switch-toggle-wrap">
+                                <input type="checkbox" id="backup-auto-enabled" class="switch-input" onchange="actualizarEstadoAutoBackupUI()" />
+                                <span class="switch-track"></span>
+                            </label>
+                        </div>
+
+                        <div id="backup-schedule-wrap" style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
+                            <label style="font-size: 12px; font-weight: 600; color: var(--text);">Frecuencia de ejecución:</label>
+                            <div class="backup-freq-grid">
+                                <label class="backup-freq-option">
+                                    <input type="radio" name="backup-freq-type" value="hours" checked onchange="actualizarTipoFrecuenciaUI()" />
+                                    <span>Por horas de trabajo</span>
+                                </label>
+                                <label class="backup-freq-option">
+                                    <input type="radio" name="backup-freq-type" value="days" onchange="actualizarTipoFrecuenciaUI()" />
+                                    <span>Por intervalo de días</span>
+                                </label>
+                                <label class="backup-freq-option">
+                                    <input type="radio" name="backup-freq-type" value="weekdays" onchange="actualizarTipoFrecuenciaUI()" />
+                                    <span>Días específicos</span>
+                                </label>
+                            </div>
+
+                            <!-- Detalle: Por horas -->
+                            <div id="freq-hours-box" class="backup-freq-config-row">
+                                <span>Realizar respaldo cada:</span>
+                                <select id="backup-freq-hours">
+                                    <option value="1">1 hora</option>
+                                    <option value="2">2 horas</option>
+                                    <option value="4" selected>4 horas (Recomendado)</option>
+                                    <option value="8">8 horas</option>
+                                    <option value="12">12 horas</option>
+                                </select>
+                            </div>
+
+                            <!-- Detalle: Por días -->
+                            <div id="freq-days-box" class="backup-freq-config-row" style="display: none;">
+                                <span>Realizar respaldo cada:</span>
+                                <select id="backup-freq-days">
+                                    <option value="1" selected>1 día (Diario)</option>
+                                    <option value="2">2 días</option>
+                                    <option value="3">3 días</option>
+                                    <option value="7">7 días (Semanal)</option>
+                                </select>
+                            </div>
+
+                            <!-- Detalle: Días específicos de la semana -->
+                            <div id="freq-weekdays-box" class="backup-freq-config-row" style="display: none; flex-direction: column; align-items: flex-start; gap: 8px;">
+                                <span>Días de la semana en los que se respaldará:</span>
+                                <div class="backup-weekdays-row" id="backup-weekdays-container">
+                                    <label class="backup-day-chip active"><input type="checkbox" value="1" checked /> Lun</label>
+                                    <label class="backup-day-chip active"><input type="checkbox" value="2" checked /> Mar</label>
+                                    <label class="backup-day-chip active"><input type="checkbox" value="3" checked /> Mié</label>
+                                    <label class="backup-day-chip active"><input type="checkbox" value="4" checked /> Jue</label>
+                                    <label class="backup-day-chip active"><input type="checkbox" value="5" checked /> Vie</label>
+                                    <label class="backup-day-chip"><input type="checkbox" value="6" /> Sáb</label>
+                                    <label class="backup-day-chip"><input type="checkbox" value="0" /> Dom</label>
+                                </div>
+                            </div>
+
+                            <!-- Retención -->
+                            <div class="backup-freq-config-row" style="justify-content: space-between;">
+                                <span>Límite de copias automáticas guardadas (retención):</span>
+                                <select id="backup-retention-limit">
+                                    <option value="5">Conservar las 5 más recientes</option>
+                                    <option value="10" selected>Conservar las 10 más recientes</option>
+                                    <option value="20">Conservar las 20 más recientes</option>
+                                    <option value="50">Conservar las 50 más recientes</option>
+                                    <option value="0">Conservar todas (Sin purga automática)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="backup-status-bar" id="backup-status-bar">
+                            <span id="backup-status-last-text">Último respaldo automático: Ninguno registrado</span>
+                            <span id="backup-status-next-text">Estado: Activo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PESTAÑA 2: CREAR Y EXPORTAR -->
+                <div id="backup-pane-manual" class="backup-pane" style="display: none; flex-direction: column; gap: 14px;">
+                    <div class="backup-section-card">
+                        <div class="backup-sec-header">
+                            <div class="backup-sec-title">🎯 Alcance de la Copia de Seguridad</div>
+                        </div>
+                        <div class="backup-sec-desc">Puedes respaldar toda tu base de datos completa o únicamente las hojas que tú decidas.</div>
+                        <div class="backup-freq-grid" style="grid-template-columns: 1fr 1fr;">
+                            <label class="backup-freq-option">
+                                <input type="radio" name="backup-scope-type" value="all" checked onchange="actualizarAlcanceUI()" />
+                                <span><b>Toda la información</b> (Todas las hojas y tarjetas)</span>
+                            </label>
+                            <label class="backup-freq-option">
+                                <input type="radio" name="backup-scope-type" value="custom" onchange="actualizarAlcanceUI()" />
+                                <span><b>Hojas seleccionadas...</b> (Personalizado)</span>
+                            </label>
+                        </div>
+
+                        <div id="backup-custom-sheets-container" style="display: none; flex-direction: column; gap: 8px; margin-top: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--muted);">
+                                <span>Elige las hojas a incluir en la copia:</span>
+                                <div style="display: flex; gap: 6px;">
+                                    <button type="button" class="hbtn" onclick="toggleSelectAllSheetsBackup(true)" style="border:1px solid var(--border);">Todas</button>
+                                    <button type="button" class="hbtn" onclick="toggleSelectAllSheetsBackup(false)" style="border:1px solid var(--border);">Ninguna</button>
+                                </div>
+                            </div>
+                            <div class="backup-sheets-box" id="backup-sheets-checklist">
+                                <!-- Se rellena dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="backup-actions-cards">
+                        <div class="backup-act-card">
+                            <div class="backup-act-top">
+                                <span class="backup-act-icon">💾</span>
+                                <div class="backup-act-title">Guardar en Carpeta Configurada</div>
+                            </div>
+                            <div class="backup-act-desc">Crea inmediatamente un archivo con fecha y hora en tu carpeta de respaldos predeterminada.</div>
+                            <button type="button" class="tb-btn" onclick="ejecutarCopiaManualDirecta()" style="font-weight: 700; background: var(--surface); border-color: var(--border2); align-self: flex-start; padding: 7px 14px;">
+                                💾 Crear copia ahora
+                            </button>
+                        </div>
+
+                        <div class="backup-act-card">
+                            <div class="backup-act-top">
+                                <span class="backup-act-icon">📤</span>
+                                <div class="backup-act-title">Exportar a Archivo Portable</div>
+                            </div>
+                            <div class="backup-act-desc">Guarda un archivo único portable (<code>.fastbackup</code>) en la ubicación que elijas (Escritorio, Pendrive, etc.) para compartir con otros usuarios.</div>
+                            <button type="button" class="tb-btn" onclick="exportarCopiaDialog()" style="font-weight: 700; background: rgba(59, 130, 246, 0.15); color: #93c5fd; border-color: rgba(59, 130, 246, 0.4); align-self: flex-start; padding: 7px 14px;">
+                                📤 Exportar archivo...
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PESTAÑA 3: IMPORTAR Y COMPARTIR -->
+                <div id="backup-pane-import" class="backup-pane" style="display: none; flex-direction: column; gap: 14px;">
+                    <div class="import-hero-box">
+                        <span class="import-hero-icon">🤝</span>
+                        <div class="import-hero-texts">
+                            <h3>Compartir e Importar entre Usuarios</h3>
+                            <p>Este sistema está diseñado para que varios compañeros de trabajo puedan intercambiar copias de seguridad. Al importar un archivo, <b>tus datos locales jamás se reemplazan ni eliminan: el contenido importado se SUMA a lo que ya tienes</b>.</p>
+                            <button type="button" class="tb-btn" onclick="abrirDialogoImportacion()" style="font-weight: 700; font-size: 13px; background: var(--primary); color: #fff; padding: 9px 18px; border: none; border-radius: 6px; cursor: pointer;">
+                                📥 Seleccionar archivo de respaldo (.fastbackup / .json)...
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="import-info-box">
+                        <h4>🛡️ Garantías de seguridad durante la importación:</h4>
+                        <ul>
+                            <li><b>Sin sobrescritura destructiva</b>: La importación suma las hojas y tarjetas al gestor actual sin borrar nada de lo existente.</li>
+                            <li><b>Reasignación segura de IDs</b>: Cada tarjeta y contenedor importado recibe nuevos identificadores únicos generados en tu PC para evitar conflictos de sistema.</li>
+                            <li><b>Resolución inteligente de nombres iguales</b>: Si una hoja importada tiene el mismo nombre que una tuya, podrás decidir si crearla como hoja nueva e independiente (ej. <i>Clientes (Importada)</i>) o fusionar las tarjetas nuevas dentro de tu hoja existente sin duplicar.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PESTAÑA 4: HISTORIAL DE RESPALDOS -->
+                <div id="backup-pane-history" class="backup-pane" style="display: none; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="backup-history-count-text" style="font-size: 12px; color: var(--muted);">Cargando historial...</span>
+                        <button type="button" class="hbtn" onclick="cargarHistorialRespaldosUI()" style="border: 1px solid var(--border);">🔄 Actualizar lista</button>
+                    </div>
+                    <div class="backup-history-box" id="backup-history-items-list">
+                        <!-- Items de historial -->
+                    </div>
+                </div>
+
+                <!-- PESTAÑA 5: SALUD Y DIAGNÓSTICO -->
+                <div id="backup-pane-health" class="backup-pane" style="display: none; flex-direction: column; gap: 14px;">
+                    <div class="backup-section-card">
+                        <div class="backup-sec-header">
+                            <div class="backup-sec-title">📊 Diagnóstico de Rendimiento y Almacenamiento</div>
+                        </div>
+                        <div class="backup-sec-desc">Métricas en tiempo real sobre el volumen de tarjetas, imágenes y consumo de memoria en disco.</div>
+                        <div id="backup-health-metrics-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px;">
+                            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Hojas / Tarjetas</div>
+                                <div id="health-cards-count" style="font-size: 18px; font-weight: 700; color: var(--primary); margin-top: 4px;">0 / 0</div>
+                                <div id="health-cards-detail" style="font-size: 11px; color: var(--muted); margin-top: 2px;">0 texto · 0 vacías</div>
+                            </div>
+                            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Imágenes Base64</div>
+                                <div id="health-images-count" style="font-size: 18px; font-weight: 700; color: #f59e0b; margin-top: 4px;">0 imgs</div>
+                                <div id="health-images-size" style="font-size: 11px; color: var(--muted); margin-top: 2px;">0 MB</div>
+                            </div>
+                            <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700;">Base de Datos (Disco)</div>
+                                <div id="health-db-size" style="font-size: 18px; font-weight: 700; color: #10b981; margin-top: 4px;">0 MB</div>
+                                <div id="health-text-size" style="font-size: 11px; color: var(--muted); margin-top: 2px;">Texto puro: 0 KB</div>
+                            </div>
+                        </div>
+
+                        <!-- Barra de composición -->
+                        <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--muted);">
+                                <span>Composición del almacenamiento:</span>
+                                <span id="health-composition-text">Imágenes vs Texto</span>
+                            </div>
+                            <div style="height: 10px; border-radius: 5px; background: rgba(255,255,255,0.06); overflow: hidden; display: flex;">
+                                <div id="health-bar-images" style="width: 0%; background: #f59e0b;" title="Imágenes Base64"></div>
+                                <div id="health-bar-text" style="width: 0%; background: #10b981;" title="Texto y configuraciones"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="backup-section-card">
+                        <div class="backup-sec-header">
+                            <div>
+                                <div class="backup-sec-title">🧹 Optimización y Compactación de Datos</div>
+                                <div class="backup-sec-desc">Analiza la base de datos, purga propiedades temporales no utilizadas y regenera el índice de búsqueda en memoria para máxima velocidad.</div>
+                            </div>
+                            <button type="button" class="tb-btn" onclick="ejecutarOptimizacionBaseDatos()" style="background: #10b981; color: #fff; font-weight: 700; border: none; padding: 6px 14px;">
+                                🚀 Optimizar Ahora
+                            </button>
+                        </div>
+                        <div id="health-opt-result" style="display: none; margin-top: 10px; font-size: 12px; padding: 10px; border-radius: 6px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--text);">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="backup-modal-footer">
+                <button type="button" class="tb-btn" onclick="cerrarModalBackup()">Cerrar</button>
+                <button type="button" class="tb-btn" id="btn-save-backup-settings" onclick="guardarAjustesBackup()" style="font-weight: 700; background: var(--primary); color: #fff; border: none;">
+                    💾 Guardar configuración
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASISTENTE DE IMPORTACIÓN DE RESPALDO (MERGE WIZARD) -->
+    <div id="import-wizard-overlay">
+        <div class="import-wizard-box">
+            <div class="backup-modal-header">
+                <div class="backup-title-wrap">
+                    <span class="backup-title-icon">📥</span>
+                    <div>
+                        <div class="backup-modal-title">Asistente de Importación de Respaldo</div>
+                        <div class="backup-modal-subtitle" id="import-wizard-filename">Archivo seleccionado: cargando...</div>
+                    </div>
+                </div>
+                <button class="hbtn" onclick="cerrarAsistenteImportacion()" style="font-size: 16px; padding: 4px 8px;" title="Cancelar (Esc)">✕</button>
+            </div>
+
+            <div class="backup-tab-body">
+                <div class="import-meta-box" id="import-wizard-meta-bar">
+                    <!-- Resumen de metadatos del archivo -->
+                </div>
+
+                <div style="font-size: 12px; color: var(--text); line-height: 1.45;">
+                    Elige las hojas que deseas incorporar a tu Fast. <b>Tus datos locales están seguros y no se borrarán.</b>
+                </div>
+
+                <div class="import-table-wrap">
+                    <table class="import-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; text-align: center;">
+                                    <input type="checkbox" id="import-select-all-chk" checked onchange="toggleSelectAllImportItems(this.checked)" />
+                                </th>
+                                <th>Hoja a Importar</th>
+                                <th>Tipo</th>
+                                <th>Tarjetas</th>
+                                <th>Modo de Incorporación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="import-wizard-tbody">
+                            <!-- Filas dinámicas -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="backup-modal-footer">
+                <button type="button" class="tb-btn" onclick="cerrarAsistenteImportacion()">Cancelar</button>
+                <button type="button" class="tb-btn" id="btn-confirm-import-run" onclick="ejecutarImportacionConfirmada()" style="font-weight: 700; background: var(--accent); color: #fff; border: none; padding: 8px 16px;">
+                    ✅ Incorporar información seleccionada
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST -->
     <div id="toast-container"></div>
 
     <script>
-        const { ipcRenderer, clipboard, nativeImage } = require('electron');
+        const { ipcRenderer, clipboard, nativeImage, shell } = require('electron');
         const fs = require('fs');
         const path = require('path');
         const os = require('os');
@@ -3883,6 +4710,38 @@
         const DEFAULT_HEADERS = ['Título', 'Tipo', 'Descripción', 'Área', 'Prioridad', 'Detalles'];
         const DEFAULT_COL2_OPTIONS = ['Opción A', 'Opción B', 'Opción C'];
 
+        const DEFAULT_BACKUP_CONFIG = {
+            folderPath: '',
+            enabled: false,
+            frequencyType: 'hours', // 'hours' | 'days' | 'weekdays'
+            frequencyHours: 4,
+            frequencyDays: 1,
+            specificDays: [1, 2, 3, 4, 5], // Lun a Vie
+            preferredTime: '18:00',
+            maxBackups: 10,
+            lastBackupTime: 0,
+            scope: 'all', // 'all' | 'custom'
+            selectedSheetIds: []
+        };
+
+        function normalizeBackupConfig(cfg) {
+            const defFolder = path.join(os.homedir(), 'Documents', 'Fast_Respaldos');
+            const c = (cfg && typeof cfg === 'object') ? cfg : {};
+            return {
+                folderPath: (typeof c.folderPath === 'string' && c.folderPath.trim()) ? c.folderPath.trim() : defFolder,
+                enabled: !!c.enabled,
+                frequencyType: ['hours', 'days', 'weekdays'].includes(c.frequencyType) ? c.frequencyType : 'hours',
+                frequencyHours: parseInt(c.frequencyHours, 10) || 4,
+                frequencyDays: parseInt(c.frequencyDays, 10) || 1,
+                specificDays: Array.isArray(c.specificDays) ? c.specificDays.map(n => parseInt(n, 10)).filter(n => !isNaN(n)) : [1, 2, 3, 4, 5],
+                preferredTime: typeof c.preferredTime === 'string' ? c.preferredTime : '18:00',
+                maxBackups: (c.maxBackups !== undefined && !isNaN(parseInt(c.maxBackups, 10))) ? parseInt(c.maxBackups, 10) : 10,
+                lastBackupTime: parseInt(c.lastBackupTime, 10) || 0,
+                scope: (c.scope === 'custom') ? 'custom' : 'all',
+                selectedSheetIds: Array.isArray(c.selectedSheetIds) ? c.selectedSheetIds : []
+            };
+        }
+
         let state = {
             sheets: [],
             activeSheetId: null,
@@ -3902,7 +4761,8 @@
             drawerNoteEdit: false,
             drawerNoteDraft: '',
             dataPath: null,
-            dataPathReady: false
+            dataPathReady: false,
+            backupConfig: null
         };
 
         // Cola de guardado
@@ -3916,6 +4776,7 @@
         let scrollInterval = null;
         const SCROLL_SPEED = 15;
         let openDrawerTimer = null;
+        let debouncedActiveSheetTimer = null;
 
         // ============================================================
         // REFERENCIAS DOM
@@ -4220,17 +5081,32 @@
             return path.join(path.dirname(state.dataPath), 'backups');
         }
 
-        function rotateFastBackup() {
+        let lastFastBackupRotationTime = 0;
+        const FAST_BACKUP_MIN_INTERVAL_MS = 10 * 60 * 1000; // Mínimo 10 min entre copias rotativas automáticas en backups/
+
+        function rotateFastBackup(force = false) {
             try {
                 if (!state.dataPath || !fs.existsSync(state.dataPath)) return;
                 const dir = path.dirname(state.dataPath);
+
+                // Salvaguarda rápida inmediata: actualizar el .bak directo
+                try {
+                    fs.copyFileSync(state.dataPath, path.join(dir, 'gestor-fast.json.bak'));
+                } catch (_) {}
+
+                // Rotar archivos con timestamp en backups/ solo cada 10 minutos (o si es forzado)
+                const now = Date.now();
+                if (!force && (now - lastFastBackupRotationTime < FAST_BACKUP_MIN_INTERVAL_MS)) {
+                    return;
+                }
+                lastFastBackupRotationTime = now;
+
                 const bDir = getFastBackupsDir();
                 if (!fs.existsSync(bDir)) fs.mkdirSync(bDir, { recursive: true });
 
                 const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
                 const dest = path.join(bDir, `gestor-fast-${stamp}.json`);
                 fs.copyFileSync(state.dataPath, dest);
-                fs.copyFileSync(state.dataPath, path.join(dir, 'gestor-fast.json.bak'));
 
                 const files = fs.readdirSync(bDir)
                     .filter(f => /^gestor-fast-.*\.json$/.test(f))
@@ -4347,6 +5223,10 @@
         }
 
         function saveData() {
+            if (debouncedActiveSheetTimer) {
+                clearTimeout(debouncedActiveSheetTimer);
+                debouncedActiveSheetTimer = null;
+            }
             saveQueue.push({
                 sheets: state.sheets,
                 activeSheetId: state.activeSheetId,
@@ -4354,7 +5234,8 @@
                     searchAll: state.searchAll,
                     searchFilterMode: state.searchFilterMode,
                     view: state.view,
-                    lastCardColor: state.lastCardColor
+                    lastCardColor: state.lastCardColor,
+                    backupConfig: state.backupConfig || DEFAULT_BACKUP_CONFIG
                 }
             });
             processSaveQueue();
@@ -4433,16 +5314,35 @@
             return s;
         }
 
+        // ============================================================
+        // CARGA Y GUARDADO
+        // ============================================================
         function loadData() {
-            if (!state.dataPathReady || !fs.existsSync(state.dataPath)) {
+            if (!state.dataPathReady || !state.dataPath) return;
+            if (!fs.existsSync(state.dataPath)) {
+                // Primera ejecución (instalación limpia): crear estructura inicial con tarjeta de bienvenida
                 const defaultSheet = normalizeSheet({
                     id: 'sheet_' + Date.now(),
                     name: 'Hoja 1',
                     color: '#3b82f6',
-                    cards: []
+                    cards: [
+                        {
+                            id: generateId(),
+                            title: '¡Bienvenido a Fast 2.0!',
+                            body: 'Esta es una *tarjeta de ejemplo*.\n\n1. Crea tus hojas con el botón ＋\n2. Agrega tarjetas con ➕ Tarjeta\n3. Copia con un clic en *📋 COPIAR*\n\n`Todo listo para WhatsApp.`',
+                            color: '#dbeafe',
+                            images: [],
+                            links: [],
+                            pinned: true,
+                            notes: '',
+                            created: Date.now(),
+                            updated: Date.now()
+                        }
+                    ]
                 });
                 state.sheets = [defaultSheet];
                 state.activeSheetId = defaultSheet.id;
+                state.backupConfig = normalizeBackupConfig(null);
                 saveData();
                 return;
             }
@@ -4452,7 +5352,14 @@
 
                 if (data.sheets && Array.isArray(data.sheets) && data.sheets.length) {
                     state.sheets = data.sheets.map(normalizeSheet);
-                    state.activeSheetId = data.activeSheetId || data.sheets[0].id;
+                    let initialActiveId = data.activeSheetId || data.sheets[0].id;
+                    try {
+                        const rememberedActiveId = localStorage.getItem('FAST_LAST_ACTIVE_SHEET');
+                        if (rememberedActiveId && state.sheets.some(s => s.id === rememberedActiveId && !s.hidden)) {
+                            initialActiveId = rememberedActiveId;
+                        }
+                    } catch (_) {}
+                    state.activeSheetId = initialActiveId;
                     if (data.settings) {
                         state.searchAll = !!data.settings.searchAll;
                         if (data.settings.searchFilterMode) {
@@ -4460,6 +5367,9 @@
                         }
                         state.view = data.settings.view === 'list' ? 'list' : 'grid';
                         if (data.settings.lastCardColor) state.lastCardColor = data.settings.lastCardColor;
+                        state.backupConfig = normalizeBackupConfig(data.settings.backupConfig);
+                    } else {
+                        state.backupConfig = normalizeBackupConfig(null);
                     }
                 } else {
                     const migrated = migrateV1(data);
@@ -4472,12 +5382,15 @@
                         throw new Error('Datos corruptos');
                     }
                 }
+                actualizarIndicadorBotonHeader();
             } catch (e) {
                 console.error('Error al cargar gestor-fast.json, intentando recuperar último backup:', e);
                 const restored = restoreLatestFastBackup();
                 if (restored && restored.sheets && restored.sheets.length) {
                     state.sheets = restored.sheets.map(normalizeSheet);
                     state.activeSheetId = restored.activeSheetId || restored.sheets[0].id;
+                    if (!state.backupConfig) state.backupConfig = normalizeBackupConfig(restored.settings?.backupConfig);
+                    actualizarIndicadorBotonHeader();
                     showToast('🔄 Se recuperaron los datos de Fast desde el último respaldo automático.', 'success', 4000);
                     return;
                 }
@@ -4490,6 +5403,8 @@
                 });
                 state.sheets = [defaultSheet];
                 state.activeSheetId = defaultSheet.id;
+                if (!state.backupConfig) state.backupConfig = normalizeBackupConfig(null);
+                actualizarIndicadorBotonHeader();
                 saveData();
             }
         }
@@ -4626,10 +5541,13 @@
             return out.join(' ');
         }
 
-        // Devuelve score de relevancia (0 = sin coincidencia). AND entre términos.
-        // Busca en título, cabecera, cuerpo completo, notas internas y enlaces.
-        function cardSearchScore(card, tokens) {
-            if (!card || card.isEmpty || !tokens.length) return 0;
+        // Caché en memoria para búsquedas instantáneas: indexa los campos textuales
+        // usando propiedades no enumerables para que nunca se serialicen en el archivo JSON.
+        function getCardSearchIndex(card) {
+            const ver = card.updated || 1;
+            if (card._searchIndex && card._searchIndexVer === ver) {
+                return card._searchIndex;
+            }
             const title = normText(card.title || '');
             const plain = waToPlain(card.body || '');
             const body = normText(plain);
@@ -4638,14 +5556,31 @@
             const linksText = normText((card.links || []).map(l => (l.text || '') + ' ' + (l.url || '')).join(' '));
             const imgLabels = normText((card.images || []).map(i => i.label || '').join(' '));
 
+            const idx = { title, header, body, notes, linksText, imgLabels };
+            try {
+                Object.defineProperty(card, '_searchIndex', { value: idx, writable: true, configurable: true, enumerable: false });
+                Object.defineProperty(card, '_searchIndexVer', { value: ver, writable: true, configurable: true, enumerable: false });
+            } catch (_) {
+                card._searchIndex = idx;
+                card._searchIndexVer = ver;
+            }
+            return idx;
+        }
+
+        // Devuelve score de relevancia (0 = sin coincidencia). AND entre términos.
+        // Busca en título, cabecera, cuerpo completo, notas internas y enlaces.
+        function cardSearchScore(card, tokens) {
+            if (!card || card.isEmpty || !tokens.length) return 0;
+            const idx = getCardSearchIndex(card);
+
             let score = 0;
             for (const tok of tokens) {
-                const inTitle = wordMatch(title, tok);
-                const inHeader = wordMatch(header, tok);
-                const inBody = wordMatch(body, tok);
-                const inNotes = wordMatch(notes, tok);
-                const inLinks = wordMatch(linksText, tok);
-                const inImgs = wordMatch(imgLabels, tok);
+                const inTitle = wordMatch(idx.title, tok);
+                const inHeader = wordMatch(idx.header, tok);
+                const inBody = wordMatch(idx.body, tok);
+                const inNotes = wordMatch(idx.notes, tok);
+                const inLinks = wordMatch(idx.linksText, tok);
+                const inImgs = wordMatch(idx.imgLabels, tok);
 
                 if (!inTitle && !inHeader && !inBody && !inNotes && !inLinks && !inImgs) {
                     return 0; // AND: todos los términos deben coincidir en alguna parte de la tarjeta
@@ -4663,9 +5598,9 @@
             // Bonus de coincidencia por frase exacta completa
             const rawQueryNorm = normText(state.searchQuery.trim());
             if (rawQueryNorm.length >= 3 && rawQueryNorm.includes(' ')) {
-                if (title.includes(rawQueryNorm)) score += 120;
-                else if (header.includes(rawQueryNorm)) score += 60;
-                else if (body.includes(rawQueryNorm)) score += 40;
+                if (idx.title.includes(rawQueryNorm)) score += 120;
+                else if (idx.header.includes(rawQueryNorm)) score += 60;
+                else if (idx.body.includes(rawQueryNorm)) score += 40;
             }
 
             return score;
@@ -4718,6 +5653,51 @@
             updateCardSelectionUI();
             updateSearchNav();
         }
+        function debouncedSaveActiveSheet() {
+            if (debouncedActiveSheetTimer) clearTimeout(debouncedActiveSheetTimer);
+            debouncedActiveSheetTimer = setTimeout(() => {
+                saveData();
+            }, 4000);
+        }
+
+        function updateActiveSheetTabUI() {
+            if (!sheetTabs) return;
+            const tabs = sheetTabs.querySelectorAll('.sheet-tab');
+            tabs.forEach(tab => {
+                if (tab.dataset.sheetId === state.activeSheetId) {
+                    tab.classList.add('active');
+                    try { tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' }); } catch (_) {}
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+        }
+
+        function switchActiveSheet(sheetId) {
+            if (!sheetId || state.activeSheetId === sheetId) return;
+            state.activeSheetId = sheetId;
+            state.drawer = null;
+            selectedIndex = -1;
+            if (selectedSheetId && selectedSheetId !== sheetId) {
+                clearCardSelection();
+            }
+            try {
+                localStorage.setItem('FAST_LAST_ACTIVE_SHEET', sheetId);
+            } catch (_) {}
+
+            debouncedSaveActiveSheet();
+            updateActiveSheetTabUI();
+            renderCards();
+            renderDrawer();
+            updateResultCount();
+            updateViewClass();
+            updatePasteButtonState();
+            updateSearchModeButtonsUI();
+            collectVisibleCards();
+            updateCardSelectionUI();
+            updateSearchNav();
+        }
+
         // ---------- SHEETBAR (pestañas estilo Excel) ----------
         function renderSheets() {
             sheetTabs.innerHTML = '';
@@ -4745,13 +5725,10 @@
                     <span class="sheet-count">${sheet.mode === 'process' ? (sheet.grid ? sheet.grid.cells.filter(row => row.some(v => v)).length : 0) : sheet.cards.length}</span>
                 `;
 
-                // Clic: activar
+                // Clic: activar hoja de forma instantánea sin congelar la UI
                 el.addEventListener('click', (e) => {
                     if (e.target.closest('.sheet-name.editing')) return;
-                    state.activeSheetId = sheet.id;
-                    state.drawer = null;
-                    saveData();
-                    render();
+                    switchActiveSheet(sheet.id);
                 });
 
                 // Doble clic en nombre: renombrar
@@ -5068,21 +6045,35 @@
             if (!titleEl) return;
             const text = (titleEl.textContent || '').trim();
             if (!text) return;
-            // Presupuesto vertical: alto de tarjeta menos espacio del bloque de botones y paddings
-            const budget = Math.max(46, (cardH || 190) - 46);
-            titleEl.style.maxHeight = '';
-            titleEl.style.display = 'block';
-            titleEl.style.webkitLineClamp = '';
-            titleEl.style.webkitBoxOrient = '';
-            titleEl.style.overflow = 'hidden';
-            titleEl.style.textOverflow = '';
-            titleEl.style.whiteSpace = 'normal';
-            // Nunca partir una palabra a mitad: se quiebra solo por espacios.
+            const baseFs = (parseFloat(startFs) > 0 ? startFs : 12);
+            titleEl.style.lineHeight = '1.2';
             titleEl.style.wordBreak = 'normal';
             titleEl.style.overflowWrap = 'normal';
             titleEl.style.hyphens = 'none';
-            titleEl.style.lineHeight = '1.2';
-            titleEl.style.fontSize = (parseFloat(startFs) > 0 ? startFs : 12) + 'px';
+            titleEl.style.whiteSpace = 'normal';
+            titleEl.style.overflow = 'hidden';
+
+            // Si el elemento no está montado en el DOM o no tiene dimensiones visibles (render por fragmento):
+            // aplicar escala proporcional según caracteres para evitar desbordes y prevenir layout thrashing sincrónico
+            if (!titleEl.isConnected || titleEl.clientWidth === 0) {
+                if (text.length > 55) {
+                    titleEl.style.fontSize = Math.min(baseFs, 9.5) + 'px';
+                } else if (text.length > 35) {
+                    titleEl.style.fontSize = Math.min(baseFs, 10.5) + 'px';
+                } else if (text.length > 20) {
+                    titleEl.style.fontSize = Math.min(baseFs, 11.5) + 'px';
+                } else {
+                    titleEl.style.fontSize = baseFs + 'px';
+                }
+                return;
+            }
+
+            // Si el elemento ya está conectado al DOM con dimensiones medibles (p. ej. en el preview del editor):
+            titleEl.style.fontSize = baseFs + 'px';
+            if (text.length <= 18) return;
+
+            // Presupuesto vertical: alto de tarjeta menos espacio del bloque de botones y paddings
+            const budget = Math.max(46, (cardH || 190) - 46);
             const MIN_TITLE_FS = 9;
             while (parseFloat(titleEl.style.fontSize) > MIN_TITLE_FS) {
                 const overH = titleEl.scrollHeight > budget + 1;
@@ -5309,13 +6300,15 @@
                 return;
             }
 
+            const frag = document.createDocumentFragment();
             cards.forEach(({ card, sheetId, score }) => {
                 const el = createCardElement(card, sheet, sheetId, false);
                 if (tokens.length && state.searchFilterMode === 'mark' && score > 0) {
                     el.classList.add('search-marked');
                 }
-                cardsContainer.appendChild(el);
+                frag.appendChild(el);
             });
+            cardsContainer.appendChild(frag);
 
             if (query) highlightMatches(query);
         }
@@ -5392,6 +6385,7 @@
             const maxCardsPerSegment = Math.max(1, Math.floor((containerWidth + GRID_GAP) / cardSlotWidth));
 
             // Renderizar elementos raíz en el orden establecido (side-by-side en la misma grilla horizontal)
+            const frag = document.createDocumentFragment();
             rootOrder.forEach((itemId) => {
                 // Caso A: Es un Contenedor
                 const cont = sheet.containers.find(c => c.id === itemId);
@@ -5540,7 +6534,7 @@
                         }
 
                         block.appendChild(body);
-                        cardsContainer.appendChild(block);
+                        frag.appendChild(block);
                     });
                     return;
                 }
@@ -5555,9 +6549,10 @@
                     if (tokens.length && state.searchFilterMode === 'mark' && !card.isEmpty && cardSearchScore(card, tokens) > 0) {
                         cardEl.classList.add('search-marked');
                     }
-                    cardsContainer.appendChild(cardEl);
+                    frag.appendChild(cardEl);
                 }
             });
+            cardsContainer.appendChild(frag);
 
             if (query) highlightMatches(query);
         }
@@ -5611,6 +6606,7 @@
                 return;
             }
 
+            const frag = document.createDocumentFragment();
             cards.forEach(({ card, sheetId, score }) => {
                 if (card.isEmpty) {
                     const el = document.createElement('div');
@@ -5630,7 +6626,7 @@
                         e.stopPropagation();
                         showEmptySlotContextMenu(e.clientX, e.clientY, sheetId, card.id);
                     });
-                    cardsContainer.appendChild(el);
+                    frag.appendChild(el);
                     return;
                 }
 
@@ -5652,7 +6648,7 @@
                         <span class="card-star" title="${card.pinned ? 'Favorita' : 'No favorita'}">${card.pinned ? '⭐' : '☆'}</span>
                         ${badge}
                     </div>
-                    <div class="img-card-media" title="Clic: copiar · Doble clic: copiar y ver ampliada">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" /><span class="img-copy-hint">🖼 Clic copiar · Doble clic ver</span>` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
+                    <div class="img-card-media" title="Clic: copiar · Doble clic: copiar y ver ampliada">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" loading="lazy" decoding="async" /><span class="img-copy-hint">🖼 Clic copiar · Doble clic ver</span>` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
                     <div class="img-card-right">
                         <div class="img-card-text">${esc(waToPlain(card.body)) || '<span class="img-card-noimg">Sin texto complementario</span>'}</div>
                         <div class="img-card-btns">
@@ -5703,8 +6699,9 @@
                     showCardContextMenu(e.clientX, e.clientY, sheetId, card.id);
                 });
 
-                cardsContainer.appendChild(el);
+                frag.appendChild(el);
             });
+            cardsContainer.appendChild(frag);
 
             if (query) highlightMatches(query);
         }
@@ -6446,6 +7443,104 @@
             updateSearchNav();
         }
 
+        // Filtra y ordena las tarjetas en modo 'Ocultar' (hide) en sitio, sin destruir
+        // ni reconstruir el DOM (evita recodificar imágenes Base64 y bloqueos de interfaz).
+        function applyHideSearchInPlace() {
+            const sheet = getActiveSheet();
+            if (!sheet) return;
+            if (state.searchAll) {
+                renderCards();
+                updateResultCount();
+                collectVisibleCards();
+                return;
+            }
+
+            const cardEls = cardsContainer.querySelectorAll('.card-item');
+            if (!cardEls.length) {
+                renderCards();
+                updateResultCount();
+                collectVisibleCards();
+                return;
+            }
+
+            const tokens = searchTokens();
+            const query = state.searchQuery.trim();
+            let visibleCount = 0;
+
+            cardEls.forEach(el => {
+                if (el.classList.contains('empty-slot')) {
+                    if (tokens.length > 0 || state.favOnly) {
+                        el.style.display = 'none';
+                        el.style.order = '';
+                    } else {
+                        el.style.display = '';
+                        el.style.order = '';
+                    }
+                    return;
+                }
+
+                const cardId = el.dataset.cardId;
+                const card = sheet.cards.find(c => c.id === cardId);
+                if (!card) return;
+
+                if (state.favOnly && !card.pinned) {
+                    el.style.display = 'none';
+                    el.style.order = '';
+                    return;
+                }
+
+                let score = 0;
+                let isMatch = true;
+                if (tokens.length > 0) {
+                    score = cardSearchScore(card, tokens);
+                    isMatch = (score > 0);
+                }
+
+                if (isMatch) {
+                    el.style.display = '';
+                    visibleCount++;
+                    if (tokens.length > 0) {
+                        const pinBonus = card.pinned ? 1 : 0;
+                        el.style.order = String(-(score * 10 + pinBonus));
+                    } else {
+                        el.style.order = '';
+                    }
+
+                    const titleEl = el.querySelector('.card-title') || el.querySelector('.img-card-title');
+                    const previewEl = el.querySelector('.card-body-preview') || el.querySelector('.img-card-text');
+                    const plain = waToPlain(card.body || '');
+
+                    if (titleEl) {
+                        titleEl.innerHTML = (query && isMatch && tokens.length) ? highlightHtml(card.title || '', query) : esc(card.title || 'Sin título');
+                    }
+                    if (previewEl) {
+                        previewEl.innerHTML = (query && isMatch && tokens.length) ? highlightHtml(plain, query) : esc(plain);
+                    }
+                } else {
+                    el.style.display = 'none';
+                    el.style.order = '';
+                }
+            });
+
+            let emptyMsgEl = cardsContainer.querySelector('.empty-cards.in-place-search');
+            if (visibleCount === 0 && (tokens.length > 0 || state.favOnly)) {
+                if (!emptyMsgEl) {
+                    emptyMsgEl = document.createElement('div');
+                    emptyMsgEl.className = 'empty-cards in-place-search';
+                    cardsContainer.appendChild(emptyMsgEl);
+                }
+                emptyMsgEl.style.display = '';
+                emptyMsgEl.innerHTML = tokens.length
+                    ? 'Sin resultados.<div class="hint">Prueba con otra búsqueda</div>'
+                    : 'Sin favoritas.<div class="hint">Marca una tarjeta con ⭐ en su editor</div>';
+            } else if (emptyMsgEl) {
+                emptyMsgEl.style.display = 'none';
+            }
+
+            updateResultCount();
+            collectVisibleCards();
+        }
+
         // Re-resalta las celdas del grid de procesos en sitio (sin reconstruir el
         // DOM): mantiene scroll, selección, anchos y altos, evitando deformaciones.
         // El contenido resaltado va envuelto en un <span> único: como la celda es
@@ -6945,7 +8040,7 @@
                     const box = document.createElement('div');
                     box.className = 'd-img';
                     box.innerHTML = `
-                        <img src="${img.data}" alt="${esc(img.label || 'Imagen')}" />
+                        <img src="${img.data}" alt="${esc(img.label || 'Imagen')}" loading="lazy" decoding="async" />
                         <div class="d-img-actions">
                             <button title="Abrir grande">🔍</button>
                             <button title="Copiar">📋</button>
@@ -9250,7 +10345,6 @@
                         sheet.cards.push(card);
                     }
                 }
-                saveData();
             }
             editingCard = { sheetId, cardId: card.id, isNew, replacedSlotId: replaceSlotId };
 
@@ -9408,7 +10502,7 @@
                 const div = document.createElement('div');
                 div.className = 'img-item';
                 div.innerHTML = `
-                    <img class="img-preview-small" src="${img.data}" alt="" />
+                    <img class="img-preview-small" src="${img.data}" alt="" loading="lazy" decoding="async" />
                     <input type="text" placeholder="Texto breve" value="${esc(img.label || '')}" data-index="${idx}" />
                     <button class="btn-remove" data-index="${idx}">✕</button>
                 `;
@@ -9687,16 +10781,25 @@
                 card.bodyFontSize = parseInt(editBodyFs.value, 10) || 10;
             }
             card.updated = Date.now();
-            saveData();
         }
 
         let autosaveTimer = null;
+        let diskAutosaveTimer = null;
         function scheduleAutosave() {
-            if (autosaveTimer) clearTimeout(autosaveTimer);
-            autosaveTimer = setTimeout(() => { autosaveTimer = null; autosaveCard(); }, 400);
+            autosaveCard();
+            if (diskAutosaveTimer) clearTimeout(diskAutosaveTimer);
+            diskAutosaveTimer = setTimeout(() => {
+                diskAutosaveTimer = null;
+                if (editingCard) {
+                    autosaveCard();
+                    saveData();
+                }
+            }, 5000);
         }
         function flushAutosave() {
-            if (autosaveTimer) { clearTimeout(autosaveTimer); autosaveTimer = null; autosaveCard(); }
+            if (autosaveTimer) { clearTimeout(autosaveTimer); autosaveTimer = null; }
+            if (diskAutosaveTimer) { clearTimeout(diskAutosaveTimer); diskAutosaveTimer = null; }
+            autosaveCard();
         }
 
         editTitle.addEventListener('input', () => { updateCardPreview(); scheduleAutosave(); });
@@ -9729,6 +10832,7 @@
 
         function cancelCardEditor() {
             if (autosaveTimer) { clearTimeout(autosaveTimer); autosaveTimer = null; }
+            if (diskAutosaveTimer) { clearTimeout(diskAutosaveTimer); diskAutosaveTimer = null; }
             modalOverlay.classList.remove('show');
             if (editingCard) {
                 if (editingCard.isNew) {
@@ -11251,39 +12355,58 @@
         editPinned.addEventListener('change', autosaveCard);
         editSheet.addEventListener('change', autosaveCard);
 
-        let searchInputRaf = null;
-        searchInput.addEventListener('input', () => {
-            state.searchQuery = searchInput.value;
+        let searchDebounceTimer = null;
+        function triggerSearchFiltering(immediate = false) {
             const sheet = getActiveSheet();
             if (!sheet) return;
 
-            if (searchInputRaf) cancelAnimationFrame(searchInputRaf);
-            searchInputRaf = requestAnimationFrame(() => {
-                // 1. En modo procesos: re-resaltamos celdas en sitio sin reconstruir cuadrícula
-                if (sheet.mode === 'process') {
-                    exApplyHighlight();
-                    updateResultCount();
-                    return;
-                }
+            // 1. En modo procesos: re-resaltamos celdas en sitio sin reconstruir cuadrícula
+            if (sheet.mode === 'process') {
+                exApplyHighlight();
+                updateResultCount();
+                return;
+            }
 
-                // 2. En modo marcar búsqueda: actualización instantánea en sitio, sin parpadeos ni recreación del DOM
-                if (state.searchFilterMode === 'mark') {
-                    if (cardsContainer.querySelector('.empty-cards') || !cardsContainer.querySelector('.card-item')) {
-                        renderCards();
-                    } else {
-                        applyMarkSearchInPlace();
-                    }
-                    updateSearchNav();
-                    return;
+            // 2. En modo marcar búsqueda: actualización instantánea en sitio, sin parpadeos ni recreación del DOM
+            if (state.searchFilterMode === 'mark') {
+                if (cardsContainer.querySelector('.empty-cards:not(.in-place-search)') || !cardsContainer.querySelector('.card-item')) {
+                    renderCards();
+                } else {
+                    applyMarkSearchInPlace();
                 }
+                updateSearchNav();
+                return;
+            }
 
-                // 3. En modo ocultar (hide): actualizamos las tarjetas sin reconstruir la barra inferior de hojas
+            // 3. En modo ocultar (hide):
+            // Si estamos en modo imágenes o tarjetas (y no es búsqueda global entre todas las hojas),
+            // filtramos en sitio para máxima velocidad sin reconstruir imágenes Base64
+            if (!state.searchAll && (sheet.mode === 'images' || sheet.mode === 'cards')) {
+                applyHideSearchInPlace();
+            } else {
                 renderCards();
                 updateResultCount();
                 collectVisibleCards();
-            });
+            }
+        }
+
+        searchInput.addEventListener('input', () => {
+            state.searchQuery = searchInput.value;
+            if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+            // 200ms de debounce para escribir fluido sin tirones ni decodificaciones intermedias
+            searchDebounceTimer = setTimeout(() => {
+                searchDebounceTimer = null;
+                triggerSearchFiltering();
+            }, 200);
         });
         searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (searchDebounceTimer) {
+                    clearTimeout(searchDebounceTimer);
+                    searchDebounceTimer = null;
+                    triggerSearchFiltering(true);
+                }
+            }
             if (state.searchFilterMode === 'mark' && (state.searchQuery || '').trim()) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -11406,7 +12529,16 @@
 
         function collectVisibleCards() {
             visibleCards = [];
-            document.querySelectorAll('.card-item:not(.empty-slot)').forEach(el => {
+            const els = Array.from(document.querySelectorAll('.card-item:not(.empty-slot)'))
+                .filter(el => el.style.display !== 'none');
+
+            els.sort((a, b) => {
+                const ordA = parseInt(a.style.order || '0', 10);
+                const ordB = parseInt(b.style.order || '0', 10);
+                return ordA - ordB;
+            });
+
+            els.forEach(el => {
                 visibleCards.push({ sheetId: el.dataset.sheetId, cardId: el.dataset.cardId, el });
             });
             if (selectedIndex >= visibleCards.length) selectedIndex = -1;
@@ -11528,11 +12660,7 @@
                         const idx = parseInt(e.key, 10) - 1;
                         const visibleSheets = state.sheets.filter(s => !s.hidden);
                         if (visibleSheets[idx]) {
-                            state.activeSheetId = visibleSheets[idx].id;
-                            state.drawer = null;
-                            selectedIndex = -1;
-                            saveData();
-                            render();
+                            switchActiveSheet(visibleSheets[idx].id);
                         }
                         break;
                 }
@@ -11604,6 +12732,8 @@
                     editingContainer = null;
                     return;
                 }
+                if (document.getElementById('import-wizard-overlay')?.classList.contains('show')) { cerrarAsistenteImportacion(); return; }
+                if (document.getElementById('backup-modal-overlay')?.classList.contains('show')) { cerrarModalBackup(); return; }
                 if (hiddenSheetsOverlay && hiddenSheetsOverlay.classList.contains('show')) { closeHiddenSheetsModal(); return; }
                 if (modalOverlay.classList.contains('show')) { cancelCardEditor(); return; }
                 if (confirmOverlay.classList.contains('show')) { closeConfirm(); return; }
@@ -11623,10 +12753,932 @@
         });
 
         // ============================================================
+        // SISTEMA INTELIGENTE DE COPIAS DE SEGURIDAD, EXPORTACIÓN E IMPORTACIÓN
+        // ============================================================
+        let currentImportDraft = null;
+        let backupSchedulerInterval = null;
+
+        function abrirModalBackup() {
+            if (!state.backupConfig) state.backupConfig = normalizeBackupConfig(null);
+            const overlay = document.getElementById('backup-modal-overlay');
+            if (!overlay) return;
+
+            // Sincronizar UI con state.backupConfig
+            const folderInput = document.getElementById('backup-folder-path');
+            if (folderInput) folderInput.value = state.backupConfig.folderPath || '';
+            const autoEnabled = document.getElementById('backup-auto-enabled');
+            if (autoEnabled) autoEnabled.checked = !!state.backupConfig.enabled;
+
+            // Frecuencia
+            const freqRadios = document.getElementsByName('backup-freq-type');
+            freqRadios.forEach(r => { r.checked = (r.value === state.backupConfig.frequencyType); });
+            const freqHours = document.getElementById('backup-freq-hours');
+            if (freqHours) freqHours.value = state.backupConfig.frequencyHours || 4;
+            const freqDays = document.getElementById('backup-freq-days');
+            if (freqDays) freqDays.value = state.backupConfig.frequencyDays || 1;
+
+            // Chips de días
+            const dayChips = document.querySelectorAll('#backup-weekdays-container .backup-day-chip');
+            dayChips.forEach(chip => {
+                const chk = chip.querySelector('input');
+                if (chk) {
+                    const d = parseInt(chk.value, 10);
+                    chk.checked = state.backupConfig.specificDays.includes(d);
+                    if (chk.checked) chip.classList.add('active');
+                    else chip.classList.remove('active');
+                }
+            });
+
+            // Retención
+            const retLimit = document.getElementById('backup-retention-limit');
+            if (retLimit) retLimit.value = String(state.backupConfig.maxBackups);
+
+            // Alcance
+            const scopeRadios = document.getElementsByName('backup-scope-type');
+            scopeRadios.forEach(r => { r.checked = (r.value === state.backupConfig.scope); });
+            renderizarChecklistHojasBackup();
+
+            actualizarEstadoAutoBackupUI();
+            actualizarTipoFrecuenciaUI();
+            actualizarAlcanceUI();
+            actualizarTextoEstadoBackupUI();
+
+            cambiarPestanaBackup('auto');
+            overlay.classList.add('show');
+        }
+
+        function cerrarModalBackup() {
+            const overlay = document.getElementById('backup-modal-overlay');
+            if (overlay) overlay.classList.remove('show');
+        }
+
+        function cambiarPestanaBackup(tabName) {
+            const tabs = document.querySelectorAll('.backup-nav-tab');
+            tabs.forEach(t => {
+                if (t.dataset.tab === tabName) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+
+            const panes = {
+                auto: document.getElementById('backup-pane-auto'),
+                manual: document.getElementById('backup-pane-manual'),
+                import: document.getElementById('backup-pane-import'),
+                history: document.getElementById('backup-pane-history'),
+                health: document.getElementById('backup-pane-health')
+            };
+
+            Object.keys(panes).forEach(k => {
+                if (panes[k]) {
+                    panes[k].style.display = (k === tabName) ? 'flex' : 'none';
+                }
+            });
+
+            if (tabName === 'history') {
+                cargarHistorialRespaldosUI();
+            } else if (tabName === 'manual') {
+                renderizarChecklistHojasBackup();
+            } else if (tabName === 'health') {
+                cargarSaludDiagnosticoUI();
+            }
+        }
+
+        function cargarSaludDiagnosticoUI() {
+            try {
+                let totalCards = 0;
+                let emptyCards = 0;
+                let totalImages = 0;
+                let imagesBytes = 0;
+                let textBytes = 0;
+
+                state.sheets.forEach(s => {
+                    (s.cards || []).forEach(c => {
+                        totalCards++;
+                        if (c.isEmpty) {
+                            emptyCards++;
+                            return;
+                        }
+                        // Contar texto
+                        textBytes += (c.title || '').length + (c.body || '').length + (c.notes || '').length;
+                        (c.links || []).forEach(l => { textBytes += (l.text || '').length + (l.url || '').length; });
+
+                        // Contar imágenes
+                        (c.images || []).forEach(img => {
+                            totalImages++;
+                            if (img.data) imagesBytes += img.data.length;
+                            if (img.label) textBytes += img.label.length;
+                        });
+                    });
+                });
+
+                let dbFileSizeBytes = 0;
+                if (state.dataPath && fs.existsSync(state.dataPath)) {
+                    dbFileSizeBytes = fs.statSync(state.dataPath).size;
+                }
+
+                const cCountEl = document.getElementById('health-cards-count');
+                const cDetailEl = document.getElementById('health-cards-detail');
+                const iCountEl = document.getElementById('health-images-count');
+                const iSizeEl = document.getElementById('health-images-size');
+                const dSizeEl = document.getElementById('health-db-size');
+                const tSizeEl = document.getElementById('health-text-size');
+                const barImgs = document.getElementById('health-bar-images');
+                const barTxt = document.getElementById('health-bar-text');
+                const compText = document.getElementById('health-composition-text');
+
+                if (cCountEl) cCountEl.textContent = `${state.sheets.length} hojas / ${totalCards} tarj.`;
+                if (cDetailEl) cDetailEl.textContent = `${totalCards - emptyCards} activas · ${emptyCards} slots libres`;
+                if (iCountEl) iCountEl.textContent = `${totalImages} imágenes`;
+                if (iSizeEl) iSizeEl.textContent = `${(imagesBytes / (1024 * 1024)).toFixed(2)} MB`;
+                if (dSizeEl) dSizeEl.textContent = `${(dbFileSizeBytes / (1024 * 1024)).toFixed(2)} MB`;
+                if (tSizeEl) tSizeEl.textContent = `Texto puro: ${(textBytes / 1024).toFixed(1)} KB`;
+
+                const totalPayload = Math.max(1, imagesBytes + textBytes);
+                const imgPct = Math.round((imagesBytes / totalPayload) * 100);
+                const txtPct = 100 - imgPct;
+
+                if (barImgs) barImgs.style.width = `${imgPct}%`;
+                if (barTxt) barTxt.style.width = `${txtPct}%`;
+                if (compText) compText.textContent = `Imágenes: ${imgPct}% (${(imagesBytes / (1024 * 1024)).toFixed(1)} MB) · Texto: ${txtPct}% (${(textBytes / 1024).toFixed(1)} KB)`;
+            } catch (err) {
+                console.error('Error al cargar métricas de salud:', err);
+            }
+        }
+
+        function ejecutarOptimizacionBaseDatos() {
+            try {
+                // Forzar backup de seguridad antes de compactar
+                rotateFastBackup(true);
+
+                let cleanedCards = 0;
+
+                state.sheets.forEach(s => {
+                    // Limpiar propiedades temporales o basura en tarjetas
+                    (s.cards || []).forEach(c => {
+                        cleanedCards++;
+                        delete c._searchIndex;
+                        delete c._searchIndexVer;
+                    });
+                });
+
+                // Guardar atómicamente a disco
+                saveData();
+
+                // Recargar métricas
+                cargarSaludDiagnosticoUI();
+
+                const resBox = document.getElementById('health-opt-result');
+                if (resBox) {
+                    resBox.style.display = 'block';
+                    resBox.innerHTML = `✅ <b>Optimización completada con éxito.</b> Se verificaron ${cleanedCards} tarjetas en ${state.sheets.length} hojas. Los índices de memoria fueron regenerados y se aseguró el respaldo de seguridad.`;
+                }
+                showToast('🚀 Base de datos optimizada e índices regenerados.', 'success', 3500);
+            } catch (err) {
+                console.error('Error al optimizar base de datos:', err);
+                showToast('❌ Error durante la optimización: ' + err.message, 'error');
+            }
+        }
+
+        async function abrirSelectorCarpetaBackup() {
+            try {
+                const def = (state.backupConfig && state.backupConfig.folderPath) ? state.backupConfig.folderPath : os.homedir();
+                const res = await ipcRenderer.invoke('show-open-dialog', {
+                    title: 'Seleccionar carpeta para copias de seguridad de Fast',
+                    defaultPath: def,
+                    properties: ['openDirectory', 'createDirectory']
+                });
+                if (!res.canceled && res.filePaths && res.filePaths.length > 0) {
+                    const selectedPath = res.filePaths[0];
+                    const folderInput = document.getElementById('backup-folder-path');
+                    if (folderInput) folderInput.value = selectedPath;
+                    if (!state.backupConfig) state.backupConfig = normalizeBackupConfig(null);
+                    state.backupConfig.folderPath = selectedPath;
+                    saveData();
+                    showToast('📂 Carpeta de respaldos configurada.', 'success', 2500);
+                }
+            } catch (err) {
+                console.error('Error al seleccionar carpeta de respaldo:', err);
+                showToast('❌ Error al seleccionar carpeta: ' + err.message, 'error');
+            }
+        }
+
+        function abrirCarpetaBackupEnExplorador() {
+            const p = (state.backupConfig && state.backupConfig.folderPath) ? state.backupConfig.folderPath : '';
+            if (!p) {
+                showToast('⚠️ No hay ninguna carpeta configurada todavía.', 'warning');
+                return;
+            }
+            if (!fs.existsSync(p)) {
+                try { fs.mkdirSync(p, { recursive: true }); } catch (_) {}
+            }
+            try {
+                shell.openPath(p);
+            } catch (err) {
+                console.error('Error al abrir carpeta:', err);
+            }
+        }
+
+        function actualizarEstadoAutoBackupUI() {
+            const autoEnabled = document.getElementById('backup-auto-enabled');
+            const enabled = autoEnabled ? autoEnabled.checked : false;
+            const wrap = document.getElementById('backup-schedule-wrap');
+            if (wrap) {
+                wrap.style.opacity = enabled ? '1' : '0.45';
+                wrap.style.pointerEvents = enabled ? 'auto' : 'none';
+            }
+        }
+
+        function actualizarTipoFrecuenciaUI() {
+            const checkedRadio = document.querySelector('input[name="backup-freq-type"]:checked');
+            const type = checkedRadio ? checkedRadio.value : 'hours';
+            const hBox = document.getElementById('freq-hours-box');
+            const dBox = document.getElementById('freq-days-box');
+            const wBox = document.getElementById('freq-weekdays-box');
+            if (hBox) hBox.style.display = (type === 'hours') ? 'flex' : 'none';
+            if (dBox) dBox.style.display = (type === 'days') ? 'flex' : 'none';
+            if (wBox) wBox.style.display = (type === 'weekdays') ? 'flex' : 'none';
+        }
+
+        function actualizarAlcanceUI() {
+            const checkedRadio = document.querySelector('input[name="backup-scope-type"]:checked');
+            const scope = checkedRadio ? checkedRadio.value : 'all';
+            const cBox = document.getElementById('backup-custom-sheets-container');
+            if (cBox) cBox.style.display = (scope === 'custom') ? 'flex' : 'none';
+        }
+
+        function renderizarChecklistHojasBackup() {
+            const list = document.getElementById('backup-sheets-checklist');
+            if (!list) return;
+            list.innerHTML = '';
+            const selected = new Set(state.backupConfig?.selectedSheetIds || []);
+            state.sheets.forEach(s => {
+                const item = document.createElement('label');
+                item.className = 'backup-sheet-item';
+                const isChecked = (selected.size === 0 || selected.has(s.id));
+                const numCards = Array.isArray(s.cards) ? s.cards.filter(c => !c.isEmpty).length : 0;
+                const hiddenTag = s.hidden ? ' · <i>(Oculta)</i>' : '';
+                item.innerHTML = `
+                    <input type="checkbox" value="${esc(s.id)}" ${isChecked ? 'checked' : ''} />
+                    <span style="font-weight: 600; color: var(--text);">${esc(s.name)}</span>
+                    <span class="backup-sheet-badge">${numCards} tarjeta${numCards === 1 ? '' : 's'} · ${esc(s.mode || 'cards')}${hiddenTag}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function toggleSelectAllSheetsBackup(check) {
+            const chks = document.querySelectorAll('#backup-sheets-checklist input[type="checkbox"]');
+            chks.forEach(c => c.checked = check);
+        }
+
+        function actualizarIndicadorBotonHeader() {
+            const badge = document.getElementById('hdr-backup-badge');
+            if (!badge) return;
+            const isEnabled = !!(state.backupConfig && state.backupConfig.enabled);
+            badge.textContent = isEnabled ? 'ON' : 'OFF';
+            badge.className = 'hdr-backup-badge ' + (isEnabled ? 'on' : 'off');
+            const btn = document.getElementById('hdr-backup');
+            if (btn) {
+                btn.title = isEnabled 
+                    ? 'Copias de Seguridad: Programador Automático ACTIVADO' 
+                    : 'Copias de Seguridad: Programador Automático DESACTIVADO';
+            }
+        }
+
+        function generarNombreHojaUnico(baseName) {
+            let candidate = (baseName || 'Hoja').trim();
+            let counter = 1;
+            const existingNames = new Set(state.sheets.map(s => (s.name || '').trim().toLowerCase()));
+            while (existingNames.has(candidate.toLowerCase())) {
+                counter++;
+                candidate = `${baseName} (${counter})`;
+            }
+            return candidate;
+        }
+
+        function actualizarTextoEstadoBackupUI() {
+            const lastTxt = document.getElementById('backup-status-last-text');
+            const nextTxt = document.getElementById('backup-status-next-text');
+            if (!state.backupConfig || !state.backupConfig.lastBackupTime) {
+                if (lastTxt) lastTxt.textContent = 'Último respaldo automático: Ninguno registrado';
+            } else {
+                const d = new Date(state.backupConfig.lastBackupTime);
+                if (lastTxt) lastTxt.textContent = 'Último respaldo automático: ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            if (!state.backupConfig?.enabled) {
+                if (nextTxt) nextTxt.textContent = 'Estado: Desactivado';
+            } else {
+                if (nextTxt) nextTxt.textContent = 'Estado: Activo y programado';
+            }
+            actualizarIndicadorBotonHeader();
+        }
+
+        function guardarAjustesBackup() {
+            if (!state.backupConfig) state.backupConfig = normalizeBackupConfig(null);
+            const folderInput = document.getElementById('backup-folder-path');
+            state.backupConfig.folderPath = (folderInput && folderInput.value.trim()) ? folderInput.value.trim() : path.join(os.homedir(), 'Documents', 'Fast_Respaldos');
+            const autoEnabled = document.getElementById('backup-auto-enabled');
+            state.backupConfig.enabled = autoEnabled ? autoEnabled.checked : false;
+
+            const freqRadio = document.querySelector('input[name="backup-freq-type"]:checked');
+            state.backupConfig.frequencyType = freqRadio ? freqRadio.value : 'hours';
+
+            const freqHours = document.getElementById('backup-freq-hours');
+            state.backupConfig.frequencyHours = freqHours ? (parseInt(freqHours.value, 10) || 4) : 4;
+            const freqDays = document.getElementById('backup-freq-days');
+            state.backupConfig.frequencyDays = freqDays ? (parseInt(freqDays.value, 10) || 1) : 1;
+
+            // Días específicos
+            const days = [];
+            document.querySelectorAll('#backup-weekdays-container input[type="checkbox"]').forEach(c => {
+                if (c.checked) days.push(parseInt(c.value, 10));
+            });
+            state.backupConfig.specificDays = days.length ? days : [1, 2, 3, 4, 5];
+
+            const retLimit = document.getElementById('backup-retention-limit');
+            state.backupConfig.maxBackups = retLimit ? parseInt(retLimit.value, 10) : 10;
+
+            // Alcance
+            const scopeRadio = document.querySelector('input[name="backup-scope-type"]:checked');
+            state.backupConfig.scope = scopeRadio ? scopeRadio.value : 'all';
+            const selectedSheetIds = [];
+            document.querySelectorAll('#backup-sheets-checklist input[type="checkbox"]').forEach(c => {
+                if (c.checked) selectedSheetIds.push(c.value);
+            });
+            state.backupConfig.selectedSheetIds = selectedSheetIds;
+
+            saveData();
+            actualizarTextoEstadoBackupUI();
+            showToast('✅ Configuración de respaldos guardada correctamente.', 'success');
+        }
+
+        // Delegación de clic para chips de días
+        document.addEventListener('change', (e) => {
+            if (e.target && e.target.closest('#backup-weekdays-container')) {
+                const chip = e.target.closest('.backup-day-chip');
+                if (chip) {
+                    if (e.target.checked) chip.classList.add('active');
+                    else chip.classList.remove('active');
+                }
+            }
+        });
+
+        // Generación de payload estructurado para respaldo
+        function construirPayloadRespaldo(sheetIds = null) {
+            let sheetsToExport = state.sheets;
+            let isPartial = false;
+            if (Array.isArray(sheetIds) && sheetIds.length > 0) {
+                sheetsToExport = state.sheets.filter(s => sheetIds.includes(s.id));
+                isPartial = (sheetsToExport.length < state.sheets.length);
+            }
+
+            let totalCards = 0;
+            let totalImages = 0;
+            sheetsToExport.forEach(s => {
+                if (Array.isArray(s.cards)) {
+                    s.cards.forEach(c => {
+                        if (!c.isEmpty) {
+                            totalCards++;
+                            if (Array.isArray(c.images)) totalImages += c.images.length;
+                        }
+                    });
+                }
+            });
+
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const formattedDate = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+            return {
+                app: "NeoGestor-Fast",
+                formatVersion: 2,
+                exportDate: now.toISOString(),
+                exportDateFormatted: formattedDate,
+                scope: isPartial ? "partial" : "full",
+                meta: {
+                    totalSheets: sheetsToExport.length,
+                    totalCards,
+                    totalImages,
+                    sheetNames: sheetsToExport.map(s => s.name)
+                },
+                sheets: JSON.parse(JSON.stringify(sheetsToExport))
+            };
+        }
+
+        async function guardarArchivoRespaldoAsync(filePath, payload) {
+            const dir = path.dirname(filePath);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            const content = JSON.stringify(payload, null, 2);
+            await fs.promises.writeFile(filePath, content, 'utf8');
+        }
+
+        function generarNombreArchivoBackup(prefix = 'Fast_Backup') {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const str = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+            return `${prefix}_${str}.fastbackup`;
+        }
+
+        async function ejecutarCopiaManualDirecta() {
+            try {
+                if (!state.backupConfig) state.backupConfig = normalizeBackupConfig(null);
+                let folder = state.backupConfig.folderPath || path.join(os.homedir(), 'Documents', 'Fast_Respaldos');
+                if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+
+                const scopeRadio = document.querySelector('input[name="backup-scope-type"]:checked');
+                const scope = scopeRadio ? scopeRadio.value : 'all';
+                let sheetIds = null;
+                if (scope === 'custom') {
+                    sheetIds = [];
+                    document.querySelectorAll('#backup-sheets-checklist input[type="checkbox"]').forEach(c => {
+                        if (c.checked) sheetIds.push(c.value);
+                    });
+                    if (!sheetIds.length) {
+                        showToast('⚠️ Debes seleccionar al menos una hoja para respaldar.', 'warning');
+                        return;
+                    }
+                }
+
+                const payload = construirPayloadRespaldo(sheetIds);
+                const fileName = generarNombreArchivoBackup('Fast_Backup');
+                const fullPath = path.join(folder, fileName);
+
+                await guardarArchivoRespaldoAsync(fullPath, payload);
+                state.backupConfig.lastBackupTime = Date.now();
+                saveData();
+
+                purgarCopiasAntiguas(folder, state.backupConfig.maxBackups);
+                actualizarTextoEstadoBackupUI();
+                showToast(`✅ Copia guardada en: ${fileName}`, 'success', 3500);
+                cargarHistorialRespaldosUI();
+            } catch (err) {
+                console.error('Error al ejecutar copia directa:', err);
+                showToast('❌ Error al crear copia: ' + err.message, 'error');
+            }
+        }
+
+        async function exportarCopiaDialog() {
+            try {
+                const scopeRadio = document.querySelector('input[name="backup-scope-type"]:checked');
+                const scope = scopeRadio ? scopeRadio.value : 'all';
+                let sheetIds = null;
+                if (scope === 'custom') {
+                    sheetIds = [];
+                    document.querySelectorAll('#backup-sheets-checklist input[type="checkbox"]').forEach(c => {
+                        if (c.checked) sheetIds.push(c.value);
+                    });
+                    if (!sheetIds.length) {
+                        showToast('⚠️ Debes seleccionar al menos una hoja para exportar.', 'warning');
+                        return;
+                    }
+                }
+
+                const payload = construirPayloadRespaldo(sheetIds);
+                const defaultName = generarNombreArchivoBackup('Fast_Respaldo');
+                const res = await ipcRenderer.invoke('show-save-dialog', {
+                    title: 'Exportar copia de seguridad de Fast para compartir',
+                    defaultPath: defaultName,
+                    filters: [
+                        { name: 'Respaldo Fast (*.fastbackup)', extensions: ['fastbackup'] },
+                        { name: 'Archivo JSON (*.json)', extensions: ['json'] }
+                    ]
+                });
+
+                if (!res.canceled && res.filePath) {
+                    await guardarArchivoRespaldoAsync(res.filePath, payload);
+                    showToast('📤 Respaldo exportado exitosamente.', 'success', 3500);
+                }
+            } catch (err) {
+                console.error('Error al exportar copia:', err);
+                showToast('❌ Error al exportar: ' + err.message, 'error');
+            }
+        }
+
+        function purgarCopiasAntiguas(folder, maxCount) {
+            if (!maxCount || maxCount <= 0 || !fs.existsSync(folder)) return;
+            try {
+                const files = fs.readdirSync(folder)
+                    .filter(f => f.startsWith('Fast_Backup_Auto_') && (f.endsWith('.fastbackup') || f.endsWith('.json')))
+                    .map(f => {
+                        const fp = path.join(folder, f);
+                        const stat = fs.statSync(fp);
+                        return { name: f, fullPath: fp, mtime: stat.mtimeMs };
+                    })
+                    .sort((a, b) => b.mtime - a.mtime);
+
+                if (files.length > maxCount) {
+                    const toDelete = files.slice(maxCount);
+                    toDelete.forEach(f => {
+                        try { fs.unlinkSync(f.fullPath); } catch (_) {}
+                    });
+                }
+            } catch (err) {
+                console.warn('Error purgando copias antiguas:', err);
+            }
+        }
+
+        function cargarHistorialRespaldosUI() {
+            const listEl = document.getElementById('backup-history-items-list');
+            const countEl = document.getElementById('backup-history-count-text');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            const folder = state.backupConfig?.folderPath;
+            if (!folder || !fs.existsSync(folder)) {
+                if (countEl) countEl.textContent = 'Carpeta no encontrada o sin configurar.';
+                listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--faint); font-size:12px;">No se ha configurado la carpeta o aún no contiene respaldos.</div>';
+                return;
+            }
+
+            try {
+                const files = fs.readdirSync(folder)
+                    .filter(f => (f.endsWith('.fastbackup') || f.endsWith('.json')))
+                    .map(f => {
+                        const fp = path.join(folder, f);
+                        const stat = fs.statSync(fp);
+                        return { name: f, fullPath: fp, size: stat.size, mtime: stat.mtime };
+                    })
+                    .sort((a, b) => b.mtime - a.mtime);
+
+                if (countEl) countEl.textContent = `Archivos de respaldo detectados: ${files.length}`;
+                if (!files.length) {
+                    listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--faint); font-size:12px;">No se encontraron copias de seguridad en esta carpeta.</div>';
+                    return;
+                }
+
+                files.forEach(file => {
+                    const mb = (file.size / (1024 * 1024)).toFixed(2);
+                    const sizeStr = (file.size > 1024 * 1024) ? `${mb} MB` : `${Math.round(file.size / 1024)} KB`;
+                    const dateStr = file.mtime.toLocaleDateString() + ' ' + file.mtime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    const item = document.createElement('div');
+                    item.className = 'backup-history-item';
+                    item.innerHTML = `
+                        <div class="backup-file-info">
+                            <span class="backup-file-name" title="${esc(file.name)}">${esc(file.name)}</span>
+                            <span class="backup-file-sub">${dateStr} · <b>${sizeStr}</b></span>
+                        </div>
+                        <div class="backup-file-actions">
+                            <button type="button" class="hbtn" data-act="import" style="border:1px solid var(--border);" title="Importar contenido de este respaldo">📥 Importar</button>
+                            <button type="button" class="hbtn" data-act="open" style="border:1px solid var(--border);" title="Mostrar en explorador">📂 Ver</button>
+                        </div>
+                    `;
+                    item.querySelector('[data-act="open"]').addEventListener('click', () => {
+                        shell.showItemInFolder(file.fullPath);
+                    });
+                    item.querySelector('[data-act="import"]').addEventListener('click', () => {
+                        analizarArchivoImportacion(file.fullPath);
+                    });
+                    listEl.appendChild(item);
+                });
+            } catch (err) {
+                console.error('Error cargando historial:', err);
+                listEl.innerHTML = `<div style="color:var(--danger); padding:10px;">Error al leer carpeta: ${esc(err.message)}</div>`;
+            }
+        }
+
+        // Planificador en segundo plano
+        function iniciarPlanificadorBackups() {
+            if (backupSchedulerInterval) clearInterval(backupSchedulerInterval);
+            backupSchedulerInterval = setInterval(chequearAutoBackup, 60000);
+            setTimeout(chequearAutoBackup, 10000);
+        }
+
+        async function chequearAutoBackup() {
+            if (!state.backupConfig || !state.backupConfig.enabled || !state.backupConfig.folderPath) return;
+            const now = Date.now();
+            const last = state.backupConfig.lastBackupTime || 0;
+            let shouldRun = false;
+
+            if (state.backupConfig.frequencyType === 'hours') {
+                const intervalMs = (state.backupConfig.frequencyHours || 4) * 3600 * 1000;
+                if (now - last >= intervalMs) shouldRun = true;
+            } else if (state.backupConfig.frequencyType === 'days') {
+                const intervalMs = (state.backupConfig.frequencyDays || 1) * 86400 * 1000;
+                if (now - last >= intervalMs) shouldRun = true;
+            } else if (state.backupConfig.frequencyType === 'weekdays') {
+                const curDay = new Date().getDay();
+                if (state.backupConfig.specificDays.includes(curDay)) {
+                    const lastDate = new Date(last);
+                    const todayDate = new Date();
+                    const sameDay = (lastDate.getFullYear() === todayDate.getFullYear() &&
+                                     lastDate.getMonth() === todayDate.getMonth() &&
+                                     lastDate.getDate() === todayDate.getDate());
+                    if (!sameDay) shouldRun = true;
+                }
+            }
+
+            if (shouldRun) {
+                try {
+                    const folder = state.backupConfig.folderPath;
+                    if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
+                    const targetSheetIds = (state.backupConfig.scope === 'custom' && Array.isArray(state.backupConfig.selectedSheetIds) && state.backupConfig.selectedSheetIds.length > 0)
+                        ? state.backupConfig.selectedSheetIds
+                        : null;
+                    const payload = construirPayloadRespaldo(targetSheetIds);
+                    const fileName = generarNombreArchivoBackup('Fast_Backup_Auto');
+                    const fullPath = path.join(folder, fileName);
+
+                    await guardarArchivoRespaldoAsync(fullPath, payload);
+                    state.backupConfig.lastBackupTime = now;
+                    saveData();
+                    purgarCopiasAntiguas(folder, state.backupConfig.maxBackups);
+                    actualizarTextoEstadoBackupUI();
+                    showToast('🛡️ Copia de seguridad automática completada.', 'info', 2500);
+                } catch (err) {
+                    console.error('Error en respaldo automático:', err);
+                }
+            }
+        }
+
+        // Asistente de importación
+        async function abrirDialogoImportacion() {
+            try {
+                const res = await ipcRenderer.invoke('show-open-dialog', {
+                    title: 'Seleccionar archivo de respaldo de Fast para importar',
+                    properties: ['openFile'],
+                    filters: [
+                        { name: 'Respaldos de Fast (*.fastbackup, *.json)', extensions: ['fastbackup', 'json'] }
+                    ]
+                });
+
+                if (!res.canceled && res.filePaths && res.filePaths.length > 0) {
+                    analizarArchivoImportacion(res.filePaths[0]);
+                }
+            } catch (err) {
+                console.error('Error abriendo diálogo de importación:', err);
+                showToast('❌ Error al abrir archivo: ' + err.message, 'error');
+            }
+        }
+
+        function analizarArchivoImportacion(filePath) {
+            try {
+                if (!fs.existsSync(filePath)) {
+                    showToast('⚠️ El archivo no existe o no se puede leer.', 'error');
+                    return;
+                }
+                const raw = fs.readFileSync(filePath, 'utf8');
+                const data = JSON.parse(raw);
+
+                let sheets = [];
+                let exportDate = 'Desconocida';
+                let totalCards = 0;
+                let totalImages = 0;
+
+                if (Array.isArray(data.sheets)) {
+                    sheets = data.sheets;
+                    exportDate = data.exportDateFormatted || data.exportDate || 'No especificada';
+                    if (data.meta) {
+                        totalCards = data.meta.totalCards || 0;
+                        totalImages = data.meta.totalImages || 0;
+                    }
+                } else if (Array.isArray(data.tabs)) {
+                    const mig = migrateV1(data);
+                    if (mig && Array.isArray(mig.sheets)) sheets = mig.sheets;
+                } else {
+                    throw new Error('El archivo no contiene una estructura de hojas válida para Fast.');
+                }
+
+                if (!sheets.length) {
+                    showToast('⚠️ El archivo de respaldo no contiene ninguna hoja.', 'warning');
+                    return;
+                }
+
+                if (!totalCards) {
+                    sheets.forEach(s => {
+                        if (Array.isArray(s.cards)) {
+                            s.cards.forEach(c => {
+                                if (!c.isEmpty) {
+                                    totalCards++;
+                                    if (Array.isArray(c.images)) totalImages += c.images.length;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                currentImportDraft = {
+                    filePath,
+                    fileName: path.basename(filePath),
+                    exportDate,
+                    totalCards,
+                    totalImages,
+                    sheets
+                };
+
+                const filenameEl = document.getElementById('import-wizard-filename');
+                if (filenameEl) filenameEl.textContent = `Archivo: ${path.basename(filePath)}`;
+                const metaBar = document.getElementById('import-wizard-meta-bar');
+                if (metaBar) {
+                    metaBar.innerHTML = `
+                        <div class="import-meta-item">📅 Fecha de respaldo: <b>${esc(exportDate)}</b></div>
+                        <div class="import-meta-item">📑 Hojas en archivo: <b>${sheets.length}</b></div>
+                        <div class="import-meta-item">📇 Tarjetas: <b>${totalCards}</b></div>
+                        <div class="import-meta-item">🖼️ Imágenes: <b>${totalImages}</b></div>
+                    `;
+                }
+
+                const tbody = document.getElementById('import-wizard-tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    sheets.forEach((s, idx) => {
+                        const numCards = Array.isArray(s.cards) ? s.cards.filter(c => !c.isEmpty).length : 0;
+                        const existingSheet = state.sheets.find(local => local.name.trim().toLowerCase() === s.name.trim().toLowerCase());
+                        const hasConflict = !!existingSheet;
+                        const isModeCompatible = existingSheet && (existingSheet.mode === (s.mode || 'cards')) && existingSheet.mode !== 'process';
+
+                        const tr = document.createElement('tr');
+                        tr.dataset.sheetIndex = idx;
+                        tr.innerHTML = `
+                            <td style="text-align: center;">
+                                <input type="checkbox" class="import-sheet-chk" checked data-index="${idx}" />
+                            </td>
+                            <td>
+                                <span style="font-weight: 700; color: var(--text);">${esc(s.name)}</span>
+                                ${hasConflict ? `<div style="font-size: 10.5px; color: ${isModeCompatible ? 'var(--muted)' : '#f87171'}; margin-top:2px;">${isModeCompatible ? 'Ya existe una hoja local con este nombre' : 'Nombre duplicado con distinto tipo de hoja (se creará nueva)'}</div>` : ''}
+                            </td>
+                            <td><span style="font-size: 11px; opacity: 0.85;">${esc(s.mode || 'cards')}</span></td>
+                            <td><b>${s.mode === 'process' ? 'Cuadrícula' : numCards}</b></td>
+                            <td>
+                                ${hasConflict ? (isModeCompatible ? `
+                                    <select class="import-mode-select" data-index="${idx}">
+                                        <option value="new" selected>Crear como hoja nueva</option>
+                                        <option value="merge">Fusionar en hoja local existente</option>
+                                    </select>
+                                ` : `
+                                    <span class="badge-status conflict" title="Los tipos de hoja son distintos (${existingSheet.mode} vs ${s.mode || 'cards'})">✨ Se creará nueva</span>
+                                `) : `
+                                    <span class="badge-status new">✨ Hoja nueva</span>
+                                `}
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                const checkAll = document.getElementById('import-select-all-chk');
+                if (checkAll) checkAll.checked = true;
+
+                const wizardOverlay = document.getElementById('import-wizard-overlay');
+                if (wizardOverlay) wizardOverlay.classList.add('show');
+            } catch (err) {
+                console.error('Error al analizar archivo de respaldo:', err);
+                showToast('❌ Archivo inválido o incompatible: ' + err.message, 'error', 4500);
+            }
+        }
+
+        function cerrarAsistenteImportacion() {
+            currentImportDraft = null;
+            const ov = document.getElementById('import-wizard-overlay');
+            if (ov) ov.classList.remove('show');
+        }
+
+        function toggleSelectAllImportItems(check) {
+            document.querySelectorAll('.import-sheet-chk').forEach(c => c.checked = check);
+        }
+
+        function ejecutarImportacionConfirmada() {
+            if (!currentImportDraft || !Array.isArray(currentImportDraft.sheets)) return;
+            try {
+                const checkedIndices = [];
+                document.querySelectorAll('.import-sheet-chk:checked').forEach(c => {
+                    checkedIndices.push(parseInt(c.dataset.index, 10));
+                });
+
+                if (!checkedIndices.length) {
+                    showToast('⚠️ No has seleccionado ninguna hoja para importar.', 'warning');
+                    return;
+                }
+
+                let importedSheetsCount = 0;
+                let importedCardsCount = 0;
+
+                checkedIndices.forEach(idx => {
+                    const rawSheet = currentImportDraft.sheets[idx];
+                    if (!rawSheet) return;
+
+                    const cloned = JSON.parse(JSON.stringify(rawSheet));
+                    const existingSheet = state.sheets.find(local => local.name.trim().toLowerCase() === cloned.name.trim().toLowerCase());
+                    const isModeCompatible = existingSheet && (existingSheet.mode === (cloned.mode || 'cards')) && existingSheet.mode !== 'process';
+
+                    const modeSelect = document.querySelector(`.import-mode-select[data-index="${idx}"]`);
+                    const resolutionMode = (modeSelect && isModeCompatible) ? modeSelect.value : 'new';
+
+                    if (existingSheet && resolutionMode === 'merge' && isModeCompatible) {
+                        // FUSIÓN EN HOJA EXISTENTE (SUMAR SIN SOBREESCRIBIR)
+                        if (!Array.isArray(existingSheet.cards)) existingSheet.cards = [];
+                        if (!Array.isArray(existingSheet.containers)) existingSheet.containers = [];
+                        if (!Array.isArray(existingSheet.rootOrder)) existingSheet.rootOrder = getRootOrder(existingSheet);
+
+                        const idMap = {};
+                        if (Array.isArray(cloned.containers)) {
+                            cloned.containers.forEach(cont => {
+                                const newContId = generateId();
+                                idMap[cont.id] = newContId;
+                                const newCont = { ...cont, id: newContId };
+                                existingSheet.containers.push(newCont);
+                                existingSheet.rootOrder.push(newContId);
+                            });
+                        }
+
+                        (cloned.cards || []).forEach(card => {
+                            if (card.isEmpty) return;
+                            const newCardId = generateId();
+                            idMap[card.id] = newCardId;
+                            const mappedContId = card.containerId ? (idMap[card.containerId] || null) : null;
+                            const newCard = {
+                                ...card,
+                                id: newCardId,
+                                containerId: mappedContId
+                            };
+                            existingSheet.cards.push(newCard);
+                            if (!mappedContId) {
+                                existingSheet.rootOrder.push(newCardId);
+                            }
+                            importedCardsCount++;
+                        });
+                    } else {
+                        // CREAR COMO NUEVA HOJA INDEPENDIENTE CON ID ÚNICO Y NOMBRE DEDUPLICADO
+                        cloned.id = generateId();
+                        const d = new Date();
+                        const pad = n => String(n).padStart(2, '0');
+                        const dayTag = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}`;
+                        const prefName = existingSheet ? `${cloned.name} (Importado ${dayTag})` : cloned.name;
+                        cloned.name = generarNombreHojaUnico(prefName);
+
+                        // Reasignar todos los IDs para evitar cualquier colisión entre distintas PCs
+                        const idMap = {};
+                        if (Array.isArray(cloned.containers)) {
+                            cloned.containers.forEach(cont => {
+                                const newId = generateId();
+                                idMap[cont.id] = newId;
+                                cont.id = newId;
+                            });
+                        }
+
+                        if (Array.isArray(cloned.cards)) {
+                            cloned.cards.forEach(card => {
+                                const newId = generateId();
+                                idMap[card.id] = newId;
+                                card.id = newId;
+                                if (card.containerId && idMap[card.containerId]) {
+                                    card.containerId = idMap[card.containerId];
+                                } else if (card.containerId && !idMap[card.containerId]) {
+                                    card.containerId = null;
+                                }
+                                if (!card.isEmpty) importedCardsCount++;
+                            });
+                        }
+
+                        if (Array.isArray(cloned.rootOrder)) {
+                            cloned.rootOrder = cloned.rootOrder.map(id => idMap[id] || id);
+                        }
+
+                        state.sheets.push(normalizeSheet(cloned));
+                        importedSheetsCount++;
+                    }
+                });
+
+                if (!state.activeSheetId && state.sheets.length > 0) {
+                    state.activeSheetId = state.sheets[0].id;
+                }
+
+                saveData();
+                render();
+                cerrarAsistenteImportacion();
+                cerrarModalBackup();
+
+                let msg = `✅ Importación completada: `;
+                if (importedSheetsCount > 0) msg += `${importedSheetsCount} hoja(s) nueva(s) `;
+                if (importedCardsCount > 0) msg += `y ${importedCardsCount} tarjeta(s) sumada(s).`;
+                showToast(msg, 'success', 4000);
+            } catch (err) {
+                console.error('Error durante la importación:', err);
+                showToast('❌ Error al importar: ' + err.message, 'error', 4500);
+            }
+        }
+
+        // Cierre de modales al hacer clic en el fondo oscuro
+        const backupModalOverlay = document.getElementById('backup-modal-overlay');
+        if (backupModalOverlay) {
+            backupModalOverlay.addEventListener('click', (e) => {
+                if (e.target === backupModalOverlay) cerrarModalBackup();
+            });
+        }
+        const importWizardOverlay = document.getElementById('import-wizard-overlay');
+        if (importWizardOverlay) {
+            importWizardOverlay.addEventListener('click', (e) => {
+                if (e.target === importWizardOverlay) cerrarAsistenteImportacion();
+            });
+        }
+
+        // ============================================================
         // CIERRE DE LA HERRAMIENTA
         // ============================================================
         function cerrarFast() {
             if (editingCard) saveCardEditor();
+            if (debouncedActiveSheetTimer) {
+                clearTimeout(debouncedActiveSheetTimer);
+                debouncedActiveSheetTimer = null;
+            }
             saveData();
             let attempts = 0;
             const waitForSave = () => {
@@ -11649,23 +13701,7 @@
         async function init() {
             await obtenerRuta();
             loadData();
-            // Asegurar que exista al menos una tarjeta de bienvenida si todo está vacío
-            const sheet = getActiveSheet();
-            if (sheet && sheet.mode !== 'process' && sheet.cards.length === 0 && state.sheets.length === 1 && sheet.name === 'Hoja 1') {
-                sheet.cards.push({
-                    id: generateId(),
-                    title: '¡Bienvenido a Fast 2.0!',
-                    body: 'Esta es una *tarjeta de ejemplo*.\n\n1. Crea tus hojas con el botón ＋\n2. Agrega tarjetas con ➕ Tarjeta\n3. Copia con un clic en *📋 COPIAR*\n\n`Todo listo para WhatsApp.`',
-                    color: '#dbeafe',
-                    images: [],
-                    links: [],
-                    pinned: true,
-                    notes: '',
-                    created: Date.now(),
-                    updated: Date.now()
-                });
-                saveData();
-            }
+            iniciarPlanificadorBackups();
             render();
         }
 
