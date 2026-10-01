@@ -2771,7 +2771,7 @@ appData.alertsMuted = data.alertsMuted || false;
                     appData.draft.customFields.forEach(f => {
                         const el = document.getElementById(`dyn-${f.id}`);
                         if (el) {
-                            if (el.tagName === 'DIV') el.innerHTML = f.value;
+                            if (el.tagName === 'DIV') el.innerHTML = sanitizeRichHtml(f.value);
                             else el.value = f.value;
                         }
                     });
@@ -2905,6 +2905,43 @@ ipcRenderer.on('request-close-confirm', () => {
         // UTILIDADES
         // ============================================================
         function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+        // Saneador de HTML enriquecido (campos del caso / texto pegado): conserva
+        // solo formato básico y elimina <script>, atributos on*, style y URLs peligrosas.
+        function sanitizeRichHtml(html) {
+            var tpl = document.createElement('template');
+            tpl.innerHTML = String(html == null ? '' : html);
+            var ALLOWED = { B: 1, STRONG: 1, I: 1, EM: 1, U: 1, S: 1, STRIKE: 1, BR: 1, P: 1, DIV: 1, SPAN: 1, UL: 1, OL: 1, LI: 1, A: 1, SUB: 1, SUP: 1, MARK: 1, FONT: 1 };
+            function walk(node) {
+                var kids = Array.prototype.slice.call(node.childNodes);
+                for (var i = 0; i < kids.length; i++) {
+                    var child = kids[i];
+                    if (child.nodeType === 1) {
+                        if (!ALLOWED[child.tagName]) {
+                            node.replaceChild(document.createTextNode(child.textContent || ''), child);
+                            continue;
+                        }
+                        var attrs = Array.prototype.slice.call(child.attributes);
+                        for (var j = 0; j < attrs.length; j++) {
+                            var name = attrs[j].name.toLowerCase();
+                            var val = String(attrs[j].value || '').trim().toLowerCase();
+                            if (name.indexOf('on') === 0 || name === 'srcdoc') { child.removeAttribute(attrs[j].name); continue; }
+                            if (name === 'style') { if (/expression\(|javascript:|behavior:/i.test(attrs[j].value)) child.removeAttribute('style'); continue; }
+                            if ((name === 'href' || name === 'src' || name === 'xlink:href') && !/^https?:\/\//.test(val) && !/^mailto:/.test(val)) { child.removeAttribute(attrs[j].name); }
+                        }
+                        walk(child);
+                    } else if (child.nodeType === 8) {
+                        node.removeChild(child);
+                    }
+                }
+            }
+            walk(tpl.content);
+            return tpl.innerHTML;
+        }
+        // Delegación para copiar valores sin usar handlers inline (evita bypass de escapado)
+        document.addEventListener('click', function (e) {
+            var t = e.target && e.target.closest ? e.target.closest('[data-copy-text]') : null;
+            if (t) { e.stopPropagation(); copyTexto(e, t.getAttribute('data-copy-text')); }
+        });
         function fmtDiff(ms) { const totalMin = Math.floor(ms / 60000); const h = Math.floor(totalMin / 60); const m = totalMin % 60; if (h > 0) return `${h}h ${m}m`; return `${m}m`; }
         function showBadge(id, show, val = '') { const el = document.getElementById(id); if (!el) return; el.style.display = show ? 'inline' : 'none'; if (val) el.textContent = val; }
         function updateDraftBadge(show) { showBadge('badge-draft', show); }
@@ -3109,7 +3146,7 @@ ipcRenderer.on('request-close-confirm', () => {
         function saveDraft() {
             const data = getActiveCaseData();
             appData.draft = {
-                customFields: data.fields.map(f => ({ id: f.id, value: f.value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") })),
+                customFields: data.fields.map(f => ({ id: f.id, value: sanitizeRichHtml(f.value) })),
                 comuna: data.comuna,
                 name: data.fields[0] ? data.fields[0].text : '',
                 num: data.fields[1] ? data.fields[1].text : '',
@@ -3125,20 +3162,20 @@ ipcRenderer.on('request-close-confirm', () => {
             data.fields.forEach(f => {
                 if (f.text) {
                     if (compiledHtml) compiledHtml += '<br><br>';
-                    compiledHtml += `<b>${f.label}:</b><br>${f.value}`;
+                    compiledHtml += `<b>${esc(f.label)}:</b><br>${sanitizeRichHtml(f.value)}`;
                 }
             });
             if (data.comuna) {
                 if (compiledHtml) compiledHtml += '<br><br>';
-                compiledHtml += `<b>Comuna:</b> ${data.comuna}`;
+                compiledHtml += `<b>Comuna:</b> ${esc(data.comuna)}`;
             }
             if (data.huerfanos) {
                 if (compiledHtml) compiledHtml += '<br><br>';
-                compiledHtml += `<b>Datos Rescatados:</b><br>${data.huerfanos.replace(/\n/g, '<br>')}`;
+                compiledHtml += `<b>Datos Rescatados:</b><br>${esc(data.huerfanos).replace(/\n/g, '<br>')}`;
             }
             const name = data.fields[0] ? data.fields[0].text : '';
             const num = data.fields[1] ? data.fields[1].text : '';
-            const rawFields = data.fields.map(f => ({ id: f.id, value: f.value }));
+            const rawFields = data.fields.map(f => ({ id: f.id, value: sanitizeRichHtml(f.value) }));
             const entry = { id: Date.now(), name, num, content: compiledHtml, rawFields, comuna: data.comuna, type: 'saved', closed: new Date().toISOString() };
             appData.history = [entry, ...(appData.history || [])];
             ipcRenderer.send('save-data', { history: appData.history });
@@ -3172,7 +3209,7 @@ ipcRenderer.on('request-close-confirm', () => {
             const box = document.getElementById('huerfano-box');
             if (!box) return;
             if (text) {
-                box.innerHTML = `<strong>⚠️ DATOS RESCATADOS:</strong>${text}`;
+                box.innerHTML = `<strong>⚠️ DATOS RESCATADOS:</strong>${esc(text)}`;
                 box.style.display = 'block';
             } else {
                 box.innerHTML = '';
@@ -3188,7 +3225,7 @@ ipcRenderer.on('request-close-confirm', () => {
                 caseObj.rawFields.forEach(rf => {
                     const el = document.getElementById(`dyn-${rf.id}`);
                     if (el) {
-                        if (el.tagName === 'DIV') el.innerHTML = rf.value;
+                        if (el.tagName === 'DIV') el.innerHTML = sanitizeRichHtml(rf.value);
                         else el.value = rf.value;
                     } else {
                         if (rf.value && rf.value.trim() !== '') {
@@ -3218,7 +3255,11 @@ ipcRenderer.on('request-close-confirm', () => {
             });
 
             if (match) {
-                alertaEl.innerHTML = `⚠️ Zona en contingencia: <span onclick="copyTexto(event, '${esc(match.id)}')">📋 ${esc(match.id)}</span>`;
+                alertaEl.textContent = '⚠️ Zona en contingencia: ';
+                const span = document.createElement('span');
+                span.setAttribute('data-copy-text', String(match.id));
+                span.textContent = '📋 ' + match.id;
+                alertaEl.appendChild(span);
                 alertaEl.style.display = 'block';
             } else {
                 alertaEl.style.display = 'none';
@@ -3372,7 +3413,7 @@ ipcRenderer.on('request-close-confirm', () => {
                             <span class="pc-time-lbl">...</span>
                         </div>
                         <div class="pc-row-sub">
-                            <span class="pc-num" onclick="copyTexto(event, '${esc(p.num)}')">${esc(p.num) || 'Sin número'}</span>
+                            <span class="pc-num" data-copy-text="${esc(p.num)}">${esc(p.num) || 'Sin número'}</span>
                             <span class="pc-date">⌚ ${dt.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                     </div>
@@ -3383,7 +3424,7 @@ ipcRenderer.on('request-close-confirm', () => {
                             <button class="pa-icon-btn" onclick="toggleNota(${p.id})" title="Ver nota">📄</button>
                             <button class="pa-icon-btn" onclick="borrarPend(${p.id})" title="Descartar">🗑</button>
                         </div>
-                        <div class="pa-note-full" id="pn-${p.id}">${p.content || 'Sin nota'}</div>
+                        <div class="pa-note-full" id="pn-${p.id}">${sanitizeRichHtml(p.content) || 'Sin nota'}</div>
                         ${p.type === 'callback' ? `
                         <div class="cb-intentos">
                             <div class="cb-int-hdr">Intento ${intento}</div>
@@ -3564,7 +3605,7 @@ ipcRenderer.on('request-close-confirm', () => {
                     <div class="hcard-top" onclick="toggleHCard(this)">
                         <div class="hcard-info">
                             <div class="hcard-name">${esc(h.name) || 'Sin nombre'}</div>
-                            <div class="hcard-num" onclick="copyTexto(event, '${esc(h.num)}')">${esc(h.num) || '-'}</div>
+                            <div class="hcard-num" data-copy-text="${esc(h.num)}">${esc(h.num) || '-'}</div>
                         </div>
                         <span class="hcard-tag ${tc}">${tag}</span>
                         <span class="hcard-date">${ds}</span>

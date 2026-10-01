@@ -340,7 +340,7 @@
                 msg.textContent = '✅ Tienes la versión más reciente (v' + res.currentVersion + ').';
             } else if (res.status === 'update_available') {
                 updateAcercaInfo = res;
-                msg.innerHTML = '🚀 ¡Nueva versión <b>' + res.latestVersion + '</b> disponible!';
+                msg.innerHTML = '🚀 ¡Nueva versión <b>' + String(res.latestVersion || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) + '</b> disponible!';
                 btn.textContent = '📥 Ver en GitHub ↗';
                 btn.classList.add('ready-update');
             } else {

@@ -133,6 +133,18 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.11</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Seguridad (XSS→RCE)</b>: saneadores de HTML enriquecido y escapado de datos en <code>index.html</code> (borrador, editor, pendientes, historial), <code>fast.html</code> (<code>sheet.color</code>, <code>img.data</code>/<code>firstImg</code>, labels del menú, <code>htmlToWa</code>) y <code>tipificaciones.html</code> (columna <i>Importante</i> del CSV); versión remota escapada en <code>acerca.html</code>; <code>shell.openExternal</code> validado por esquema; <b>allowlist de URL de descarga</b> en <code>updater.js</code> (solo Releases HTTPS de GitHub, corta el amplificador de RCE); se eliminaron los <code>onclick</code> con <code>esc()</code> bypassable (delegación <code>data-copy-text</code>).</li>
+                    <li><b>Tests</b>: suite <code>test/updater.test.js</code> (9 pruebas, <code>npm test</code>) para <code>compareVersions</code>, <code>parseSemver</code>, <code>findMatchingAsset</code> y la allowlist de URL.</li>
+                    <li><b>Fast — búsqueda</b>: la estrella ⭐ ahora filtra en modo "Marcar Búsqueda" (Tarjetas y Contenedores), dejando coherente grilla y contador; modo Imágenes + "Ocultar" usa el render completo (corrige el glitch visual); Imágenes resetea sus columnas al entrar.</li>
+                    <li><b>Release v6.1.11</b>: portable <code>GestorCasos-portable-6.1.11.exe</code> como asset y notas de cambios.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.10</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

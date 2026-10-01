@@ -7,6 +7,26 @@ const GITHUB_OWNER = 'r0loplss';
 const GITHUB_REPO = 'NeoGestor-6.1.1';
 const RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
 
+// Dominios permitidos para descargar el binario de actualización.
+// Evita que un renderer comprometido pida descargar/ejecutar un .exe arbitrario.
+const ALLOWED_DOWNLOAD_HOSTS = [
+    'github.com',
+    'objects.githubusercontent.com',
+    'github-releases.githubusercontent.com',
+    'release-assets.githubusercontent.com'
+];
+
+function isAllowedDownloadUrl(url) {
+    try {
+        const parsed = new URL(String(url));
+        if (parsed.protocol !== 'https:') return false;
+        const host = parsed.hostname.toLowerCase();
+        return ALLOWED_DOWNLOAD_HOSTS.some(h => host === h || host.endsWith('.' + h));
+    } catch (e) {
+        return false;
+    }
+}
+
 let downloadedUpdatePath = null;
 let isDownloading = false;
 let onBeforeQuitCallback = null;
@@ -182,6 +202,9 @@ async function checkForUpdates() {
 async function downloadUpdate(downloadUrl, senderWebContents) {
     if (isDownloading) {
         return { success: false, error: 'Ya hay una descarga en curso.' };
+    }
+    if (!isAllowedDownloadUrl(downloadUrl)) {
+        return { success: false, error: 'URL de descarga no permitida (solo se admiten Releases de GitHub).' };
     }
     isDownloading = true;
 
@@ -381,5 +404,8 @@ module.exports = {
     downloadUpdate,
     applyUpdateAndRestart,
     getExecutionInfo,
-    compareVersions
+    compareVersions,
+    parseSemver,
+    findMatchingAsset,
+    isAllowedDownloadUrl
 };

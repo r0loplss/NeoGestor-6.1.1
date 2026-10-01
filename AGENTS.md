@@ -52,21 +52,23 @@
 > 2. `git commit -m "mensaje descriptivo del cambio"`
 > 3. `git push`
 
-## Identificación y Roles de Agentes IA (IMPORTANTE, 24/08/2026)
+## Identificación y Roles de Agentes IA (IMPORTANTE, actualizado 01/10/2026)
 
-> El proyecto cuenta con dos agentes IA con responsabilidades claramente delimitadas:
-> - **Antigravity** (Google DeepMind):
->   - Programación y desarrollo de nuevas funciones, refactorizaciones y corrección de bugs en el código.
->   - Registro y actualización de la bitácora (`BITACORA.html`).
->   - **NO** realiza compilaciones de ejecutables portables ni operaciones Git (`commit`/`push`).
-> - **Open Code**:
->   - Compilación del proyecto (`package.json`, borrado de portables antiguos en `dist/` y ejecución de `npm run build:portable`).
->   - Gestión completa de Git (inicio con `git pull`, fin con `git add -A`, `git commit -m "[Open Code] ..."` y `git push`).
+> **Open Code** es ahora el agente principal de desarrollo:
+>   - **Programación**: desarrollo de nuevas funciones, refactorizaciones y corrección de bugs en el código.
+>   - **Compilación**: `package.json`, borrado de portables antiguos en `dist/` y `npm run build:portable`.
+>   - **Git**: gestión completa (inicio con `git pull`; fin con `git add -A`, `git commit -m "[Open Code] ..."` y `git push`).
+>   - **Publicación de Releases**: cada push que corresponda a una versión nueva debe crear/actualizar el Release en GitHub con el portable como asset y las notas de la bitácora.
+>   - **Bitácora**: registro y actualización de `BITACORA.html`.
+>
+> **Antigravity** (Google DeepMind) pasa a ser **consultor**:
+>   - Solo interviene cuando el usuario lo solicite explícitamente (revisiones, consejo técnico, análisis).
+>   - **NO** programa, **NO** compila y **NO** realiza operaciones Git.
 >
 > **Reglas de identificación:**
 > 1. **En `BITACORA.html`:** Toda nueva entrada insertada debe incluir la etiqueta del agente responsable en la cabecera `.enc`:
->    - Si la modificación la hace **Antigravity**: `<span class="agente agy">Antigravity</span>`
->    - Si la modificación la hace **Open Code**: `<span class="agente oc">Open Code</span>`
+>    - **Open Code** (habitual): `<span class="agente oc">Open Code</span>`
+>    - **Antigravity** (solo consultoría puntual): `<span class="agente agy">Antigravity</span>`
 > 2. **En los mensajes de Commit:** Prefijar siempre el commit con el nombre del agente:
 >    - `git commit -m "[Open Code] Descripción clara del cambio"` (Open Code es el encargado exclusivo de Git).
 

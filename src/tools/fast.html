@@ -5441,6 +5441,33 @@
             return map[n];
         }
         function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+        // Saneador de HTML enriquecido (datos importados/migrados): elimina script,
+        // manejadores on* y URLs peligrosas, conservando formato básico.
+        function sanitizeRichHtml(html) {
+            var tpl = document.createElement('template');
+            tpl.innerHTML = String(html == null ? '' : html);
+            var ALLOWED = { B: 1, STRONG: 1, I: 1, EM: 1, U: 1, S: 1, STRIKE: 1, BR: 1, P: 1, DIV: 1, SPAN: 1, UL: 1, OL: 1, LI: 1, A: 1, SUB: 1, SUP: 1, MARK: 1, FONT: 1 };
+            function walk(node) {
+                var kids = Array.prototype.slice.call(node.childNodes);
+                for (var i = 0; i < kids.length; i++) {
+                    var child = kids[i];
+                    if (child.nodeType === 1) {
+                        if (!ALLOWED[child.tagName]) { node.replaceChild(document.createTextNode(child.textContent || ''), child); continue; }
+                        var attrs = Array.prototype.slice.call(child.attributes);
+                        for (var j = 0; j < attrs.length; j++) {
+                            var name = attrs[j].name.toLowerCase();
+                            var val = String(attrs[j].value || '').trim().toLowerCase();
+                            if (name.indexOf('on') === 0 || name === 'srcdoc') { child.removeAttribute(attrs[j].name); continue; }
+                            if (name === 'style') { if (/expression\(|javascript:|behavior:/i.test(attrs[j].value)) child.removeAttribute('style'); continue; }
+                            if ((name === 'href' || name === 'src' || name === 'xlink:href') && !/^https?:\/\//.test(val) && !/^mailto:/.test(val)) { child.removeAttribute(attrs[j].name); }
+                        }
+                        walk(child);
+                    } else if (child.nodeType === 8) { node.removeChild(child); }
+                }
+            }
+            walk(tpl.content);
+            return tpl.innerHTML;
+        }
         function getContrastColor(hexColor) {
             if (!hexColor) return 'var(--text)';
             const hex = hexColor.replace('#', '');
@@ -5610,7 +5637,7 @@
         function htmlToWa(html) {
             if (!html) return '';
             const temp = document.createElement('div');
-            temp.innerHTML = html;
+            temp.innerHTML = sanitizeRichHtml(html);
             const walk = (node) => {
                 const out = [];
                 node.childNodes.forEach((child) => {
@@ -5720,7 +5747,7 @@
                 el.dataset.sheetId = sheet.id;
                 el.style.borderTopColor = sheet.color || 'transparent';
                 el.innerHTML = `
-                    <span class="sheet-color-dot" style="background:${sheet.color || '#3b82f6'}"></span>
+                    <span class="sheet-color-dot" style="background:${esc(sheet.color || '#3b82f6')}"></span>
                     <span class="sheet-name">${esc(sheet.name)}</span>
                     <span class="sheet-count">${sheet.mode === 'process' ? (sheet.grid ? sheet.grid.cells.filter(row => row.some(v => v)).length : 0) : sheet.cards.length}</span>
                 `;
@@ -5965,7 +5992,7 @@
 
                 item.innerHTML = `
                     <div class="hidden-sheet-info">
-                        <span class="hidden-sheet-dot" style="background:${sheet.color || '#3b82f6'};"></span>
+                        <span class="hidden-sheet-dot" style="background:${esc(sheet.color || '#3b82f6')};"></span>
                         <div class="hidden-sheet-text">
                             <span class="hidden-sheet-name" title="${esc(sheet.name)}">${esc(sheet.name)}</span>
                             <span class="hidden-sheet-meta">${modeIcon} ${modeLabel} • ${countLabel}</span>
@@ -6268,6 +6295,8 @@
                         const sc = c.isEmpty ? 0 : cardSearchScore(c, tokens);
                         cards.push({ card: c, sheetId: sheet.id, score: sc });
                     });
+                    // La estrella ⭐ también filtra en modo Marcar (consistente con el contador)
+                    if (state.favOnly) cards = cards.filter(({ card }) => card.pinned);
                 } else {
                     sheet.cards.forEach(c => {
                         if (!c.isEmpty) {
@@ -6393,7 +6422,8 @@
                     let contCards = allCards.filter(c => c.containerId === cont.id);
                     if (tokens.length) {
                         if (state.searchFilterMode === 'mark') {
-                            // En modo marcar NO filtramos las tarjetas del contenedor
+                            // En modo marcar mostramos todas, pero la estrella ⭐ igual filtra
+                            if (state.favOnly) contCards = contCards.filter(c => !c.isEmpty && c.pinned);
                         } else {
                             contCards = contCards.filter(c => !c.isEmpty && cardSearchScore(c, tokens) > 0);
                         }
@@ -6401,7 +6431,8 @@
                         contCards = contCards.filter(c => !c.isEmpty && c.pinned);
                     }
 
-                    if (state.searchFilterMode !== 'mark' && (tokens.length || state.favOnly) && !contCards.length) return;
+                    const hideEmptyCont = state.searchFilterMode !== 'mark' || state.favOnly;
+                    if (hideEmptyCont && (tokens.length || state.favOnly) && !contCards.length) return;
 
                     const nonEmpties = contCards.filter(c => !c.isEmpty);
                     const titleFs = cont.titleFontSize
@@ -6567,6 +6598,7 @@
             btnView.style.display = '';
             cardsContainer.classList.add('images-mode');
             const h = (sheet.cardSize && sheet.cardSize.h) || 420;
+            cardsContainer.style.gridTemplateColumns = '1fr';
             cardsContainer.style.gridAutoRows = h + 'px';
 
             const tokens = searchTokens();
@@ -6648,7 +6680,7 @@
                         <span class="card-star" title="${card.pinned ? 'Favorita' : 'No favorita'}">${card.pinned ? '⭐' : '☆'}</span>
                         ${badge}
                     </div>
-                    <div class="img-card-media" title="Clic: copiar · Doble clic: copiar y ver ampliada">${firstImg ? `<img src="${firstImg}" alt="" draggable="false" loading="lazy" decoding="async" /><span class="img-copy-hint">🖼 Clic copiar · Doble clic ver</span>` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
+                    <div class="img-card-media" title="Clic: copiar · Doble clic: copiar y ver ampliada">${firstImg ? `<img src="${esc(firstImg)}" alt="" draggable="false" loading="lazy" decoding="async" /><span class="img-copy-hint">🖼 Clic copiar · Doble clic ver</span>` : '<span class="img-card-noimg">🖼️ Sin imagen</span>'}</div>
                     <div class="img-card-right">
                         <div class="img-card-text">${esc(waToPlain(card.body)) || '<span class="img-card-noimg">Sin texto complementario</span>'}</div>
                         <div class="img-card-btns">
@@ -8040,7 +8072,7 @@
                     const box = document.createElement('div');
                     box.className = 'd-img';
                     box.innerHTML = `
-                        <img src="${img.data}" alt="${esc(img.label || 'Imagen')}" loading="lazy" decoding="async" />
+                        <img src="${esc(img.data)}" alt="${esc(img.label || 'Imagen')}" loading="lazy" decoding="async" />
                         <div class="d-img-actions">
                             <button title="Abrir grande">🔍</button>
                             <button title="Copiar">📋</button>
@@ -8079,7 +8111,7 @@
                     box.appendChild(copyBtn);
                     box.appendChild(icon);
                     box.addEventListener('click', () => {
-                        if (link.url) require('electron').shell.openExternal(link.url);
+                        if (link.url && /^https?:\/\//i.test(link.url)) require('electron').shell.openExternal(link.url);
                     });
                     drawerScroll.appendChild(box);
                 });
@@ -8644,7 +8676,7 @@
                 if (item.children && item.children.length) {
                     const btn = document.createElement('button');
                     btn.className = 'ctx-item has-sub';
-                    btn.innerHTML = `<span>${item.icon || ''} ${item.label}</span><span style="margin-left:auto;opacity:0.5;">▸</span>`;
+                    btn.innerHTML = `<span>${esc(item.icon || '')} ${esc(item.label)}</span><span style="margin-left:auto;opacity:0.5;">▸</span>`;
                     const sub = document.createElement('div');
                     sub.className = 'ctx-sub';
                     item.children.forEach(ch => {
@@ -8677,7 +8709,7 @@
                 }
                 const btn = document.createElement('button');
                 btn.className = 'ctx-item' + (item.danger ? ' danger' : '');
-                btn.innerHTML = `${item.icon || ''} ${item.label}`;
+                btn.innerHTML = `${esc(item.icon || '')} ${esc(item.label)}`;
                 btn.addEventListener('click', (e) => { e.stopPropagation(); hideContextMenu(); if (typeof item.fn === 'function') item.fn(); });
                 ctxMenu.appendChild(btn);
             });
@@ -9485,7 +9517,7 @@
                 ghost.style.gap = '12px';
                 ghost.style.padding = '8px 14px';
                 ghost.innerHTML = `
-                    ${firstImg ? `<img src="${firstImg}" style="width:68px; height:68px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.15); flex-shrink:0;" />` : '<span style="font-size:28px; flex-shrink:0;">🖼️</span>'}
+                    ${firstImg ? `<img src="${esc(firstImg)}" style="width:68px; height:68px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.15); flex-shrink:0;" />` : '<span style="font-size:28px; flex-shrink:0;">🖼️</span>'}
                     <div style="flex:1; min-width:0; overflow:hidden;">
                         <div style="font-weight:700; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:inherit;">${esc(card.title) || 'Sin título'}</div>
                         <div style="font-size:11px; opacity:0.8; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:inherit;">${esc(waToPlain(card.body || ''))}</div>
@@ -11111,8 +11143,8 @@
                 settingsPreview.style.height = 'auto';
                 const contH = Math.max(60, h - 38);
                 settingsPreview.innerHTML = `
-                    <div class="sp-cont-box" style="border-color: ${sheet.color || 'var(--primary)'}; height: ${h}px; display: inline-flex; flex-direction: column;">
-                        <div class="sp-cont-hdr" style="font-size: ${contTitleFs}px; background: ${(sheet.color || '#3b82f6')}33; height: 30px;">
+                    <div class="sp-cont-box" style="border-color: ${esc(sheet.color || 'var(--primary)')}; height: ${h}px; display: inline-flex; flex-direction: column;">
+                        <div class="sp-cont-hdr" style="font-size: ${contTitleFs}px; background: ${esc(sheet.color || '#3b82f6')}33; height: 30px;">
                             <span>📦 CONTENEDOR</span>
                             <span style="font-size: 10px; opacity: 0.8;">1 tarjeta</span>
                         </div>
@@ -12381,7 +12413,7 @@
             // 3. En modo ocultar (hide):
             // Si estamos en modo imágenes o tarjetas (y no es búsqueda global entre todas las hojas),
             // filtramos en sitio para máxima velocidad sin reconstruir imágenes Base64
-            if (!state.searchAll && (sheet.mode === 'images' || sheet.mode === 'cards')) {
+            if (!state.searchAll && sheet.mode === 'cards') {
                 applyHideSearchInPlace();
             } else {
                 renderCards();
