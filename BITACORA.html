@@ -133,6 +133,65 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.10</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Publicación Release v6.1.10</b>: commit y push de los cambios pendientes (fix del actualizador — consola oculta, reintentos con cierre forzado, salida limpia; Radar de Contingencias; Tráfico) y Release <code>v6.1.10</code> en GitHub con el asset <code>GestorCasos-portable-6.1.10.exe</code> y notas de cambios. Sincroniza <code>releases/latest</code> (antes v6.1.9) y desbloquea la actualización de los usuarios.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">30 sep 2026</span><span class="ver">v6.1.10</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Radar de Contingencias (src/tools/contingencias.html) - Selector de orden en Copiar Breve</b>:
+                        <ul>
+                            <li>Se transformó el botón <i>Copiar Breve</i> en un menú desplegable interactivo con 2 opciones de copia:
+                                <ul>
+                                    <li>🔤 <b>Alfabético (A-Z)</b>: Orden alfabético por comuna para contingencias de red, y orden descendente por fecha para sistemas/nacionales.</li>
+                                    <li>📅 <b>Por Fecha (Descendente)</b>: Orden cronológico descendente (más recientes primero) para contingencias de red, y orden cronológico descendente para sistemas/nacionales.</li>
+                                </ul>
+                            </li>
+                            <li>Se preservó de forma estricta el formato limpio de salida (<code>📍 *Comuna/Detalle* ID</code>) y la separación entre contingencias de red y de sistemas, sin añadir textos ni metadatos extra.</li>
+                            <li>Se añadieron estilos integrados con el tema oscuro, animación fluida, indicador visual y cierre automático al interactuar fuera o pulsar <code>Escape</code>.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">24 sep 2026</span><span class="ver">v6.1.9</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Herramienta de Tráfico (src/tools/trafico.html) - Precisión en clasificación de bolsas</b>:
+                        <ul>
+                            <li>Se corrigió la discriminación entre <i>Datos Libres / Navegación</i> y <i>Redes Sociales</i>: ahora se prioriza el bucket técnico consumido (<code>snDes</code>) por sobre el nombre comercial de la oferta (<code>spDes</code>).</li>
+                            <li>Evita que bolsas comerciales combinadas (ej. <i>"Bolsa 10GB + 250 min y RRSS Ilimitadas"</i>) desvíen falsamente el tráfico de cuota general (<code>[Bolsa Datos]</code>) hacia Redes Sociales, reflejando de forma fidedigna los datos libres consumidos sin alterar totales matemáticos ni cobros.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
+            <div class="enc"><span class="fecha">13 sep 2026</span><span class="ver">v6.1.9</span><span class="agente agy">Antigravity</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Corrección de bloqueo y reinicio en Auto-Actualizador</b>:
+                        <ul>
+                            <li><b>Desbloqueo de cierre en Electron</b>: Se configuró un callback previo a la salida en <code>updater.initUpdater</code> que establece <code>isQuitting = true</code> y ejecuta <code>flushSavePos()</code> antes de invocar <code>app.quit()</code>, evitando que el interceptor <code>mainWin.on('close')</code> bloquee el cierre del proceso con el diálogo de confirmación. Adicionalmente, se integró un temporizador de seguridad de fallback con <code>app.exit(0)</code> a 1200 ms.</li>
+                            <li><b>Consola CMD invisible</b>: Se añadió <code>windowsHide: true</code> en el spawn del proceso batch para evitar que aparezca la ventana negra de la consola durante la sustitución del ejecutable portable.</li>
+                            <li><b>Prevención de bucles infinitos en el script batch</b>: Se reemplazó la búsqueda por subcadena por coincidencia exacta con delimitadores de espacio (<code>findstr /i /c:" %PID% "</code>) y se incorporó un límite de 30 reintentos con terminación forzada (<code>taskkill /F /PID %PID%</code>) para garantizar que el proceso jamás quede congelado esperando al ejecutable previo.</li>
+                            <li><b>Compatibilidad en procesos sin terminal interactiva</b>: Se sustituyó <code>timeout /t 1</code> por <code>ping 127.0.0.1 -n 2 > nul</code> en el archivo batch para evitar fallos de redirección de entrada cuando el proceso se lanza en segundo plano.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">13 sep 2026</span><span class="ver">v6.1.9</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

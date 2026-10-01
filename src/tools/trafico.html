@@ -1600,9 +1600,27 @@
 
             // Categoría de bolsa/servicio
             let categoriaServicio = 'General';
+            const snLower = (snDes || '').toLowerCase();
+            const spLower = (spDes || '').toLowerCase();
+            const desLowerStr = (destino || '').toLowerCase();
             const comboService = (spDes + ' ' + snDes + ' ' + destino).toLowerCase();
-            if (comboService.includes('redes sociales') || comboService.includes('rrss') || comboService.includes('social') || comboService.includes('whatsapp') || comboService.includes('instagram') || comboService.includes('facebook') || comboService.includes('twitter') || comboService.includes('tiktok') || comboService.includes('spotify') || comboService.includes('messenger') || comboService.includes('snapchat') || comboService.includes('pinterest') || comboService.includes('linkedin')) {
+
+            const rrssKeywords = ['redes sociales', 'rrss', 'social', 'whatsapp', 'instagram', 'facebook', 'twitter', 'tiktok', 'spotify', 'messenger', 'snapchat', 'pinterest', 'linkedin'];
+            const esRRSS = (txt) => rrssKeywords.some(k => txt.includes(k));
+
+            if (esRRSS(snLower) || esRRSS(desLowerStr)) {
                 categoriaServicio = 'Redes Sociales';
+            } else if (snLower.includes('bolsa datos') || snLower.includes('servicio de datos') || snLower.includes('datos libres') || snLower.includes('navegacion') || snLower.includes('navegación') || snLower.includes('datos') || snLower.includes('internet')) {
+                categoriaServicio = 'Datos Incluidos';
+            } else if (esRRSS(spLower)) {
+                // Si el paquete comercial tiene RRSS, diferenciar si es exclusivo de RRSS o un combo mixto (ej. 10GB + RRSS)
+                const esComboMixto = (spLower.includes('+') || spLower.includes(' y ') || spLower.includes('con ') || spLower.includes('/')) &&
+                    (spLower.includes('gb') || spLower.includes('giga') || spLower.includes('mb') || spLower.includes('datos') || spLower.includes('navegacion') || spLower.includes('navegación'));
+                if (esComboMixto) {
+                    categoriaServicio = (tipoTrafico === 'datos') ? 'Datos Incluidos' : 'General';
+                } else {
+                    categoriaServicio = 'Redes Sociales';
+                }
             } else if (comboService.includes('datos incluidos') || comboService.includes('navegacion') || comboService.includes('navegación') || comboService.includes('gigas') || comboService.includes('datos libres')) {
                 categoriaServicio = 'Datos Incluidos';
             } else if (comboService.includes('sms incluidos')) {

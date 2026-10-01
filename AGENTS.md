@@ -1,5 +1,33 @@
 # Instrucciones del proyecto — Gestor de Casos (NeoGestor 6.1.1)
 
+## PROTECCIÓN DEL CONTENIDO DEL USUARIO (REGLAS CRÍTICAS — INQUEBRANTABLE)
+
+> **El contenido ingresado por el usuario (tarjetas, hojas, imágenes, notas, enlaces,
+> textos, colores, posición/orden y cualquier dato almacenado) NUNCA debe perderse,
+> sobrescribirse, migrarse ni reformatearse sin autorización explícita del usuario.**
+>
+> Aplica a **ambos agentes (Antigravity y Open Code)** y a cualquier cambio de código,
+> compilación, limpieza o proceso.
+>
+> **Prohibiciones absolutas:**
+> - No tocar ni editar directamente los archivos de datos del usuario:
+>   `gestor-data.json`, `gestor-fast.json`, sus `.bak` ni la carpeta `backups/`.
+> - No re-sembrar hojas/tarjetas/datos "de fábrica" ni reemplazar `state.sheets`
+>   sobre datos existentes.
+> - No migrar, renombrar ni reformatear el almacenamiento sin backup verificado previo
+>   y autorización explícita del usuario.
+> - No ejecutar scripts de prueba que apunten a las rutas de datos reales.
+>
+> **Obligaciones antes de cualquier cambio que roce datos:**
+> 1. **Respaldar primero** (copia con hash/verificación) y validar sobre **copias**,
+>    nunca sobre los originales.
+> 2. Preservar compatibilidad hacia atrás: datos viejos deben seguir cargando.
+> 3. Si algo pudiera afectar contenido del usuario, **detenerse y pedir autorización**.
+>
+> Salvaguardas ya presentes que deben mantenerse y no debilitarse:
+> `writeFileAtomic`, cola de guardado serializada, backups rotativos, restauración
+> automática ante JSON corrupto (`src/main.js`) y backups de Fast con planificador.
+
 ## Fuente canónica del proyecto (Git) (IMPORTANTE, 21/08/2026)
 
 > **Desde ahora la versión de referencia es el repositorio de GitHub:

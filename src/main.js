@@ -13,7 +13,10 @@ const TOOLS = path.join(ROOT, 'src', 'tools');
 // SISTEMA DE ACTUALIZACIÓN (GitHub Releases)
 // ============================================================
 const updater = require('./updater');
-updater.initUpdater(ipcMain);
+updater.initUpdater(ipcMain, () => {
+  try { flushSavePos(); } catch (e) {}
+  isQuitting = true;
+});
 
 // ============================================================
 // RUTAS DE HTML (con nuevas herramientas)

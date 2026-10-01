@@ -166,6 +166,95 @@
             background: rgba(34, 197, 94, 0.22);
             box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
         }
+        .tb-btn.copy-breve .dropdown-arrow {
+            font-size: 8px;
+            margin-left: 2px;
+            opacity: 0.8;
+            transition: transform 0.2s ease;
+            pointer-events: none;
+        }
+        .dropdown-wrapper.open .tb-btn.copy-breve .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+        .dropdown-wrapper {
+            position: relative;
+            display: inline-flex;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 5px);
+            right: 0;
+            min-width: 185px;
+            background: #151d30;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            display: none;
+            flex-direction: column;
+            gap: 3px;
+            z-index: 1000;
+        }
+        .dropdown-wrapper.open .dropdown-menu {
+            display: flex;
+            animation: dropdownIn 0.15s ease-out forwards;
+        }
+        @keyframes dropdownIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            width: 100%;
+            padding: 6px 9px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            color: var(--text);
+            font-size: 11.5px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: var(--font);
+            user-select: none;
+        }
+        .dropdown-item:hover {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: rgba(34, 197, 94, 0.35);
+            color: #86efac;
+        }
+        .dropdown-item-icon {
+            font-size: 13px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .dropdown-item-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 0;
+        }
+        .dropdown-item-title {
+            font-weight: 600;
+            font-size: 11.5px;
+            line-height: 1.2;
+        }
+        .dropdown-item-desc {
+            font-size: 10px;
+            color: var(--muted);
+            line-height: 1.1;
+        }
+        .dropdown-item:hover .dropdown-item-desc {
+            color: #a7f3d0;
+        }
         .tb-btn.danger {
             background: transparent;
             color: var(--danger);
@@ -660,7 +749,28 @@
         <div id="toolbar">
             <span class="status" id="status-bar">Casos en Radar: <b id="count-actives">0</b></span>
             <button class="tb-btn copy-det" id="btn-copy-det">📋 Copiar Detallado</button>
-            <button class="tb-btn copy-breve" id="btn-copy-breve">📋 Copiar Breve</button>
+            <div class="dropdown-wrapper" id="dropdown-breve-wrapper">
+                <button class="tb-btn copy-breve" id="btn-copy-breve" type="button" aria-haspopup="true" aria-expanded="false" title="Opciones de copia breve">
+                    <span>📋 Copiar Breve</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="dropdown-menu" id="menu-copy-breve" role="menu">
+                    <button class="dropdown-item" id="btn-copy-breve-az" type="button" role="menuitem">
+                        <span class="dropdown-item-icon">🔤</span>
+                        <div class="dropdown-item-text">
+                            <span class="dropdown-item-title">Alfabético</span>
+                            <span class="dropdown-item-desc">Orden A-Z por Comuna</span>
+                        </div>
+                    </button>
+                    <button class="dropdown-item" id="btn-copy-breve-fecha" type="button" role="menuitem">
+                        <span class="dropdown-item-icon">📅</span>
+                        <div class="dropdown-item-text">
+                            <span class="dropdown-item-title">Por Fecha</span>
+                            <span class="dropdown-item-desc">Más recientes primero (Desc.)</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
             <button class="tb-btn danger" id="btn-limpiar">🗑 Limpiar</button>
         </div>
 
@@ -739,6 +849,9 @@
         const btnLimpiar = document.getElementById('btn-limpiar');
         const btnCopyDet = document.getElementById('btn-copy-det');
         const btnCopyBreve = document.getElementById('btn-copy-breve');
+        const dropdownBreveWrapper = document.getElementById('dropdown-breve-wrapper');
+        const btnCopyBreveAZ = document.getElementById('btn-copy-breve-az');
+        const btnCopyBreveFecha = document.getElementById('btn-copy-breve-fecha');
         const listContainer = document.getElementById('list-container');
         const countActives = document.getElementById('count-actives');
 
@@ -1470,7 +1583,7 @@
             return lines.join('\n');
         }
 
-        function generarBreve() {
+        function generarBreve(criterio = 'alfabetico') {
             if (!contingencias.length) {
                 showToast('⚠️ No hay contingencias para copiar.', 'warning');
                 return null;
@@ -1483,8 +1596,22 @@
                 !c.zona || ['Desconocida', 'Nacional', 'A-Nacional', 'Varias'].includes(c.zona)
             );
 
-            // Ordenar comunas alfabéticamente
-            const sortedConComuna = [...conComuna].sort((a, b) => a.zona.localeCompare(b.zona));
+            // Ordenar comunas según criterio
+            let sortedConComuna;
+            if (criterio === 'fecha') {
+                // Orden descendente por fecha de inicio (más recientes primero)
+                sortedConComuna = [...conComuna].sort((a, b) => {
+                    const da = parseFechaContingencia(a.inicio);
+                    const db = parseFechaContingencia(b.inicio);
+                    if (!da && !db) return 0;
+                    if (!da) return 1;
+                    if (!db) return -1;
+                    return db - da;
+                });
+            } else {
+                // Ordenar comunas alfabéticamente
+                sortedConComuna = [...conComuna].sort((a, b) => (a.zona || '').localeCompare(b.zona || ''));
+            }
 
             // Ordenar no-red / sistemas por fecha descendente
             const sortedSinComuna = [...sinComuna].sort((a, b) => {
@@ -1533,14 +1660,29 @@
             });
         }
 
-        function copiarBreve() {
-            const texto = generarBreve();
+        function copiarBreve(criterio = 'alfabetico') {
+            const texto = generarBreve(criterio);
             if (!texto) return;
             navigator.clipboard.writeText(texto).then(() => {
-                showToast('📋 Texto breve copiado al portapapeles.', 'success');
+                const label = criterio === 'fecha' ? 'por fecha' : 'alfabético';
+                showToast(`📋 Texto breve (${label}) copiado al portapapeles.`, 'success');
             }).catch(() => {
                 showToast('❌ Error al copiar.', 'error');
             });
+        }
+
+        function toggleDropdownBreve(e) {
+            if (e) e.stopPropagation();
+            if (!dropdownBreveWrapper) return;
+            const isOpen = dropdownBreveWrapper.classList.toggle('open');
+            btnCopyBreve.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        function closeDropdownBreve() {
+            if (dropdownBreveWrapper && dropdownBreveWrapper.classList.contains('open')) {
+                dropdownBreveWrapper.classList.remove('open');
+                btnCopyBreve.setAttribute('aria-expanded', 'false');
+            }
         }
 
         // ============================================================
@@ -1563,7 +1705,29 @@
         btnLimpiarTodo.addEventListener('click', limpiarTodo);
         btnLimpiar.addEventListener('click', limpiarTodo);
         btnCopyDet.addEventListener('click', copiarDetallado);
-        btnCopyBreve.addEventListener('click', copiarBreve);
+        btnCopyBreve.addEventListener('click', toggleDropdownBreve);
+
+        if (btnCopyBreveAZ) {
+            btnCopyBreveAZ.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeDropdownBreve();
+                copiarBreve('alfabetico');
+            });
+        }
+
+        if (btnCopyBreveFecha) {
+            btnCopyBreveFecha.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeDropdownBreve();
+                copiarBreve('fecha');
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (dropdownBreveWrapper && !dropdownBreveWrapper.contains(e.target)) {
+                closeDropdownBreve();
+            }
+        });
 
         // Modal eventos
         const modalEditOverlay = document.getElementById('modal-edit-contingencia');
@@ -1581,6 +1745,9 @@
         });
 
         document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDropdownBreve();
+            }
             const modal = document.getElementById('modal-edit-contingencia');
             if (modal && modal.classList.contains('show')) {
                 if (e.key === 'Escape') {

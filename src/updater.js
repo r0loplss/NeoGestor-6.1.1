@@ -9,6 +9,7 @@ const RELEASES_API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_
 
 let downloadedUpdatePath = null;
 let isDownloading = false;
+let onBeforeQuitCallback = null;
 
 let pkgVersion = '6.1.6';
 try {
@@ -272,19 +273,24 @@ function applyUpdateAndRestart() {
 
         const batScript = `@echo off
 chcp 65001 > nul
-set PID=${process.pid}
-set NEW_EXE=${downloadedUpdatePath}
-set TARGET_EXE=${targetPath}
+set "PID=${process.pid}"
+set "NEW_EXE=${downloadedUpdatePath}"
+set "TARGET_EXE=${targetPath}"
+set RETRIES=0
 
 :wait_proc
-timeout /t 1 /nobreak > nul
-tasklist /fi "PID eq %PID%" 2>nul | find "%PID%" > nul
-if not errorlevel 1 goto wait_proc
+ping 127.0.0.1 -n 2 > nul
+tasklist /fi "PID eq %PID%" 2>nul | findstr /i /c:" %PID% " > nul
+if errorlevel 1 goto proc_done
+set /a RETRIES+=1
+if %RETRIES% geq 30 taskkill /F /PID %PID% > nul 2>&1
+goto wait_proc
 
-timeout /t 1 /nobreak > nul
+:proc_done
+ping 127.0.0.1 -n 2 > nul
 copy /y "%NEW_EXE%" "%TARGET_EXE%" > nul
 if errorlevel 1 (
-    timeout /t 1 /nobreak > nul
+    ping 127.0.0.1 -n 2 > nul
     copy /y "%NEW_EXE%" "%TARGET_EXE%" > nul
 )
 
@@ -297,10 +303,18 @@ del /f /q "%~f0" > nul
 
         const child = child_process.spawn('cmd.exe', ['/c', batPath], {
             detached: true,
-            stdio: 'ignore'
+            stdio: 'ignore',
+            windowsHide: true
         });
         child.unref();
+
+        if (typeof onBeforeQuitCallback === 'function') {
+            try { onBeforeQuitCallback(); } catch (_) {}
+        }
         app.quit();
+        setTimeout(() => {
+            try { app.exit(0); } catch (_) {}
+        }, 1200);
         return { success: true };
     } else if (execInfo.isPackaged) {
         const child = child_process.spawn(downloadedUpdatePath, ['--updated'], {
@@ -308,7 +322,14 @@ del /f /q "%~f0" > nul
             stdio: 'ignore'
         });
         child.unref();
+
+        if (typeof onBeforeQuitCallback === 'function') {
+            try { onBeforeQuitCallback(); } catch (_) {}
+        }
         app.quit();
+        setTimeout(() => {
+            try { app.exit(0); } catch (_) {}
+        }, 1200);
         return { success: true };
     } else {
         // En modo desarrollo, abrir la carpeta contenedora
@@ -323,7 +344,10 @@ del /f /q "%~f0" > nul
 /**
  * Registra los escuchadores IPC en el proceso principal
  */
-function initUpdater(ipc) {
+function initUpdater(ipc, onBeforeQuit) {
+    if (typeof onBeforeQuit === 'function') {
+        onBeforeQuitCallback = onBeforeQuit;
+    }
     const ipcTarget = ipc || ipcMain;
 
     ipcTarget.handle('updater:check', async () => {
