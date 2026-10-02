@@ -4779,6 +4779,78 @@
         let debouncedActiveSheetTimer = null;
 
         // ============================================================
+        // DESHACER / REHACER (Ctrl+Z / Ctrl+Y)
+        // ============================================================
+        const UNDO_MAX = 40;
+        let undoStack = [];
+        let redoStack = [];
+        let undoRestoring = false;
+
+        // Clona la estructura compartiendo los strings pesados (imágenes Base64) por referencia.
+        function cloneCardForUndo(card) {
+            const c = Object.assign({}, card);
+            if (Array.isArray(card.images)) c.images = card.images.map(im => Object.assign({}, im));
+            if (Array.isArray(card.links)) c.links = card.links.map(l => Object.assign({}, l));
+            return c;
+        }
+        function cloneSheetForUndo(sheet) {
+            const s = Object.assign({}, sheet);
+            if (Array.isArray(sheet.cards)) s.cards = sheet.cards.map(cloneCardForUndo);
+            if (Array.isArray(sheet.containers)) s.containers = sheet.containers.map(ct => Object.assign({}, ct));
+            if (Array.isArray(sheet.rootOrder)) s.rootOrder = sheet.rootOrder.slice();
+            if (sheet.grid && Array.isArray(sheet.grid.cells)) {
+                s.grid = Object.assign({}, sheet.grid, { cells: sheet.grid.cells.map(row => Array.isArray(row) ? row.slice() : row) });
+            }
+            return s;
+        }
+        function cloneStateForUndo() {
+            return { sheets: (state.sheets || []).map(cloneSheetForUndo), activeSheetId: state.activeSheetId };
+        }
+        function pushUndo(label) {
+            if (undoRestoring) return;
+            try {
+                undoStack.push({ label: label || 'acción', snap: cloneStateForUndo() });
+                if (undoStack.length > UNDO_MAX) undoStack.shift();
+                redoStack = [];
+            } catch (e) { console.warn('No se pudo registrar el deshacer:', e); }
+        }
+        function restoreSnap(snap) {
+            undoRestoring = true;
+            try {
+                state.sheets = snap.sheets;
+                if (snap.activeSheetId && state.sheets.some(s => s.id === snap.activeSheetId)) {
+                    state.activeSheetId = snap.activeSheetId;
+                }
+                state.drawer = null;
+                try { if (typeof selectedCardIds !== 'undefined' && selectedCardIds && selectedCardIds.clear) selectedCardIds.clear(); } catch (_) {}
+                try { if (typeof selectedIndex !== 'undefined') selectedIndex = -1; } catch (_) {}
+            } finally {
+                undoRestoring = false;
+            }
+            render();
+            saveData();
+        }
+        function undo() {
+            if (!undoStack.length) { showToast('Nada para deshacer.', 'info', 1100); return; }
+            const entry = undoStack.pop();
+            redoStack.push({ label: entry.label, snap: cloneStateForUndo() });
+            restoreSnap(entry.snap);
+            showToast('↩ Deshacer: ' + entry.label, 'info', 1300);
+        }
+        function redo() {
+            if (!redoStack.length) { showToast('Nada para rehacer.', 'info', 1100); return; }
+            const entry = redoStack.pop();
+            undoStack.push({ label: entry.label, snap: cloneStateForUndo() });
+            restoreSnap(entry.snap);
+            showToast('↪ Rehacer: ' + entry.label, 'info', 1300);
+        }
+        function isEditableTarget(el) {
+            if (!el) return false;
+            const tag = el.tagName;
+            return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+        }
+
+        // ============================================================
         // REFERENCIAS DOM
         // ============================================================
         const contentEl = document.getElementById('content');
@@ -5790,6 +5862,7 @@
 
             const finishRename = () => {
                 const newName = input.value.trim() || sheet.name;
+                if (newName !== sheet.name) pushUndo('renombrar hoja');
                 sheet.name = newName;
                 saveData();
                 render();
@@ -5803,6 +5876,7 @@
         }
 
         function newSheet(name, mode) {
+            pushUndo('crear hoja');
             const idx = state.sheets.length;
             const sheet = {
                 id: generateId(),
@@ -5831,6 +5905,7 @@
         function duplicateSheet(sheetId) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
+            pushUndo('duplicar hoja');
             const copy = JSON.parse(JSON.stringify(sheet));
             copy.id = generateId();
             copy.name = sheet.name + ' (copia)';
@@ -5869,6 +5944,7 @@
             if (idx === -1) return;
             const to = idx + dir;
             if (to < 0 || to >= state.sheets.length) return;
+            pushUndo('mover hoja');
             const [moved] = state.sheets.splice(idx, 1);
             state.sheets.splice(to, 0, moved);
             saveData();
@@ -5886,6 +5962,7 @@
                 ? `¿Eliminar la hoja "${sheet.name}"? Contiene ${sheet.cards.length} tarjeta(s).`
                 : `¿Eliminar la hoja "${sheet.name}"?`;
             showConfirm(msg, () => {
+                pushUndo('eliminar hoja');
                 const idx = state.sheets.indexOf(sheet);
                 if (idx !== -1) state.sheets.splice(idx, 1);
                 const nextVisible = state.sheets.find(s => !s.hidden) || state.sheets[0];
@@ -5908,6 +5985,7 @@
                 showToast('⚠️ No se puede ocultar la única hoja visible del libro.', 'warning');
                 return;
             }
+            pushUndo('ocultar hoja');
             sheet.hidden = true;
             if (state.activeSheetId === sheetId) {
                 const nextVisible = state.sheets.find(s => !s.hidden && s.id !== sheetId);
@@ -5922,6 +6000,7 @@
         function unhideSheet(sheetId, activate = true) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
+            pushUndo('reactivar hoja');
             sheet.hidden = false;
             if (activate) {
                 state.activeSheetId = sheet.id;
@@ -5938,6 +6017,7 @@
         }
 
         function unhideAllSheets() {
+            pushUndo('reactivar hojas');
             let unhiddenCount = 0;
             state.sheets.forEach(sheet => {
                 if (sheet.hidden) {
@@ -8233,6 +8313,7 @@
                 if (d) {
                     const c = getCardById(d.sheetId, d.cardId);
                     if (c) {
+                        pushUndo('favorita');
                         c.pinned = !c.pinned;
                         saveData();
                         render();
@@ -8346,6 +8427,7 @@
                 : `¿Eliminar la tarjeta "${card.title || 'Sin título'}" permanentemente?`;
 
             showConfirm(promptMsg, () => {
+                pushUndo(isSlot ? 'eliminar espacio' : 'eliminar tarjeta');
                 const sheet = getSheetById(sheetId);
                 if (sheet) {
                     const idx = sheet.cards.findIndex(c => c.id === cardId);
@@ -8391,6 +8473,7 @@
             if (!sheet) return;
             const original = sheet.cards.find(c => c.id === cardId);
             if (!original) return;
+            pushUndo('duplicar tarjeta');
             const copy = JSON.parse(JSON.stringify(original));
             copy.id = generateId();
             copy.title = original.title + ' (copia)';
@@ -8535,6 +8618,7 @@
                 return;
             }
 
+            pushUndo('pegar tarjeta');
             const newCard = {
                 id: generateId(),
                 containerId: null,
@@ -8803,7 +8887,7 @@
                 { icon: '🎨', label: 'Color de hoja', children: [
                     ...SHEET_COLORS.map(c => ({ icon: '', label: '', swatch: c, fn: () => {
                         const sheet = getSheetById(sheetId);
-                        if (sheet) { sheet.color = c; saveData(); render(); }
+                        if (sheet) { pushUndo('color de hoja'); sheet.color = c; saveData(); render(); }
                     }}))
                 ]},
                 transformItem,
@@ -8839,13 +8923,13 @@
                 isCardsOrImages ? { icon: '📥', label: hasCopiedCard() ? `Pegar tarjeta aquí ("${(getCopiedCard()?.title || 'Tarjeta').slice(0, 20)}")` : 'Pegar tarjeta aquí', fn: () => pasteFullCard(sheetId, cardId) } : null,
                 null,
                 { icon: card.pinned ? '☆' : '⭐', label: card.pinned ? 'Quitar de favoritas' : 'Fijar como favorita', fn: () => {
-                    card.pinned = !card.pinned; saveData(); render();
+                    pushUndo('favorita'); card.pinned = !card.pinned; saveData(); render();
                 }},
                 { icon: '✏️', label: 'Editar', fn: () => openCardEditor(sheetId, cardId) },
                 { icon: '⧉', label: 'Duplicar', fn: () => duplicateCard(sheetId, cardId) },
                 { icon: '🎨', label: 'Color', fn: () => showColorPalette(x - 100, y, (c) => {
                     const card = getCardById(sheetId, cardId);
-                    if (card) { card.color = c; saveData(); render(); showToast('🎨 Color actualizado.', 'success'); }
+                    if (card) { pushUndo('color de tarjeta'); card.color = c; saveData(); render(); showToast('🎨 Color actualizado.', 'success'); }
                 }, card.color) },
                 moveTo.length ? { icon: '➡', label: 'Mover a hoja', children: moveTo } : null,
                 { icon: '🗑', label: 'Eliminar (dejar espacio libre)', danger: true, fn: () => confirmDeleteCard(sheetId, cardId, false) },
@@ -8857,6 +8941,7 @@
                 items.unshift(
                     { icon: '🔲', label: `Crear ${selCount} espacio${selCount > 1 ? 's vacíos' : ' vacío'} (anclar al cursor)`, fn: () => startSlotPlacement(selCount, sheetId) },
                     { icon: '📦', label: `Agregar las ${selCount} a nuevo contenedor`, fn: () => {
+                        pushUndo('agregar a contenedor');
                         if (sheet.mode !== 'containers') {
                             sheet.mode = 'containers';
                             if (!Array.isArray(sheet.containers)) sheet.containers = [];
@@ -8916,6 +9001,7 @@
             if (!from || !to || fromSheetId === toSheetId) return;
             const idx = from.cards.findIndex(c => c.id === cardId);
             if (idx === -1) return;
+            pushUndo('mover tarjeta de hoja');
             const [moved] = from.cards.splice(idx, 1);
             if (to.mode === 'images') {
                 to.cards.unshift(moved);
@@ -9090,6 +9176,7 @@
         function compactarHoja(sheetId) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
+            pushUndo('compactar hoja');
             const prevCount = sheet.cards.length;
             sheet.cards = sheet.cards.filter(c => !c.isEmpty);
             const removed = prevCount - sheet.cards.length;
@@ -9110,6 +9197,7 @@
         function compactarContainer(sheetId, containerId) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
+            pushUndo('compactar contenedor');
             const prevCount = sheet.cards.length;
             sheet.cards = sheet.cards.filter(c => !(c.isEmpty && c.containerId === containerId));
             const removed = prevCount - sheet.cards.length;
@@ -9169,6 +9257,7 @@
             if (idx === -1) return;
             const newIdx = idx + dir;
             if (newIdx < 0 || newIdx >= rootOrder.length) return;
+            pushUndo('reordenar');
             const [moved] = rootOrder.splice(idx, 1);
             rootOrder.splice(newIdx, 0, moved);
             sheet.rootOrder = rootOrder;
@@ -9339,6 +9428,7 @@
                 null,
                 { icon: '🗑', label: 'Eliminar contenedor', danger: true, fn: () => {
                     showConfirm(`¿Eliminar el contenedor "${cont.name}"? Las tarjetas se conservarán como libres.`, () => {
+                        pushUndo('eliminar contenedor');
                         sheet.cards.forEach(c => {
                             if (c.containerId === containerId) {
                                 c.containerId = null;
@@ -9424,6 +9514,7 @@
             if (!sheet) return;
             const cont = (sheet.containers || []).find(c => c.id === containerId);
             if (!cont) return;
+            pushUndo('mover contenedor');
 
             const origEl = cardsContainer.querySelector(`.container-block[data-container-id="${containerId}"]`);
             if (origEl) origEl.classList.add('dragging');
@@ -9461,6 +9552,7 @@
             if (!sheet) return;
             const card = sheet.cards[index];
             if (!card) return;
+            pushUndo('mover tarjeta');
 
             const origEl = cardsContainer.querySelector(`.card-item[data-card-id="${cardId}"]`);
             if (origEl) origEl.classList.add('dragging');
@@ -10330,6 +10422,7 @@
         function openCardEditor(sheetId, cardId, replaceSlotId = null, targetContainerId = null, spatialTarget = null) {
             const sheet = getSheetById(sheetId);
             if (!sheet) return;
+            pushUndo((cardId && !replaceSlotId) ? 'editar tarjeta' : 'nueva tarjeta');
             let card;
             let isNew = false;
             if (cardId && !replaceSlotId) {
@@ -11341,6 +11434,7 @@
 
         function executeTransformSheetMode(sheet, targetMode) {
             const fromMode = sheet.mode || 'cards';
+            pushUndo('cambiar modo de hoja');
             sheet.mode = targetMode;
 
             if (targetMode === 'containers') {
@@ -11634,6 +11728,7 @@
                 if (!editingContainer) return;
                 const sheet = getSheetById(editingContainer.sheetId);
                 if (!sheet) return;
+                pushUndo(editingContainer.isNew ? 'crear contenedor' : 'editar contenedor');
                 if (!Array.isArray(sheet.containers)) sheet.containers = [];
 
                 const name = (contEditName ? contEditName.value.trim() : '') || 'Contenedor';
@@ -11733,6 +11828,7 @@
                 if (!sheet) return;
                 if (selectedCardIds.size === 0) return;
 
+                pushUndo('agregar a contenedor');
                 // Si la hoja no está en modo contenedores, la preparamos para soportar contenedores
                 if (sheet.mode !== 'containers') {
                     sheet.mode = 'containers';
@@ -12032,6 +12128,7 @@
                 return;
             }
 
+            pushUndo('crear espacios');
             if (!Array.isArray(sheet.cards)) sheet.cards = [];
 
             const targetContId = target?.containerId || (target?.type === 'container' ? target.containerId : null);
@@ -12183,6 +12280,7 @@
                 sw.style.backgroundColor = c;
                 sw.title = c;
                 sw.addEventListener('click', () => {
+                    pushUndo('color de hoja');
                     sheet.color = c;
                     saveData();
                     render();
@@ -12599,6 +12697,17 @@
             }
             if (e.ctrlKey || e.metaKey) {
                 switch (e.key.toLowerCase()) {
+                    case 'z':
+                        // Deshacer de la app; dentro de campos de texto o con el editor abierto, dejar el nativo
+                        if (isEditableTarget(e.target) || modalOverlay.classList.contains('show')) break;
+                        e.preventDefault();
+                        if (e.shiftKey) redo(); else undo();
+                        break;
+                    case 'y':
+                        if (isEditableTarget(e.target) || modalOverlay.classList.contains('show')) break;
+                        e.preventDefault();
+                        redo();
+                        break;
                     case 'n':
                         if (!modalOverlay.classList.contains('show')) {
                             e.preventDefault();
@@ -13579,6 +13688,7 @@
                     showToast('⚠️ No has seleccionado ninguna hoja para importar.', 'warning');
                     return;
                 }
+                pushUndo('importar hojas');
 
                 let importedSheetsCount = 0;
                 let importedCardsCount = 0;

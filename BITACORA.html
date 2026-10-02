@@ -133,6 +133,18 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.13</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Fast — Deshacer/Rehacer (Ctrl+Z / Ctrl+Y)</b>: nueva pila de estados que permite deshacer la última acción sobre tarjetas, textos, imágenes, contenedores y hojas (eliminar, crear, editar, mover/arrastrar, pegar, duplicar, compactar, color, favorita, ocultar, importar, cambiar modo, etc.). <b>Ctrl+Z</b> deshace y <b>Ctrl+Y</b>/<b>Ctrl+Shift+Z</b> rehace; se muestran toasts con la acción deshecha.</li>
+                    <li><b>Diseño sin duplicar imágenes</b>: los snapshots clonan la estructura compartiendo por referencia los strings Base64 (imágenes), por lo que el historial (40 pasos) es liviano y no altera los datos del usuario.</li>
+                    <li><b>Respeto del deshacer nativo</b>: dentro de campos de texto o con el editor de tarjetas abierto, <code>Ctrl+Z</code> no se intercepta (lo maneja el navegador para deshacer escritura).</li>
+                    <li><b>Release v6.1.13</b>: portable <code>GestorCasos-portable-6.1.13.exe</code> como asset y notas.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.12</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
