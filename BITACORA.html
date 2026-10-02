@@ -133,6 +133,18 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.12</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Actualizador — control de sobrepeticiones (sin token)</b>: se agregó caché <code>ETag</code>/<code>If-None-Match</code>, <b>throttle de 2 min</b> entre chequeos, deduplicación de consultas simultáneas y caché persistente en <code>updater-cache.json</code> (archivo propio, no toca datos del usuario). Con esto el error <code>403 rate limit</code> de GitHub (60 consultas/hora) ya no debería aparecer en uso normal.</li>
+                    <li><b>Manejo amable del límite</b>: nuevo estado <code>rate_limited</code> que informa "reintentá en ~N min" en Ajustes y Acerca de, en vez de un error genérico. Se documentó que, en la práctica, las respuestas 304 también decrementan el contador, por lo que la protección principal es el throttle.</li>
+                    <li><b>Tests</b>: 12 pruebas en total (<code>npm test</code>), incluyendo <code>buildUpdateResult</code> (detección de versión y selección de asset).</li>
+                    <li><b>Release v6.1.12</b>: portable <code>GestorCasos-portable-6.1.12.exe</code> como asset y notas.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.11</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

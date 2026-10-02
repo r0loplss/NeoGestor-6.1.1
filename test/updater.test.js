@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const updater = require('../src/updater.js');
 
-const { compareVersions, parseSemver, findMatchingAsset, isAllowedDownloadUrl } = updater;
+const { compareVersions, parseSemver, findMatchingAsset, isAllowedDownloadUrl, buildUpdateResult } = updater;
 
 test('parseSemver normaliza formatos', () => {
   assert.deepEqual(parseSemver('v6.1.6'), [6, 1, 6]);
@@ -75,4 +75,27 @@ test('isAllowedDownloadUrl acepta solo releases HTTPS de GitHub', () => {
   assert.equal(isAllowedDownloadUrl('javascript:alert(1)'), false);
   assert.equal(isAllowedDownloadUrl(''), false);
   assert.equal(isAllowedDownloadUrl(null), false);
+});
+
+test('buildUpdateResult detecta actualizacion y adjunta el asset portable', () => {
+  const release = {
+    tag_name: 'v6.2.0', name: 'Version v6.2.0', body: 'notas', html_url: 'https://x', published_at: '2026',
+    assets: [{ name: 'GestorCasos-portable-6.2.0.exe', size: 123, browser_download_url: 'https://github.com/o/r/releases/download/v6.2.0/x.exe' }]
+  };
+  const r = buildUpdateResult(release, '6.1.11', { isPortable: true });
+  assert.equal(r.status, 'update_available');
+  assert.equal(r.latestVersion, 'v6.2.0');
+  assert.equal(r.asset.name, 'GestorCasos-portable-6.2.0.exe');
+  assert.equal(r.asset.downloadUrl, 'https://github.com/o/r/releases/download/v6.2.0/x.exe');
+});
+
+test('buildUpdateResult marca al dia cuando la version es igual', () => {
+  const r = buildUpdateResult({ tag_name: 'v6.1.11', assets: [] }, '6.1.11', { isPortable: true });
+  assert.equal(r.status, 'up_to_date');
+});
+
+test('buildUpdateResult no ofrece asset si no hay coincidencia', () => {
+  const r = buildUpdateResult({ tag_name: 'v6.2.0', assets: [] }, '6.1.11', { isPortable: true });
+  assert.equal(r.status, 'update_available');
+  assert.equal(r.asset, null);
 });

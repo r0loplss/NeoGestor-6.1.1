@@ -343,6 +343,8 @@
                 msg.innerHTML = '🚀 ¡Nueva versión <b>' + String(res.latestVersion || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) + '</b> disponible!';
                 btn.textContent = '📥 Ver en GitHub ↗';
                 btn.classList.add('ready-update');
+            } else if (res.status === 'rate_limited') {
+                msg.textContent = '⏳ ' + (res.error || 'Límite temporal de GitHub.');
             } else {
                 msg.textContent = '❌ ' + (res.error || 'Error al comprobar');
             }

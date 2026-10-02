@@ -2690,6 +2690,10 @@ font-family: var(--font);
                         btn.textContent = `📥 Descargar actualización`;
                     }
                     showToast(`🚀 Nueva versión ${res.latestVersion} disponible`, 'success');
+                } else if (res.status === 'rate_limited') {
+                    btn.textContent = '🔍 Buscar actualizaciones';
+                    msg.textContent = '⏳ ' + (res.error || 'Límite temporal de GitHub.');
+                    showToast('⏳ ' + (res.error || 'Límite temporal de GitHub'), 'warning');
                 } else {
                     btn.textContent = '🔍 Buscar actualizaciones';
                     msg.textContent = '❌ ' + (res.error || 'Error al comprobar actualizaciones.');

@@ -31,6 +31,83 @@ let downloadedUpdatePath = null;
 let isDownloading = false;
 let onBeforeQuitCallback = null;
 
+// ── Caché de la consulta a Releases: evita sobrepeticiones y el 403 por rate limit ──
+// El ETag reduce el cuerpo de la respuesta, pero en la práctica el 304 igual decrementa
+// el contador de GitHub; por eso la protección principal es el throttle.
+const UPDATE_CHECK_THROTTLE_MS = 120 * 1000;
+let cachedRelease = null;   // último release completo (para responder 304)
+let cachedEtag = null;      // ETag del último release
+let cachedResult = null;    // último resultado devuelto
+let lastCheckedAt = 0;      // timestamp del último chequeo real
+let checkInFlight = null;   // dedupe de consultas simultáneas
+
+function getCacheFilePath() {
+    try {
+        if (app && typeof app.getPath === 'function') {
+            return path.join(app.getPath('userData'), 'updater-cache.json');
+        }
+    } catch (e) {}
+    return null;
+}
+
+function loadUpdaterCache() {
+    try {
+        const f = getCacheFilePath();
+        if (!f || !fs.existsSync(f)) return;
+        const c = JSON.parse(fs.readFileSync(f, 'utf8'));
+        if (c && typeof c === 'object') {
+            if (c.etag) cachedEtag = c.etag;
+            if (c.release) cachedRelease = c.release;
+            if (typeof c.lastCheckedAt === 'number') lastCheckedAt = c.lastCheckedAt;
+        }
+    } catch (e) {}
+}
+
+function saveUpdaterCache() {
+    try {
+        const f = getCacheFilePath();
+        if (!f) return;
+        fs.writeFileSync(f, JSON.stringify({ etag: cachedEtag, release: cachedRelease, lastCheckedAt }));
+    } catch (e) {}
+}
+
+/**
+ * Construye el resultado a partir de un release (sirve tanto para respuesta 200 como 304).
+ */
+function buildUpdateResult(release, currentVersion, execInfo) {
+    const latestVersion = (release && (release.tag_name || release.name)) || '';
+    const cmp = compareVersions(latestVersion, currentVersion);
+    if (cmp > 0) {
+        const asset = findMatchingAsset(release.assets, execInfo.isPortable);
+        return {
+            success: true,
+            status: 'update_available',
+            currentVersion,
+            latestVersion,
+            releaseName: release.name || latestVersion,
+            releaseNotes: release.body || 'Sin notas de versión disponibles.',
+            releaseUrl: release.html_url,
+            publishedAt: release.published_at,
+            asset: asset ? { name: asset.name, size: asset.size, downloadUrl: asset.browser_download_url } : null,
+            execInfo
+        };
+    }
+    return {
+        success: true,
+        status: 'up_to_date',
+        currentVersion,
+        latestVersion,
+        releaseName: release.name || latestVersion,
+        releaseUrl: release.html_url,
+        publishedAt: release.published_at,
+        message: '¡Tienes la versión más reciente instalada!',
+        execInfo
+    };
+}
+
+loadUpdaterCache();
+
+
 let pkgVersion = '6.1.6';
 try {
     const pkg = require(path.join(__dirname, '..', 'package.json'));
@@ -117,83 +194,96 @@ function findMatchingAsset(assets, isPortable) {
 }
 
 /**
- * Consulta la API pública de GitHub Releases para comprobar si hay actualizaciones disponibles
+ * Consulta la API pública de GitHub Releases para comprobar si hay actualizaciones.
+ * Usa ETag/If-None-Match (los 304 no cuentan contra el rate limit), throttle y dedupe.
  */
-async function checkForUpdates() {
-    try {
-        const currentVersion = getCurrentVersion();
-        const execInfo = getExecutionInfo();
+async function checkForUpdates(options) {
+    const opts = options || {};
+    const currentVersion = getCurrentVersion();
+    const execInfo = getExecutionInfo();
 
-        const res = await fetch(RELEASES_API_URL, {
-            headers: {
+    // Dedupe: si ya hay una consulta en curso, reusar la misma promesa
+    if (checkInFlight) return checkInFlight;
+
+    // Throttle: si se consultó hace poco y hay resultado cacheado, devolverlo sin golpear la API
+    if (!opts.force && cachedResult && lastCheckedAt && (Date.now() - lastCheckedAt) < UPDATE_CHECK_THROTTLE_MS) {
+        return Object.assign({}, cachedResult, { cached: true });
+    }
+
+    checkInFlight = (async () => {
+        try {
+            const headers = {
                 'User-Agent': 'NeoGestor-App/' + currentVersion,
                 'Accept': 'application/vnd.github.v3+json'
-            }
-        });
-
-        if (res.status === 404) {
-            return {
-                success: true,
-                status: 'no_releases',
-                currentVersion,
-                message: 'Aún no hay versiones publicadas en GitHub Releases.',
-                execInfo
             };
-        }
+            if (cachedEtag) headers['If-None-Match'] = cachedEtag;
 
-        if (!res.ok) {
+            const res = await fetch(RELEASES_API_URL, { headers });
+
+            // 304 Not Modified: reusar el release cacheado (no consume cuota)
+            if (res.status === 304 && cachedRelease) {
+                lastCheckedAt = Date.now();
+                saveUpdaterCache();
+                cachedResult = buildUpdateResult(cachedRelease, currentVersion, execInfo);
+                return cachedResult;
+            }
+
+            // Límite temporal de GitHub (rate limit): no cachear, avisar y dejar reintentar
+            if (res.status === 403 || res.status === 429) {
+                const reset = parseInt(res.headers.get('x-ratelimit-reset') || '0', 10);
+                const mins = reset ? Math.max(1, Math.ceil((reset * 1000 - Date.now()) / 60000)) : null;
+                return {
+                    success: false,
+                    status: 'rate_limited',
+                    currentVersion,
+                    error: 'Límite temporal de GitHub' + (mins ? ` — reintentá en ~${mins} min.` : '.'),
+                    execInfo
+                };
+            }
+
+            if (res.status === 404) {
+                cachedResult = {
+                    success: true,
+                    status: 'no_releases',
+                    currentVersion,
+                    message: 'Aún no hay versiones publicadas en GitHub Releases.',
+                    execInfo
+                };
+                lastCheckedAt = Date.now();
+                return cachedResult;
+            }
+
+            if (!res.ok) {
+                return {
+                    success: false,
+                    status: 'error',
+                    currentVersion,
+                    error: `Error al consultar GitHub Releases (${res.status} ${res.statusText})`,
+                    execInfo
+                };
+            }
+
+            const etag = res.headers.get('etag');
+            const release = await res.json();
+            if (etag) cachedEtag = etag;
+            cachedRelease = release;
+            lastCheckedAt = Date.now();
+            saveUpdaterCache();
+            cachedResult = buildUpdateResult(release, currentVersion, execInfo);
+            return cachedResult;
+        } catch (err) {
             return {
                 success: false,
                 status: 'error',
                 currentVersion,
-                error: `Error al consultar GitHub Releases (${res.status} ${res.statusText})`,
+                error: err.message || 'Error de conexión con GitHub.',
                 execInfo
             };
+        } finally {
+            checkInFlight = null;
         }
-
-        const release = await res.json();
-        const latestVersion = release.tag_name || release.name || '';
-        const cmp = compareVersions(latestVersion, currentVersion);
-
-        if (cmp > 0) {
-            const asset = findMatchingAsset(release.assets, execInfo.isPortable);
-            return {
-                success: true,
-                status: 'update_available',
-                currentVersion,
-                latestVersion,
-                releaseName: release.name || latestVersion,
-                releaseNotes: release.body || 'Sin notas de versión disponibles.',
-                releaseUrl: release.html_url,
-                publishedAt: release.published_at,
-                asset: asset ? {
-                    name: asset.name,
-                    size: asset.size,
-                    downloadUrl: asset.browser_download_url
-                } : null,
-                execInfo
-            };
-        } else {
-            return {
-                success: true,
-                status: 'up_to_date',
-                currentVersion,
-                latestVersion,
-                releaseName: release.name || latestVersion,
-                releaseUrl: release.html_url,
-                publishedAt: release.published_at,
-                message: '¡Tienes la versión más reciente instalada!',
-                execInfo
-            };
-        }
-    } catch (err) {
-        return {
-            success: false,
-            status: 'error',
-            currentVersion: getCurrentVersion(),
-            error: err.message || 'Error de conexión con GitHub.'
-        };
-    }
+    })();
+    return checkInFlight;
 }
 
 /**
@@ -407,5 +497,6 @@ module.exports = {
     compareVersions,
     parseSemver,
     findMatchingAsset,
-    isAllowedDownloadUrl
+    isAllowedDownloadUrl,
+    buildUpdateResult
 };
