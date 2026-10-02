@@ -133,6 +133,17 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.14</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Actualizador — corrección del cuelgue en la ventana negra</b>: el reemplazo del portable se reescribió. Ahora el script de actualización (1) se ejecuta <b>oculto</b> mediante un lanzador VBScript (window style 0), sin consola visible; (2) espera de forma <b>acotada</b> a que el proceso termine (detección por token de PID con <code>findstr</code>) y si se resiste lo cierra forzado por PID y por nombre de imagen; (3) copia el nuevo binario con <b>reintentos</b>; y (4) relanza la app y se autolimpia. Además la app ahora <b>se cierra de forma forzosa</b> (<code>app.quit()</code> + <code>app.exit(0)</code> con fallback a <code>process.exit(0)</code>) para no quedar viva mientras el script espera.</li>
+                    <li><b>Validación local</b>: se probó el script (espera → corte → copia) con un proceso real (4,6 s) y el lanzador oculto (el .bat corrió sin ventana). 12 tests del updater en verde.</li>
+                    <li><b>Release v6.1.14</b>: portable <code>GestorCasos-portable-6.1.14.exe</code> como asset y notas.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.13</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

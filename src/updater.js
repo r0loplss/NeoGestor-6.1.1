@@ -382,39 +382,55 @@ function applyUpdateAndRestart() {
     if (execInfo.isPortable && execInfo.portableFile) {
         const targetPath = execInfo.portableFile;
         const tempDir = getTempDirectory();
-        const batPath = path.join(tempDir, `neogestor_updater_${Date.now()}.bat`);
+        const stamp = Date.now();
+        const batPath = path.join(tempDir, `neogestor_updater_${stamp}.bat`);
+        const vbsPath = path.join(tempDir, `neogestor_updater_${stamp}.vbs`);
 
-        const batScript = `@echo off
-chcp 65001 > nul
-set "PID=${process.pid}"
-set "NEW_EXE=${downloadedUpdatePath}"
-set "TARGET_EXE=${targetPath}"
-set RETRIES=0
+        // El .bat espera de forma ACOTADA a que el proceso actual termine, fuerza el cierre si
+        // se resiste, reemplaza el portable (con reintentos) y relanza. Se ejecuta OCULTO
+        // mediante un VBScript (window style 0) para que no aparezca ninguna consola negra.
+        const batScript = [
+            '@echo off',
+            'set "PID=' + process.pid + '"',
+            'set "NEW_EXE=' + downloadedUpdatePath + '"',
+            'set "TARGET_EXE=' + targetPath + '"',
+            'set RETRIES=0',
+            ':wait_proc',
+            'tasklist /fi "PID eq %PID%" /nh 2>nul | findstr /i /c:" %PID% " >nul',
+            'if errorlevel 1 goto copy',
+            'set /a RETRIES+=1',
+            'if %RETRIES% geq 20 goto force_kill',
+            'ping 127.0.0.1 -n 2 >nul',
+            'goto wait_proc',
+            ':force_kill',
+            'taskkill /f /pid %PID% >nul 2>&1',
+            'taskkill /f /im "%~nxTARGET_EXE%" >nul 2>&1',
+            'ping 127.0.0.1 -n 3 >nul',
+            ':copy',
+            'set CRETRY=0',
+            ':try_copy',
+            'copy /y "%NEW_EXE%" "%TARGET_EXE%" >nul',
+            'if not errorlevel 1 goto done',
+            'set /a CRETRY+=1',
+            'if %CRETRY% geq 12 goto done',
+            'ping 127.0.0.1 -n 2 >nul',
+            'goto try_copy',
+            ':done',
+            'del /f /q "%NEW_EXE%" >nul 2>&1',
+            'start "" "%TARGET_EXE%"',
+            'del /f /q "' + vbsPath + '" >nul 2>&1',
+            'del /f /q "%~f0" >nul 2>&1',
+            ''
+        ].join('\r\n');
 
-:wait_proc
-ping 127.0.0.1 -n 2 > nul
-tasklist /fi "PID eq %PID%" 2>nul | findstr /i /c:" %PID% " > nul
-if errorlevel 1 goto proc_done
-set /a RETRIES+=1
-if %RETRIES% geq 30 taskkill /F /PID %PID% > nul 2>&1
-goto wait_proc
-
-:proc_done
-ping 127.0.0.1 -n 2 > nul
-copy /y "%NEW_EXE%" "%TARGET_EXE%" > nul
-if errorlevel 1 (
-    ping 127.0.0.1 -n 2 > nul
-    copy /y "%NEW_EXE%" "%TARGET_EXE%" > nul
-)
-
-del /f /q "%NEW_EXE%" > nul
-start "" "%TARGET_EXE%"
-del /f /q "%~f0" > nul
-`;
+        const vbsScript = 'Set sh = CreateObject("WScript.Shell")\r\n' +
+            'sh.Run "' + batPath + '", 0, False\r\n';
 
         fs.writeFileSync(batPath, batScript, 'utf8');
+        fs.writeFileSync(vbsPath, vbsScript, 'utf8');
 
-        const child = child_process.spawn('cmd.exe', ['/c', batPath], {
+        // wscript.exe es una app de GUI sin consola: el .bat corre oculto (sin ventana negra)
+        const child = child_process.spawn('wscript.exe', ['//nologo', vbsPath], {
             detached: true,
             stdio: 'ignore',
             windowsHide: true
@@ -424,10 +440,10 @@ del /f /q "%~f0" > nul
         if (typeof onBeforeQuitCallback === 'function') {
             try { onBeforeQuitCallback(); } catch (_) {}
         }
-        app.quit();
+        try { app.quit(); } catch (_) {}
         setTimeout(() => {
-            try { app.exit(0); } catch (_) {}
-        }, 1200);
+            try { app.exit(0); } catch (_) { try { process.exit(0); } catch (_) {} }
+        }, 250);
         return { success: true };
     } else if (execInfo.isPackaged) {
         const child = child_process.spawn(downloadedUpdatePath, ['--updated'], {
@@ -439,10 +455,10 @@ del /f /q "%~f0" > nul
         if (typeof onBeforeQuitCallback === 'function') {
             try { onBeforeQuitCallback(); } catch (_) {}
         }
-        app.quit();
+        try { app.quit(); } catch (_) {}
         setTimeout(() => {
-            try { app.exit(0); } catch (_) {}
-        }, 1200);
+            try { app.exit(0); } catch (_) { try { process.exit(0); } catch (_) {} }
+        }, 250);
         return { success: true };
     } else {
         // En modo desarrollo, abrir la carpeta contenedora
