@@ -889,17 +889,15 @@
             border: 2px solid var(--cont-color, var(--primary));
             border-radius: 8px;
             box-shadow: 0 3px 12px rgba(0,0,0,0.25);
-            display: inline-flex;
+            display: flex;
             flex-direction: column;
             box-sizing: border-box;
-            flex-shrink: 0;
-            max-width: 100%;
+            min-width: 0;
             min-height: 0;
             height: var(--cont-h, 190px);
             max-height: var(--cont-h, 190px);
             transition: box-shadow 0.15s ease, border-color 0.15s ease;
             overflow: hidden;
-            align-self: flex-start;
         }
         .container-block.container-continuity {
             border-top: 2px dashed var(--cont-color, var(--primary));
@@ -3959,6 +3957,7 @@
         </div>
         <button class="tb-btn" id="btn-new-card" title="Nueva tarjeta (Ctrl+N)">➕ Tarjeta</button>
         <button class="tb-btn" id="btn-new-container" title="Nuevo contenedor" style="display:none;">📦 Contenedor</button>
+        <button class="tb-btn" id="btn-acomodar" title="Auto-acomodar: reordena para minimizar huecos" style="display:none;">🧩 Acomodar</button>
         <button class="tb-btn" id="btn-paste-card" title="Pegar tarjeta copiada (Ctrl+V)" style="display:none;">📥 Pegar</button>
         <button class="tb-btn" id="btn-compactar" title="Compactar y eliminar espacios vacíos">🧹</button>
         <button class="tb-btn" id="btn-fav-filter" title="Mostrar solo favoritos">⭐</button>
@@ -4105,6 +4104,13 @@
                         <option value="120">2 minutos</option>
                     </select>
                     <div class="field-hint">La ventana de detalle se cierra sola tras ese tiempo en reposo. También puedes cerrarla con ✕, Esc o haciendo clic fuera.</div>
+                </div>
+                <div class="modal-field" id="settings-auto-arrange-field" style="display:none">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="settings-auto-arrange" />
+                        🧩 Auto-acomodar al redimensionar
+                    </label>
+                    <div class="field-hint">Solo en modo Contenedor. Reordena los elementos al cambiar el tamaño de la ventana para reducir espacios vacíos. Reversible con Ctrl+Z.</div>
                 </div>
                 <div class="modal-field">
                     <label>Vista previa en tiempo real</label>
@@ -4869,6 +4875,7 @@
         const btnSearchNext = document.getElementById('btn-search-next');
         const btnNewCard = document.getElementById('btn-new-card');
         const btnNewContainer = document.getElementById('btn-new-container');
+        const btnAcomodar = document.getElementById('btn-acomodar');
         const btnPasteCard = document.getElementById('btn-paste-card');
         const btnCompactar = document.getElementById('btn-compactar');
         const btnFavFilter = document.getElementById('btn-fav-filter');
@@ -6343,6 +6350,7 @@
         function renderCardsMode(sheet) {
             btnNewCard.style.display = '';
             if (btnNewContainer) btnNewContainer.style.display = 'none';
+            if (btnAcomodar) btnAcomodar.style.display = 'none';
             btnCompactar.style.display = '';
             btnFavFilter.style.display = '';
             btnView.style.display = '';
@@ -6452,21 +6460,24 @@
         function renderContainersMode(sheet) {
             btnNewCard.style.display = '';
             if (btnNewContainer) btnNewContainer.style.display = '';
+            if (btnAcomodar) btnAcomodar.style.display = '';
             btnCompactar.style.display = '';
             btnFavFilter.style.display = '';
             btnView.style.display = 'none';
 
             cardsContainer.className = 'containers-mode';
-            cardsContainer.style.display = 'flex';
-            cardsContainer.style.flexDirection = 'row';
-            cardsContainer.style.flexWrap = 'wrap';
-            cardsContainer.style.alignItems = 'flex-start';
-            cardsContainer.style.alignContent = 'flex-start';
+            cardsContainer.style.display = 'grid';
+            cardsContainer.style.flexDirection = '';
+            cardsContainer.style.flexWrap = '';
+            cardsContainer.style.alignItems = '';
+            cardsContainer.style.alignContent = 'start';
+            cardsContainer.style.justifyContent = '';
             cardsContainer.style.gap = '10px';
-            cardsContainer.style.gridTemplateColumns = '';
-            cardsContainer.style.gridAutoRows = '';
+            cardsContainer.style.gridAutoFlow = 'row';
 
             const cs = sheet.cardSize || { w: 150, h: 190 };
+            cardsContainer.style.gridTemplateColumns = 'repeat(auto-fill, ' + (cs.w || 150) + 'px)';
+            cardsContainer.style.gridAutoRows = (cs.h || 190) + 'px';
             const tokens = searchTokens();
             const query = state.searchQuery.trim();
 
@@ -6537,21 +6548,15 @@
                         block.dataset.sheetId = sheet.id;
                         block.dataset.segmentIndex = segIdx;
 
-                        // Ancho exacto igual a N tarjetas exteriores + gaps
-                        const numCards = segCards.length;
-                        const blockW = numCards === 0 ? (cs.w || 150) : (numCards * (cs.w || 150) + (numCards - 1) * GRID_GAP);
+                        // Ancho por columnas de rejilla (span N), sin ancho fijo que aplaste tarjetas
+                        const numCards = Math.max(1, segCards.length);
+                        const blockCols = Math.min(numCards, maxCardsPerSegment);
                         const blockH = (cs.h || 190);
 
                         block.style.setProperty('--cont-h', blockH + 'px');
-                        block.style.width = blockW + 'px';
-                        block.style.minWidth = blockW + 'px';
-                        block.style.maxWidth = blockW + 'px';
+                        block.style.gridColumn = 'span ' + blockCols;
                         block.style.height = blockH + 'px';
-                        block.style.maxHeight = blockH + 'px';
-                        block.style.minHeight = blockH + 'px';
                         block.style.boxSizing = 'border-box';
-                        block.style.flexShrink = '0';
-                        block.style.flexGrow = '0';
                         const contColorNorm = normalizeHexColor(cont.color, '#3b82f6');
                         block.style.setProperty('--cont-color', contColorNorm);
                         block.style.setProperty('--cont-bg', getContBgColor(contColorNorm, 0.16));
@@ -6674,6 +6679,7 @@
         function renderImagesMode(sheet) {
             btnNewCard.style.display = '';
             btnCompactar.style.display = 'none';
+            if (btnAcomodar) btnAcomodar.style.display = 'none';
             btnFavFilter.style.display = '';
             btnView.style.display = '';
             cardsContainer.classList.add('images-mode');
@@ -7220,6 +7226,7 @@
 
         function renderProcessMode(sheet) {
             cardsContainer.classList.remove('images-mode');
+            if (btnAcomodar) btnAcomodar.style.display = 'none';
             cardsContainer.style.gridTemplateColumns = '1fr';
             cardsContainer.style.gridAutoRows = 'auto';
             btnNewCard.style.display = 'none';
@@ -9135,7 +9142,11 @@
             if (sheet && sheet.mode === 'containers') {
                 if (containerResizeTimer) clearTimeout(containerResizeTimer);
                 containerResizeTimer = setTimeout(() => {
+                    const s = getActiveSheet();
                     render();
+                    if (s && s.mode === 'containers' && s.autoArrange) {
+                        acomodarContenedores(s.id, false);
+                    }
                 }, 80);
             }
         });
@@ -9208,6 +9219,51 @@
             } else {
                 showToast('✨ No hay espacios vacíos en este contenedor.', 'info', 1600);
             }
+        }
+
+        // Auto-acomodo: reordena los elementos raíz (tarjetas libres y contenedores como bloques
+        // atómicos) con empaquetado "first-fit" por filas para minimizar huecos. No toca el
+        // contenido: sólo el orden (rootOrder), y es reversible con Ctrl+Z.
+        function acomodarContenedores(sheetId, useUndo) {
+            const sheet = getSheetById(sheetId);
+            if (!sheet || sheet.mode !== 'containers') return false;
+            const cs = sheet.cardSize || { w: 150, h: 190 };
+            const GAP = 10;
+            const W = cardsContainer.clientWidth || (window.innerWidth - 80);
+            const cols = Math.max(1, Math.floor((W + GAP) / ((cs.w || 150) + GAP)));
+            const order = getRootOrder(sheet);
+            if (!order.length) return false;
+
+            const units = order.map(id => {
+                const cont = (sheet.containers || []).find(c => c.id === id);
+                if (cont) {
+                    const n = (sheet.cards || []).filter(c => c.containerId === cont.id).length;
+                    return { id, w: Math.min(Math.max(1, n), cols) };
+                }
+                return { id, w: 1 };
+            });
+
+            const rowRemaining = [];
+            const packed = [];
+            units.forEach(u => {
+                let placed = false;
+                for (let i = 0; i < rowRemaining.length; i++) {
+                    if (rowRemaining[i] >= u.w) { packed.push(u.id); rowRemaining[i] -= u.w; placed = true; break; }
+                }
+                if (!placed) { packed.push(u.id); rowRemaining.push(cols - u.w); }
+            });
+
+            const changed = packed.some((id, i) => id !== order[i]);
+            if (!changed) {
+                if (useUndo !== false) showToast('✨ Ya está acomodado.', 'info', 1200);
+                return false;
+            }
+            if (useUndo !== false) pushUndo('acomodar');
+            sheet.rootOrder = packed;
+            saveData();
+            render();
+            if (useUndo !== false) showToast('🧩 Acomodado para minimizar huecos.', 'success', 1500);
+            return true;
         }
 
         function showEmptySlotContextMenu(x, y, sheetId, slotId) {
@@ -11199,6 +11255,16 @@
             const drawerSelect = document.getElementById('settings-drawer-timeout');
             drawerField.style.display = sheet.mode === 'process' ? 'none' : '';
             drawerSelect.value = String(sheet.drawerTimeout != null ? sheet.drawerTimeout : 10);
+            const autoArrangeField = document.getElementById('settings-auto-arrange-field');
+            const autoArrangeChk = document.getElementById('settings-auto-arrange');
+            if (autoArrangeField && autoArrangeChk) {
+                if (sheet.mode === 'containers') {
+                    autoArrangeField.style.display = '';
+                    autoArrangeChk.checked = !!sheet.autoArrange;
+                } else {
+                    autoArrangeField.style.display = 'none';
+                }
+            }
             syncSettingsSliders();
             settingsOverlay.classList.add('show');
         }
@@ -12260,6 +12326,17 @@
             showToast('⏱️ Tiempo de cierre actualizado.', 'success', 1000);
         });
 
+        const autoArrangeChkEl = document.getElementById('settings-auto-arrange');
+        if (autoArrangeChkEl) {
+            autoArrangeChkEl.addEventListener('change', () => {
+                const sheet = getSheetById(settingsSheetId);
+                if (!sheet) return;
+                sheet.autoArrange = !!autoArrangeChkEl.checked;
+                saveData();
+                showToast(sheet.autoArrange ? '🧩 Auto-acomodo activado.' : '🧩 Auto-acomodo desactivado.', 'info', 1200);
+            });
+        }
+
         // ============================================================
         // AJUSTES: COLOR DE HOJA Y OPCIONES DE CUADRÍCULA (procesos)
         // ============================================================
@@ -12599,6 +12676,13 @@
         if (btnCompactar) {
             btnCompactar.addEventListener('click', () => {
                 compactarHoja(state.activeSheetId);
+            });
+        }
+
+        if (btnAcomodar) {
+            btnAcomodar.addEventListener('click', () => {
+                const sheet = getActiveSheet();
+                if (sheet && sheet.mode === 'containers') acomodarContenedores(sheet.id, true);
             });
         }
 

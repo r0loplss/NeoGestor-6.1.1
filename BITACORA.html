@@ -133,6 +133,18 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">02 oct 2026</span><span class="ver">v6.1.15</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Fast — Modo Contenedor a rejilla (fin de la deformación y huecos)</b>: el lienzo de contenedores pasó de <i>flex-wrap</i> con anchos fijos a una <b>rejilla de columnas del ancho de tarjeta</b> (<code>repeat(auto-fill, cs.w)</code>, filas <code>cs.h</code>, <code>grid-auto-flow: row</code>). Cada contenedor ocupa <b>N columnas</b> (<code>grid-column: span N</code>) y las tarjetas libres 1 columna. Resultado: las tarjetas <b>ya no se comprimen</b> y los huecos dejan de ser irregulares (quedan celdas alineadas, como en Modo Tarjetas).</li>
+                    <li><b>Contenedores de Continuidad — preservados</b>: se mantiene la segmentación por ancho (continuación en la línea inferior con cabecera minimalista y botón <code>＋</code>), el <b>“Mover Todo en Bloque”</b>, el orden y el <b>resize</b> con debounce. Se corrige además un <code>display:flex</code> residual que quedaba al cambiar de Contenedores a Imágenes/Procesos.</li>
+                    <li><b>Fast — Auto-acomodo (🧩)</b>: nuevo botón <b>“🧩 Acomodar”</b> que reordena los elementos raíz (contenedores tratados como <b>bloques atómicos</b>) con empaquetado “first-fit” por filas para <b>minimizar huecos</b>. Es <b>reversible con Ctrl+Z</b> y <b>no toca el contenido</b> (solo el orden). Se añadió el interruptor por hoja <b>“Auto-acomodar al redimensionar”</b> en Ajustes de hoja (solo en modo Contenedor).</li>
+                    <li><b>Release v6.1.15</b>: portable <code>GestorCasos-portable-6.1.15.exe</code> como asset y notas.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">01 oct 2026</span><span class="ver">v6.1.14</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
