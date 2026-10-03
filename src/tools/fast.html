@@ -870,19 +870,14 @@
             overflow-y: auto;
         }
         #content[data-mode="containers"] #cards-container {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            align-content: flex-start;
+            display: grid;
+            align-content: start;
             gap: 10px;
             width: 100%;
             box-sizing: border-box;
         }
         #content[data-mode="containers"] #cards-container > .card-item {
-            flex-shrink: 0;
             box-sizing: border-box;
-            align-self: flex-start;
         }
         .container-block {
             background: var(--surface);
@@ -6473,7 +6468,7 @@
             cardsContainer.style.alignContent = 'start';
             cardsContainer.style.justifyContent = '';
             cardsContainer.style.gap = '10px';
-            cardsContainer.style.gridAutoFlow = 'row';
+            cardsContainer.style.gridAutoFlow = 'row dense';
 
             const cs = sheet.cardSize || { w: 150, h: 190 };
             cardsContainer.style.gridTemplateColumns = 'repeat(auto-fill, ' + (cs.w || 150) + 'px)';
