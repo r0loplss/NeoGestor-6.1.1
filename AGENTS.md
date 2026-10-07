@@ -58,6 +58,11 @@ Antes de cada commit, agregar al **inicio** de `#lista` una `<section class="ent
 ## Sesión y publicación
 
 - **Inicio:** `git pull`.
-- **Fin / "sube a git":** actualizar bitácora → `git add -A` → commit `[Open Code]` → `git push`.
-- **Compilar y publicar** (solo cuando el usuario lo pida): 1) subir `version` en `package.json` (patch); 2) `npm.cmd run build:portable`; 3) crear/actualizar el **Release** `v<version>` con el asset `GestorCasos-portable-<version>.exe` y las notas de la bitácora; 4) push.
-- No compilar portables por cada cambio. No borrar los instaladores (`Gestor de Casos Setup *.exe`) salvo indicación explícita.
+- **REGLA FIJA (sin excepción): cada vez que se haga commit, compila o publica, hacer SIEMPRE las 3 cosas juntas.** Nunca dejar tareas por goteo (un commit sin compilar/publicar, o un Release sin commit).
+- Flujo único (todo en una sola operación):
+  1. Subir `version` en `package.json` (patch).
+  2. Actualizar `BITACORA.html` (entrada del día con la nueva versión).
+  3. `npm.cmd run build:portable` (genera `dist/GestorCasos-portable-<version>.exe`).
+  4. `git add -A` → commit `[Open Code] ...` → `git push`.
+  5. Crear/actualizar el **Release** `v<version>` con el asset `GestorCasos-portable-<version>.exe` y las notas de la bitácora.
+- El repo debe estar **público** para que el updater vea el `Release`. No borrar los instaladores (`Gestor de Casos Setup *.exe`) salvo indicación explícita.
