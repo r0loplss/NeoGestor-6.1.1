@@ -133,6 +133,17 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">07 oct 2026</span><span class="ver">v6.1.16</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Radar de Contingencias — pulido del parser (solo reglas, sin perder lo existente)</b>: nuevos filtros de ruido (<i>Protocolo de Comunicación</i>, <i>En este momento…</i>, roles <i>EJEC.</i>, frases de script como "presentamos intermitencia" / "pronta solución" / "gracias por tu comprensión"); detección de <b>INC con espacio</b> (<code>INC 000…</code>); <code>Recaudación</code> agregada como metadato Siebel; nuevos tipos de falla (<i>Saturación de Nodo</i>, <i>OLT sin cuentas PPP activas</i>); limpieza de guiones colgantes en cadenas de estados; y descarte de líneas que son solo INC o solo fecha. Verificado corriendo el parser real contra 7 tickets del nuevo lote.</li>
+                    <li><b>AGENTS.md</b>: versión combinada definitiva (reglas críticas de datos, comandos con <code>npm.cmd</code>, arquitectura, ruta de datos, Git/roles, bitácora y publicación). Se ignoran los respaldos <code>AGENTS.backup-*.md</code>.</li>
+                    <li>Pendiente de compilar/publicar como <code>6.1.17</code> (commit sin release en esta instancia).</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">02 oct 2026</span><span class="ver">v6.1.16</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

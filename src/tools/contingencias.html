@@ -1029,6 +1029,7 @@
                 'cerrado', 'resuelto', 'abierto', 'cancelado', 'pendiente', 'en proceso',
                 'nacional', 'a-nacional',
                 'recaud externos', 'recaud. externos',
+                'recaudación', 'recaudacion',
                 'sistemas de atencion', 'sistemas de atención',
                 'trabajo programado móvil', 'trabajo programado movil',
                 'trabajo programado sistemas', 'trabajo programado',
@@ -1061,6 +1062,7 @@
             }
 
             // Corregir posibles erratas comunes en la descripción resultante
+            t = t.replace(/[\s\-–]+$/, '').trim();
             t = t.replace(/\bDicultad\b/gi, 'Dificultad');
             t = t.replace(/\bintermitencias\b/gi, 'intermitencia');
 
@@ -1084,9 +1086,17 @@
             const cleanLines = rawLines.filter(line => {
                 if (/^Hola\s+\(/i.test(line) || /^Estimado\b/i.test(line) || /^Hola\s+[a-zA-Z]/i.test(line)) return false;
                 if (/^En estos momentos el servicio/i.test(line)) return false;
+                if (/^En este momento\b/i.test(line)) return false;
+                if (/^Protocolo\s+de\s+Comunicaci[oó]n/i.test(line)) return false;
+                if (/^EJEC\./i.test(line)) return false;
+                if (/presentamos\s+(?:una\s+)?intermitencia/i.test(line)) return false;
+                if (/\bpronta\s+soluci[oó]n\b/i.test(line)) return false;
+                if (/\bGracias\s+por\s+tu\s+comprensi[oó]n\b/i.test(line)) return false;
+                if (/\bnuestro equipo t[eé]cnico\b/i.test(line)) return false;
+                if (/\best[aá]n?\s+trabajando\s+para\b/i.test(line)) return false;
                 if (/^Debido al cambio de hora/i.test(line)) return false;
                 if (/^Derivar\s+al\s+cliente/i.test(line)) return false;
-                if (/^\s*INC\d+\s*$/i.test(line)) return false;
+                if (/^\s*INC\s?\d+\s*$/i.test(line)) return false;
                 if (/^\s*\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(line)) return false;
                 if (line.startsWith(id) || /^1-\d{11,12}\b/.test(line)) return false;
                 if (/^(?:Serv\.\s+Voz|Comunicación\s+Voz|Problemas\s+de\s+cobertura|Sistemas\s+de\s+Atenci[oó]n|Activación\s+de\s+móviles|Servicio\s+de\s+Recarga|Trabajo\s+Programado\s+Móvil|Trabajo\s+Programado\s+Sistemas|Entel|Integración)$/i.test(line)) return false;
@@ -1108,7 +1118,7 @@
 
             // 3. Buscar líneas técnicas de INC de Red (ej: INC000009433631, INC000009408613, etc.)
             for (const line of cleanLines) {
-                const incIdx = line.search(/\bINC\d{8,14}\b/i);
+                const incIdx = line.search(/\bINC\s?\d{8,14}\b/i);
                 if (incIdx !== -1) {
                     let textoInc = line.substring(incIdx).trim();
                     const guionIdx = textoInc.indexOf(' - ');
@@ -1149,6 +1159,10 @@
                             tipoFalla = 'Aumento de Reclamos';
                         } else if (/Ca[íi]da\s+de\s+Sitios/i.test(cuerpo)) {
                             tipoFalla = 'Caída de Sitios';
+                        } else if (/Saturaci[oó]n/i.test(cuerpo)) {
+                            tipoFalla = 'Saturación de Nodo';
+                        } else if (/\bOLT\b/i.test(cuerpo) && /PPP/i.test(cuerpo)) {
+                            tipoFalla = 'OLT sin cuentas PPP activas';
                         } else {
                             const genericoMatch = cuerpo.match(/^([A-Za-z0-9áéíóúÁÉÍÓÚñÑ\s]+?)(?=\s+en\s+Comunas?|\s+en\s+[A-Z]|\s*Causa:|\s*$)/i);
                             if (genericoMatch) tipoFalla = genericoMatch[1].trim();
@@ -1175,7 +1189,7 @@
             for (const line of cleanLines) {
                 const limpia = limpiarPrefijoEstadosSiebel(line, zona);
                 const sinTablas = limpiarColasTecnicas(limpia);
-                if (sinTablas && sinTablas.length >= 6 && !esDetalleGenerico(sinTablas) && !sinTablas.startsWith('<') && !sinTablas.startsWith('INC000')) {
+                if (sinTablas && sinTablas.length >= 6 && !esDetalleGenerico(sinTablas) && !sinTablas.startsWith('<') && !/^INC\s?\d/i.test(sinTablas)) {
                     return sinTablas;
                 }
             }
@@ -1185,7 +1199,7 @@
                 const parts = line.split('\t').map(p => p.trim()).filter(p => p.length > 0);
                 for (const part of parts) {
                     const cleanPart = limpiarColasTecnicas(limpiarPrefijoEstadosSiebel(part, zona));
-                    if (cleanPart.length >= 6 && !esDetalleGenerico(cleanPart) && !cleanPart.startsWith('<') && !cleanPart.startsWith('INC000')) {
+                    if (cleanPart.length >= 6 && !esDetalleGenerico(cleanPart) && !cleanPart.startsWith('<') && !/^INC\s?\d/i.test(cleanPart) && !/^\d{1,2}[/-]\d{1,2}[/-]\d{4}/.test(cleanPart)) {
                         return cleanPart;
                     }
                 }
@@ -1256,8 +1270,8 @@
                     const pops = extraerPOPs(chunk);
 
                     // INC
-                    const incMatch = chunk.match(/\b(INC\d{8,14})\b/i);
-                    const inc = incMatch ? incMatch[1].toUpperCase() : '';
+                    const incMatch = chunk.match(/\b(INC\s?\d{8,14})\b/i);
+                    const inc = incMatch ? incMatch[1].replace(/\s+/g, '').toUpperCase() : '';
 
                     // Detalle puntual
                     let detalle = extraerDetallePuntual(chunk, id, zona, inc);
@@ -1331,7 +1345,7 @@
                         inicio: fechaDisplay,
                         detalle,
                         pops: extraerPOPs(linea),
-                        inc: (linea.match(/\b(INC\d{8,14})\b/i) || [])[1] || '',
+                        inc: (linea.match(/\b(INC\s?\d{8,14})\b/i) || [])[1] || '',
                         textoCompleto: linea
                     });
                 });

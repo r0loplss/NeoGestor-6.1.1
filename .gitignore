@@ -18,3 +18,6 @@ configurar-git-y-clonar-repositorio.json
 # Sistema
 Thumbs.db
 Desktop.ini
+
+# Respaldos locales (no versionar)
+AGENTS.backup-*.md
