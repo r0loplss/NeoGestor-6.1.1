@@ -133,6 +133,18 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">07 oct 2026</span><span class="ver">v6.1.18</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Fast — Múltiples anotaciones por tarjeta (drawer)</b>: además de la nota base (<code>card.notes</code>, intacta) se pueden sumar hasta <b>3 anotaciones adicionales</b> (<code>card.extraNotes: [{id, text}]</code>, aditivo, sin migración). En el drawer se listan como <b>Notas</b> con <b>✏️ editar</b>, <b>📋 copiar</b> y <b>🗑 eliminar</b> por ítem, editor inline (<code>Ctrl+Enter</code> guarda, <code>Esc</code> cancela) y <b>➕ Agregar anotación</b> (tope 3). El auto-cierre del drawer se pausa mientras se edita cualquier nota; el estado de edición es por nota (no se pierde el borrador al cambiar de tarjeta). Las anotaciones se incluyen en el <b>índice de búsqueda</b>.</li>
+                    <li><b>Fast — Imágenes en el drawer (tarjetas/contenedores/imágenes)</b>: se quitaron los botones flotantes 🔍/📋. Ahora la imagen reacciona directo: <b>1 clic</b> → copiar al portapapeles; <b>doble clic</b> → abrir en tamaño normal <b>+ copiar</b> (mismo patrón que el modo imágenes, con timer de desambiguación propio). Hint al hover (“Clic copiar · Doble clic ver”).</li>
+                    <li><b>Fast — Reglas de copiado</b>: <b>copiar normal</b> (clic / “Copiar texto”) = solo contenido (sin notas ni imágenes); <b>📑 Copiar tarjeta completa</b> (migrar) = contenido + imágenes + <b>todas las notas</b>.</li>
+                    <li><b>Release v6.1.18</b>: portable <code>GestorCasos-portable-6.1.18.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">07 oct 2026</span><span class="ver">v6.1.17</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

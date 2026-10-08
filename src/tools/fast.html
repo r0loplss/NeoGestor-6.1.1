@@ -2377,6 +2377,35 @@
         .d-note-input:focus { border-color: var(--primary); }
         .d-note-editbtns { display: flex; gap: 6px; margin-top: 8px; }
 
+        /* Lista de notas (base + adicionales) en el drawer */
+        .d-note-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+        }
+        .d-note-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+        .d-note-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); font-weight: 700; }
+        .d-note-actions { display: flex; gap: 4px; }
+        .d-note-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+        .d-note-add { margin: 2px 0 12px; }
+        .d-notes-empty { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+        .d-img-hint {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            font-size: 10px;
+            text-align: center;
+            padding: 2px;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.15s;
+            pointer-events: none;
+        }
+        .d-img:hover .d-img-hint { opacity: 1; }
+
         /* ============================================================
                GUÍA DE ARRASTRE
                ============================================================ */
@@ -4760,6 +4789,7 @@
             lastCardColor: '#fef3c7',
             drawer: null,
             drawerNoteEdit: false,
+            drawerNoteEditRef: null,
             drawerNoteDraft: '',
             dataPath: null,
             dataPathReady: false,
@@ -5383,6 +5413,7 @@
                     if (!Array.isArray(c.links)) c.links = [];
                     if (c.pinned == null) c.pinned = false;
                     if (c.notes == null) c.notes = '';
+                    if (!Array.isArray(c.extraNotes)) c.extraNotes = [];
                 });
             }
             return s;
@@ -5653,7 +5684,8 @@
             const plain = waToPlain(card.body || '');
             const body = normText(plain);
             const header = normText(tipHeader(plain));
-            const notes = normText(card.notes || '');
+            const extraNotesText = (card.extraNotes || []).map(n => (n && n.text) || '').join(' ');
+            const notes = normText((card.notes || '') + ' ' + extraNotesText);
             const linksText = normText((card.links || []).map(l => (l.text || '') + ' ' + (l.url || '')).join(' '));
             const imgLabels = normText((card.images || []).map(i => i.label || '').join(' '));
 
@@ -6670,6 +6702,7 @@
 
         // ---------- MODO BUSCADOR DE IMÁGENES ----------
         let imgClickTimer = null;
+        let drawerImgClickTimer = null;
 
         function renderImagesMode(sheet) {
             btnNewCard.style.display = '';
@@ -7916,40 +7949,45 @@
             }
         }
 
-        function cacheCopiedCard(card) {
+        function cacheCopiedCard(card, includeAll) {
             if (!card || card.isEmpty) return;
-            window.__lastCopiedCard = {
+            const payload = {
                 __type: 'FAST_CARD',
-                version: 1,
+                version: includeAll ? 2 : 1,
                 title: card.title || '',
                 body: card.body || '',
                 color: card.color || '#fef3c7',
-                images: Array.isArray(card.images) ? JSON.parse(JSON.stringify(card.images)) : [],
                 links: Array.isArray(card.links) ? JSON.parse(JSON.stringify(card.links)) : [],
                 pinned: !!card.pinned,
-                notes: card.notes || '',
                 titleFontSize: card.titleFontSize || null,
                 bodyFontSize: card.bodyFontSize || null,
                 copiedAt: Date.now()
             };
+            // La copia "completa" (migrar) lleva imágenes y TODAS las notas; la copia normal, no.
+            if (includeAll) {
+                payload.images = Array.isArray(card.images) ? JSON.parse(JSON.stringify(card.images)) : [];
+                payload.notes = card.notes || '';
+                payload.extraNotes = Array.isArray(card.extraNotes) ? JSON.parse(JSON.stringify(card.extraNotes)) : [];
+            }
+            window.__lastCopiedCard = payload;
             try {
-                localStorage.setItem(FAST_CLIPBOARD_KEY, JSON.stringify(window.__lastCopiedCard));
+                localStorage.setItem(FAST_CLIPBOARD_KEY, JSON.stringify(payload));
             } catch (e) {}
             if (typeof updatePasteButtonState === 'function') updatePasteButtonState();
         }
 
         function copyCardBody(card) {
-            cacheCopiedCard(card);
+            cacheCopiedCard(card, false);
             copyText(card.body || '');
         }
 
         function copyCardPlain(card) {
-            cacheCopiedCard(card);
+            cacheCopiedCard(card, false);
             copyText(waToPlain(card.body));
         }
 
         function copyCardTitleBody(card) {
-            cacheCopiedCard(card);
+            cacheCopiedCard(card, false);
             const title = card.title || '';
             const body = waToPlain(card.body);
             const text = (title && body) ? title + '\n\n' + body : (title || body);
@@ -8071,6 +8109,7 @@
         function openDrawer(sheetId, cardId) {
             state.drawer = { sheetId, cardId };
             state.drawerNoteEdit = false;
+            state.drawerNoteEditRef = null;
             state.drawerNoteDraft = '';
             renderDrawer();
             armDrawerTimer();
@@ -8080,6 +8119,7 @@
             cancelDrawerTimer();
             state.drawer = null;
             state.drawerNoteEdit = false;
+            state.drawerNoteEditRef = null;
             state.drawerNoteDraft = '';
             renderDrawer();
         }
@@ -8153,16 +8193,22 @@
                 card.images.forEach(img => {
                     const box = document.createElement('div');
                     box.className = 'd-img';
+                    box.title = 'Clic: copiar · Doble clic: ver ampliada';
                     box.innerHTML = `
                         <img src="${esc(img.data)}" alt="${esc(img.label || 'Imagen')}" loading="lazy" decoding="async" />
-                        <div class="d-img-actions">
-                            <button title="Abrir grande">🔍</button>
-                            <button title="Copiar">📋</button>
-                        </div>
+                        <span class="d-img-hint">Clic copiar · Doble clic ver</span>
                     `;
-                    box.querySelector('img').addEventListener('dblclick', () => openImageBig(img));
-                    box.querySelector('.d-img-actions button:first-child').addEventListener('click', () => openImageBig(img));
-                    box.querySelector('.d-img-actions button:last-child').addEventListener('click', () => copyImage(img.data));
+                    box.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        if (drawerImgClickTimer) clearTimeout(drawerImgClickTimer);
+                        drawerImgClickTimer = setTimeout(() => { drawerImgClickTimer = null; copyImage(img.data); }, 220);
+                    });
+                    box.addEventListener('dblclick', (ev) => {
+                        ev.stopPropagation();
+                        if (drawerImgClickTimer) { clearTimeout(drawerImgClickTimer); drawerImgClickTimer = null; }
+                        copyImage(img.data);
+                        openImageBig(img);
+                    });
                     grid.appendChild(box);
                 });
                 drawerScroll.appendChild(grid);
@@ -8199,35 +8245,55 @@
                 });
             }
 
-            // ── Nota personal (visible solo aquí, se guarda en la tarjeta) ──
+            // ── Notas (base + adicionales; visible solo aquí, se guardan en la tarjeta) ──
+            const MAX_EXTRA_NOTES = 3;
+            const baseNote = (card.notes || '');
+            if (!Array.isArray(card.extraNotes)) card.extraNotes = [];
+            const extras = card.extraNotes;
+
             const noteRow = document.createElement('div');
             noteRow.className = 'd-note-row';
             const noteTitle = document.createElement('span');
             noteTitle.className = 'd-section-label';
-            noteTitle.textContent = '📝 Nota';
-            const noteBtns = document.createElement('div');
-            noteBtns.className = 'd-note-btns';
+            noteTitle.textContent = '📝 Notas';
             noteRow.appendChild(noteTitle);
-            noteRow.appendChild(noteBtns);
+            drawerScroll.appendChild(noteRow);
 
-            const noteBox = document.createElement('div');
-            noteBox.className = 'd-note';
+            const notesWrap = document.createElement('div');
 
-            if (state.drawerNoteEdit) {
-                // Editor inline en el mismo bloque (sin popup)
+            const startNoteEdit = (ref, draft) => {
+                state.drawerNoteEditRef = ref;
+                state.drawerNoteDraft = draft || '';
+                state.drawerNoteEdit = true;
+                cancelDrawerTimer();
+                renderDrawer();
+            };
+
+            const buildNoteEditor = (ref, placeholder) => {
                 const ta = document.createElement('textarea');
                 ta.className = 'd-note-input';
                 ta.value = state.drawerNoteDraft;
-                ta.placeholder = 'Escribe aquí tu nota... (Ctrl+Enter para guardar)';
-                noteBox.appendChild(ta);
+                ta.placeholder = placeholder || 'Escribe aquí tu nota... (Ctrl+Enter para guardar)';
                 const ebtns = document.createElement('div');
                 ebtns.className = 'd-note-editbtns';
                 const btnSave = document.createElement('button');
                 btnSave.className = 'd-note-btn save';
-                btnSave.textContent = '💾 Guardar nota';
+                btnSave.textContent = '💾 Guardar';
                 btnSave.addEventListener('click', () => {
-                    card.notes = state.drawerNoteDraft;
+                    const text = ta.value.trim();
+                    if (ref === 'base') {
+                        card.notes = text;
+                    } else if (ref === 'new') {
+                        if (text && card.extraNotes.length < MAX_EXTRA_NOTES) {
+                            card.extraNotes.push({ id: generateId(), text });
+                        }
+                    } else {
+                        const n = card.extraNotes.find(x => x.id === ref);
+                        if (n) n.text = text;
+                    }
+                    card.updated = Date.now();
                     state.drawerNoteEdit = false;
+                    state.drawerNoteEditRef = null;
                     state.drawerNoteDraft = '';
                     saveData();
                     renderDrawer();
@@ -8238,59 +8304,110 @@
                 btnCancel.textContent = 'Cancelar';
                 btnCancel.addEventListener('click', () => {
                     state.drawerNoteEdit = false;
+                    state.drawerNoteEditRef = null;
                     state.drawerNoteDraft = '';
                     renderDrawer();
                 });
                 ebtns.appendChild(btnSave);
                 ebtns.appendChild(btnCancel);
-                noteBox.appendChild(ebtns);
-                ta.addEventListener('input', () => {
-                    state.drawerNoteDraft = ta.value;
-                });
+                ta.addEventListener('input', () => { state.drawerNoteDraft = ta.value; });
                 ta.addEventListener('keydown', (e) => {
                     e.stopPropagation();
-                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                        e.preventDefault();
-                        btnSave.click();
-                    }
+                    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); btnSave.click(); }
+                    else if (e.key === 'Escape') { e.preventDefault(); btnCancel.click(); }
                 });
                 setTimeout(() => { try { ta.focus(); } catch (err) {} }, 0);
-            } else if (card.notes && card.notes.trim()) {
+                return { ta, ebtns };
+            };
+
+            const buildNoteItem = (ref, label, text) => {
+                const item = document.createElement('div');
+                item.className = 'd-note-item';
+                if (state.drawerNoteEdit && state.drawerNoteEditRef === ref) {
+                    const { ta, ebtns } = buildNoteEditor(ref);
+                    item.appendChild(ta);
+                    item.appendChild(ebtns);
+                    return item;
+                }
+                const head = document.createElement('div');
+                head.className = 'd-note-head';
+                const lab = document.createElement('span');
+                lab.className = 'd-note-label';
+                lab.textContent = label;
+                const acts = document.createElement('div');
+                acts.className = 'd-note-actions';
+                const bCopy = document.createElement('button');
+                bCopy.className = 'd-note-btn'; bCopy.textContent = '📋'; bCopy.title = 'Copiar nota';
+                bCopy.addEventListener('click', () => copyText(text));
+                const bEdit = document.createElement('button');
+                bEdit.className = 'd-note-btn'; bEdit.textContent = '✏️'; bEdit.title = 'Editar nota';
+                bEdit.addEventListener('click', () => startNoteEdit(ref, text));
+                const bDel = document.createElement('button');
+                bDel.className = 'd-note-btn danger'; bDel.textContent = '🗑'; bDel.title = 'Eliminar nota';
+                bDel.addEventListener('click', () => {
+                    showConfirm('¿Eliminar esta nota?', () => {
+                        if (ref === 'base') card.notes = '';
+                        else card.extraNotes = card.extraNotes.filter(x => x.id !== ref);
+                        card.updated = Date.now();
+                        saveData();
+                        renderDrawer();
+                        showToast('🗑 Nota eliminada.', 'success', 1000);
+                    });
+                });
+                acts.appendChild(bCopy); acts.appendChild(bEdit); acts.appendChild(bDel);
+                head.appendChild(lab); head.appendChild(acts);
                 const content = document.createElement('div');
                 content.className = 'd-note-content';
-                content.textContent = card.notes;
-                noteBox.appendChild(content);
-                const btnCopy = document.createElement('button');
-                btnCopy.className = 'd-note-btn';
-                btnCopy.textContent = '📋';
-                btnCopy.title = 'Copiar nota';
-                btnCopy.addEventListener('click', () => copyText(card.notes));
-                const btnEdit = document.createElement('button');
-                btnEdit.className = 'd-note-btn';
-                btnEdit.textContent = '✏️ Editar';
-                btnEdit.addEventListener('click', () => {
-                    state.drawerNoteDraft = card.notes || '';
-                    state.drawerNoteEdit = true;
-                    renderDrawer();
-                });
-                noteBtns.appendChild(btnCopy);
-                noteBtns.appendChild(btnEdit);
-            } else {
-                noteBox.classList.add('empty');
-                noteBox.textContent = 'Sin nota todavía.';
-                const btnAdd = document.createElement('button');
-                btnAdd.className = 'd-note-btn';
-                btnAdd.textContent = '➕ Agregar nota';
-                btnAdd.addEventListener('click', () => {
-                    state.drawerNoteDraft = card.notes || '';
-                    state.drawerNoteEdit = true;
-                    renderDrawer();
-                });
-                noteBox.appendChild(btnAdd);
+                content.textContent = text;
+                item.appendChild(head);
+                item.appendChild(content);
+                return item;
+            };
+
+            // Nota base
+            if (baseNote.trim() || (state.drawerNoteEdit && state.drawerNoteEditRef === 'base')) {
+                notesWrap.appendChild(buildNoteItem('base', 'Nota', baseNote));
             }
 
-            drawerScroll.appendChild(noteRow);
-            drawerScroll.appendChild(noteBox);
+            // Anotaciones adicionales
+            extras.forEach((n, idx) => {
+                notesWrap.appendChild(buildNoteItem(n.id, 'Anotación ' + (idx + 1), n.text || ''));
+            });
+
+            // Nueva anotación en edición
+            if (state.drawerNoteEdit && state.drawerNoteEditRef === 'new') {
+                const item = document.createElement('div');
+                item.className = 'd-note-item';
+                const { ta, ebtns } = buildNoteEditor('new', 'Nueva anotación... (Ctrl+Enter para guardar)');
+                item.appendChild(ta);
+                item.appendChild(ebtns);
+                notesWrap.appendChild(item);
+            }
+
+            // Estado vacío
+            if (!baseNote.trim() && extras.length === 0 && !state.drawerNoteEdit) {
+                const empty = document.createElement('div');
+                empty.className = 'd-notes-empty';
+                empty.textContent = 'Sin notas todavía.';
+                notesWrap.appendChild(empty);
+            }
+
+            // Botón agregar (hasta 3 adicionales; si no hay base todavía, la primera va a la base)
+            if (extras.length < MAX_EXTRA_NOTES && !(state.drawerNoteEdit && state.drawerNoteEditRef === 'new')) {
+                const addWrap = document.createElement('div');
+                addWrap.className = 'd-note-add';
+                const btnAdd = document.createElement('button');
+                btnAdd.className = 'd-note-btn';
+                btnAdd.textContent = '➕ Agregar anotación';
+                btnAdd.addEventListener('click', () => {
+                    const target = (!baseNote.trim() && extras.length === 0) ? 'base' : 'new';
+                    startNoteEdit(target, '');
+                });
+                addWrap.appendChild(btnAdd);
+                notesWrap.appendChild(addWrap);
+            }
+
+            drawerScroll.appendChild(notesWrap);
 
             drawerActions.innerHTML = `
                 <button class="da-btn primary" data-a="copy" title="Copiar texto para WhatsApp">📋 Copiar</button>
@@ -8498,7 +8615,7 @@
 
         function copyFullCard(card) {
             if (!card || card.isEmpty) return;
-            cacheCopiedCard(card);
+            cacheCopiedCard(card, true);
             const jsonStr = JSON.stringify(window.__lastCopiedCard);
 
             // 1. Guardar en localStorage (compartido entre todas las ventanas del Gestor)
@@ -8631,6 +8748,7 @@
                 links: Array.isArray(data.links) ? JSON.parse(JSON.stringify(data.links)) : [],
                 pinned: !!data.pinned,
                 notes: data.notes || '',
+                extraNotes: Array.isArray(data.extraNotes) ? JSON.parse(JSON.stringify(data.extraNotes)) : [],
                 titleFontSize: data.titleFontSize || null,
                 bodyFontSize: data.bodyFontSize || null,
                 created: Date.now(),
@@ -10485,7 +10603,7 @@
                 }
             }
             if (!card || replaceSlotId) {
-                card = { id: generateId(), containerId: targetContainerId, title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', created: Date.now(), updated: Date.now() };
+                card = { id: generateId(), containerId: targetContainerId, title: '', body: '', color: state.lastCardColor || '#fef3c7', images: [], links: [], pinned: false, notes: '', extraNotes: [], created: Date.now(), updated: Date.now() };
                 isNew = true;
                 cardSnapshot = null;
                 if (replaceSlotId) {
@@ -12961,7 +13079,7 @@
                 if (ctxMenu.classList.contains('show')) { hideContextMenu(); return; }
                 if (colorPalette.classList.contains('show')) { colorPalette.classList.remove('show'); return; }
                 if (state.drawer) {
-                    if (state.drawerNoteEdit) { state.drawerNoteEdit = false; state.drawerNoteDraft = ''; renderDrawer(); }
+                    if (state.drawerNoteEdit) { state.drawerNoteEdit = false; state.drawerNoteEditRef = null; state.drawerNoteDraft = ''; renderDrawer(); }
                     else closeDrawer();
                     return;
                 }
