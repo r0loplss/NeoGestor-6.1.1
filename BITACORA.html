@@ -133,6 +133,21 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.21</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tipificador V2 — rediseño de interfaz y experiencia (adaptabilidad + calidad)</b>.</li>
+                    <li><b>Adaptabilidad</b>: la página ya no hace scroll; el layout es un <b>grid de 3 columnas con scroll independiente por panel</b>, con breakpoints <b>3 → 2 → 1 columna</b> (1180 / 760 px). Se reemplazaron todas las tipografías en <code>vh</code> por tamaños fijos en <code>px</code>.</li>
+                    <li><b>Ventana/Admin</b>: tema, "ventana flotante" y <b>Admin</b> se movieron al <b>header frameless</b> (ya no flotan sobre el contenido); el Panel Admin pasa a <b>drawer lateral</b> con scroll propio. Se recuerda el <b>último procedimiento y la selección</b> (<code>tipificador_v2_ui</code>).</li>
+                    <li><b>UX de lista/resultado</b>: <b>contador de resultados</b>, búsqueda con <b>debounce</b> y <b>resaltado</b> del término, <b>estado vacío guiado</b> (centro y detalles), <b>preview del texto exacto</b> que se copia ("Se copiará:") y <b>navegación por teclado</b> (<code>/</code>, <code>↑/↓</code>, <code>Enter</code>, <code>Esc</code>).</li>
+                    <li><b>Robustez offline</b>: íconos de Google Material Icons reemplazados por <b>emoji locales</b> (se quitó el link externo de íconos); fuentes con fallback del sistema. Los enlaces dentro de "Detalles" ahora abren en el <b>navegador externo</b> (<code>shell.openExternal</code>) en vez de navegar la app.</li>
+                    <li><b>Validación</b>: <code>node --check</code> OK; chequeo automático de IDs/handlers OK; <b>smoke test real en Electron</b> (56 procedimientos cargados, grid de 3 columnas, búsqueda "robo" → 5 resultados, selección + preview OK). Único aviso = warning de CSP de Electron en dev (no aparece empaquetado).</li>
+                    <li><b>Release v6.1.21</b>: portable <code>GestorCasos-portable-6.1.21.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.20</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tipificador V2</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 <style>
     :root {
         --bg-body: #eef1f6;
@@ -36,67 +35,59 @@
         --shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
 
-    * { font-family: 'Barlow', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+    * { font-family: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
 
+    html { height: 100%; }
     body {
-        max-width: 1500px;
-        min-height: 100vh;
-        margin: 0 auto;
+        height: 100vh;
+        margin: 0;
         display: flex;
         flex-direction: column;
         padding: 0;
+        overflow: hidden;
         background: var(--bg-body);
         color: var(--text-main);
     }
 
     .calculator {
-        width: 100%;
-        padding: 2vh;
-        margin: 10px auto 0;
-        box-shadow: var(--shadow);
-        border-radius: 16px;
-        background-color: var(--bg-calc);
-        border-top: 4px solid var(--accent-cyan);
-        display: flex;
-        align-items: stretch;
-        gap: 18px;
         flex: 1;
+        min-height: 0;
+        display: grid;
+        gap: 12px;
+        padding: 12px;
+        grid-template-columns: minmax(260px, 360px) minmax(0, 1.35fr) minmax(280px, 1fr);
     }
 
-    .left-panel   { width: 480px; max-width: 480px; display: flex; flex-direction: column; }
-    .center-panel { width: 420px; max-width: 420px; display: flex; flex-direction: column; height: fit-content; }
-    .right-panel  { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
-
-    h2 {
-        text-align: center;
-        color: var(--text-main);
-        font-size: clamp(18px, 2.8vh, 22px);
-        margin-bottom: 1.5vh;
-        font-weight: 700;
-        position: relative;
+    .left-panel,
+    .center-panel,
+    .right-panel {
+        min-width: 0;
+        min-height: 0;
+        background-color: var(--bg-calc);
+        border: 1px solid var(--border-soft);
+        border-top: 4px solid var(--accent-cyan);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
     }
-    h2:after {
-        content: '';
-        display: block;
-        width: 60px; height: 4px;
-        background: var(--accent-mint);
-        margin: 1vh auto 0;
-        border-radius: 2px;
-    }
+    .left-panel { overflow: hidden; }
+    .center-panel, .right-panel { overflow-y: auto; }
 
-    .input-group { margin-bottom: 1vh; display: flex; flex-direction: column; }
+    .input-group { margin-bottom: 10px; display: flex; flex-direction: column; }
     .input-group label {
-        font-size: clamp(14px, 2vh, 16px);
+        font-size: 14px;
         color: var(--text-muted);
         font-weight: 600;
-        margin-bottom: 0.5vh;
+        margin-bottom: 4px;
     }
     .input-group select, .input-group input {
         width: 100%;
         padding: 10px;
         border: 2px solid var(--border-soft);
         border-radius: 8px;
-        font-size: clamp(15px, 2vh, 17px);
+        font-size: 15px;
         transition: all .2s ease;
         background: var(--bg-calc);
         color: var(--text-main);
@@ -108,18 +99,18 @@
     }
 
     .recuadro {
-        margin: 1vh 0;
+        margin: 0 0 10px;
         padding: 12px;
         border-radius: 12px;
         background-color: var(--bg-recuadro);
         border-left: 4px solid var(--accent-mint);
-        font-size: clamp(15px, 2vh, 17px);
+        font-size: 15px;
         color: var(--text-main);
     }
     .recuadro.azul { border-left-color: var(--accent-blue); }
     .recuadro.naranja { border-left-color: var(--accent-orange); }
 
-    .subtitulo { font-weight: 700; font-size: clamp(16px, 2.3vh, 19px); margin-bottom: 6px; }
+    .subtitulo { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
     .subtitulo-copiar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .detalle { margin: 2px 0; }
     .detalle strong { color: var(--text-main); }
@@ -131,7 +122,7 @@
         color: #fff;
         border: none;
         border-radius: 8px;
-        font-size: clamp(14px, 2vh, 16px);
+        font-size: 14px;
         cursor: pointer;
         transition: background-color .2s;
         display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -140,8 +131,6 @@
     .btn-borrar-filtros { background-color: #B23B2E; width: 100%; }
     .btn-borrar-filtros:hover { background-color: #d9534f; color: #fff; }
 
-    .material-icons-outlined { font-size: 1.1em; vertical-align: middle; }
-
     .descripcion-container { display: flex; flex-direction: column; flex: 1; }
     .descripcion-texto {
         flex-grow: 1;
@@ -149,16 +138,14 @@
         text-align: justify;
         word-wrap: break-word;
         line-height: 1.5;
-        font-size: clamp(14px, 2vh, 16px);
+        font-size: 14px;
     }
-    #importante { flex: 1; height: 100%; overflow-y: auto; }
-
     .search-input {
         padding: 10px;
         border: 2px solid var(--border-soft);
         border-radius: 8px;
-        font-size: clamp(15px, 2vh, 17px);
-        margin-bottom: 1vh;
+        font-size: 15px;
+        margin-bottom: 10px;
         background: var(--bg-calc);
         color: var(--text-main);
     }
@@ -168,7 +155,7 @@
 
     .motivo-lista {
         list-style: none; padding: 0; margin: 0;
-        max-height: 55vh; overflow-y: auto;
+        flex: 1; min-height: 120px; overflow-y: auto;
         border: 2px solid var(--border-soft); border-radius: 10px;
     }
     .motivo-item {
@@ -176,49 +163,43 @@
         cursor: pointer;
         border-bottom: 1px solid var(--border-soft);
         transition: background-color .2s;
-        font-size: clamp(14px, 2vh, 16px);
+        font-size: 14px;
     }
     .motivo-item:hover { background-color: var(--bg-hover); }
     .motivo-item .proc-tag { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
     .motivo-item.seleccionado { background-color: #0F80CE; color: #fff; }
     .motivo-item.seleccionado .proc-tag { color: #e6f2ff; }
+    mark { background: rgba(47,203,241,.4); color: inherit; border-radius: 3px; padding: 0 1px; }
+    .result-count { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; flex-shrink: 0; }
 
     /* ---------- header frameless (arrastrable) ---------- */
     #hdr {
-        display: flex; align-items: center; gap: 6px;
-        padding: 0 8px; height: 32px; flex-shrink: 0;
+        display: flex; align-items: center; gap: 4px;
+        padding: 0 8px; height: 40px; flex-shrink: 0;
         background: #0d1220; border-bottom: 1px solid var(--border-soft);
-        border-radius: 6px 6px 0 0;
         -webkit-app-region: drag; user-select: none;
     }
     #hdr-title {
-        flex: 1; font-size: 11px; font-weight: 700; color: var(--text-muted);
-        text-transform: uppercase; letter-spacing: 0.5px;
+        font-size: 12px; font-weight: 700; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
     }
+    #hdr .spacer { flex: 1; }
     .hbtn {
         -webkit-app-region: no-drag; background: none; border: none; cursor: pointer;
-        color: var(--text-muted); font-size: 12px; padding: 2px 6px; border-radius: 3px;
-        transition: all 0.15s; font-family: 'Barlow', sans-serif;
+        color: var(--text-muted); font-size: 13px; padding: 5px 9px; border-radius: 6px;
+        transition: all 0.15s; font-family: inherit; line-height: 1;
+        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
     }
     .hbtn:hover { color: var(--text-main); background: rgba(255,255,255,0.08); }
-
-    .top-controls {
-        position: fixed; top: 44px; right: 12px; z-index: 2000;
-        display: flex; gap: 8px; align-items: center;
-    }
-    .btn-flotante {
-        background: rgba(0,92,255,.9); color: #fff; border: 1px solid #3D8BFF;
-        border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 600;
-        cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.18);
-        display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
-    }
-    .btn-flotante:hover { background: var(--accent-cyan); color: #0B1220; }
+    .hbtn.danger:hover { color: #FF6B5E; }
+    .hbtn.on { color: var(--accent-cyan); }
 
     #adminPanel {
-        position: fixed; top: 86px; right: 12px; z-index: 2000;
-        background: var(--bg-calc); border: 1px solid var(--border-soft);
-        border-radius: 12px; padding: 10px; box-shadow: var(--shadow);
-        display: none; flex-direction: column; gap: 6px; width: 268px;
+        position: fixed; top: 40px; right: 0; bottom: 0; z-index: 2500;
+        background: var(--bg-calc); border-left: 1px solid var(--border-soft);
+        box-shadow: -8px 0 24px rgba(0,0,0,.25);
+        padding: 12px; display: none; flex-direction: column; gap: 6px;
+        width: min(320px, 88vw); overflow-y: auto;
     }
     #adminPanel .admin-title {
         font-size: 12px; font-weight: 700; color: var(--accent-orange);
@@ -272,11 +253,43 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    footer { text-align: center; margin-top: 24px; font-size: 12px; color: var(--text-muted); padding: 16px 0; opacity: .85; }
+    /* ---------- estados vacíos / preview ---------- */
+    .empty-state {
+        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; color: var(--text-muted); gap: 6px; padding: 24px 12px;
+    }
+    .empty-state .big { font-size: 40px; }
+    .empty-state ol { font-size: 13px; line-height: 1.9; text-align: left; margin-top: 4px; }
+    .empty-state.small { padding: 20px 8px; font-size: 13px; }
+    .empty-state.small .big { font-size: 30px; }
 
-    @media (max-width: 1100px) {
-        .calculator { flex-wrap: wrap; }
-        .left-panel, .center-panel, .right-panel { width: 100%; max-width: 100%; }
+    .preview-label {
+        font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+        color: var(--text-muted); margin: 10px 0 4px;
+    }
+    .preview {
+        margin: 0; padding: 10px; border-radius: 8px; background: var(--bg-calc);
+        border: 1px dashed var(--border-soft);
+        font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+        font-size: 12.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+        color: var(--text-main); max-height: 240px; overflow: auto;
+    }
+
+    /* ---------- adaptabilidad ---------- */
+    @media (max-width: 1180px) {
+        .calculator {
+            grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+        }
+        .left-panel   { grid-column: 1; grid-row: 1 / -1; }
+        .center-panel { grid-column: 2; grid-row: 1; }
+        .right-panel  { grid-column: 2; grid-row: 2; }
+    }
+    @media (max-width: 760px) {
+        .calculator { display: flex; flex-direction: column; overflow-y: auto; }
+        .left-panel, .center-panel, .right-panel { overflow: visible; flex: none; }
+        .left-panel .motivo-lista { flex: none; max-height: 45vh; }
+        #adminPanel { width: 100%; }
     }
 </style>
 </head>
@@ -284,39 +297,33 @@
 
 <div id="hdr">
     <span id="hdr-title">⌨️ Tipificador V2</span>
+    <span class="spacer"></span>
+    <button class="hbtn" id="btnTema" onclick="toggleTheme()" title="Cambiar tema Día/Noche"><span id="themeIcon">🌙</span></button>
+    <button class="hbtn" onclick="abrirVentanaFlotante()" title="Abrir en ventana flotante">⧉</button>
+    <button class="hbtn" id="btnAdminHdr" onclick="mostrarLogin()" title="Panel administrador (Ctrl+Shift+Q)">🔒 Admin</button>
     <button class="hbtn" onclick="winMin()" title="Minimizar">—</button>
-    <button class="hbtn" onclick="winClose()" title="Cerrar">✕</button>
-</div>
-
-<div class="top-controls">
-    <button class="btn-flotante" onclick="toggleTheme()" title="Cambiar tema Día/Noche">
-        <span class="material-icons-outlined" id="themeIcon">dark_mode</span>
-    </button>
-    <button class="btn-flotante" onclick="abrirVentanaFlotante()" title="Abrir en ventana flotante">
-        <span class="material-icons-outlined">open_in_new</span>
-    </button>
-    <button class="btn-flotante" onclick="mostrarLogin()"><span class="material-icons-outlined">lock</span> Admin</button>
+    <button class="hbtn danger" onclick="winClose()" title="Cerrar">✕</button>
 </div>
 
 <div id="adminPanel">
     <div class="admin-title"><span>Panel Admin</span><span class="badge-admin">Edición</span></div>
-    <button class="btn-admin" onclick="nuevoProcedimiento()"><span class="material-icons-outlined">add</span> Nuevo procedimiento</button>
-    <button class="btn-admin" onclick="nuevoMotivo()"><span class="material-icons-outlined">playlist_add</span> Nuevo motivo</button>
-    <button class="btn-admin" onclick="abrirEditarSeleccion()"><span class="material-icons-outlined">edit</span> Editar tipificación</button>
-    <button class="btn-admin" onclick="renombrarProcedimiento()"><span class="material-icons-outlined">drive_file_rename_outline</span> Renombrar procedimiento</button>
-    <button class="btn-admin danger" onclick="eliminarMotivo()"><span class="material-icons-outlined">delete</span> Eliminar motivo</button>
-    <button class="btn-admin danger" onclick="eliminarProcedimiento()"><span class="material-icons-outlined">delete_forever</span> Eliminar procedimiento</button>
-    <button class="btn-admin" onclick="exportarJSON()"><span class="material-icons-outlined">download</span> Exportar JSON</button>
-    <button class="btn-admin" onclick="importarJSON()"><span class="material-icons-outlined">upload_file</span> Importar JSON</button>
-    <button class="btn-admin" onclick="abrirImportCode1()"><span class="material-icons-outlined">sync</span> Importar desde Código 1</button>
-    <button class="btn-admin" onclick="restaurarBase()"><span class="material-icons-outlined">restart_alt</span> Restaurar dataset base</button>
-    <button class="btn-admin" onclick="cambiarPassword()"><span class="material-icons-outlined">key</span> Cambiar contraseña</button>
-    <button class="btn-admin" onclick="cerrarSesion()"><span class="material-icons-outlined">logout</span> Cerrar sesión</button>
+    <button class="btn-admin" onclick="nuevoProcedimiento()"><span>➕</span> Nuevo procedimiento</button>
+    <button class="btn-admin" onclick="nuevoMotivo()"><span>➕</span> Nuevo motivo</button>
+    <button class="btn-admin" onclick="abrirEditarSeleccion()"><span>✏️</span> Editar tipificación</button>
+    <button class="btn-admin" onclick="renombrarProcedimiento()"><span>✏️</span> Renombrar procedimiento</button>
+    <button class="btn-admin danger" onclick="eliminarMotivo()"><span>🗑</span> Eliminar motivo</button>
+    <button class="btn-admin danger" onclick="eliminarProcedimiento()"><span>🗑</span> Eliminar procedimiento</button>
+    <button class="btn-admin" onclick="exportarJSON()"><span>⬇️</span> Exportar JSON</button>
+    <button class="btn-admin" onclick="importarJSON()"><span>⬆️</span> Importar JSON</button>
+    <button class="btn-admin" onclick="abrirImportCode1()"><span>🔄</span> Importar desde Código 1</button>
+    <button class="btn-admin" onclick="restaurarBase()"><span>♻️</span> Restaurar dataset base</button>
+    <button class="btn-admin" onclick="cambiarPassword()"><span>🔑</span> Cambiar contraseña</button>
+    <button class="btn-admin" onclick="cerrarSesion()"><span>🚪</span> Cerrar sesión</button>
 </div>
 
 <div class="modal-overlay" id="loginModal">
     <div class="modal" style="width:min(360px,92vw)">
-        <h3><span class="material-icons-outlined">lock</span> Acceso Administrador</h3>
+        <h3><span>🔒</span> Acceso Administrador</h3>
         <div class="form-field">
             <label for="loginPass">Contraseña</label>
             <input type="password" id="loginPass" onkeydown="if(event.key==='Enter')intentarLogin()">
@@ -331,7 +338,7 @@
 
 <div class="modal-overlay" id="editModal">
     <div class="modal">
-        <h3 id="editModalTitulo"><span class="material-icons-outlined">edit</span> Gestionar tipificación</h3>
+        <h3 id="editModalTitulo"><span>✏️</span> Gestionar tipificación</h3>
         <div class="form-row">
             <div class="form-field">
                 <label for="fProcedimiento">Procedimiento</label>
@@ -384,14 +391,14 @@
         </datalist>
         <div class="modal-buttons">
             <button class="btn-copiar btn-cancelar" onclick="cerrarEdicion()">Cancelar</button>
-            <button class="btn-copiar" onclick="guardarEdicion()"><span class="material-icons-outlined">save</span> Guardar</button>
+            <button class="btn-copiar" onclick="guardarEdicion()"><span>💾</span> Guardar</button>
         </div>
     </div>
 </div>
 
 <div class="modal-overlay" id="importModal">
     <div class="modal">
-        <h3><span class="material-icons-outlined">sync</span> Importar desde Código 1</h3>
+        <h3><span>🔄</span> Importar desde Código 1</h3>
         <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
             Pega el HTML de <b>tipificaciones.php</b> (Ver código fuente de la página) o intenta la descarga automática.
             Se extraerá <code>DATOS_EMBEDIDOS</code>.
@@ -414,11 +421,9 @@
 <div class="calculator">
 
     <div class="left-panel">
-        <h2>Tipificador V2</h2>
-
         <div class="input-group">
             <label for="searchMotivo">Buscar motivo:</label>
-            <input type="text" id="searchMotivo" class="search-input" oninput="filtrarMotivos()" placeholder="Buscar...">
+            <input type="text" id="searchMotivo" class="search-input" oninput="onBuscar()" placeholder="Buscar... (atajo: /)">
         </div>
 
         <div class="input-group">
@@ -428,10 +433,12 @@
             </select>
         </div>
 
+        <div id="resultCount" class="result-count">Elige un procedimiento o busca un motivo.</div>
+
         <ul id="motivoLista" class="motivo-lista"></ul>
 
         <button class="btn-copiar btn-borrar-filtros" onclick="borrarFiltros()">
-            <span class="material-icons-outlined">clear_all</span> Borrar filtros
+            <span>🧹</span> Borrar filtros
         </button>
     </div>
 
@@ -440,32 +447,44 @@
             🗞️: <span id="procedimientoNombre"></span>
         </div>
 
+        <div id="emptyState" class="empty-state">
+            <div class="big">🔎</div>
+            <div><b>Cómo usar el tipificador</b></div>
+            <ol>
+                <li>Busca un motivo o elige un procedimiento</li>
+                <li>Selecciona el motivo en la lista</li>
+                <li>Copia la tipificación o la descripción</li>
+            </ol>
+        </div>
+
         <div id="capturaPanel">
             <div class="recuadro azul" id="tipificacion">
                 <div class="subtitulo-copiar">
-                    <div class="subtitulo"><span class="material-icons-outlined">keyboard</span> Tipificación en Siebel:</div>
+                    <div class="subtitulo"><span>⌨️</span> Tipificación en Siebel:</div>
                     <div style="display:flex;gap:6px;">
                         <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
-                            <span class="material-icons-outlined">edit</span>
+                            <span>✏️</span>
                         </button>
                         <button class="btn-copiar" style="margin:0;" onclick="copiarTipificacion()" title="Copiar tipificación">
-                            <span class="material-icons-outlined">content_copy</span>
+                            <span>📋</span>
                         </button>
                     </div>
                 </div>
+                <div class="preview-label">Se copiará:</div>
+                <pre id="tipificacionPreview" class="preview"></pre>
             </div>
 
             <div class="recuadro" id="resultado">💡 El resultado aparecerá aquí.</div>
 
             <div class="recuadro">
                 <div class="subtitulo-copiar">
-                    <div class="subtitulo"><span class="material-icons-outlined">description</span> Descripción:</div>
+                    <div class="subtitulo"><span>📄</span> Descripción:</div>
                     <div style="display:flex;gap:6px;">
                         <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
-                            <span class="material-icons-outlined">edit</span>
+                            <span>✏️</span>
                         </button>
                         <button class="btn-copiar" style="margin:0;" onclick="copiarDescripcion()" title="Copiar descripción">
-                            <span class="material-icons-outlined">content_copy</span>
+                            <span>📋</span>
                         </button>
                     </div>
                 </div>
@@ -478,17 +497,19 @@
     </div>
 
     <div class="right-panel">
+        <div id="detalleEmpty" class="empty-state small">
+            <div class="big">📌</div>
+            <div>Los <b>detalles</b> aparecerán aquí al seleccionar un motivo.</div>
+        </div>
         <div class="recuadro naranja" id="importante">
             <div class="subtitulo-copiar">
-                <div class="subtitulo"><span class="material-icons-outlined">important_devices</span> Detalles:</div>
+                <div class="subtitulo"><span>📌</span> Detalles:</div>
             </div>
             <div id="importanteDescripcion" class="descripcion-texto"></div>
         </div>
     </div>
 
 </div>
-
-<footer>Tipificador V2 · UI basada en plataforma previa · Datos: base interna actual</footer>
 
 <script src="tipis.data.js"></script>
 <script>
@@ -500,12 +521,15 @@
 /* ---------- integración con la ventana Electron (frameless) ---------- */
 let ipcRenderer = null;
 try { ipcRenderer = require('electron').ipcRenderer; } catch (e) { ipcRenderer = null; }
+let shell = null;
+try { shell = require('electron').shell; } catch (e) { shell = null; }
 function winMin()   { try { if (ipcRenderer) ipcRenderer.send('minimize-tool', 'tipificador-v2'); } catch (e) {} }
 function winClose() { try { if (ipcRenderer) ipcRenderer.send('close-tool',    'tipificador-v2'); } catch (e) {} }
 
 const STORAGE_KEY   = 'tipificador_v2_data';
 const PASS_KEY      = 'tipificador_v2_pass';
 const THEME_KEY     = 'tipificador_v2_theme';
+const UI_KEY        = 'tipificador_v2_ui';
 const DEFAULT_PASS  = 'admin123';
 
 let datos = {};
@@ -552,6 +576,17 @@ function cargarLocal() {
     return null;
 }
 
+/* ---------- persistencia de UI (selección / último procedimiento) ---------- */
+function guardarUI() {
+    try {
+        localStorage.setItem(UI_KEY, JSON.stringify({
+            proc: document.getElementById('procedimiento').value || '',
+            motivo: seleccion ? seleccion.motivo : ''
+        }));
+    } catch (e) {}
+}
+function cargarUI() { try { return JSON.parse(localStorage.getItem(UI_KEY) || '{}'); } catch (e) { return {}; } }
+
 /* ---------- arranque ---------- */
 function init() {
     datos = cargarLocal();
@@ -562,6 +597,15 @@ function init() {
     poblarProcedimientos();
     setupShortcuts();
     aplicarTemaGuardado();
+
+    const ui = cargarUI();
+    if (ui.proc && datos[ui.proc]) {
+        document.getElementById('procedimiento').value = ui.proc;
+        actualizarMotivos();
+        if (ui.motivo && datos[ui.proc][ui.motivo]) mostrarResultado(ui.proc, ui.motivo);
+    } else {
+        mostrarMotivos();
+    }
 }
 
 function poblarProcedimientos() {
@@ -577,21 +621,30 @@ function poblarProcedimientos() {
 }
 
 /* ---------- listado de motivos ---------- */
+let buscarTimer = null;
+function onBuscar() {
+    clearTimeout(buscarTimer);
+    buscarTimer = setTimeout(filtrarMotivos, 140);
+}
+
 function actualizarMotivos() {
     const proc = document.getElementById('procedimiento').value;
     document.getElementById('searchMotivo').value = '';
     if (proc && datos[proc]) {
         motivosFiltrados = Object.keys(datos[proc]).sort().map(m => ({ proc, motivo: m }));
         document.getElementById('procedimientoNombre').textContent = proc;
-        mostrarMotivos();
     } else {
         motivosFiltrados = [];
-        mostrarMotivos();
+        document.getElementById('procedimientoNombre').textContent = '';
     }
+    guardarUI();
+    mostrarMotivos();
 }
 
+let ultimoQuery = '';
 function filtrarMotivos() {
     const q = document.getElementById('searchMotivo').value.trim();
+    ultimoQuery = q;
     const procSel = document.getElementById('procedimiento');
 
     if (q) {
@@ -615,25 +668,42 @@ function filtrarMotivos() {
         });
     }
     motivosFiltrados = out;
+    guardarUI();
     mostrarMotivos();
+}
+
+function resaltar(texto, q) {
+    const safe = escapeHtml(texto);
+    const terms = (q || '').trim().split(/\s+/).filter(t => t.length >= 2);
+    if (!terms.length) return safe;
+    let out = safe;
+    terms.forEach(t => {
+        const re = new RegExp('(' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        out = out.replace(re, '<mark>$1</mark>');
+    });
+    return out;
 }
 
 function mostrarMotivos() {
     const ul = document.getElementById('motivoLista');
+    const countEl = document.getElementById('resultCount');
     ul.innerHTML = '';
     if (!motivosFiltrados.length) {
         const li = document.createElement('li');
         li.className = 'motivo-item';
         li.style.cursor = 'default';
-        li.textContent = 'Sin resultados.';
+        li.textContent = ultimoQuery ? 'Sin resultados para esa búsqueda.' : 'Elige un procedimiento o busca un motivo.';
         ul.appendChild(li);
+        if (countEl) countEl.textContent = '0 motivos';
         return;
     }
+    if (countEl) countEl.textContent = motivosFiltrados.length + (motivosFiltrados.length === 1 ? ' motivo' : ' motivos');
     motivosFiltrados.forEach(({ proc, motivo }) => {
         const li = document.createElement('li');
         li.className = 'motivo-item';
         const mostrarProc = document.getElementById('procedimiento').value !== proc;
-        li.innerHTML = (mostrarProc ? `<span class="proc-tag">${proc}</span>` : '') + escapeHtml(motivo);
+        li.innerHTML = (mostrarProc ? `<span class="proc-tag">${resaltar(proc, ultimoQuery)}</span>` : '') + resaltar(motivo, ultimoQuery);
+        if (seleccion && seleccion.proc === proc && seleccion.motivo === motivo) li.classList.add('seleccionado');
         li.onclick = () => {
             document.querySelectorAll('.motivo-item').forEach(i => i.classList.remove('seleccionado'));
             li.classList.add('seleccionado');
@@ -658,6 +728,10 @@ function mostrarResultado(proc, motivo) {
     document.getElementById('procedimientoSeleccionado').style.display = 'block';
     document.getElementById('capturaPanel').style.display = 'block';
     document.getElementById('importante').style.display = 'block';
+    const empty = document.getElementById('emptyState');
+    if (empty) empty.style.display = 'none';
+    const dEmpty = document.getElementById('detalleEmpty');
+    if (dEmpty) dEmpty.style.display = 'none';
 
     const resultadoDiv = document.getElementById('resultado');
     resultadoDiv.innerHTML = `
@@ -668,7 +742,25 @@ function mostrarResultado(proc, motivo) {
         <div class="detalle"><strong>Tiempo de Respuesta:</strong> <span style="color:${colorNA(info.tiempoDeRespuesta)}">${info.tiempoDeRespuesta || ''}</span></div>
     `;
     document.getElementById('descripcion').innerHTML = info.descripcion || '';
-    document.getElementById('importanteDescripcion').innerHTML = info.importante || '';
+    const imp = document.getElementById('importanteDescripcion');
+    imp.innerHTML = info.importante || '';
+    aplicarLinksExternos(imp);
+    const prev = document.getElementById('tipificacionPreview');
+    if (prev) prev.textContent = textoTipificacion();
+    guardarUI();
+}
+
+function aplicarLinksExternos(container) {
+    if (!container) return;
+    container.querySelectorAll('a').forEach(a => {
+        a.removeAttribute('target');
+        a.style.cursor = 'pointer';
+        a.addEventListener('click', ev => {
+            ev.preventDefault();
+            const href = a.getAttribute('href');
+            if (href && /^https?:\/\//i.test(href) && shell) { try { shell.openExternal(href); } catch (e) {} }
+        });
+    });
 }
 
 /* ---------- copiar ---------- */
@@ -698,8 +790,8 @@ function limpiarTexto(t) {
         .replace(/\s+$/gm, '')
         .trim();
 }
-function copiarTipificacion() {
-    if (!seleccion) return;
+function textoTipificacion() {
+    if (!seleccion) return '';
     const i = seleccion.info;
     let txt = '';
     txt += `*Tipo:* ${limpiarTexto(i.tipo)}\n`;
@@ -707,11 +799,15 @@ function copiarTipificacion() {
     txt += `*Subárea:* ${limpiarTexto(i.subarea)}\n`;
     txt += `*Estado:* ${limpiarTexto(i.estado)}\n`;
     txt += `*Tiempo de Respuesta:* _${limpiarTexto(i.tiempoDeRespuesta)}_\n\n`;
-    txt += document.getElementById('descripcion').innerText.trim();
-    copiarTexto(txt, 'Tipificación copiada ✨');
+    txt += (document.getElementById('descripcion').innerText || '').trim();
+    return txt;
+}
+function copiarTipificacion() {
+    if (!seleccion) return;
+    copiarTexto(textoTipificacion(), 'Tipificación copiada ✨');
 }
 function copiarDescripcion() {
-    copiarTexto(document.getElementById('descripcion').innerText.trim(), 'Descripción copiada ✅');
+    copiarTexto((document.getElementById('descripcion').innerText || '').trim(), 'Descripción copiada ✅');
 }
 
 /* ---------- tema ---------- */
@@ -719,13 +815,13 @@ function toggleTheme() {
     const doc = document.documentElement;
     const nuevo = doc.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     doc.setAttribute('data-theme', nuevo);
-    document.getElementById('themeIcon').textContent = nuevo === 'dark' ? 'light_mode' : 'dark_mode';
+    document.getElementById('themeIcon').textContent = nuevo === 'dark' ? '☀️' : '🌙';
     localStorage.setItem(THEME_KEY, nuevo);
 }
 function aplicarTemaGuardado() {
     const t = localStorage.getItem(THEME_KEY) || 'light';
     document.documentElement.setAttribute('data-theme', t);
-    document.getElementById('themeIcon').textContent = t === 'dark' ? 'light_mode' : 'dark_mode';
+    document.getElementById('themeIcon').textContent = t === 'dark' ? '☀️' : '🌙';
 }
 
 /* ---------- ventana flotante ---------- */
@@ -751,6 +847,8 @@ function intentarLogin() {
     if (pass === real) {
         document.body.classList.add('modo-admin');
         document.getElementById('adminPanel').style.display = 'flex';
+        const b = document.getElementById('btnAdminHdr');
+        if (b) b.classList.add('on');
         cerrarLogin();
     } else {
         document.getElementById('loginError').textContent = 'Contraseña incorrecta';
@@ -759,6 +857,8 @@ function intentarLogin() {
 function cerrarSesion() {
     document.body.classList.remove('modo-admin');
     document.getElementById('adminPanel').style.display = 'none';
+    const b = document.getElementById('btnAdminHdr');
+    if (b) b.classList.remove('on');
 }
 function cambiarPassword() {
     const actual = prompt('Contraseña actual:');
@@ -772,7 +872,43 @@ function cambiarPassword() {
 }
 function setupShortcuts() {
     document.addEventListener('keydown', e => {
-        if (e.ctrlKey && e.shiftKey && (e.key === 'Q' || e.key === 'q')) { e.preventDefault(); mostrarLogin(); }
+        if (e.ctrlKey && e.shiftKey && (e.key === 'Q' || e.key === 'q')) { e.preventDefault(); mostrarLogin(); return; }
+
+        const t = e.target || {};
+        const enTexto = (t.tagName === 'INPUT' && t.type !== 'checkbox') || t.tagName === 'TEXTAREA' || t.isContentEditable;
+
+        // '/' enfoca la búsqueda (fuera de campos de texto)
+        if (e.key === '/' && !enTexto && t.tagName !== 'SELECT') {
+            e.preventDefault();
+            document.getElementById('searchMotivo').focus();
+            return;
+        }
+
+        // Esc: cierra modales / panel admin
+        if (e.key === 'Escape') {
+            const abierto = ['loginModal', 'editModal', 'importModal'].find(id => document.getElementById(id).style.display === 'flex');
+            if (abierto) { document.getElementById(abierto).style.display = 'none'; return; }
+            const ap = document.getElementById('adminPanel');
+            if (ap && ap.style.display === 'flex' && !enTexto) { ap.style.display = 'none'; return; }
+        }
+
+        // Navegación con flechas + Enter sobre la lista (búsqueda o sin foco)
+        const ae = document.activeElement;
+        const puedeNav = ae === document.body || ae === document.getElementById('searchMotivo') || ae === null;
+        if ((e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter') && puedeNav) {
+            const items = Array.from(document.querySelectorAll('.motivo-item')).filter(i => i.style.cursor !== 'default');
+            if (!items.length) return;
+            let idx = items.findIndex(i => i.classList.contains('seleccionado'));
+            if (e.key === 'Enter') {
+                if (idx >= 0) { e.preventDefault(); items[idx].click(); }
+                return;
+            }
+            e.preventDefault();
+            idx = e.key === 'ArrowDown' ? Math.min(items.length - 1, idx + 1) : Math.max(0, idx - 1);
+            items.forEach(i => i.classList.remove('seleccionado'));
+            items[idx].classList.add('seleccionado');
+            items[idx].scrollIntoView({ block: 'nearest' });
+        }
     });
 }
 
@@ -798,7 +934,7 @@ function nuevoMotivo() {
     if (!proc) { toast('Selecciona un procedimiento'); return; }
     abrirModal(proc, '');
     document.getElementById('editModalTitulo').innerHTML =
-        '<span class="material-icons-outlined">playlist_add</span> Nuevo motivo';
+        '<span>➕</span> Nuevo motivo';
 }
 
 function abrirModal(proc, motivo) {
@@ -817,7 +953,7 @@ function abrirModal(proc, motivo) {
     dl.innerHTML = Object.keys(datos).sort().map(p => `<option value="${escapeHtml(p)}"></option>`).join('');
 
     document.getElementById('editModalTitulo').innerHTML =
-        '<span class="material-icons-outlined">edit</span> Gestionar tipificación';
+        '<span>✏️</span> Gestionar tipificación';
     document.getElementById('editModal').style.display = 'flex';
 }
 function cerrarEdicion() { document.getElementById('editModal').style.display = 'none'; }
@@ -888,6 +1024,13 @@ function ocultarPaneles() {
     document.getElementById('descripcion').innerHTML = '';
     document.getElementById('importanteDescripcion').innerHTML = '';
     document.getElementById('resultado').innerHTML = '💡 El resultado aparecerá aquí.';
+    const prev = document.getElementById('tipificacionPreview');
+    if (prev) prev.textContent = '';
+    const empty = document.getElementById('emptyState');
+    if (empty) empty.style.display = '';
+    const dEmpty = document.getElementById('detalleEmpty');
+    if (dEmpty) dEmpty.style.display = '';
+    guardarUI();
 }
 
 /* ---------- import / export ---------- */
