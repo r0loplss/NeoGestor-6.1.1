@@ -133,6 +133,21 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.22</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tipificador V2 — interfaz más compacta y "copia completa"</b>.</li>
+                    <li><b>Densidad/UX</b>: reducción general de tamaño de letra (~12.5–13px), paddings, gaps, bordes y header (40→34px); los paneles y recuadros ocupan menos espacio y se ve más contenido.</li>
+                    <li><b>Layout "inteligente"</b>: columnas de 3 pasan a ser <b>proporcionales (fr)</b> con anchos mínimos, de modo que al estrechar/agrandar la ventana <b>no se deforma</b>; breakpoints ajustados a <b>940 / 640 px</b> (3 → 2 → 1 columna).</li>
+                    <li><b>Copiar tipificación completa</b>: el botón ahora copia <b>Tipo + Área + Subárea + Estado + Tiempo + Descripción + Detalles</b> (antes solo campos + descripción). El preview "Se copiará (completo)" refleja el texto exacto. Se conserva el botón de copiar solo la Descripción.</li>
+                    <li>Se <b>quitaron del header</b> los botones "Ventana flotante" y "Admin" (el acceso al Panel Admin sigue por <b>Ctrl+Shift+Q</b>).</li>
+                    <li><b>Validación</b>: <code>node --check</code> + chequeo de IDs/handlers OK; <b>smoke test en Electron a 1320 / 880 / 600 px</b> (grid 3 / 2 / 1 columna) y verificación de que la copia completa incluye Descripción y Detalles.</li>
+                    <li><b>Release v6.1.22</b>: portable <code>GestorCasos-portable-6.1.22.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.21</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

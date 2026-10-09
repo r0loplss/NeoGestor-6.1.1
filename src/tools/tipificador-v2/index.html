@@ -53,9 +53,9 @@
         flex: 1;
         min-height: 0;
         display: grid;
-        gap: 12px;
-        padding: 12px;
-        grid-template-columns: minmax(260px, 360px) minmax(0, 1.35fr) minmax(280px, 1fr);
+        gap: 8px;
+        padding: 8px;
+        grid-template-columns: minmax(200px, 0.9fr) minmax(0, 1.7fr) minmax(200px, 1.05fr);
     }
 
     .left-panel,
@@ -65,29 +65,29 @@
         min-height: 0;
         background-color: var(--bg-calc);
         border: 1px solid var(--border-soft);
-        border-top: 4px solid var(--accent-cyan);
-        border-radius: 14px;
+        border-top: 3px solid var(--accent-cyan);
+        border-radius: 10px;
         box-shadow: var(--shadow);
-        padding: 14px;
+        padding: 10px;
         display: flex;
         flex-direction: column;
     }
     .left-panel { overflow: hidden; }
     .center-panel, .right-panel { overflow-y: auto; }
 
-    .input-group { margin-bottom: 10px; display: flex; flex-direction: column; }
+    .input-group { margin-bottom: 8px; display: flex; flex-direction: column; }
     .input-group label {
-        font-size: 14px;
+        font-size: 12px;
         color: var(--text-muted);
         font-weight: 600;
-        margin-bottom: 4px;
+        margin-bottom: 3px;
     }
     .input-group select, .input-group input {
         width: 100%;
-        padding: 10px;
-        border: 2px solid var(--border-soft);
-        border-radius: 8px;
-        font-size: 15px;
+        padding: 6px 8px;
+        border: 1.5px solid var(--border-soft);
+        border-radius: 7px;
+        font-size: 13px;
         transition: all .2s ease;
         background: var(--bg-calc);
         color: var(--text-main);
@@ -95,37 +95,38 @@
     .input-group select:focus, .input-group input:focus {
         outline: none;
         border-color: var(--accent-cyan);
-        box-shadow: 0 0 0 3px rgba(47,203,241,0.15);
+        box-shadow: 0 0 0 2px rgba(47,203,241,0.15);
     }
 
     .recuadro {
-        margin: 0 0 10px;
-        padding: 12px;
-        border-radius: 12px;
+        margin: 0 0 8px;
+        padding: 9px 10px;
+        border-radius: 9px;
         background-color: var(--bg-recuadro);
-        border-left: 4px solid var(--accent-mint);
-        font-size: 15px;
+        border-left: 3px solid var(--accent-mint);
+        font-size: 13px;
         color: var(--text-main);
     }
     .recuadro.azul { border-left-color: var(--accent-blue); }
     .recuadro.naranja { border-left-color: var(--accent-orange); }
 
-    .subtitulo { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+    .subtitulo { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
     .subtitulo-copiar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .detalle { margin: 2px 0; }
+    .detalle { margin: 3px 0; }
     .detalle strong { color: var(--text-main); }
 
     .btn-copiar {
-        margin-top: 6px;
-        padding: 8px 14px;
+        margin-top: 4px;
+        padding: 6px 11px;
         background-color: var(--accent-blue);
         color: #fff;
         border: none;
-        border-radius: 8px;
-        font-size: 14px;
+        border-radius: 7px;
+        font-size: 12.5px;
         cursor: pointer;
         transition: background-color .2s;
-        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+        white-space: nowrap;
     }
     .btn-copiar:hover { background-color: var(--accent-cyan); color: #0B1220; }
     .btn-borrar-filtros { background-color: #B23B2E; width: 100%; }
@@ -137,15 +138,15 @@
         white-space: pre-wrap;
         text-align: justify;
         word-wrap: break-word;
-        line-height: 1.5;
-        font-size: 14px;
+        line-height: 1.45;
+        font-size: 13px;
     }
     .search-input {
-        padding: 10px;
-        border: 2px solid var(--border-soft);
-        border-radius: 8px;
-        font-size: 15px;
-        margin-bottom: 10px;
+        padding: 6px 8px;
+        border: 1.5px solid var(--border-soft);
+        border-radius: 7px;
+        font-size: 13px;
+        margin-bottom: 8px;
         background: var(--bg-calc);
         color: var(--text-main);
     }
@@ -155,51 +156,52 @@
 
     .motivo-lista {
         list-style: none; padding: 0; margin: 0;
-        flex: 1; min-height: 120px; overflow-y: auto;
-        border: 2px solid var(--border-soft); border-radius: 10px;
+        flex: 1; min-height: 90px; overflow-y: auto;
+        border: 1.5px solid var(--border-soft); border-radius: 8px;
     }
     .motivo-item {
-        padding: 10px 12px;
+        padding: 7px 9px;
         cursor: pointer;
         border-bottom: 1px solid var(--border-soft);
         transition: background-color .2s;
-        font-size: 14px;
+        font-size: 12.5px;
+        line-height: 1.35;
     }
     .motivo-item:hover { background-color: var(--bg-hover); }
-    .motivo-item .proc-tag { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+    .motivo-item .proc-tag { display: block; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; margin-bottom: 1px; }
     .motivo-item.seleccionado { background-color: #0F80CE; color: #fff; }
     .motivo-item.seleccionado .proc-tag { color: #e6f2ff; }
     mark { background: rgba(47,203,241,.4); color: inherit; border-radius: 3px; padding: 0 1px; }
-    .result-count { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; flex-shrink: 0; }
+    .result-count { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; flex-shrink: 0; }
 
     /* ---------- header frameless (arrastrable) ---------- */
     #hdr {
         display: flex; align-items: center; gap: 4px;
-        padding: 0 8px; height: 40px; flex-shrink: 0;
+        padding: 0 6px; height: 34px; flex-shrink: 0;
         background: #0d1220; border-bottom: 1px solid var(--border-soft);
         -webkit-app-region: drag; user-select: none;
     }
     #hdr-title {
-        font-size: 12px; font-weight: 700; color: var(--text-muted);
+        font-size: 11px; font-weight: 700; color: var(--text-muted);
         text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
     }
     #hdr .spacer { flex: 1; }
     .hbtn {
         -webkit-app-region: no-drag; background: none; border: none; cursor: pointer;
-        color: var(--text-muted); font-size: 13px; padding: 5px 9px; border-radius: 6px;
+        color: var(--text-muted); font-size: 12px; padding: 4px 8px; border-radius: 6px;
         transition: all 0.15s; font-family: inherit; line-height: 1;
-        display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+        display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
     }
     .hbtn:hover { color: var(--text-main); background: rgba(255,255,255,0.08); }
     .hbtn.danger:hover { color: #FF6B5E; }
     .hbtn.on { color: var(--accent-cyan); }
 
     #adminPanel {
-        position: fixed; top: 40px; right: 0; bottom: 0; z-index: 2500;
+        position: fixed; top: 34px; right: 0; bottom: 0; z-index: 2500;
         background: var(--bg-calc); border-left: 1px solid var(--border-soft);
         box-shadow: -8px 0 24px rgba(0,0,0,.25);
-        padding: 12px; display: none; flex-direction: column; gap: 6px;
-        width: min(320px, 88vw); overflow-y: auto;
+        padding: 10px; display: none; flex-direction: column; gap: 5px;
+        width: min(300px, 88vw); overflow-y: auto;
     }
     #adminPanel .admin-title {
         font-size: 12px; font-weight: 700; color: var(--accent-orange);
@@ -208,8 +210,8 @@
     }
     .badge-admin { background: var(--accent-orange); color: #0B1220; border-radius: 999px; padding: 2px 8px; font-size: 10px; }
     .btn-admin {
-        width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-soft);
-        background: var(--bg-calc); color: var(--text-main); font-size: 13px; font-weight: 500;
+        width: 100%; padding: 6px 9px; border-radius: 7px; border: 1px solid var(--border-soft);
+        background: var(--bg-calc); color: var(--text-main); font-size: 12.5px; font-weight: 500;
         cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;
     }
     .btn-admin:hover { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
@@ -220,25 +222,25 @@
         display: none; align-items: center; justify-content: center; padding: 16px;
     }
     .modal {
-        background: var(--bg-calc); border: 1px solid var(--border-soft); border-radius: 14px;
-        padding: 20px; width: min(620px, 96vw); max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow);
+        background: var(--bg-calc); border: 1px solid var(--border-soft); border-radius: 12px;
+        padding: 16px; width: min(600px, 96vw); max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow);
         color: var(--text-main);
     }
-    .modal h3 { font-size: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-    .form-field { margin-bottom: 10px; }
-    .form-field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    .modal h3 { font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .form-field { margin-bottom: 8px; }
+    .form-field label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 3px; font-weight: 600; }
     .modal input, .modal select, .modal textarea {
-        width: 100%; padding: 9px 10px; border: 2px solid var(--border-soft); border-radius: 8px;
-        background: var(--bg-calc); color: var(--text-main); font-size: 14px; font-family: inherit;
+        width: 100%; padding: 7px 9px; border: 1.5px solid var(--border-soft); border-radius: 7px;
+        background: var(--bg-calc); color: var(--text-main); font-size: 13px; font-family: inherit;
     }
-    .modal textarea { min-height: 90px; resize: vertical; }
-    .form-row { display: flex; gap: 10px; }
+    .modal textarea { min-height: 80px; resize: vertical; }
+    .form-row { display: flex; gap: 8px; }
     .form-row .form-field { flex: 1; }
     .editor-area {
-        min-height: 150px; background: var(--bg-calc); color: var(--text-main);
-        border: 1px solid var(--border-soft); border-radius: 8px; padding: 10px; font-size: 14px; overflow-y: auto;
+        min-height: 130px; background: var(--bg-calc); color: var(--text-main);
+        border: 1px solid var(--border-soft); border-radius: 7px; padding: 8px; font-size: 13px; overflow-y: auto;
     }
-    .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+    .modal-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
     .btn-cancelar { background: var(--bg-recuadro) !important; color: var(--text-main) !important; }
     .btn-cancelar:hover { background: #94a3b8 !important; color: #000 !important; }
 
@@ -246,9 +248,9 @@
     body.modo-admin .btn-editar-admin { display: inline-flex; }
 
     .toast {
-        position: fixed; bottom: 20px; right: 20px; z-index: 4000;
-        background: #1f2937; color: #fff; padding: 12px 18px; border-radius: 8px;
-        font-size: 15px; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px);
+        position: fixed; bottom: 16px; right: 16px; z-index: 4000;
+        background: #1f2937; color: #fff; padding: 10px 14px; border-radius: 8px;
+        font-size: 13px; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px);
         transition: opacity .25s, transform .25s;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -256,39 +258,39 @@
     /* ---------- estados vacíos / preview ---------- */
     .empty-state {
         flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        text-align: center; color: var(--text-muted); gap: 6px; padding: 24px 12px;
+        text-align: center; color: var(--text-muted); gap: 4px; padding: 18px 10px;
     }
-    .empty-state .big { font-size: 40px; }
-    .empty-state ol { font-size: 13px; line-height: 1.9; text-align: left; margin-top: 4px; }
-    .empty-state.small { padding: 20px 8px; font-size: 13px; }
-    .empty-state.small .big { font-size: 30px; }
+    .empty-state .big { font-size: 30px; }
+    .empty-state ol { font-size: 12px; line-height: 1.8; text-align: left; margin-top: 2px; }
+    .empty-state.small { padding: 16px 8px; font-size: 12px; }
+    .empty-state.small .big { font-size: 24px; }
 
     .preview-label {
-        font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-        color: var(--text-muted); margin: 10px 0 4px;
+        font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+        color: var(--text-muted); margin: 8px 0 3px;
     }
     .preview {
-        margin: 0; padding: 10px; border-radius: 8px; background: var(--bg-calc);
+        margin: 0; padding: 8px; border-radius: 7px; background: var(--bg-calc);
         border: 1px dashed var(--border-soft);
         font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-        font-size: 12.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
-        color: var(--text-main); max-height: 240px; overflow: auto;
+        font-size: 11.5px; line-height: 1.45; white-space: pre-wrap; word-break: break-word;
+        color: var(--text-main); max-height: 200px; overflow: auto;
     }
 
     /* ---------- adaptabilidad ---------- */
-    @media (max-width: 1180px) {
+    @media (max-width: 940px) {
         .calculator {
-            grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+            grid-template-columns: minmax(190px, 320px) minmax(0, 1fr);
             grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
         }
         .left-panel   { grid-column: 1; grid-row: 1 / -1; }
         .center-panel { grid-column: 2; grid-row: 1; }
         .right-panel  { grid-column: 2; grid-row: 2; }
     }
-    @media (max-width: 760px) {
+    @media (max-width: 640px) {
         .calculator { display: flex; flex-direction: column; overflow-y: auto; }
         .left-panel, .center-panel, .right-panel { overflow: visible; flex: none; }
-        .left-panel .motivo-lista { flex: none; max-height: 45vh; }
+        .left-panel .motivo-lista { flex: none; max-height: 40vh; }
         #adminPanel { width: 100%; }
     }
 </style>
@@ -299,8 +301,6 @@
     <span id="hdr-title">⌨️ Tipificador V2</span>
     <span class="spacer"></span>
     <button class="hbtn" id="btnTema" onclick="toggleTheme()" title="Cambiar tema Día/Noche"><span id="themeIcon">🌙</span></button>
-    <button class="hbtn" onclick="abrirVentanaFlotante()" title="Abrir en ventana flotante">⧉</button>
-    <button class="hbtn" id="btnAdminHdr" onclick="mostrarLogin()" title="Panel administrador (Ctrl+Shift+Q)">🔒 Admin</button>
     <button class="hbtn" onclick="winMin()" title="Minimizar">—</button>
     <button class="hbtn danger" onclick="winClose()" title="Cerrar">✕</button>
 </div>
@@ -461,17 +461,15 @@
             <div class="recuadro azul" id="tipificacion">
                 <div class="subtitulo-copiar">
                     <div class="subtitulo"><span>⌨️</span> Tipificación en Siebel:</div>
-                    <div style="display:flex;gap:6px;">
-                        <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
-                            <span>✏️</span>
-                        </button>
-                        <button class="btn-copiar" style="margin:0;" onclick="copiarTipificacion()" title="Copiar tipificación">
-                            <span>📋</span>
-                        </button>
-                    </div>
+                    <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
+                        <span>✏️</span>
+                    </button>
                 </div>
-                <div class="preview-label">Se copiará:</div>
+                <div class="preview-label">Se copiará (completo):</div>
                 <pre id="tipificacionPreview" class="preview"></pre>
+                <button class="btn-copiar" style="width:100%;margin-top:8px;" onclick="copiarTipificacion()" title="Copia tipo, área, subárea, estado, tiempo, descripción y detalles">
+                    <span>📋</span> Copiar tipificación completa
+                </button>
             </div>
 
             <div class="recuadro" id="resultado">💡 El resultado aparecerá aquí.</div>
@@ -790,6 +788,12 @@ function limpiarTexto(t) {
         .replace(/\s+$/gm, '')
         .trim();
 }
+function htmlATexto(html) {
+    if (!html) return '';
+    const d = document.createElement('div');
+    d.innerHTML = html;
+    return (d.innerText || d.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+}
 function textoTipificacion() {
     if (!seleccion) return '';
     const i = seleccion.info;
@@ -798,13 +802,16 @@ function textoTipificacion() {
     txt += `*Área:* ${limpiarTexto(i.area)}\n`;
     txt += `*Subárea:* ${limpiarTexto(i.subarea)}\n`;
     txt += `*Estado:* ${limpiarTexto(i.estado)}\n`;
-    txt += `*Tiempo de Respuesta:* _${limpiarTexto(i.tiempoDeRespuesta)}_\n\n`;
-    txt += (document.getElementById('descripcion').innerText || '').trim();
+    txt += `*Tiempo de Respuesta:* _${limpiarTexto(i.tiempoDeRespuesta)}_`;
+    const desc = (document.getElementById('descripcion').innerText || '').trim();
+    if (desc) txt += `\n\n*Descripción:*\n${desc}`;
+    const det = htmlATexto(i.importante);
+    if (det) txt += `\n\n*Detalles:*\n${det}`;
     return txt;
 }
 function copiarTipificacion() {
     if (!seleccion) return;
-    copiarTexto(textoTipificacion(), 'Tipificación copiada ✨');
+    copiarTexto(textoTipificacion(), 'Tipificación completa copiada ✨');
 }
 function copiarDescripcion() {
     copiarTexto((document.getElementById('descripcion').innerText || '').trim(), 'Descripción copiada ✅');
