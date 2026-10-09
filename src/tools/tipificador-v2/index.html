@@ -280,6 +280,14 @@
     .empty-state.small { padding: 16px 8px; font-size: 12px; }
     .empty-state.small .big { font-size: 24px; }
 
+    /* ---------- historial / actualizaciones ---------- */
+    .hist-last { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+    .hist-body { max-height: 52vh; overflow-y: auto; }
+    .hist-entry { border: 1px solid var(--border-soft); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+    .hist-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px; font-size: 12.5px; }
+    .hist-counts { font-size: 11px; color: var(--text-muted); }
+    .hist-line { font-size: 12px; color: var(--text-muted); border-left: 2px solid var(--border-soft); margin: 2px 0; padding: 1px 0 1px 8px; word-break: break-word; }
+
     /* ---------- adaptabilidad ---------- */
     @media (max-width: 940px) {
         .calculator { flex-direction: column; overflow-y: auto; }
@@ -297,6 +305,8 @@
 <div id="hdr">
     <span id="hdr-title">⌨️ Tipificador V2</span>
     <span class="spacer"></span>
+    <button class="hbtn" id="btnSync" onclick="buscarActualizaciones()" title="Buscar actualizaciones de la base en línea">🔄</button>
+    <button class="hbtn" onclick="verHistorial()" title="Historial de actualizaciones">🕘</button>
     <button class="hbtn" id="btnTema" onclick="toggleTheme()" title="Cambiar tema Día/Noche"><span id="themeIcon">🌙</span></button>
     <button class="hbtn" onclick="winMin()" title="Minimizar">—</button>
     <button class="hbtn danger" onclick="winClose()" title="Cerrar">✕</button>
@@ -411,6 +421,29 @@
             <button class="btn-copiar btn-cancelar" onclick="cerrarImport()">Cancelar</button>
             <button class="btn-copiar btn-cancelar" onclick="descargarCode1()">Descargar automático</button>
             <button class="btn-copiar" onclick="importarCode1()">Importar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="updateModal">
+    <div class="modal" style="width:min(560px,94vw)">
+        <h3><span>🔄</span> Actualización de tipificaciones</h3>
+        <div id="updateMsg" style="font-size:13px;color:var(--text-muted);margin-bottom:10px;"></div>
+        <div id="updateBody" class="hist-body"></div>
+        <div class="modal-buttons">
+            <button class="btn-copiar btn-cancelar" onclick="cerrarUpdate()">Cerrar</button>
+            <button class="btn-copiar" onclick="verHistorial()">🕘 Ver historial</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="histModal">
+    <div class="modal" style="width:min(640px,94vw)">
+        <h3><span>🕘</span> Historial de actualizaciones</h3>
+        <div id="histLast" class="hist-last"></div>
+        <div id="histBody" class="hist-body"></div>
+        <div class="modal-buttons">
+            <button class="btn-copiar btn-cancelar" onclick="cerrarHist()">Cerrar</button>
         </div>
     </div>
 </div>
@@ -530,6 +563,10 @@ const PASS_KEY      = 'tipificador_v2_pass';
 const THEME_KEY     = 'tipificador_v2_theme';
 const UI_KEY        = 'tipificador_v2_ui';
 const COLS_KEY      = 'tipificador_v2_cols';
+const BASE_KEY      = 'tipificador_v2_base';
+const CHANGELOG_KEY = 'tipificador_v2_changelog';
+const LASTS_KEY     = 'tipificador_v2_lastsync';
+const SYNC_URL      = 'https://tipificaciones.cajatecnicachile.cloud/tipificaciones.php';
 const DEFAULT_PASS  = 'admin123';
 
 let datos = {};
@@ -684,6 +721,7 @@ function init() {
     poblarProcedimientos();
     setupShortcuts();
     aplicarTemaGuardado();
+    inicializarBase();
     aplicarAnchosCols();
     setupResizers();
 
@@ -973,7 +1011,7 @@ function setupShortcuts() {
 
         // Esc: cierra modales / panel admin
         if (e.key === 'Escape') {
-            const abierto = ['loginModal', 'editModal', 'importModal'].find(id => document.getElementById(id).style.display === 'flex');
+            const abierto = ['loginModal', 'editModal', 'importModal', 'updateModal', 'histModal'].find(id => document.getElementById(id).style.display === 'flex');
             if (abierto) { document.getElementById(abierto).style.display = 'none'; return; }
             const ap = document.getElementById('adminPanel');
             if (ap && ap.style.display === 'flex' && !enTexto) { ap.style.display = 'none'; return; }
@@ -1202,6 +1240,7 @@ function restaurarBase() {
     if (!window.DATOS_TIPIFICACIONES) { toast('No hay dataset base cargado'); return; }
     if (!confirm('Esto reemplazará tus datos actuales por el dataset base. ¿Continuar?')) return;
     datos = clonar(window.DATOS_TIPIFICACIONES);
+    try { localStorage.setItem(BASE_KEY, JSON.stringify(window.DATOS_TIPIFICACIONES)); } catch (e) {}
     guardarLocal(); poblarProcedimientos(); ocultarPaneles();
     toast('Dataset base restaurado ♻️');
 }
@@ -1215,6 +1254,151 @@ function borrarFiltros() {
     mostrarMotivos();
     ocultarPaneles();
 }
+
+/* ---------- actualización desde la fuente en línea ---------- */
+function cargarBase() { try { return JSON.parse(localStorage.getItem(BASE_KEY) || 'null'); } catch (e) { return null; } }
+function inicializarBase() {
+    if (!localStorage.getItem(BASE_KEY) && window.DATOS_TIPIFICACIONES) {
+        try { localStorage.setItem(BASE_KEY, JSON.stringify(window.DATOS_TIPIFICACIONES)); } catch (e) {}
+    }
+}
+function cargarChangelog() { try { return JSON.parse(localStorage.getItem(CHANGELOG_KEY) || '[]'); } catch (e) { return []; } }
+function agregarChangelog(entry) {
+    const a = cargarChangelog();
+    a.unshift(entry);
+    try { localStorage.setItem(CHANGELOG_KEY, JSON.stringify(a.slice(0, 60))); } catch (e) {}
+}
+
+function contarBase(d) { let p = Object.keys(d || {}), m = 0; for (const k of p) m += Object.keys(d[k] || {}).length; return { procs: p.length, motivos: m }; }
+
+function diffBases(base, nuevo) {
+    const added = [], modified = [], removed = [];
+    const campos = ['tipo', 'area', 'subarea', 'estado', 'tiempoDeRespuesta', 'descripcion', 'importante'];
+    const nP = new Set(Object.keys(nuevo || {})), bP = new Set(Object.keys(base || {}));
+    for (const p of nP) {
+        const mp = nuevo[p] || {}, bp = (base && base[p]) || {};
+        for (const m of Object.keys(mp)) {
+            if (!bp[m]) added.push({ p, m });
+            else if (JSON.stringify(bp[m]) !== JSON.stringify(mp[m])) {
+                modified.push({ p, m, campos: campos.filter(k => (bp[m][k] || '') !== (mp[m][k] || '')) });
+            }
+        }
+        if (base && base[p]) for (const m of Object.keys(bp)) if (!mp[m]) removed.push({ p, m });
+    }
+    for (const p of bP) if (!nP.has(p)) for (const m of Object.keys(base[p] || {})) removed.push({ p, m });
+    return { added, modified, removed };
+}
+
+function resumenDetalle(dif) {
+    const MAX = 25, lines = [];
+    dif.added.slice(0, MAX).forEach(x => lines.push('➕ ' + x.p + ' › ' + x.m));
+    dif.modified.slice(0, MAX).forEach(x => lines.push('✏️ ' + x.p + ' › ' + x.m + (x.campos && x.campos.length ? '  (' + x.campos.join(', ') + ')' : '')));
+    dif.removed.slice(0, MAX).forEach(x => lines.push('➖ ' + x.p + ' › ' + x.m));
+    const total = dif.added.length + dif.modified.length + dif.removed.length;
+    if (total > lines.length) lines.push('… y ' + (total - lines.length) + ' más.');
+    return lines;
+}
+
+function httpsGetTexto(url) {
+    return new Promise((resolve, reject) => {
+        let mod;
+        try { mod = require('https'); } catch (e) { mod = require('http'); }
+        const req = mod.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 NeoGestor/6' } }, res => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                res.resume();
+                return httpsGetTexto(new URL(res.headers.location, url).toString()).then(resolve, reject);
+            }
+            if (res.statusCode !== 200) { res.resume(); return reject(new Error('HTTP ' + res.statusCode)); }
+            let d = ''; res.setEncoding('utf8');
+            res.on('data', c => d += c);
+            res.on('end', () => resolve(d));
+        });
+        req.on('error', reject);
+        req.setTimeout(25000, () => req.destroy(new Error('tiempo de espera agotado')));
+    });
+}
+
+function aplicarRemoto(remoto) {
+    Object.keys(remoto).forEach(p => {
+        if (!datos[p] || typeof datos[p] !== 'object') datos[p] = {};
+        Object.keys(remoto[p]).forEach(m => { datos[p][m] = clonar(remoto[p][m]); });
+    });
+    guardarLocal();
+    try { localStorage.setItem(BASE_KEY, JSON.stringify(remoto)); } catch (e) {}
+}
+
+function refrescarVista() {
+    const proc = document.getElementById('procedimiento').value;
+    if (seleccion && datos[seleccion.proc] && datos[seleccion.proc][seleccion.motivo]) {
+        mostrarResultado(seleccion.proc, seleccion.motivo);
+    } else {
+        ocultarPaneles();
+    }
+    if (proc && datos[proc]) actualizarMotivos();
+    else mostrarMotivos();
+}
+
+let actualizando = false;
+async function buscarActualizaciones() {
+    if (actualizando) return;
+    actualizando = true;
+    const btn = document.getElementById('btnSync');
+    if (btn) btn.classList.add('on');
+    toast('🔎 Buscando actualizaciones...');
+    try {
+        const html = await httpsGetTexto(SYNC_URL);
+        const remoto = extraerEmbedidos(html);
+        const base = cargarBase() || (window.DATOS_TIPIFICACIONES ? clonar(window.DATOS_TIPIFICACIONES) : {});
+        const dif = diffBases(base, remoto);
+        const total = dif.added.length + dif.modified.length + dif.removed.length;
+        const c = contarBase(remoto);
+        if (!total) {
+            try { localStorage.setItem(LASTS_KEY, new Date().toISOString()); } catch (e) {}
+            mostrarUpdate('✅ Todo al día. La base en línea (' + c.procs + ' procedimientos / ' + c.motivos + ' motivos) no tiene cambios.', []);
+            return;
+        }
+        aplicarRemoto(remoto);
+        const resumen = dif.added.length + ' nuevas · ' + dif.modified.length + ' modificadas · ' + dif.removed.length + ' ya no están en la fuente';
+        agregarChangelog({ fecha: new Date().toISOString(), added: dif.added.length, modified: dif.modified.length, removed: dif.removed.length, detalle: resumenDetalle(dif) });
+        try { localStorage.setItem(LASTS_KEY, new Date().toISOString()); } catch (e) {}
+        refrescarVista();
+        mostrarUpdate('🔄 Base actualizada: ' + resumen + '. (Los ítems que ya no están en la fuente se conservaron.)', resumenDetalle(dif));
+        toast('Tipificaciones actualizadas ✅');
+    } catch (e) {
+        mostrarUpdate('⚠️ No se pudo consultar la fuente en línea: ' + e.message + '.', []);
+    } finally {
+        actualizando = false;
+        if (btn) btn.classList.remove('on');
+    }
+}
+
+function mostrarUpdate(msg, lineas) {
+    document.getElementById('updateMsg').textContent = msg;
+    const b = document.getElementById('updateBody');
+    b.innerHTML = (lineas && lineas.length) ? lineas.map(l => '<div class="hist-line">' + escapeHtml(l) + '</div>').join('') : '';
+    document.getElementById('updateModal').style.display = 'flex';
+}
+function cerrarUpdate() { document.getElementById('updateModal').style.display = 'none'; }
+
+function verHistorial() {
+    document.getElementById('updateModal').style.display = 'none';
+    const last = localStorage.getItem(LASTS_KEY);
+    document.getElementById('histLast').textContent = last ? ('Última revisión: ' + new Date(last).toLocaleString()) : 'Aún no revisaste la fuente en línea.';
+    const a = cargarChangelog();
+    const body = document.getElementById('histBody');
+    if (!a.length) {
+        body.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Sin actualizaciones registradas todavía.</div>';
+    } else {
+        body.innerHTML = a.map(e => {
+            const f = new Date(e.fecha), fecha = isNaN(f) ? e.fecha : f.toLocaleString();
+            const det = (e.detalle || []).slice(0, 60).map(d => '<div class="hist-line">' + escapeHtml(d) + '</div>').join('');
+            return '<div class="hist-entry"><div class="hist-head"><b>' + escapeHtml(fecha) + '</b>' +
+                '<span class="hist-counts">➕ ' + e.added + ' · ✏️ ' + e.modified + ' · ➖ ' + e.removed + '</span></div>' + det + '</div>';
+        }).join('');
+    }
+    document.getElementById('histModal').style.display = 'flex';
+}
+function cerrarHist() { document.getElementById('histModal').style.display = 'none'; }
 
 document.addEventListener('DOMContentLoaded', init);
 </script>

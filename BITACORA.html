@@ -133,6 +133,20 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.24</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tipificador V2 — actualización de la base desde la fuente en línea + historial</b>.</li>
+                    <li><b>Botón 🔄 (barra superior):</b> al presionarlo consulta <code>tipificaciones.cajatecnicachile.cloud/tipificaciones.php</code>, extrae <code>DATOS_EMBEDIDOS</code> y lo <b>compara con la base sincronizada</b> (<code>tipificador_v2_base</code>). Si hay cambios, <b>actualiza la base</b> y muestra una <b>alerta con el conteo</b> (nuevas / modificadas / ya no están en la fuente). Consulta hecha desde el renderer vía Node <code>https</code> (sin problema de CORS).</li>
+                    <li><b>Botón 🕘 (barra superior):</b> abre el <b>historial</b> con la última revisión y una bitácora breve por fecha (conteos + detalle de qué tipificaciones cambiaron). Se guarda en <code>tipificador_v2_changelog</code>.</li>
+                    <li><b>Seguridad de datos:</b> la actualización es un <b>merge donde gana la fuente</b> (agrega/actualiza motivos) y <b>no borra</b> lo local que no esté en la fuente. Solo se actualiza el <b>contenido</b>; la interfaz no se toca. "Restaurar dataset base" también resetea el snapshot. No se toca ningún dato del gestor.</li>
+                    <li><b>Validación</b>: <code>node --check</code> + chequeo de IDs/handlers OK; tests del repo 12/12; <b>smoke test real de sincronización</b> (con la fuente actual: "Todo al día", 56/387) y con <b>cambios simulados</b> (detecta 1 nueva + 1 modificada, aplica, conserva lo local y registra la bitácora).</li>
+                    <li><b>Release v6.1.24</b>: portable <code>GestorCasos-portable-6.1.24.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.23</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
