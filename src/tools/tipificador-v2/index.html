@@ -918,14 +918,15 @@ function limpiarTexto(t) {
 function textoTipificacion() {
     if (!seleccion) return '';
     const i = seleccion.info;
-    let txt = '';
-    txt += `*Tipo:* ${limpiarTexto(i.tipo)}\n`;
-    txt += `*Área:* ${limpiarTexto(i.area)}\n`;
-    txt += `*Subárea:* ${limpiarTexto(i.subarea)}\n`;
-    txt += `*Estado:* ${limpiarTexto(i.estado)}\n`;
-    txt += `*Tiempo de Respuesta:* _${limpiarTexto(i.tiempoDeRespuesta)}_\n\n`;
-    txt += (document.getElementById('descripcion').innerText || '').trim();
-    return txt;
+    const head = [
+        '*Tipo:* ' + limpiarTexto(i.tipo),
+        '*Área:* ' + limpiarTexto(i.area),
+        '*Subárea:* ' + limpiarTexto(i.subarea),
+        '*Estado:* ' + limpiarTexto(i.estado),
+        '*Tiempo de Respuesta:* _' + limpiarTexto(i.tiempoDeRespuesta) + '_'
+    ].join('\n');
+    const body = (document.getElementById('descripcion').innerText || '').trim();
+    return body ? (head + '\n\n' + body) : head;
 }
 function copiarTipificacion() {
     if (!seleccion) return;
