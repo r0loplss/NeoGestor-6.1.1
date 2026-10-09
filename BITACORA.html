@@ -133,6 +133,19 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.23</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tipificador V2 — correcciones de UX por feedback</b>.</li>
+                    <li>Se <b>eliminó el bloque duplicado "Se copiará (completo)"</b> que rompía la armonía de la interfaz. Vuelven los <b>dos botones</b> dentro del panel de tipificación: <b>copiar tipificación</b> (ruta + descripción) y, en Descripción, <b>copiar descripción</b>. La copia de ruta <b>ya no incluye los Detalles</b>.</li>
+                    <li><b>Columnas redimensionables con el mouse</b> (estilo Excel): dos <b>separadores arrastrables</b> entre los 3 paneles; <b>doble clic restablece</b> el ancho; el ancho se <b>recuerda</b> (<code>tipificador_v2_cols</code>) y se <b>reajusta</b> al cambiar el tamaño de la ventana para no desbordar. Por debajo de 940px los paneles se apilan y los separadores se ocultan.</li>
+                    <li><b>Validación</b>: <code>node --check</code> + chequeo de IDs/handlers OK; smoke test en Electron a 1320 / 900 / 600px (2 separadores funcionando — arrastre +90px; copia sin Detalles; apilado bajo 940px).</li>
+                    <li><b>Release v6.1.23</b>: portable <code>GestorCasos-portable-6.1.23.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.22</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

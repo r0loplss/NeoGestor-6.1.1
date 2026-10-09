@@ -52,10 +52,9 @@
     .calculator {
         flex: 1;
         min-height: 0;
-        display: grid;
-        gap: 8px;
+        display: flex;
+        gap: 6px;
         padding: 8px;
-        grid-template-columns: minmax(200px, 0.9fr) minmax(0, 1.7fr) minmax(200px, 1.05fr);
     }
 
     .left-panel,
@@ -72,8 +71,24 @@
         display: flex;
         flex-direction: column;
     }
-    .left-panel { overflow: hidden; }
+    .left-panel  { overflow: hidden; flex: 0 0 var(--col-left, 290px); min-width: 170px; }
+    .center-panel { flex: 1 1 auto; min-width: 220px; }
+    .right-panel { flex: 0 0 var(--col-right, 340px); min-width: 170px; }
     .center-panel, .right-panel { overflow-y: auto; }
+
+    .col-resizer {
+        flex: 0 0 10px;
+        align-self: stretch;
+        cursor: col-resize;
+        position: relative;
+        -webkit-app-region: no-drag;
+    }
+    .col-resizer::before {
+        content: ''; position: absolute; top: 6px; bottom: 6px; left: 50%; width: 2px;
+        transform: translateX(-50%); background: var(--border-soft); border-radius: 2px;
+        transition: background .15s, width .15s;
+    }
+    .col-resizer:hover::before, .col-resizer.dragging::before { background: var(--accent-cyan); width: 3px; }
 
     .input-group { margin-bottom: 8px; display: flex; flex-direction: column; }
     .input-group label {
@@ -255,7 +270,7 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    /* ---------- estados vacíos / preview ---------- */
+    /* ---------- estados vacíos ---------- */
     .empty-state {
         flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
         text-align: center; color: var(--text-muted); gap: 4px; padding: 18px 10px;
@@ -265,32 +280,14 @@
     .empty-state.small { padding: 16px 8px; font-size: 12px; }
     .empty-state.small .big { font-size: 24px; }
 
-    .preview-label {
-        font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
-        color: var(--text-muted); margin: 8px 0 3px;
-    }
-    .preview {
-        margin: 0; padding: 8px; border-radius: 7px; background: var(--bg-calc);
-        border: 1px dashed var(--border-soft);
-        font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-        font-size: 11.5px; line-height: 1.45; white-space: pre-wrap; word-break: break-word;
-        color: var(--text-main); max-height: 200px; overflow: auto;
-    }
-
     /* ---------- adaptabilidad ---------- */
     @media (max-width: 940px) {
-        .calculator {
-            grid-template-columns: minmax(190px, 320px) minmax(0, 1fr);
-            grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-        }
-        .left-panel   { grid-column: 1; grid-row: 1 / -1; }
-        .center-panel { grid-column: 2; grid-row: 1; }
-        .right-panel  { grid-column: 2; grid-row: 2; }
+        .calculator { flex-direction: column; overflow-y: auto; }
+        .col-resizer { display: none; }
+        .left-panel, .center-panel, .right-panel { flex: none; overflow: visible; }
+        .left-panel .motivo-lista { flex: none; max-height: 40vh; }
     }
     @media (max-width: 640px) {
-        .calculator { display: flex; flex-direction: column; overflow-y: auto; }
-        .left-panel, .center-panel, .right-panel { overflow: visible; flex: none; }
-        .left-panel .motivo-lista { flex: none; max-height: 40vh; }
         #adminPanel { width: 100%; }
     }
 </style>
@@ -442,6 +439,8 @@
         </button>
     </div>
 
+    <div class="col-resizer" id="resizer1" title="Arrastra para ajustar el ancho de las columnas"></div>
+
     <div class="center-panel">
         <div class="recuadro procedimiento-rec" id="procedimientoSeleccionado">
             🗞️: <span id="procedimientoNombre"></span>
@@ -461,15 +460,15 @@
             <div class="recuadro azul" id="tipificacion">
                 <div class="subtitulo-copiar">
                     <div class="subtitulo"><span>⌨️</span> Tipificación en Siebel:</div>
-                    <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
-                        <span>✏️</span>
-                    </button>
+                    <div style="display:flex;gap:6px;">
+                        <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
+                            <span>✏️</span>
+                        </button>
+                        <button class="btn-copiar" style="margin:0;" onclick="copiarTipificacion()" title="Copiar tipificación (ruta + descripción)">
+                            <span>📋</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="preview-label">Se copiará (completo):</div>
-                <pre id="tipificacionPreview" class="preview"></pre>
-                <button class="btn-copiar" style="width:100%;margin-top:8px;" onclick="copiarTipificacion()" title="Copia tipo, área, subárea, estado, tiempo, descripción y detalles">
-                    <span>📋</span> Copiar tipificación completa
-                </button>
             </div>
 
             <div class="recuadro" id="resultado">💡 El resultado aparecerá aquí.</div>
@@ -493,6 +492,8 @@
             </div>
         </div>
     </div>
+
+    <div class="col-resizer" id="resizer2" title="Arrastra para ajustar el ancho de las columnas"></div>
 
     <div class="right-panel">
         <div id="detalleEmpty" class="empty-state small">
@@ -528,6 +529,7 @@ const STORAGE_KEY   = 'tipificador_v2_data';
 const PASS_KEY      = 'tipificador_v2_pass';
 const THEME_KEY     = 'tipificador_v2_theme';
 const UI_KEY        = 'tipificador_v2_ui';
+const COLS_KEY      = 'tipificador_v2_cols';
 const DEFAULT_PASS  = 'admin123';
 
 let datos = {};
@@ -585,6 +587,93 @@ function guardarUI() {
 }
 function cargarUI() { try { return JSON.parse(localStorage.getItem(UI_KEY) || '{}'); } catch (e) { return {}; } }
 
+/* ---------- columnas redimensionables (estilo Excel) ---------- */
+function aplicarAnchosCols() {
+    const c = (() => { try { return JSON.parse(localStorage.getItem(COLS_KEY) || '{}'); } catch (e) { return {}; } })();
+    const calc = document.querySelector('.calculator');
+    if (!calc) return;
+    if (c.left) calc.style.setProperty('--col-left', c.left + 'px');
+    if (c.right) calc.style.setProperty('--col-right', c.right + 'px');
+}
+function guardarAnchosCols() {
+    const calc = document.querySelector('.calculator');
+    const lp = document.querySelector('.left-panel');
+    const rp = document.querySelector('.right-panel');
+    if (!calc || !lp || !rp) return;
+    try { localStorage.setItem(COLS_KEY, JSON.stringify({ left: Math.round(lp.getBoundingClientRect().width), right: Math.round(rp.getBoundingClientRect().width) })); } catch (e) {}
+}
+function roomForLR() {
+    const calc = document.querySelector('.calculator');
+    if (!calc) return 0;
+    const cs = getComputedStyle(calc);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const gap = parseFloat(cs.columnGap) || 0;
+    const r1 = document.getElementById('resizer1');
+    const r2 = document.getElementById('resizer2');
+    const resW = (r1 ? r1.offsetWidth : 0) + (r2 ? r2.offsetWidth : 0);
+    return calc.clientWidth - padX - 4 * gap - resW - 220; // deja 220px mínimos al centro
+}
+function setupResizers() {
+    const calc = document.querySelector('.calculator');
+    const lp = document.querySelector('.left-panel');
+    const rp = document.querySelector('.right-panel');
+    if (!calc || !lp || !rp) return;
+    let drag = null;
+    const MIN = 170;
+    const onDown = which => e => {
+        if (window.innerWidth <= 940) return;
+        e.preventDefault();
+        drag = { which, startX: e.clientX, leftW: lp.getBoundingClientRect().width, rightW: rp.getBoundingClientRect().width, maxLR: roomForLR() };
+        e.currentTarget.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    };
+    const onMove = e => {
+        if (!drag) return;
+        const dx = e.clientX - drag.startX;
+        if (drag.which === 'left') {
+            const max = Math.max(MIN, drag.maxLR - drag.rightW);
+            calc.style.setProperty('--col-left', Math.max(MIN, Math.min(max, drag.leftW + dx)) + 'px');
+        } else {
+            const max = Math.max(MIN, drag.maxLR - drag.leftW);
+            calc.style.setProperty('--col-right', Math.max(MIN, Math.min(max, drag.rightW - dx)) + 'px');
+        }
+    };
+    const onUp = () => {
+        if (!drag) return;
+        drag = null;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.querySelectorAll('.col-resizer').forEach(x => x.classList.remove('dragging'));
+        guardarAnchosCols();
+    };
+    const r1 = document.getElementById('resizer1');
+    const r2 = document.getElementById('resizer2');
+    if (r1) { r1.addEventListener('mousedown', onDown('left')); r1.addEventListener('dblclick', () => { calc.style.removeProperty('--col-left'); guardarAnchosCols(); }); }
+    if (r2) { r2.addEventListener('mousedown', onDown('right')); r2.addEventListener('dblclick', () => { calc.style.removeProperty('--col-right'); guardarAnchosCols(); }); }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    window.addEventListener('resize', reclamarAnchos);
+    reclamarAnchos();
+}
+
+function reclamarAnchos() {
+    const calc = document.querySelector('.calculator');
+    if (!calc || window.innerWidth <= 940) return;
+    const cs = getComputedStyle(calc);
+    let l = parseFloat(cs.getPropertyValue('--col-left')) || 0;
+    let r = parseFloat(cs.getPropertyValue('--col-right')) || 0;
+    if (!l && !r) return;
+    if (!l) { l = 290; calc.style.setProperty('--col-left', l + 'px'); }
+    if (!r) { r = 340; calc.style.setProperty('--col-right', r + 'px'); }
+    const maxLR = roomForLR();
+    if (maxLR > 0 && l + r > maxLR) {
+        const factor = Math.max(0.2, maxLR / (l + r));
+        calc.style.setProperty('--col-left', Math.max(170, Math.round(l * factor)) + 'px');
+        calc.style.setProperty('--col-right', Math.max(170, Math.round(r * factor)) + 'px');
+    }
+}
+
 /* ---------- arranque ---------- */
 function init() {
     datos = cargarLocal();
@@ -595,6 +684,8 @@ function init() {
     poblarProcedimientos();
     setupShortcuts();
     aplicarTemaGuardado();
+    aplicarAnchosCols();
+    setupResizers();
 
     const ui = cargarUI();
     if (ui.proc && datos[ui.proc]) {
@@ -743,8 +834,6 @@ function mostrarResultado(proc, motivo) {
     const imp = document.getElementById('importanteDescripcion');
     imp.innerHTML = info.importante || '';
     aplicarLinksExternos(imp);
-    const prev = document.getElementById('tipificacionPreview');
-    if (prev) prev.textContent = textoTipificacion();
     guardarUI();
 }
 
@@ -788,12 +877,6 @@ function limpiarTexto(t) {
         .replace(/\s+$/gm, '')
         .trim();
 }
-function htmlATexto(html) {
-    if (!html) return '';
-    const d = document.createElement('div');
-    d.innerHTML = html;
-    return (d.innerText || d.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
-}
 function textoTipificacion() {
     if (!seleccion) return '';
     const i = seleccion.info;
@@ -802,16 +885,13 @@ function textoTipificacion() {
     txt += `*Área:* ${limpiarTexto(i.area)}\n`;
     txt += `*Subárea:* ${limpiarTexto(i.subarea)}\n`;
     txt += `*Estado:* ${limpiarTexto(i.estado)}\n`;
-    txt += `*Tiempo de Respuesta:* _${limpiarTexto(i.tiempoDeRespuesta)}_`;
-    const desc = (document.getElementById('descripcion').innerText || '').trim();
-    if (desc) txt += `\n\n*Descripción:*\n${desc}`;
-    const det = htmlATexto(i.importante);
-    if (det) txt += `\n\n*Detalles:*\n${det}`;
+    txt += `*Tiempo de Respuesta:* _${limpiarTexto(i.tiempoDeRespuesta)}_\n\n`;
+    txt += (document.getElementById('descripcion').innerText || '').trim();
     return txt;
 }
 function copiarTipificacion() {
     if (!seleccion) return;
-    copiarTexto(textoTipificacion(), 'Tipificación completa copiada ✨');
+    copiarTexto(textoTipificacion(), 'Tipificación copiada ✨');
 }
 function copiarDescripcion() {
     copiarTexto((document.getElementById('descripcion').innerText || '').trim(), 'Descripción copiada ✅');
@@ -1031,8 +1111,6 @@ function ocultarPaneles() {
     document.getElementById('descripcion').innerHTML = '';
     document.getElementById('importanteDescripcion').innerHTML = '';
     document.getElementById('resultado').innerHTML = '💡 El resultado aparecerá aquí.';
-    const prev = document.getElementById('tipificacionPreview');
-    if (prev) prev.textContent = '';
     const empty = document.getElementById('emptyState');
     if (empty) empty.style.display = '';
     const dEmpty = document.getElementById('detalleEmpty');
