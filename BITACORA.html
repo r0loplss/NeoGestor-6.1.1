@@ -133,6 +133,18 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.19</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Radar de Contingencias — pulido del parser (solo extracción, sin tocar el resto)</b>: nuevo paso <b>3.5</b> que reconoce el patrón de incidente de red cuando <b>NO viene con prefijo INC</b> en la misma frase (p. ej. el estado de Siebel <i>"Abierto - San Bernardo - … - Aumento de reclamos. en San Bernardo. - Caída de Sitios en Comuna: San Bernardo, RM Causa: Corte energía"</i>). Toma <b>la última mención del tipo de falla</b> antes de <code>Causa:</code> y normaliza a <i>"Caída de Sitios — Corte energía"</i> (antes quedaba la cadena de estados enredada). Reutiliza <code>limpiarColasTecnicas</code> y el mismo mapa de tipos de falla del paso 3.</li>
+                    <li>Filtro de script adicional: <b>"Agradecemos tu comprensión"</b> (variante de la frase de guion de atención).</li>
+                    <li>Verificado corriendo el parser real contra el nuevo lote (Quilleco, Máfil, Delivery/Arica, Negrete, Huechuraba, San Bernardo, Antofagasta, Escalamiento Nacional, Rancagua, Lampa); sin pérdida de los casos ya resueltos.</li>
+                    <li><b>Release v6.1.19</b>: portable <code>GestorCasos-portable-6.1.19.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">07 oct 2026</span><span class="ver">v6.1.18</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

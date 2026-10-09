@@ -1092,6 +1092,7 @@
                 if (/presentamos\s+(?:una\s+)?intermitencia/i.test(line)) return false;
                 if (/\bpronta\s+soluci[oó]n\b/i.test(line)) return false;
                 if (/\bGracias\s+por\s+tu\s+comprensi[oó]n\b/i.test(line)) return false;
+                if (/\bAgradecemos\s+tu\s+comprensi[oó]n\b/i.test(line)) return false;
                 if (/\bnuestro equipo t[eé]cnico\b/i.test(line)) return false;
                 if (/\best[aá]n?\s+trabajando\s+para\b/i.test(line)) return false;
                 if (/^Debido al cambio de hora/i.test(line)) return false;
@@ -1174,6 +1175,37 @@
                         if (cuerpo && cuerpo.length < 80) return cuerpo;
                     }
                 }
+            }
+
+            // 3.5. Líneas con patrón de incidente + causa SIN prefijo INC (estado de Siebel)
+            //      ej. "Abierto - San Bernardo - ... - Aumento de reclamos. en San Bernardo. - Caída de Sitios en Comuna: San Bernardo, RM Causa: Corte energía"
+            for (const line of cleanLines) {
+                const reInc = /(Ca[íi]da\s+de\s+Sitios|Aumento\s+(?:de\s+)?reclamos|Perdida\s+de\s+conectividad|Saturaci[oó]n(?:\s+de\s+Nodo)?|Degradaci[oó]n(?:\s+de\s+Sitios)?)/gi;
+                let mInc; let lastIdx = -1; let lastTipoRaw = '';
+                while ((mInc = reInc.exec(line)) !== null) { lastIdx = mInc.index; lastTipoRaw = mInc[1]; }
+                if (lastIdx === -1) continue;
+
+                let tipo = '';
+                if (/Ca[íi]da\s+de\s+Sitios/i.test(lastTipoRaw)) tipo = 'Caída de Sitios';
+                else if (/Aumento/i.test(lastTipoRaw)) tipo = 'Aumento de Reclamos';
+                else if (/Perdida/i.test(lastTipoRaw)) tipo = 'Pérdida de conectividad';
+                else if (/Saturaci/i.test(lastTipoRaw)) tipo = 'Saturación de Nodo';
+                else if (/Degradaci/i.test(lastTipoRaw)) tipo = 'Degradación de Sitios';
+
+                let cola = limpiarColasTecnicas(line.substring(lastIdx));
+                let causa = '';
+                const causaMatch = cola.match(/Causa\s*[:\s]+([^\n\r]+?)(?=\s+Lista\s+de|\s+TEC|\s*<Nem[oó]nico|\s*$)/i);
+                if (causaMatch) causa = causaMatch[1].trim();
+                if (causa) {
+                    if (causa.includes('Lista de') || causa.includes('Caída de')) {
+                        causa = causa.split(/(?:Lista\s+de|Ca[íi]da\s+de)/i)[0].trim();
+                    }
+                    if (/^\(causa por definir\)$/i.test(causa) || /^por definir$/i.test(causa)) causa = '';
+                    if (causa.length > 0) causa = causa.charAt(0).toUpperCase() + causa.slice(1);
+                }
+
+                if (tipo && causa) return `${tipo} — ${causa}`;
+                if (tipo) return tipo;
             }
 
             // 4. Buscar líneas de Trabajo Programado
