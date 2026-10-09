@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tipificador V2</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+    :root {
+        --bg-body: #eef1f6;
+        --bg-calc: #ffffff;
+        --bg-recuadro: #F2F4F8;
+        --bg-hover: #f0f0f0;
+        --text-main: #191919;
+        --text-muted: #4a5568;
+        --border-soft: #ddd;
+        --accent-blue: #005CFF;
+        --accent-cyan: #2FCBF1;
+        --accent-mint: #42E8B4;
+        --accent-orange: #FF5733;
+        --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] {
+        --bg-body: #0E1726;
+        --bg-calc: #111C31;
+        --bg-recuadro: #152036;
+        --bg-hover: #1A2846;
+        --text-main: #E6EAF2;
+        --text-muted: #9FB0C8;
+        --border-soft: #2A3A5C;
+        --accent-blue: #3D8BFF;
+        --accent-cyan: #2FCBF1;
+        --accent-mint: #42E8B4;
+        --accent-orange: #FF8A4C;
+        --shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    * { font-family: 'Barlow', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        max-width: 1500px;
+        min-height: 100vh;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        background: var(--bg-body);
+        color: var(--text-main);
+    }
+
+    .calculator {
+        width: 100%;
+        padding: 2vh;
+        margin: 10px auto 0;
+        box-shadow: var(--shadow);
+        border-radius: 16px;
+        background-color: var(--bg-calc);
+        border-top: 4px solid var(--accent-cyan);
+        display: flex;
+        align-items: stretch;
+        gap: 18px;
+        flex: 1;
+    }
+
+    .left-panel   { width: 480px; max-width: 480px; display: flex; flex-direction: column; }
+    .center-panel { width: 420px; max-width: 420px; display: flex; flex-direction: column; height: fit-content; }
+    .right-panel  { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
+
+    h2 {
+        text-align: center;
+        color: var(--text-main);
+        font-size: clamp(18px, 2.8vh, 22px);
+        margin-bottom: 1.5vh;
+        font-weight: 700;
+        position: relative;
+    }
+    h2:after {
+        content: '';
+        display: block;
+        width: 60px; height: 4px;
+        background: var(--accent-mint);
+        margin: 1vh auto 0;
+        border-radius: 2px;
+    }
+
+    .input-group { margin-bottom: 1vh; display: flex; flex-direction: column; }
+    .input-group label {
+        font-size: clamp(14px, 2vh, 16px);
+        color: var(--text-muted);
+        font-weight: 600;
+        margin-bottom: 0.5vh;
+    }
+    .input-group select, .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid var(--border-soft);
+        border-radius: 8px;
+        font-size: clamp(15px, 2vh, 17px);
+        transition: all .2s ease;
+        background: var(--bg-calc);
+        color: var(--text-main);
+    }
+    .input-group select:focus, .input-group input:focus {
+        outline: none;
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 0 3px rgba(47,203,241,0.15);
+    }
+
+    .recuadro {
+        margin: 1vh 0;
+        padding: 12px;
+        border-radius: 12px;
+        background-color: var(--bg-recuadro);
+        border-left: 4px solid var(--accent-mint);
+        font-size: clamp(15px, 2vh, 17px);
+        color: var(--text-main);
+    }
+    .recuadro.azul { border-left-color: var(--accent-blue); }
+    .recuadro.naranja { border-left-color: var(--accent-orange); }
+
+    .subtitulo { font-weight: 700; font-size: clamp(16px, 2.3vh, 19px); margin-bottom: 6px; }
+    .subtitulo-copiar { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .detalle { margin: 2px 0; }
+    .detalle strong { color: var(--text-main); }
+
+    .btn-copiar {
+        margin-top: 6px;
+        padding: 8px 14px;
+        background-color: var(--accent-blue);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: clamp(14px, 2vh, 16px);
+        cursor: pointer;
+        transition: background-color .2s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-copiar:hover { background-color: var(--accent-cyan); color: #0B1220; }
+    .btn-borrar-filtros { background-color: #B23B2E; width: 100%; }
+    .btn-borrar-filtros:hover { background-color: #d9534f; color: #fff; }
+
+    .material-icons-outlined { font-size: 1.1em; vertical-align: middle; }
+
+    .descripcion-container { display: flex; flex-direction: column; flex: 1; }
+    .descripcion-texto {
+        flex-grow: 1;
+        white-space: pre-wrap;
+        text-align: justify;
+        word-wrap: break-word;
+        line-height: 1.5;
+        font-size: clamp(14px, 2vh, 16px);
+    }
+    #importante { flex: 1; height: 100%; overflow-y: auto; }
+
+    .search-input {
+        padding: 10px;
+        border: 2px solid var(--border-soft);
+        border-radius: 8px;
+        font-size: clamp(15px, 2vh, 17px);
+        margin-bottom: 1vh;
+        background: var(--bg-calc);
+        color: var(--text-main);
+    }
+
+    .procedimiento-rec { border-left-color: var(--accent-blue); font-weight: 600; }
+    #procedimientoSeleccionado, #capturaPanel, #importante { display: none; }
+
+    .motivo-lista {
+        list-style: none; padding: 0; margin: 0;
+        max-height: 55vh; overflow-y: auto;
+        border: 2px solid var(--border-soft); border-radius: 10px;
+    }
+    .motivo-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid var(--border-soft);
+        transition: background-color .2s;
+        font-size: clamp(14px, 2vh, 16px);
+    }
+    .motivo-item:hover { background-color: var(--bg-hover); }
+    .motivo-item .proc-tag { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .04em; }
+    .motivo-item.seleccionado { background-color: #0F80CE; color: #fff; }
+    .motivo-item.seleccionado .proc-tag { color: #e6f2ff; }
+
+    /* ---------- header frameless (arrastrable) ---------- */
+    #hdr {
+        display: flex; align-items: center; gap: 6px;
+        padding: 0 8px; height: 32px; flex-shrink: 0;
+        background: #0d1220; border-bottom: 1px solid var(--border-soft);
+        border-radius: 6px 6px 0 0;
+        -webkit-app-region: drag; user-select: none;
+    }
+    #hdr-title {
+        flex: 1; font-size: 11px; font-weight: 700; color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .hbtn {
+        -webkit-app-region: no-drag; background: none; border: none; cursor: pointer;
+        color: var(--text-muted); font-size: 12px; padding: 2px 6px; border-radius: 3px;
+        transition: all 0.15s; font-family: 'Barlow', sans-serif;
+    }
+    .hbtn:hover { color: var(--text-main); background: rgba(255,255,255,0.08); }
+
+    .top-controls {
+        position: fixed; top: 44px; right: 12px; z-index: 2000;
+        display: flex; gap: 8px; align-items: center;
+    }
+    .btn-flotante {
+        background: rgba(0,92,255,.9); color: #fff; border: 1px solid #3D8BFF;
+        border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 600;
+        cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.18);
+        display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+    }
+    .btn-flotante:hover { background: var(--accent-cyan); color: #0B1220; }
+
+    #adminPanel {
+        position: fixed; top: 86px; right: 12px; z-index: 2000;
+        background: var(--bg-calc); border: 1px solid var(--border-soft);
+        border-radius: 12px; padding: 10px; box-shadow: var(--shadow);
+        display: none; flex-direction: column; gap: 6px; width: 268px;
+    }
+    #adminPanel .admin-title {
+        font-size: 12px; font-weight: 700; color: var(--accent-orange);
+        text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-bottom: 2px;
+        justify-content: space-between;
+    }
+    .badge-admin { background: var(--accent-orange); color: #0B1220; border-radius: 999px; padding: 2px 8px; font-size: 10px; }
+    .btn-admin {
+        width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-soft);
+        background: var(--bg-calc); color: var(--text-main); font-size: 13px; font-weight: 500;
+        cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-admin:hover { background: var(--accent-blue); border-color: var(--accent-blue); color: #fff; }
+    .btn-admin.danger:hover { background: #B23B2E; border-color: #B23B2E; color: #fff; }
+
+    .modal-overlay {
+        position: fixed; inset: 0; z-index: 3000; background: rgba(4,8,16,.7);
+        display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal {
+        background: var(--bg-calc); border: 1px solid var(--border-soft); border-radius: 14px;
+        padding: 20px; width: min(620px, 96vw); max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow);
+        color: var(--text-main);
+    }
+    .modal h3 { font-size: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .form-field { margin-bottom: 10px; }
+    .form-field label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+    .modal input, .modal select, .modal textarea {
+        width: 100%; padding: 9px 10px; border: 2px solid var(--border-soft); border-radius: 8px;
+        background: var(--bg-calc); color: var(--text-main); font-size: 14px; font-family: inherit;
+    }
+    .modal textarea { min-height: 90px; resize: vertical; }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-field { flex: 1; }
+    .editor-area {
+        min-height: 150px; background: var(--bg-calc); color: var(--text-main);
+        border: 1px solid var(--border-soft); border-radius: 8px; padding: 10px; font-size: 14px; overflow-y: auto;
+    }
+    .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+    .btn-cancelar { background: var(--bg-recuadro) !important; color: var(--text-main) !important; }
+    .btn-cancelar:hover { background: #94a3b8 !important; color: #000 !important; }
+
+    .btn-editar-admin { display: none; }
+    body.modo-admin .btn-editar-admin { display: inline-flex; }
+
+    .toast {
+        position: fixed; bottom: 20px; right: 20px; z-index: 4000;
+        background: #1f2937; color: #fff; padding: 12px 18px; border-radius: 8px;
+        font-size: 15px; box-shadow: var(--shadow); opacity: 0; transform: translateY(10px);
+        transition: opacity .25s, transform .25s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    footer { text-align: center; margin-top: 24px; font-size: 12px; color: var(--text-muted); padding: 16px 0; opacity: .85; }
+
+    @media (max-width: 1100px) {
+        .calculator { flex-wrap: wrap; }
+        .left-panel, .center-panel, .right-panel { width: 100%; max-width: 100%; }
+    }
+</style>
+</head>
+<body>
+
+<div id="hdr">
+    <span id="hdr-title">⌨️ Tipificador V2</span>
+    <button class="hbtn" onclick="winMin()" title="Minimizar">—</button>
+    <button class="hbtn" onclick="winClose()" title="Cerrar">✕</button>
+</div>
+
+<div class="top-controls">
+    <button class="btn-flotante" onclick="toggleTheme()" title="Cambiar tema Día/Noche">
+        <span class="material-icons-outlined" id="themeIcon">dark_mode</span>
+    </button>
+    <button class="btn-flotante" onclick="abrirVentanaFlotante()" title="Abrir en ventana flotante">
+        <span class="material-icons-outlined">open_in_new</span>
+    </button>
+    <button class="btn-flotante" onclick="mostrarLogin()"><span class="material-icons-outlined">lock</span> Admin</button>
+</div>
+
+<div id="adminPanel">
+    <div class="admin-title"><span>Panel Admin</span><span class="badge-admin">Edición</span></div>
+    <button class="btn-admin" onclick="nuevoProcedimiento()"><span class="material-icons-outlined">add</span> Nuevo procedimiento</button>
+    <button class="btn-admin" onclick="nuevoMotivo()"><span class="material-icons-outlined">playlist_add</span> Nuevo motivo</button>
+    <button class="btn-admin" onclick="abrirEditarSeleccion()"><span class="material-icons-outlined">edit</span> Editar tipificación</button>
+    <button class="btn-admin" onclick="renombrarProcedimiento()"><span class="material-icons-outlined">drive_file_rename_outline</span> Renombrar procedimiento</button>
+    <button class="btn-admin danger" onclick="eliminarMotivo()"><span class="material-icons-outlined">delete</span> Eliminar motivo</button>
+    <button class="btn-admin danger" onclick="eliminarProcedimiento()"><span class="material-icons-outlined">delete_forever</span> Eliminar procedimiento</button>
+    <button class="btn-admin" onclick="exportarJSON()"><span class="material-icons-outlined">download</span> Exportar JSON</button>
+    <button class="btn-admin" onclick="importarJSON()"><span class="material-icons-outlined">upload_file</span> Importar JSON</button>
+    <button class="btn-admin" onclick="abrirImportCode1()"><span class="material-icons-outlined">sync</span> Importar desde Código 1</button>
+    <button class="btn-admin" onclick="restaurarBase()"><span class="material-icons-outlined">restart_alt</span> Restaurar dataset base</button>
+    <button class="btn-admin" onclick="cambiarPassword()"><span class="material-icons-outlined">key</span> Cambiar contraseña</button>
+    <button class="btn-admin" onclick="cerrarSesion()"><span class="material-icons-outlined">logout</span> Cerrar sesión</button>
+</div>
+
+<div class="modal-overlay" id="loginModal">
+    <div class="modal" style="width:min(360px,92vw)">
+        <h3><span class="material-icons-outlined">lock</span> Acceso Administrador</h3>
+        <div class="form-field">
+            <label for="loginPass">Contraseña</label>
+            <input type="password" id="loginPass" onkeydown="if(event.key==='Enter')intentarLogin()">
+        </div>
+        <div id="loginError" style="color:#FF6B5E;font-size:13px;margin-top:4px;"></div>
+        <div class="modal-buttons">
+            <button class="btn-copiar btn-cancelar" onclick="cerrarLogin()">Cancelar</button>
+            <button class="btn-copiar" onclick="intentarLogin()">Ingresar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <h3 id="editModalTitulo"><span class="material-icons-outlined">edit</span> Gestionar tipificación</h3>
+        <div class="form-row">
+            <div class="form-field">
+                <label for="fProcedimiento">Procedimiento</label>
+                <input type="text" id="fProcedimiento" list="listaProc">
+            </div>
+            <div class="form-field">
+                <label for="fMotivo">Motivo del procedimiento</label>
+                <input type="text" id="fMotivo">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-field">
+                <label for="fTipo">Tipo</label>
+                <input type="text" id="fTipo">
+            </div>
+            <div class="form-field">
+                <label for="fArea">Área</label>
+                <input type="text" id="fArea">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-field">
+                <label for="fSubarea">Subárea</label>
+                <input type="text" id="fSubarea">
+            </div>
+            <div class="form-field">
+                <label for="fEstado">Estado</label>
+                <input type="text" id="fEstado" list="listaEstado">
+            </div>
+        </div>
+        <div class="form-field">
+            <label for="fTiempo">Tiempo de Respuesta</label>
+            <input type="text" id="fTiempo">
+        </div>
+        <div class="form-field">
+            <label for="fDescripcion">Descripción</label>
+            <textarea id="fDescripcion"></textarea>
+        </div>
+        <div class="form-field">
+            <label for="fImportante">Detalles / Importante (HTML)</label>
+            <div id="fImportante" class="editor-area" contenteditable="true"></div>
+        </div>
+        <datalist id="listaProc"></datalist>
+        <datalist id="listaEstado">
+            <option value="Cerrado + ctrl “s”"></option>
+            <option value="Cerrado/Acogido + ctrl “s”"></option>
+            <option value="En Progreso + ctrl “s”"></option>
+            <option value="Pendiente + ctrl “s”"></option>
+            <option value="NA"></option>
+        </datalist>
+        <div class="modal-buttons">
+            <button class="btn-copiar btn-cancelar" onclick="cerrarEdicion()">Cancelar</button>
+            <button class="btn-copiar" onclick="guardarEdicion()"><span class="material-icons-outlined">save</span> Guardar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="importModal">
+    <div class="modal">
+        <h3><span class="material-icons-outlined">sync</span> Importar desde Código 1</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">
+            Pega el HTML de <b>tipificaciones.php</b> (Ver código fuente de la página) o intenta la descarga automática.
+            Se extraerá <code>DATOS_EMBEDIDOS</code>.
+        </p>
+        <div class="form-field">
+            <label for="importHtml">HTML pegado</label>
+            <textarea id="importHtml" placeholder="&lt;html ... let DATOS_EMBEDIDOS = {...}; ..."></textarea>
+        </div>
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;margin:6px 0;">
+            <input type="checkbox" id="importMerge" style="width:auto;"> Fusionar con los datos actuales (si no, reemplaza todo)
+        </label>
+        <div class="modal-buttons">
+            <button class="btn-copiar btn-cancelar" onclick="cerrarImport()">Cancelar</button>
+            <button class="btn-copiar btn-cancelar" onclick="descargarCode1()">Descargar automático</button>
+            <button class="btn-copiar" onclick="importarCode1()">Importar</button>
+        </div>
+    </div>
+</div>
+
+<div class="calculator">
+
+    <div class="left-panel">
+        <h2>Tipificador V2</h2>
+
+        <div class="input-group">
+            <label for="searchMotivo">Buscar motivo:</label>
+            <input type="text" id="searchMotivo" class="search-input" oninput="filtrarMotivos()" placeholder="Buscar...">
+        </div>
+
+        <div class="input-group">
+            <label for="procedimiento">Procedimiento:</label>
+            <select id="procedimiento" onchange="actualizarMotivos()">
+                <option value="">Seleccione un procedimiento</option>
+            </select>
+        </div>
+
+        <ul id="motivoLista" class="motivo-lista"></ul>
+
+        <button class="btn-copiar btn-borrar-filtros" onclick="borrarFiltros()">
+            <span class="material-icons-outlined">clear_all</span> Borrar filtros
+        </button>
+    </div>
+
+    <div class="center-panel">
+        <div class="recuadro procedimiento-rec" id="procedimientoSeleccionado">
+            🗞️: <span id="procedimientoNombre"></span>
+        </div>
+
+        <div id="capturaPanel">
+            <div class="recuadro azul" id="tipificacion">
+                <div class="subtitulo-copiar">
+                    <div class="subtitulo"><span class="material-icons-outlined">keyboard</span> Tipificación en Siebel:</div>
+                    <div style="display:flex;gap:6px;">
+                        <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
+                            <span class="material-icons-outlined">edit</span>
+                        </button>
+                        <button class="btn-copiar" style="margin:0;" onclick="copiarTipificacion()" title="Copiar tipificación">
+                            <span class="material-icons-outlined">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recuadro" id="resultado">💡 El resultado aparecerá aquí.</div>
+
+            <div class="recuadro">
+                <div class="subtitulo-copiar">
+                    <div class="subtitulo"><span class="material-icons-outlined">description</span> Descripción:</div>
+                    <div style="display:flex;gap:6px;">
+                        <button class="btn-copiar btn-editar-admin" style="margin:0;" onclick="abrirEditarSeleccion()" title="Editar">
+                            <span class="material-icons-outlined">edit</span>
+                        </button>
+                        <button class="btn-copiar" style="margin:0;" onclick="copiarDescripcion()" title="Copiar descripción">
+                            <span class="material-icons-outlined">content_copy</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recuadro descripcion-container">
+                <div id="descripcion" class="descripcion-texto"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="recuadro naranja" id="importante">
+            <div class="subtitulo-copiar">
+                <div class="subtitulo"><span class="material-icons-outlined">important_devices</span> Detalles:</div>
+            </div>
+            <div id="importanteDescripcion" class="descripcion-texto"></div>
+        </div>
+    </div>
+
+</div>
+
+<footer>Tipificador V2 · UI basada en plataforma previa · Datos: base interna actual</footer>
+
+<script src="tipis.data.js"></script>
+<script>
+/* =========================================================
+   Tipificador V2
+   Interfaz: Código 2  ·  Funcionalidad: Código 1
+   ========================================================= */
+
+/* ---------- integración con la ventana Electron (frameless) ---------- */
+let ipcRenderer = null;
+try { ipcRenderer = require('electron').ipcRenderer; } catch (e) { ipcRenderer = null; }
+function winMin()   { try { if (ipcRenderer) ipcRenderer.send('minimize-tool', 'tipificador-v2'); } catch (e) {} }
+function winClose() { try { if (ipcRenderer) ipcRenderer.send('close-tool',    'tipificador-v2'); } catch (e) {} }
+
+const STORAGE_KEY   = 'tipificador_v2_data';
+const PASS_KEY      = 'tipificador_v2_pass';
+const THEME_KEY     = 'tipificador_v2_theme';
+const DEFAULT_PASS  = 'admin123';
+
+let datos = {};
+let motivosFiltrados = [];   // [{proc, motivo}]
+let seleccion = null;        // {proc, motivo, info}
+
+/* ---------- utilidades ---------- */
+function clonar(o) { return JSON.parse(JSON.stringify(o)); }
+
+function toast(msg) {
+    let t = document.getElementById('toastBox');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'toastBox';
+        t.className = 'toast';
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function colorNA(valor) { return (valor === 'NA') ? 'var(--text-muted)' : 'var(--text-main)'; }
+function colorEstado(estado) {
+    switch (estado) {
+        case 'Cerrado + ctrl “s”':
+        case 'Cerrado/Acogido + ctrl “s”': return '#0ECC83';
+        case 'En Progreso + ctrl “s”':     return '#10069F';
+        case 'Pendiente + ctrl “s”':       return '#FF3D00';
+        case 'NA':                          return 'var(--text-muted)';
+        default:                            return 'var(--text-main)';
+    }
+}
+
+/* ---------- persistencia ---------- */
+function guardarLocal() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(datos)); }
+    catch (e) { toast('⚠️ No se pudo guardar localmente'); }
+}
+function cargarLocal() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { try { return JSON.parse(raw); } catch (e) {} }
+    return null;
+}
+
+/* ---------- arranque ---------- */
+function init() {
+    datos = cargarLocal();
+    if (!datos || typeof datos !== 'object' || !Object.keys(datos).length) {
+        datos = (window.DATOS_TIPIFICACIONES && clonar(window.DATOS_TIPIFICACIONES)) || {};
+        guardarLocal();
+    }
+    poblarProcedimientos();
+    setupShortcuts();
+    aplicarTemaGuardado();
+}
+
+function poblarProcedimientos() {
+    const sel = document.getElementById('procedimiento');
+    const actual = sel.value;
+    sel.innerHTML = '<option value="">Seleccione un procedimiento</option>';
+    Object.keys(datos).sort().forEach(p => {
+        const o = document.createElement('option');
+        o.value = p; o.textContent = p;
+        sel.appendChild(o);
+    });
+    if (actual && datos[actual]) sel.value = actual;
+}
+
+/* ---------- listado de motivos ---------- */
+function actualizarMotivos() {
+    const proc = document.getElementById('procedimiento').value;
+    document.getElementById('searchMotivo').value = '';
+    if (proc && datos[proc]) {
+        motivosFiltrados = Object.keys(datos[proc]).sort().map(m => ({ proc, motivo: m }));
+        document.getElementById('procedimientoNombre').textContent = proc;
+        mostrarMotivos();
+    } else {
+        motivosFiltrados = [];
+        mostrarMotivos();
+    }
+}
+
+function filtrarMotivos() {
+    const q = document.getElementById('searchMotivo').value.trim();
+    const procSel = document.getElementById('procedimiento');
+
+    if (q) {
+        procSel.value = '';
+        document.getElementById('procedimientoNombre').textContent = '';
+    }
+
+    const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const terms = norm(q).split(' ').filter(Boolean);
+
+    const out = [];
+    if (!q && procSel.value && datos[procSel.value]) {
+        Object.keys(datos[procSel.value]).sort().forEach(m => out.push({ proc: procSel.value, motivo: m }));
+    } else {
+        Object.keys(datos).forEach(p => {
+            Object.keys(datos[p]).forEach(m => {
+                const info = datos[p][m];
+                const blob = norm([m, p, info.tipo, info.area, info.subarea, info.estado].join(' '));
+                if (terms.every(t => blob.includes(t))) out.push({ proc: p, motivo: m });
+            });
+        });
+    }
+    motivosFiltrados = out;
+    mostrarMotivos();
+}
+
+function mostrarMotivos() {
+    const ul = document.getElementById('motivoLista');
+    ul.innerHTML = '';
+    if (!motivosFiltrados.length) {
+        const li = document.createElement('li');
+        li.className = 'motivo-item';
+        li.style.cursor = 'default';
+        li.textContent = 'Sin resultados.';
+        ul.appendChild(li);
+        return;
+    }
+    motivosFiltrados.forEach(({ proc, motivo }) => {
+        const li = document.createElement('li');
+        li.className = 'motivo-item';
+        const mostrarProc = document.getElementById('procedimiento').value !== proc;
+        li.innerHTML = (mostrarProc ? `<span class="proc-tag">${proc}</span>` : '') + escapeHtml(motivo);
+        li.onclick = () => {
+            document.querySelectorAll('.motivo-item').forEach(i => i.classList.remove('seleccionado'));
+            li.classList.add('seleccionado');
+            mostrarResultado(proc, motivo);
+        };
+        ul.appendChild(li);
+    });
+}
+
+function escapeHtml(s) {
+    return (s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+/* ---------- resultado ---------- */
+function mostrarResultado(proc, motivo) {
+    const info = datos?.[proc]?.[motivo];
+    if (!info) return;
+
+    seleccion = { proc, motivo, info };
+
+    document.getElementById('procedimientoNombre').textContent = proc;
+    document.getElementById('procedimientoSeleccionado').style.display = 'block';
+    document.getElementById('capturaPanel').style.display = 'block';
+    document.getElementById('importante').style.display = 'block';
+
+    const resultadoDiv = document.getElementById('resultado');
+    resultadoDiv.innerHTML = `
+        <div class="detalle"><strong>Tipo:</strong> <span style="color:${colorNA(info.tipo)}">${info.tipo || ''}</span></div>
+        <div class="detalle"><strong>Área:</strong> <span style="color:${colorNA(info.area)}">${info.area || ''}</span></div>
+        <div class="detalle"><strong>Subárea:</strong> <span style="color:${colorNA(info.subarea)}">${info.subarea || ''}</span></div>
+        <div class="detalle"><strong>Estado:</strong> <span style="color:${colorEstado(info.estado)}">${info.estado || ''}</span></div>
+        <div class="detalle"><strong>Tiempo de Respuesta:</strong> <span style="color:${colorNA(info.tiempoDeRespuesta)}">${info.tiempoDeRespuesta || ''}</span></div>
+    `;
+    document.getElementById('descripcion').innerHTML = info.descripcion || '';
+    document.getElementById('importanteDescripcion').innerHTML = info.importante || '';
+}
+
+/* ---------- copiar ---------- */
+function copiarTexto(texto, msg) {
+    const done = () => toast(msg || 'Copiado ✅');
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(texto).then(done).catch(() => fallbackCopiar(texto, done));
+    } else {
+        fallbackCopiar(texto, done);
+    }
+}
+function fallbackCopiar(texto, done) {
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('No se pudo copiar'); }
+    document.body.removeChild(ta);
+}
+
+function limpiarTexto(t) {
+    return (t || '')
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/\s+$/gm, '')
+        .trim();
+}
+function copiarTipificacion() {
+    if (!seleccion) return;
+    const i = seleccion.info;
+    let txt = '';
+    txt += `*Tipo:* ${limpiarTexto(i.tipo)}\n`;
+    txt += `*Área:* ${limpiarTexto(i.area)}\n`;
+    txt += `*Subárea:* ${limpiarTexto(i.subarea)}\n`;
+    txt += `*Estado:* ${limpiarTexto(i.estado)}\n`;
+    txt += `*Tiempo de Respuesta:* _${limpiarTexto(i.tiempoDeRespuesta)}_\n\n`;
+    txt += document.getElementById('descripcion').innerText.trim();
+    copiarTexto(txt, 'Tipificación copiada ✨');
+}
+function copiarDescripcion() {
+    copiarTexto(document.getElementById('descripcion').innerText.trim(), 'Descripción copiada ✅');
+}
+
+/* ---------- tema ---------- */
+function toggleTheme() {
+    const doc = document.documentElement;
+    const nuevo = doc.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    doc.setAttribute('data-theme', nuevo);
+    document.getElementById('themeIcon').textContent = nuevo === 'dark' ? 'light_mode' : 'dark_mode';
+    localStorage.setItem(THEME_KEY, nuevo);
+}
+function aplicarTemaGuardado() {
+    const t = localStorage.getItem(THEME_KEY) || 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('themeIcon').textContent = t === 'dark' ? 'light_mode' : 'dark_mode';
+}
+
+/* ---------- ventana flotante ---------- */
+function abrirVentanaFlotante() {
+    try {
+        const w = 1050, h = 780;
+        window.open(window.location.href, 'TipificadorV2',
+            `width=${w},height=${h},top=${(screen.height-h)/2},left=${(screen.width-w)/2},resizable=yes,scrollbars=yes`);
+    } catch (e) { console.error('Ventana flotante no disponible:', e); }
+}
+
+/* ---------- admin: login ---------- */
+function mostrarLogin() {
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('loginPass').focus(), 50);
+}
+function cerrarLogin() { document.getElementById('loginModal').style.display = 'none'; }
+function intentarLogin() {
+    const pass = document.getElementById('loginPass').value;
+    const real = localStorage.getItem(PASS_KEY) || DEFAULT_PASS;
+    if (pass === real) {
+        document.body.classList.add('modo-admin');
+        document.getElementById('adminPanel').style.display = 'flex';
+        cerrarLogin();
+    } else {
+        document.getElementById('loginError').textContent = 'Contraseña incorrecta';
+    }
+}
+function cerrarSesion() {
+    document.body.classList.remove('modo-admin');
+    document.getElementById('adminPanel').style.display = 'none';
+}
+function cambiarPassword() {
+    const actual = prompt('Contraseña actual:');
+    if (actual === null) return;
+    const real = localStorage.getItem(PASS_KEY) || DEFAULT_PASS;
+    if (actual !== real) { toast('Contraseña actual incorrecta'); return; }
+    const nueva = prompt('Nueva contraseña:');
+    if (!nueva) return;
+    localStorage.setItem(PASS_KEY, nueva);
+    toast('Contraseña actualizada 🔑');
+}
+function setupShortcuts() {
+    document.addEventListener('keydown', e => {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'Q' || e.key === 'q')) { e.preventDefault(); mostrarLogin(); }
+    });
+}
+
+/* ---------- admin: CRUD ---------- */
+function abrirEditarSeleccion() {
+    if (!seleccion) { toast('Selecciona un motivo primero'); return; }
+    abrirModal(seleccion.proc, seleccion.motivo);
+}
+
+function nuevoProcedimiento() {
+    const nombre = prompt('Nombre del nuevo procedimiento:');
+    if (!nombre) return;
+    if (datos[nombre]) { toast('Ese procedimiento ya existe'); return; }
+    datos[nombre] = {};
+    guardarLocal(); poblarProcedimientos();
+    document.getElementById('procedimiento').value = nombre;
+    actualizarMotivos();
+    toast('Procedimiento creado ✅');
+}
+
+function nuevoMotivo() {
+    const proc = document.getElementById('procedimiento').value;
+    if (!proc) { toast('Selecciona un procedimiento'); return; }
+    abrirModal(proc, '');
+    document.getElementById('editModalTitulo').innerHTML =
+        '<span class="material-icons-outlined">playlist_add</span> Nuevo motivo';
+}
+
+function abrirModal(proc, motivo) {
+    document.getElementById('fProcedimiento').value = proc || '';
+    document.getElementById('fMotivo').value = motivo || '';
+    const info = (proc && motivo && datos?.[proc]?.[motivo]) || {};
+    document.getElementById('fTipo').value = info.tipo || '';
+    document.getElementById('fArea').value = info.area || '';
+    document.getElementById('fSubarea').value = info.subarea || '';
+    document.getElementById('fEstado').value = info.estado || '';
+    document.getElementById('fTiempo').value = info.tiempoDeRespuesta || '';
+    document.getElementById('fDescripcion').value = info.descripcion || '';
+    document.getElementById('fImportante').innerHTML = info.importante || '';
+
+    const dl = document.getElementById('listaProc');
+    dl.innerHTML = Object.keys(datos).sort().map(p => `<option value="${escapeHtml(p)}"></option>`).join('');
+
+    document.getElementById('editModalTitulo').innerHTML =
+        '<span class="material-icons-outlined">edit</span> Gestionar tipificación';
+    document.getElementById('editModal').style.display = 'flex';
+}
+function cerrarEdicion() { document.getElementById('editModal').style.display = 'none'; }
+
+function guardarEdicion() {
+    const proc = document.getElementById('fProcedimiento').value.trim();
+    const motivo = document.getElementById('fMotivo').value.trim();
+    if (!proc || !motivo) { toast('Procedimiento y motivo son obligatorios'); return; }
+
+    if (!datos[proc]) datos[proc] = {};
+    datos[proc][motivo] = {
+        tipo: document.getElementById('fTipo').value.trim(),
+        area: document.getElementById('fArea').value.trim(),
+        subarea: document.getElementById('fSubarea').value.trim(),
+        estado: document.getElementById('fEstado').value.trim(),
+        tiempoDeRespuesta: document.getElementById('fTiempo').value.trim(),
+        descripcion: document.getElementById('fDescripcion').value,
+        importante: document.getElementById('fImportante').innerHTML
+    };
+    guardarLocal(); poblarProcedimientos();
+    document.getElementById('procedimiento').value = proc;
+    actualizarMotivos();
+    mostrarResultado(proc, motivo);
+    cerrarEdicion();
+    toast('Guardado ✅');
+}
+
+function renombrarProcedimiento() {
+    const proc = document.getElementById('procedimiento').value;
+    if (!proc) { toast('Selecciona un procedimiento'); return; }
+    const nuevo = prompt('Nuevo nombre para el procedimiento:', proc);
+    if (!nuevo || nuevo === proc) return;
+    if (datos[nuevo]) { toast('Ya existe un procedimiento con ese nombre'); return; }
+    datos[nuevo] = datos[proc];
+    delete datos[proc];
+    guardarLocal(); poblarProcedimientos();
+    document.getElementById('procedimiento').value = nuevo;
+    actualizarMotivos();
+    toast('Procedimiento renombrado ✅');
+}
+
+function eliminarProcedimiento() {
+    const proc = document.getElementById('procedimiento').value;
+    if (!proc) { toast('Selecciona un procedimiento'); return; }
+    if (!confirm(`¿Eliminar el procedimiento "${proc}" y todos sus motivos?`)) return;
+    delete datos[proc];
+    guardarLocal(); poblarProcedimientos();
+    ocultarPaneles();
+    toast('Procedimiento eliminado 🗑️');
+}
+
+function eliminarMotivo() {
+    if (!seleccion) { toast('Selecciona un motivo primero'); return; }
+    if (!confirm(`¿Eliminar el motivo "${seleccion.motivo}"?`)) return;
+    delete datos[seleccion.proc][seleccion.motivo];
+    guardarLocal();
+    document.getElementById('procedimiento').value = seleccion.proc;
+    actualizarMotivos();
+    ocultarPaneles();
+    toast('Motivo eliminado 🗑️');
+}
+
+function ocultarPaneles() {
+    seleccion = null;
+    document.getElementById('procedimientoSeleccionado').style.display = 'none';
+    document.getElementById('capturaPanel').style.display = 'none';
+    document.getElementById('importante').style.display = 'none';
+    document.getElementById('descripcion').innerHTML = '';
+    document.getElementById('importanteDescripcion').innerHTML = '';
+    document.getElementById('resultado').innerHTML = '💡 El resultado aparecerá aquí.';
+}
+
+/* ---------- import / export ---------- */
+function exportarJSON() {
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'tipificaciones_v2.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('JSON exportado 📤');
+}
+
+function importarJSON() {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = '.json,application/json';
+    inp.onchange = () => {
+        const file = inp.files[0];
+        if (!file) return;
+        const fr = new FileReader();
+        fr.onload = () => {
+            try {
+                const obj = JSON.parse(fr.result);
+                if (typeof obj !== 'object' || Array.isArray(obj)) throw new Error('formato inválido');
+                datos = obj;
+                guardarLocal(); poblarProcedimientos(); ocultarPaneles();
+                toast('JSON importado ✅');
+            } catch (e) { toast('JSON inválido'); }
+        };
+        fr.readAsText(file);
+    };
+    inp.click();
+}
+
+function abrirImportCode1() {
+    document.getElementById('importHtml').value = '';
+    document.getElementById('importModal').style.display = 'flex';
+}
+function cerrarImport() { document.getElementById('importModal').style.display = 'none'; }
+
+function extraerEmbedidos(html) {
+    const marker = html.includes('DATOS_EMBEDIDOS') ? 'DATOS_EMBEDIDOS' : 'DATOS_TIPIFICACIONES';
+    const i = html.indexOf(marker);
+    if (i < 0) throw new Error('No se encontró DATOS_EMBEDIDOS/DATOS_TIPIFICACIONES');
+    const start = html.indexOf('{', i);
+    const end = html.indexOf('<\/script>', start);
+    let json = html.slice(start, end).trim();
+    if (json.endsWith(';')) json = json.slice(0, -1).trim();
+    return JSON.parse(json);
+}
+
+function importarCode1() {
+    const html = document.getElementById('importHtml').value;
+    if (!html.trim()) { toast('Pega el HTML de Código 1'); return; }
+    try {
+        const obj = extraerEmbedidos(html);
+        if (document.getElementById('importMerge').checked) {
+            Object.keys(obj).forEach(p => {
+                datos[p] = Object.assign({}, datos[p] || {}, obj[p]);
+            });
+        } else {
+            datos = obj;
+        }
+        guardarLocal(); poblarProcedimientos(); ocultarPaneles();
+        cerrarImport();
+        toast('Importado desde Código 1 ✅');
+    } catch (e) { toast('No se pudo parsear: ' + e.message); }
+}
+
+async function descargarCode1() {
+    const url = 'https://tipificaciones.cajatecnicachile.cloud/tipificaciones.php';
+    try {
+        const r = await fetch(url, { cache: 'no-store' });
+        const html = await r.text();
+        document.getElementById('importHtml').value = html;
+        toast('HTML descargado. Pulsa Importar.');
+    } catch (e) {
+        toast('Descarga bloqueada (CORS). Pega el HTML manualmente.');
+    }
+}
+
+function restaurarBase() {
+    if (!window.DATOS_TIPIFICACIONES) { toast('No hay dataset base cargado'); return; }
+    if (!confirm('Esto reemplazará tus datos actuales por el dataset base. ¿Continuar?')) return;
+    datos = clonar(window.DATOS_TIPIFICACIONES);
+    guardarLocal(); poblarProcedimientos(); ocultarPaneles();
+    toast('Dataset base restaurado ♻️');
+}
+
+/* ---------- filtros ---------- */
+function borrarFiltros() {
+    document.getElementById('searchMotivo').value = '';
+    document.getElementById('procedimiento').value = '';
+    document.getElementById('procedimientoNombre').textContent = '';
+    motivosFiltrados = [];
+    mostrarMotivos();
+    ocultarPaneles();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

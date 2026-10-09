@@ -133,6 +133,20 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.20</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Nueva herramienta satélite: Tipificador V2</b> (<code>src/tools/tipificador-v2/</code>): UI de 3 columnas con dataset base real embebido (<code>tipis.data.js</code>, <b>56 procedimientos / 387 motivos</b>), búsqueda global de motivo + select de procedimiento, panel de tipificación (Resultado/Descripción/Detalles) y <b>Panel Admin</b> (Ctrl+Shift+Q, clave <code>admin123</code>: nuevo/editar/renombrar/eliminar, exportar/importar JSON, restaurar base, importar Código 1, cambiar clave). Persistencia <b>autónoma</b> en <code>localStorage</code> namespaceada <code>tipificador_v2_*</code> (no toca datos del gestor).</li>
+                    <li><b>Integración aditiva en NeoGestor</b>: registrada en <code>src/main.js</code> (mapa HTML <code>tipificadorV2</code> + <code>TOOLS_CONFIG['tipificador-v2']</code> 1320×860, resize, no top) y botón/entrada de catálogo en <code>src/index.html</code> (<code>btn-tipificador-v2</code>, ⌨️ Tipificador V2). <b>No modifica</b> la herramienta existente <code>tipificaciones</code> ni otros ids.</li>
+                    <li><b>Ventana frameless</b>: header propio arrastrable con minimizar/cerrar (patrón de <code>calculadora-dias</code>); <code>require('electron')</code> con guarda para no romper fuera de Electron; controles flotantes reubicados (top 44/86) para no tapar la barra; <code>window.open</code> de "Ventana flotante" envuelto en <code>try/catch</code>.</li>
+                    <li><b>Empaquetado</b>: incluida automáticamente por <code>build.files: "src/**/*"</code> (sin cambios en <code>package.json</code>).</li>
+                    <li><b>Validación</b>: <code>node --check</code> de <code>main.js</code> y del script inline OK; dataset vía <code>vm</code> = 56 procs / 387 motivos; <code>npm.cmd test</code> 12/12.</li>
+                    <li><b>Release v6.1.20</b>: portable <code>GestorCasos-portable-6.1.20.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.19</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

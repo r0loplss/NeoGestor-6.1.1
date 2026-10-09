@@ -39,7 +39,8 @@ const HTML = {
   horarios:      path.join(TOOLS, 'horarios.html'),
   acerca:        path.join(TOOLS, 'acerca.html'),
   easter:        path.join(TOOLS, 'easter.html'),
-  imgview:       path.join(TOOLS, 'imgview.html')
+  imgview:       path.join(TOOLS, 'imgview.html'),
+  tipificadorV2: path.join(TOOLS, 'tipificador-v2', 'index.html')
 };
 
 let mainWin = null;
@@ -64,7 +65,8 @@ const TOOLS_CONFIG = {
   'tipificaciones':   { file: HTML.tipificaciones, w: 1000, h: 700, resize: true, top: false },
   'fast':             { file: HTML.fast,       w: 1000, h: 900, resize: true, top: false },
   'notas-vault':      { file: HTML.vault,      w: 460, h: 560, resize: true,  top: false },
-  'horarios':         { file: HTML.horarios,   w: 460, h: 580, resize: true,  top: false }
+  'horarios':         { file: HTML.horarios,   w: 460, h: 580, resize: true,  top: false },
+  'tipificador-v2':   { file: HTML.tipificadorV2, w: 1320, h: 860, resize: true, top: false }
 };
 
 // ── LÓGICA DE PERSISTENCIA SEGURA (COLA + BACKUP + ESCRITURA ATÓMICA) ──
