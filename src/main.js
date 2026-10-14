@@ -32,7 +32,6 @@ const HTML = {
   // NUEVAS HERRAMIENTAS
   calculadora:   path.join(TOOLS, 'calculadora-dias.html'),
   ciclos:        path.join(TOOLS, 'ciclos.html'),
-  tipificaciones:path.join(TOOLS, 'tipificaciones.html'),
   fast:          path.join(TOOLS, 'fast.html'),
   fastBtn:       path.join(TOOLS, 'fast-btn.html'),
   vault:         path.join(TOOLS, 'vault.html'),
@@ -62,7 +61,6 @@ const TOOLS_CONFIG = {
   // NUEVAS HERRAMIENTAS
   'calculadora-dias': { file: HTML.calculadora, w: 380, h: 480, resize: true, top: false },
   'ciclos':           { file: HTML.ciclos,     w: 520, h: 680, resize: true, top: false },
-  'tipificaciones':   { file: HTML.tipificaciones, w: 1000, h: 700, resize: true, top: false },
   'fast':             { file: HTML.fast,       w: 1000, h: 900, resize: true, top: false },
   'notas-vault':      { file: HTML.vault,      w: 460, h: 560, resize: true,  top: false },
   'horarios':         { file: HTML.horarios,   w: 460, h: 580, resize: true,  top: false },
