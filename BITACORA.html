@@ -133,6 +133,19 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.28</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Radar de Contingencias — limpieza y robustez de interfaz</b>.</li>
+                    <li>Se <b>quitaron los botones "Exportar" e "Importar"</b> (y todo su código asociado: funciones, refs y listeners).</li>
+                    <li><b>Interfaz a prueba de redimensionado</b>: el contenedor principal y las filas de tarjeta usan <code>min-width:0</code> + <code>flex-wrap</code>, los textos largos (zona/ID/detalle) usan <code>overflow-wrap:anywhere</code>, el título del header recorta con elipsis y se bloquea el scroll horizontal. Verificado a <b>280 / 360 / 520 / 900 px sin desbordes</b>.</li>
+                    <li><b>Validación</b>: chequeo de IDs/handlers y llaves CSS OK; tests de features y de undo en Electron; test de redimensionado sin overflow.</li>
+                    <li><b>Release v6.1.28</b>: portable <code>GestorCasos-portable-6.1.28.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.27</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

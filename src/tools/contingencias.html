@@ -792,6 +792,20 @@
         #bulkbar .tb-btn { padding: 4px 9px; }
 
         /* ============================================================
+               ROBUSTEZ AL REDIMENSIONAR
+               ============================================================ */
+        #main { min-width: 0; overflow-x: hidden; }
+        #main > * { min-width: 0; max-width: 100%; }
+        .c-card, .c-card .c-top, .c-card .c-row { min-width: 0; }
+        .c-card .c-top { flex-wrap: wrap; row-gap: 4px; }
+        .c-card .c-row { flex-wrap: wrap; }
+        .c-card .c-zona,
+        .c-card .c-id,
+        .c-card .c-meta,
+        .c-card .c-detalle { min-width: 0; overflow-wrap: anywhere; }
+        #hdr-title, #toolbar .status { min-width: 0; }
+
+        /* ============================================================
                RESPONSIVE
                ============================================================ */
         @media (max-width: 500px) {
@@ -898,12 +912,8 @@
                     </button>
                 </div>
             </div>
-            <button class="tb-btn" id="btn-export" title="Exportar el radar a JSON">⬇ Exportar</button>
-            <button class="tb-btn" id="btn-import" title="Importar el radar desde JSON">⬆ Importar</button>
             <button class="tb-btn danger" id="btn-limpiar">🗑 Limpiar</button>
         </div>
-
-        <input type="file" id="file-import" accept=".json,application/json" style="display:none" />
 
         <!-- 3. Lista de contingencias cargadas -->
         <div id="list-container">
@@ -1032,7 +1042,6 @@
         const bulkbar = document.getElementById('bulkbar');
         const bulkCount = document.getElementById('bulk-count');
         const btnUndo = document.getElementById('btn-undo');
-        const fileImport = document.getElementById('file-import');
 
         // ============================================================
         // CLASIFICACIÓN (tipo) + ESTADO helpers
@@ -2068,39 +2077,6 @@
             guardarYNotificar(); actualizarUI();
             showToast('🗑 Eliminadas.', 'success');
         }
-        function exportarRadar() {
-            if (!contingencias.length) { showToast('⚠️ Nada para exportar.', 'warning'); return; }
-            const data = { app: 'contingencias', version: 1, fecha: new Date().toISOString(), contingencias, overrides };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'radar_contingencias.json';
-            a.click();
-            URL.revokeObjectURL(a.href);
-            showToast('⬇ Radar exportado.', 'success');
-        }
-        function importarRadar(file) {
-            const fr = new FileReader();
-            fr.onload = () => {
-                try {
-                    const obj = JSON.parse(fr.result);
-                    let items, ov = null;
-                    if (Array.isArray(obj)) items = obj;
-                    else { items = obj.contingencias; ov = obj.overrides || null; }
-                    if (!Array.isArray(items)) throw new Error('formato inválido');
-                    pushUndo();
-                    contingencias = items.map(c => Object.assign({}, c));
-                    if (ov && typeof ov === 'object') overrides = ov;
-                    aplicarOverrides();
-                    seleccionados.clear();
-                    guardarOverrides(); guardarYNotificar(); actualizarUI();
-                    showToast('⬆ Radar importado.', 'success');
-                } catch (e) {
-                    showToast('❌ JSON inválido.', 'error');
-                }
-            };
-            fr.readAsText(file);
-        }
 
         function guardarYNotificar() {
             ipcRenderer.send('save-contingencias', contingencias);
@@ -2275,13 +2251,8 @@
         sortSelect.addEventListener('change', () => { sortBy = sortSelect.value; actualizarUI(); });
         if (chkOcultarNorm) chkOcultarNorm.addEventListener('change', () => { ocultarNorm = chkOcultarNorm.checked; actualizarUI(); });
 
-        // Deshacer / Exportar / Importar
+        // Deshacer
         if (btnUndo) btnUndo.addEventListener('click', deshacer);
-        const btnExport = document.getElementById('btn-export');
-        const btnImport = document.getElementById('btn-import');
-        if (btnExport) btnExport.addEventListener('click', exportarRadar);
-        if (btnImport) btnImport.addEventListener('click', () => { if (fileImport) fileImport.click(); });
-        if (fileImport) fileImport.addEventListener('change', () => { if (fileImport.files[0]) importarRadar(fileImport.files[0]); fileImport.value = ''; });
 
         // Acciones en lote
         bulkbar.querySelectorAll('[data-bulk-tipo]').forEach(b => b.addEventListener('click', () => bulkMarcarTipo(b.dataset.bulkTipo)));
