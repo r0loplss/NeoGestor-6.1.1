@@ -72,6 +72,10 @@
 
         #hdr-title {
             flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             font-size: 11px;
             font-weight: 700;
             color: var(--muted);
@@ -618,7 +622,7 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
-        .modal-field input, .modal-field textarea {
+        .modal-field input, .modal-field textarea, .modal-field select {
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: 5px;
@@ -694,6 +698,100 @@
         }
 
         /* ============================================================
+               FILTROS / BÚSQUEDA / ORDEN
+               ============================================================ */
+        #filters {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            flex-shrink: 0;
+        }
+        #filters.visible { display: flex; }
+        .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+        .chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 9px; border-radius: 999px;
+            border: 1px solid var(--border); background: var(--surface2);
+            color: var(--muted); font-size: 10.5px; font-weight: 600;
+            cursor: pointer; transition: all .15s; user-select: none;
+        }
+        .chip:hover { border-color: var(--border2); color: var(--text); }
+        .chip.active { color: #fff; border-color: transparent; }
+        .chip[data-tipo="all"].active { background: var(--primary); }
+        .chip[data-tipo="red"].active { background: #16a34a; }
+        .chip[data-tipo="nacional"].active { background: #2563eb; }
+        .chip[data-tipo="sistemas"].active { background: #9333ea; }
+        .chip[data-tipo="otro"].active { background: #64748b; }
+        .chip .chip-n { opacity: .85; font-weight: 700; }
+        .filters-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .filters-row input[type="text"] {
+            flex: 1; min-width: 110px; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+            font-size: 11.5px; padding: 5px 8px; outline: none; font-family: var(--font);
+        }
+        .filters-row input[type="text"]:focus { border-color: var(--primary); background: var(--surface3); }
+        .filters-row select {
+            background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text); font-size: 11px; padding: 5px 6px; outline: none; font-family: var(--font);
+        }
+        .mini-check {
+            display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px;
+            color: var(--muted); cursor: pointer; white-space: nowrap; user-select: none;
+        }
+        .modo-check {
+            display: inline-flex; align-items: center; gap: 5px; font-size: 11px;
+            color: var(--muted); cursor: pointer; user-select: none; padding: 6px 4px;
+        }
+        .modo-check input { accent-color: var(--primary); }
+
+        /* ============================================================
+               TIPO / ESTADO en tarjetas
+               ============================================================ */
+        .c-card .c-top { display: flex; align-items: center; gap: 6px; }
+        .c-check { width: 13px; height: 13px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
+        .c-tags { display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+        .tipo-chip {
+            display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px;
+            border-radius: 999px; font-size: 10px; font-weight: 700; cursor: pointer;
+            border: 1px solid transparent; transition: all .15s; user-select: none; white-space: nowrap;
+        }
+        .tipo-chip:hover { filter: brightness(1.22); }
+        .tipo-chip[data-tipo="red"] { background: rgba(34,197,94,.16); color: #86efac; border-color: rgba(34,197,94,.35); }
+        .tipo-chip[data-tipo="nacional"] { background: rgba(59,130,246,.16); color: #bfdbfe; border-color: rgba(59,130,246,.35); }
+        .tipo-chip[data-tipo="sistemas"] { background: rgba(168,85,247,.16); color: #e9d5ff; border-color: rgba(168,85,247,.35); }
+        .tipo-chip[data-tipo="otro"] { background: rgba(148,163,184,.14); color: #cbd5e1; border-color: rgba(148,163,184,.3); }
+        .tipo-chip .auto-dot { opacity: .5; font-size: 8px; }
+        .estado-chip {
+            display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px;
+            border-radius: 999px; font-size: 10px; font-weight: 600; cursor: pointer;
+            border: 1px solid var(--border); background: var(--surface3); color: var(--muted); user-select: none; white-space: nowrap;
+        }
+        .estado-chip[data-estado="activo"] { color: #fca5a5; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.08); }
+        .estado-chip[data-estado="curso"] { color: #fcd34d; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+        .estado-chip[data-estado="normalizado"] { color: #86efac; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.08); }
+        .c-card.normalizada { opacity: .6; }
+        .c-card.normalizada .c-zona { text-decoration: line-through; text-decoration-color: rgba(255,255,255,.4); }
+        .c-card.selected { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary) inset; }
+        .warn-parse { color: var(--warning); cursor: help; font-size: 11px; }
+        .c-card [contenteditable="true"].inline-edit { outline: 1px dashed var(--primary); border-radius: 3px; padding: 1px 3px; background: rgba(59,130,246,.08); }
+
+        /* ============================================================
+               BARRA DE ACCIONES EN LOTE
+               ============================================================ */
+        #bulkbar {
+            display: none; align-items: center; gap: 6px; flex-wrap: wrap;
+            background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.35);
+            border-radius: 8px; padding: 6px 10px; flex-shrink: 0;
+        }
+        #bulkbar.visible { display: flex; }
+        #bulkbar .bulk-label { font-size: 11px; font-weight: 700; color: #bfdbfe; margin-right: 2px; }
+        #bulkbar .tb-btn { padding: 4px 9px; }
+
+        /* ============================================================
                RESPONSIVE
                ============================================================ */
         @media (max-width: 500px) {
@@ -720,6 +818,7 @@
     ============================================================ -->
     <div id="hdr">
         <span id="hdr-title">📡 Radar de Contingencias PRO</span>
+        <button class="hbtn" id="btn-undo" title="Deshacer (Ctrl+Z)" disabled>↶</button>
         <button class="hbtn danger" id="btn-limpiar-todo" title="Limpiar todo">🗑</button>
         <button class="hbtn" onclick="ipcRenderer.send('minimize-tool','contingencias')" title="Minimizar">—</button>
         <button class="hbtn" onclick="ipcRenderer.send('close-tool','contingencias')">✕</button>
@@ -742,7 +841,35 @@
             <div class="btn-row">
                 <button class="btn" id="btn-procesar">⚡ Escanear y Reemplazar Radar</button>
                 <button class="btn secondary" id="btn-limpiar-input">🗑 Limpiar texto</button>
+                <label class="modo-check" title="Conserva las contingencias que no vengan en este reporte (no borra el radar)"><input type="checkbox" id="chk-merge"> Actualizar (conservar lo no incluido)</label>
             </div>
+        </div>
+
+        <!-- 1.b Filtros / búsqueda / orden -->
+        <div id="filters">
+            <div class="chips" id="filter-chips"></div>
+            <div class="filters-row">
+                <input type="text" id="search-radar" placeholder="🔎 Buscar ID, zona o detalle..." />
+                <select id="sort-select" title="Ordenar">
+                    <option value="fecha-desc">Fecha ↓</option>
+                    <option value="fecha-asc">Fecha ↑</option>
+                    <option value="zona">Zona A-Z</option>
+                    <option value="tipo">Tipo</option>
+                </select>
+                <label class="mini-check" title="Ocultar las contingencias marcadas como normalizadas"><input type="checkbox" id="chk-ocultar-norm"> Ocultar normalizadas</label>
+            </div>
+        </div>
+
+        <!-- 1.c Acciones en lote -->
+        <div id="bulkbar">
+            <span class="bulk-label" id="bulk-count">0 seleccionadas</span>
+            <button class="tb-btn" data-bulk-tipo="red" title="Marcar como Red">🛰️ Red</button>
+            <button class="tb-btn" data-bulk-tipo="nacional" title="Marcar como Nacional">🏛️ Nacional</button>
+            <button class="tb-btn" data-bulk-tipo="sistemas" title="Marcar como Sistemas">🔌 Sistemas</button>
+            <button class="tb-btn" data-bulk-tipo="otro" title="Marcar como Otro">⚪ Otro</button>
+            <button class="tb-btn" id="bulk-norm" title="Marcar como normalizadas">✅ Normalizar</button>
+            <button class="tb-btn danger" id="bulk-del" title="Eliminar seleccionadas">🗑</button>
+            <button class="tb-btn" id="bulk-clear" title="Deseleccionar todo">✕</button>
         </div>
 
         <!-- 2. Casos en radar: / Copiar detallado / Copiar Breve / Limpiar -->
@@ -771,8 +898,12 @@
                     </button>
                 </div>
             </div>
+            <button class="tb-btn" id="btn-export" title="Exportar el radar a JSON">⬇ Exportar</button>
+            <button class="tb-btn" id="btn-import" title="Importar el radar desde JSON">⬆ Importar</button>
             <button class="tb-btn danger" id="btn-limpiar">🗑 Limpiar</button>
         </div>
+
+        <input type="file" id="file-import" accept=".json,application/json" style="display:none" />
 
         <!-- 3. Lista de contingencias cargadas -->
         <div id="list-container">
@@ -797,6 +928,24 @@
             <div class="modal-field">
                 <label>Zona / Comuna / Ámbito</label>
                 <input type="text" id="edit-c-zona" placeholder="Nacional, Santiago, etc." />
+            </div>
+            <div class="modal-field">
+                <label>Categoría (para el copiado)</label>
+                <select id="edit-c-tipo">
+                    <option value="">Automática (según zona)</option>
+                    <option value="red">🛰️ Red (comuna/sitios)</option>
+                    <option value="nacional">🏛️ Nacional</option>
+                    <option value="sistemas">🔌 Sistemas</option>
+                    <option value="otro">⚪ Otro</option>
+                </select>
+            </div>
+            <div class="modal-field">
+                <label>Estado</label>
+                <select id="edit-c-estado">
+                    <option value="activo">🔴 Activo</option>
+                    <option value="curso">🟡 En curso</option>
+                    <option value="normalizado">🟢 Normalizado</option>
+                </select>
             </div>
             <div class="modal-field">
                 <label>Fecha y Hora de Apertura</label>
@@ -835,9 +984,29 @@
         function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 
         // ============================================================
+        // TIPOS / ESTADOS
+        // ============================================================
+        const TIPOS = {
+            red:      { label: 'Red',      icon: '🛰️', color: 'rgba(34,197,94,.75)' },
+            nacional: { label: 'Nacional', icon: '🏛️', color: 'rgba(59,130,246,.75)' },
+            sistemas: { label: 'Sistemas', icon: '🔌', color: 'rgba(168,85,247,.75)' },
+            otro:     { label: 'Otro',     icon: '⚪', color: 'rgba(148,163,184,.65)' }
+        };
+        const ORDEN_TIPOS = { red: 0, nacional: 1, sistemas: 2, otro: 3 };
+        const ESTADOS = { activo: 'Activo', curso: 'En curso', normalizado: 'Normalizado' };
+        const ZONA_NACIONAL = ['Desconocida', 'Nacional', 'A-Nacional', 'Varias', ''];
+
+        // ============================================================
         // ESTADO
         // ============================================================
         let contingencias = [];
+        let overrides = {};          // { [id]: { tipo, tipoManual, estado } } — correcciones del usuario
+        let undoStack = [];          // snapshots (JSON) para deshacer
+        let filtroTipo = 'all';
+        let textoBusqueda = '';
+        let sortBy = 'fecha-desc';
+        let ocultarNorm = false;
+        let seleccionados = new Set();
 
         // ============================================================
         // REFERENCIAS DOM
@@ -854,6 +1023,85 @@
         const btnCopyBreveFecha = document.getElementById('btn-copy-breve-fecha');
         const listContainer = document.getElementById('list-container');
         const countActives = document.getElementById('count-actives');
+        const filtersBox = document.getElementById('filters');
+        const filterChips = document.getElementById('filter-chips');
+        const searchRadar = document.getElementById('search-radar');
+        const sortSelect = document.getElementById('sort-select');
+        const chkOcultarNorm = document.getElementById('chk-ocultar-norm');
+        const chkMerge = document.getElementById('chk-merge');
+        const bulkbar = document.getElementById('bulkbar');
+        const bulkCount = document.getElementById('bulk-count');
+        const btnUndo = document.getElementById('btn-undo');
+        const fileImport = document.getElementById('file-import');
+
+        // ============================================================
+        // CLASIFICACIÓN (tipo) + ESTADO helpers
+        // ============================================================
+        function esZonaComuna(zona) {
+            const z = (zona || '').trim();
+            return !!z && !ZONA_NACIONAL.includes(z);
+        }
+        function inferirTipo(c) {
+            const zona = (c && c.zona) || '';
+            const det = ((c && c.detalle) || '').toLowerCase();
+            const sistemico = /(sistema de atenci|\bota\b|delivery|despacho|recaudaci|sitio web|\bapp\b|comercial|\bcrm\b|portal|facturaci|pago en l[íi]nea)/.test(det);
+            const redKeyword = /(ca[íi]da de sitios|saturaci|degradaci|p[eé]rdida de conectividad|\bnodo\b|\bpop\b|\bolt\b|sitios|antena|cobertura)/.test(det);
+            if (esZonaComuna(zona)) return 'red';
+            if (redKeyword) return 'red';
+            if (sistemico) return 'sistemas';
+            return 'nacional';
+        }
+        function tipoEfectivo(c) {
+            if (c && c.tipo && TIPOS[c.tipo]) return c.tipo;
+            return inferirTipo(c);
+        }
+        function estadoEfectivo(c) {
+            return (c && ESTADOS[c.estado]) ? c.estado : 'activo';
+        }
+        function clasificacionDudosa(c) {
+            if (!c || c.tipoManual) return false;
+            const zona = (c.zona || '').trim();
+            const det = (c.detalle || '').toLowerCase();
+            const redKeyword = /(ca[íi]da de sitios|saturaci|degradaci|p[eé]rdida de conectividad|\bnodo\b|\bpop\b|\bolt\b|sitios|antena|cobertura)/.test(det);
+            if (!esZonaComuna(zona) && redKeyword) return true;   // dice Nacional pero el detalle parece red
+            if (!zona || zona === 'Desconocida') return true;      // sin zona clara
+            return false;
+        }
+        function guardarOverrides() {
+            try { ipcRenderer.send('save-contingencias-overrides', overrides); } catch (e) {}
+        }
+        function aplicarOverrides() {
+            contingencias.forEach(c => {
+                if (!c.tipo || !TIPOS[c.tipo]) { if (!c.tipoManual) c.tipo = inferirTipo(c); }
+                if (!ESTADOS[c.estado]) c.estado = 'activo';
+                const o = overrides[c.id];
+                if (o) {
+                    if (o.tipo && TIPOS[o.tipo]) { c.tipo = o.tipo; c.tipoManual = true; }
+                    if (o.estado && ESTADOS[o.estado]) c.estado = o.estado;
+                }
+            });
+        }
+
+        // ============================================================
+        // UNDO
+        // ============================================================
+        function pushUndo() {
+            undoStack.push(JSON.stringify(contingencias));
+            if (undoStack.length > 40) undoStack.shift();
+            actualizarUndoUI();
+        }
+        function actualizarUndoUI() {
+            if (btnUndo) btnUndo.disabled = undoStack.length === 0;
+        }
+        function deshacer() {
+            if (!undoStack.length) { showToast('Nada para deshacer.', 'warning'); return; }
+            const prev = undoStack.pop();
+            try { contingencias = JSON.parse(prev); } catch (e) { return; }
+            seleccionados.clear();
+            guardarYNotificar(); actualizarUI();
+            showToast('↶ Cambio deshecho.', 'success');
+            actualizarUndoUI();
+        }
 
         // ============================================================
         // TOAST
@@ -1309,15 +1557,19 @@
                     let detalle = extraerDetallePuntual(chunk, id, zona, inc);
                     if (detalle) detalle = detalle.replace(/[.\s]+$/, '').trim();
 
-                    nuevasContingencias.push({
+                    const item = {
                         id,
                         zona: zona || 'Nacional',
                         inicio: fechaDisplay,
                         detalle: detalle || '',
                         pops: pops || [],
                         inc: inc || '',
-                        textoCompleto: chunk
-                    });
+                        textoCompleto: chunk,
+                        tipoManual: false,
+                        estado: 'activo'
+                    };
+                    item.tipo = inferirTipo(item);
+                    nuevasContingencias.push(item);
                 });
             } else {
                 const lineas = raw.split('\n');
@@ -1371,15 +1623,19 @@
                     const dtObj = parseFechaContingencia(fecha);
                     const fechaDisplay = dtObj ? formatearFechaDisplay(dtObj, fecha) : fecha;
 
-                    nuevasContingencias.push({
+                    const item = {
                         id,
                         zona,
                         inicio: fechaDisplay,
                         detalle,
                         pops: extraerPOPs(linea),
                         inc: (linea.match(/\b(INC\s?\d{8,14})\b/i) || [])[1] || '',
-                        textoCompleto: linea
-                    });
+                        textoCompleto: linea,
+                        tipoManual: false,
+                        estado: 'activo'
+                    };
+                    item.tipo = inferirTipo(item);
+                    nuevasContingencias.push(item);
                 });
             }
 
@@ -1388,85 +1644,257 @@
                 return false;
             }
 
-            contingencias = nuevasContingencias;
+            pushUndo();
 
-            // Ordenar por fecha descendente
-            contingencias.sort((a, b) => {
-                const da = parseFechaContingencia(a.inicio);
-                const db = parseFechaContingencia(b.inicio);
-                if (!da && !db) return 0;
-                if (!da) return 1;
-                if (!db) return -1;
-                return db - da;
-            });
+            const modoMerge = !!(chkMerge && chkMerge.checked);
+            if (modoMerge && contingencias.length) {
+                const byId = {};
+                nuevasContingencias.forEach(c => { byId[c.id] = c; });
+                const merged = [];
+                contingencias.forEach(old => {
+                    if (byId[old.id]) {
+                        const n = byId[old.id];
+                        merged.push(Object.assign({}, n, {
+                            tipo: old.tipo || n.tipo,
+                            tipoManual: !!old.tipoManual,
+                            estado: old.estado || 'activo'
+                        }));
+                        delete byId[old.id];
+                    } else {
+                        merged.push(old);
+                    }
+                });
+                Object.keys(byId).forEach(k => merged.push(byId[k]));
+                contingencias = merged;
+            } else {
+                contingencias = nuevasContingencias;
+            }
+
+            aplicarOverrides();
+            seleccionados.clear();
 
             guardarYNotificar();
             actualizarUI();
-            showToast(`✅ Radar actualizado: ${contingencias.length} casos activos.`, 'success');
+            showToast(modoMerge ? `✅ Radar actualizado (+${nuevasContingencias.length} del reporte).` : `✅ Radar actualizado: ${contingencias.length} casos activos.`, 'success');
             return true;
         }
 
         // ============================================================
         // ACTUALIZAR UI
         // ============================================================
+        function cmpFechaDesc(a, b) {
+            const x = parseFechaContingencia(a.inicio), y = parseFechaContingencia(b.inicio);
+            if (!x && !y) return 0; if (!x) return 1; if (!y) return -1; return y - x;
+        }
+        function cmpFechaAsc(a, b) {
+            const x = parseFechaContingencia(a.inicio), y = parseFechaContingencia(b.inicio);
+            if (!x && !y) return 0; if (!x) return 1; if (!y) return -1; return x - y;
+        }
+        function contingenciaVisible(c) {
+            const t = tipoEfectivo(c);
+            if (filtroTipo !== 'all' && t !== filtroTipo) return false;
+            if (ocultarNorm && estadoEfectivo(c) === 'normalizado') return false;
+            if (textoBusqueda) {
+                const q = textoBusqueda.toLowerCase();
+                const blob = [c.id, c.zona, c.detalle, c.inc, (Array.isArray(c.pops) ? c.pops.join(' ') : ''), (TIPOS[t] ? TIPOS[t].label : '')].join(' ').toLowerCase();
+                if (!blob.includes(q)) return false;
+            }
+            return true;
+        }
+        function ordenarLista(arr) {
+            const copy = [...arr];
+            if (sortBy === 'fecha-asc') copy.sort(cmpFechaAsc);
+            else if (sortBy === 'zona') copy.sort((a, b) => (a.zona || '').localeCompare(b.zona || ''));
+            else if (sortBy === 'tipo') copy.sort((a, b) => ((ORDEN_TIPOS[tipoEfectivo(a)] ?? 9) - (ORDEN_TIPOS[tipoEfectivo(b)] ?? 9)) || cmpFechaDesc(a, b));
+            else copy.sort(cmpFechaDesc);
+            return copy;
+        }
+        function findCard(id) { return Array.from(listContainer.querySelectorAll('.c-card')).find(c => c.dataset.id === id); }
+
+        function renderChips() {
+            const counts = { all: contingencias.length, red: 0, nacional: 0, sistemas: 0, otro: 0 };
+            contingencias.forEach(c => { const t = tipoEfectivo(c); if (counts[t] != null) counts[t]++; });
+            const defs = [['all', 'Todos', '🗂️'], ['red', 'Red', '🛰️'], ['nacional', 'Nacional', '🏛️'], ['sistemas', 'Sistemas', '🔌'], ['otro', 'Otro', '⚪']];
+            filterChips.innerHTML = defs.map(([k, label, ic]) =>
+                `<span class="chip ${filtroTipo === k ? 'active' : ''}" data-tipo="${k}">${ic} ${label} <span class="chip-n">${counts[k] || 0}</span></span>`
+            ).join('');
+            filterChips.querySelectorAll('.chip').forEach(el => el.addEventListener('click', () => {
+                filtroTipo = el.dataset.tipo;
+                actualizarUI();
+            }));
+        }
+
         function actualizarUI() {
             countActives.textContent = contingencias.length;
 
             if (!contingencias.length) {
-                listContainer.innerHTML =
-                    `<div class="empty-state">No hay contingencias cargadas.<br><span style="opacity:0.5;font-size:10px;">Pega un reporte para comenzar</span></div>`;
+                filtersBox.classList.remove('visible');
+                bulkbar.classList.remove('visible');
+                seleccionados.clear();
+                listContainer.innerHTML = `<div class="empty-state">No hay contingencias cargadas.<br><span style="opacity:0.5;font-size:10px;">Pega un reporte para comenzar</span></div>`;
+                actualizarUndoUI();
+                return;
+            }
+
+            filtersBox.classList.add('visible');
+            renderChips();
+
+            const visibles = ordenarLista(contingencias.filter(contingenciaVisible));
+            if (!visibles.length) {
+                listContainer.innerHTML = `<div class="empty-state">Ningún caso coincide con el filtro/búsqueda.</div>`;
+                actualizarBulkUI();
+                actualizarUndoUI();
                 return;
             }
 
             let html = '';
-            contingencias.forEach(c => {
+            visibles.forEach(c => {
+                const t = tipoEfectivo(c);
+                const T = TIPOS[t] || TIPOS.nacional;
                 const fechaObj = parseFechaContingencia(c.inicio);
                 const fechaDisplay = fechaObj ? formatearFechaDisplay(fechaObj, c.inicio) : (c.inicio || 'Sin fecha');
                 const diasStr = calcularDiasTranscurridos(fechaObj);
                 const pops = Array.isArray(c.pops) ? c.pops : extraerPOPs(c.textoCompleto || '');
                 const detalle = (c.detalle || '').trim();
                 const tieneDetalleRelevante = detalle && !esDetalleGenerico(detalle);
+                const est = estadoEfectivo(c);
+                const norm = est === 'normalizado';
+                const sel = seleccionados.has(c.id);
+                const dudoso = clasificacionDudosa(c);
+                const estIcon = est === 'normalizado' ? '🟢' : est === 'curso' ? '🟡' : '🔴';
 
                 html += `
-                    <div class="c-card" data-id="${esc(c.id)}">
-                        <div class="c-row">
-                            <span class="c-zona">📍 ${esc(c.zona || 'Nacional')}</span>
+                    <div class="c-card ${norm ? 'normalizada' : ''} ${sel ? 'selected' : ''}" data-id="${esc(c.id)}" style="border-left-color:${T.color}">
+                        <div class="c-top">
+                            <input type="checkbox" class="c-check" data-action="check" ${sel ? 'checked' : ''} title="Seleccionar" />
+                            <span class="tipo-chip" data-action="tipo" data-tipo="${t}" title="Clic para cambiar la categoría (${TIPOS[t].label})">${T.icon} ${T.label}${c.tipoManual ? '' : ' <span class="auto-dot">auto</span>'}</span>
+                            ${dudoso ? `<span class="warn-parse" title="Clasificación automática dudosa: revisá la categoría">⚠️</span>` : ''}
+                            <span class="estado-chip" data-action="estado" data-estado="${est}" title="Clic para cambiar el estado">${estIcon} ${ESTADOS[est]}</span>
+                            <span style="flex:1"></span>
                             <div class="c-actions">
                                 <button class="c-btn-edit" data-action="edit" title="Editar contingencia">✏️</button>
                                 <button class="c-del" data-action="del" title="Eliminar">✕</button>
                             </div>
                         </div>
                         <div class="c-row">
+                            <span class="c-zona" data-action="inline-zona" title="Doble clic para editar la zona">📍 ${esc(c.zona || 'Nacional')}</span>
                             <span class="c-id" data-action="copy" title="Copiar ID">📋 ${esc(c.id)}</span>
+                        </div>
+                        <div class="c-row">
                             <span class="c-meta">${esc(fechaDisplay)} | ${esc(diasStr)}</span>
                         </div>
-                        ${tieneDetalleRelevante ? `<div class="c-detalle">${esc(detalle)}</div>` : ''}
+                        ${tieneDetalleRelevante ? `<div class="c-detalle" data-action="inline-detalle" title="Doble clic para editar">${esc(detalle)}</div>` : ''}
                         ${pops.length ? `<div class="c-meta" style="margin-top:2px;"><span class="c-pops">📡 POPs: ${esc(pops.join(', '))}</span></div>` : ''}
                         ${c.inc ? `<div class="c-meta" style="margin-top:2px;"><span class="c-inc">🎫 ${esc(c.inc)}</span></div>` : ''}
                     </div>
                 `;
             });
             listContainer.innerHTML = html;
+            attachCardHandlers();
+            actualizarBulkUI();
+            actualizarUndoUI();
+        }
 
-            listContainer.querySelectorAll('[data-action="edit"]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = btn.closest('.c-card').dataset.id;
-                    abrirEditorContingencia(id);
-                });
+        function attachCardHandlers() {
+            listContainer.querySelectorAll('.c-card').forEach(card => {
+                const id = card.dataset.id;
+                const check = card.querySelector('[data-action="check"]');
+                if (check) check.addEventListener('change', (e) => { e.stopPropagation(); toggleSel(id, check.checked); });
+                const tipoChip = card.querySelector('[data-action="tipo"]');
+                if (tipoChip) tipoChip.addEventListener('click', (e) => { e.stopPropagation(); abrirMenuTipo(tipoChip, id); });
+                const estadoChip = card.querySelector('[data-action="estado"]');
+                if (estadoChip) estadoChip.addEventListener('click', (e) => { e.stopPropagation(); ciclarEstado(id); });
+                card.querySelectorAll('[data-action="edit"]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); abrirEditorContingencia(id); }));
+                card.querySelectorAll('[data-action="del"]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); eliminar(id); }));
+                card.querySelectorAll('[data-action="copy"]').forEach(s => s.addEventListener('click', (e) => { e.stopPropagation(); copiarId(id); }));
+                const zonaEl = card.querySelector('[data-action="inline-zona"]');
+                if (zonaEl) zonaEl.addEventListener('dblclick', (e) => { e.stopPropagation(); editarInline(zonaEl, id, 'zona'); });
+                const detEl = card.querySelector('[data-action="inline-detalle"]');
+                if (detEl) detEl.addEventListener('dblclick', (e) => { e.stopPropagation(); editarInline(detEl, id, 'detalle'); });
             });
-            listContainer.querySelectorAll('[data-action="del"]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    eliminar(btn.closest('.c-card').dataset.id);
-                });
+        }
+
+        function toggleSel(id, on) {
+            if (on) seleccionados.add(id); else seleccionados.delete(id);
+            const card = findCard(id);
+            if (card) card.classList.toggle('selected', on);
+            actualizarBulkUI();
+        }
+        function actualizarBulkUI() {
+            const n = seleccionados.size;
+            if (bulkbar) {
+                bulkbar.classList.toggle('visible', n > 0);
+                if (bulkCount) bulkCount.textContent = n + ' seleccionada' + (n === 1 ? '' : 's');
+            }
+        }
+
+        let tipoMenuEl = null;
+        function abrirMenuTipo(anchor, id) {
+            cerrarMenuTipo();
+            const cur = tipoEfectivo(contingencias.find(c => c.id === id) || {});
+            const menu = document.createElement('div');
+            menu.className = 'dropdown-menu';
+            menu.style.cssText = 'display:flex;position:fixed;z-index:3000;min-width:150px;';
+            menu.innerHTML = Object.keys(TIPOS).map(k =>
+                `<button class="dropdown-item" data-k="${k}"><span class="dropdown-item-icon">${TIPOS[k].icon}</span><div class="dropdown-item-text"><span class="dropdown-item-title">${TIPOS[k].label}${cur === k ? ' ✓' : ''}</span></div></button>`
+            ).join('');
+            document.body.appendChild(menu);
+            const r = anchor.getBoundingClientRect();
+            menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - 164)) + 'px';
+            menu.style.top = (r.bottom + 4) + 'px';
+            menu.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', (e) => {
+                e.stopPropagation();
+                cerrarMenuTipo();
+                setTipo(id, b.dataset.k);
+            }));
+            tipoMenuEl = menu;
+            setTimeout(() => document.addEventListener('click', cerrarMenuTipo, { once: true }), 0);
+        }
+        function cerrarMenuTipo() { if (tipoMenuEl) { tipoMenuEl.remove(); tipoMenuEl = null; } }
+
+        function ciclarEstado(id) {
+            const c = contingencias.find(x => x.id === id);
+            if (!c) return;
+            const orden = ['activo', 'curso', 'normalizado'];
+            const cur = estadoEfectivo(c);
+            const next = orden[(orden.indexOf(cur) + 1) % orden.length];
+            setEstado(id, next);
+        }
+
+        function editarInline(el, id, campo) {
+            const c = contingencias.find(x => x.id === id);
+            if (!c) return;
+            const original = (c[campo] || '');
+            el.setAttribute('contenteditable', 'true');
+            el.classList.add('inline-edit');
+            el.focus();
+            try {
+                const range = document.createRange(); range.selectNodeContents(el);
+                const s = window.getSelection(); s.removeAllRanges(); s.addRange(range);
+            } catch (e) {}
+            let done = false;
+            const finish = (save) => {
+                if (done) return; done = true;
+                el.removeAttribute('contenteditable');
+                el.classList.remove('inline-edit');
+                if (save) {
+                    let val = (el.textContent || '').replace(/^📍\s*/, '').trim();
+                    if (val !== original) {
+                        pushUndo();
+                        c[campo] = val;
+                        if (!c.tipoManual) c.tipo = inferirTipo(c);
+                        if (campo === 'zona') { c.zona = c.zona || 'Nacional'; }
+                        guardarYNotificar();
+                    }
+                }
+                actualizarUI();
+            };
+            el.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter') { ev.preventDefault(); el.blur(); }
+                else if (ev.key === 'Escape') { ev.preventDefault(); done = true; el.removeAttribute('contenteditable'); el.classList.remove('inline-edit'); actualizarUI(); }
+                ev.stopPropagation();
             });
-            listContainer.querySelectorAll('[data-action="copy"]').forEach(span => {
-                span.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    copiarId(span.closest('.c-card').dataset.id);
-                });
-            });
+            el.addEventListener('blur', () => finish(true), { once: true });
         }
 
         // ============================================================
@@ -1482,6 +1910,8 @@
 
             document.getElementById('edit-c-id').value = c.id || '';
             document.getElementById('edit-c-zona').value = c.zona || 'Nacional';
+            document.getElementById('edit-c-tipo').value = (c.tipoManual && TIPOS[c.tipo]) ? c.tipo : '';
+            document.getElementById('edit-c-estado').value = estadoEfectivo(c);
             document.getElementById('edit-c-fecha').value = c.inicio || '';
             document.getElementById('edit-c-detalle').value = c.detalle || '';
             document.getElementById('edit-c-pops').value = (c.pops || []).join(', ');
@@ -1502,6 +1932,8 @@
 
             const newId = document.getElementById('edit-c-id').value.trim();
             const newZona = document.getElementById('edit-c-zona').value.trim() || 'Nacional';
+            const selTipo = document.getElementById('edit-c-tipo').value;
+            const selEstado = document.getElementById('edit-c-estado').value || 'activo';
             const newFecha = document.getElementById('edit-c-fecha').value.trim();
             const newDetalle = document.getElementById('edit-c-detalle').value.trim().replace(/[.\s]+$/, '');
             const rawPops = document.getElementById('edit-c-pops').value;
@@ -1513,13 +1945,30 @@
                 return;
             }
 
+            pushUndo();
+            const oldId = c.id;
             c.id = newId;
             c.zona = newZona;
             c.inicio = newFecha || c.inicio;
             c.detalle = newDetalle;
             c.pops = newPops;
             c.inc = newInc;
+            c.estado = ESTADOS[selEstado] ? selEstado : 'activo';
 
+            if (selTipo && TIPOS[selTipo]) {
+                c.tipo = selTipo; c.tipoManual = true;
+                overrides[c.id] = Object.assign({}, overrides[c.id], { tipo: selTipo, tipoManual: true });
+            } else {
+                c.tipoManual = false; c.tipo = inferirTipo(c);
+                if (overrides[c.id]) {
+                    delete overrides[c.id].tipo; delete overrides[c.id].tipoManual;
+                    if (!Object.keys(overrides[c.id]).length) delete overrides[c.id];
+                }
+            }
+            overrides[c.id] = Object.assign({}, overrides[c.id], { estado: c.estado });
+            if (oldId && oldId !== c.id) delete overrides[oldId];
+
+            guardarOverrides();
             guardarYNotificar();
             actualizarUI();
             cerrarEditorContingencia();
@@ -1530,7 +1979,9 @@
         // FUNCIONES DE ACCIÓN
         // ============================================================
         function eliminar(id) {
+            pushUndo();
             contingencias = contingencias.filter(c => c.id !== id);
+            seleccionados.delete(id);
             guardarYNotificar();
             actualizarUI();
             showToast('🗑 Contingencia eliminada.', 'success');
@@ -1548,11 +1999,100 @@
                 return;
             }
             if (confirm('¿Deseas limpiar todo el radar de contingencias?')) {
+                pushUndo();
                 contingencias = [];
+                seleccionados.clear();
                 guardarYNotificar();
                 actualizarUI();
                 showToast('🗑 Radar limpiado.', 'success');
             }
+        }
+
+        function setTipo(id, tipo) {
+            const c = contingencias.find(x => x.id === id);
+            if (!c || !TIPOS[tipo]) return;
+            c.tipo = tipo; c.tipoManual = true;
+            overrides[id] = Object.assign({}, overrides[id], { tipo, tipoManual: true });
+            guardarOverrides(); guardarYNotificar(); actualizarUI();
+            showToast(`${TIPOS[tipo].icon} ${TIPOS[tipo].label}.`, 'success');
+        }
+        function setEstado(id, estado) {
+            const c = contingencias.find(x => x.id === id);
+            if (!c || !ESTADOS[estado]) return;
+            c.estado = estado;
+            overrides[id] = Object.assign({}, overrides[id], { estado });
+            guardarOverrides(); guardarYNotificar(); actualizarUI();
+            const ic = estado === 'normalizado' ? '🟢' : estado === 'curso' ? '🟡' : '🔴';
+            showToast(`${ic} Estado: ${ESTADOS[estado]}.`, 'success');
+        }
+        function bulkMarcarTipo(tipo) {
+            if (!seleccionados.size || !TIPOS[tipo]) return;
+            pushUndo();
+            seleccionados.forEach(id => {
+                const c = contingencias.find(x => x.id === id);
+                if (!c) return;
+                c.tipo = tipo; c.tipoManual = true;
+                overrides[id] = Object.assign({}, overrides[id], { tipo, tipoManual: true });
+            });
+            seleccionados.clear();
+            guardarOverrides(); guardarYNotificar(); actualizarUI();
+            showToast(`${TIPOS[tipo].icon} ${TIPOS[tipo].label}: aplicado en lote.`, 'success');
+        }
+        function bulkNormalizar() {
+            if (!seleccionados.size) return;
+            pushUndo();
+            seleccionados.forEach(id => {
+                const c = contingencias.find(x => x.id === id);
+                if (!c) return;
+                c.estado = 'normalizado';
+                overrides[id] = Object.assign({}, overrides[id], { estado: 'normalizado' });
+            });
+            seleccionados.clear();
+            guardarOverrides(); guardarYNotificar(); actualizarUI();
+            showToast('🟢 Normalizadas.', 'success');
+        }
+        function bulkEliminar() {
+            if (!seleccionados.size) return;
+            if (!confirm(`¿Eliminar ${seleccionados.size} contingencia(s)?`)) return;
+            pushUndo();
+            const sel = new Set(seleccionados);
+            contingencias = contingencias.filter(c => !sel.has(c.id));
+            seleccionados.clear();
+            guardarYNotificar(); actualizarUI();
+            showToast('🗑 Eliminadas.', 'success');
+        }
+        function exportarRadar() {
+            if (!contingencias.length) { showToast('⚠️ Nada para exportar.', 'warning'); return; }
+            const data = { app: 'contingencias', version: 1, fecha: new Date().toISOString(), contingencias, overrides };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'radar_contingencias.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('⬇ Radar exportado.', 'success');
+        }
+        function importarRadar(file) {
+            const fr = new FileReader();
+            fr.onload = () => {
+                try {
+                    const obj = JSON.parse(fr.result);
+                    let items, ov = null;
+                    if (Array.isArray(obj)) items = obj;
+                    else { items = obj.contingencias; ov = obj.overrides || null; }
+                    if (!Array.isArray(items)) throw new Error('formato inválido');
+                    pushUndo();
+                    contingencias = items.map(c => Object.assign({}, c));
+                    if (ov && typeof ov === 'object') overrides = ov;
+                    aplicarOverrides();
+                    seleccionados.clear();
+                    guardarOverrides(); guardarYNotificar(); actualizarUI();
+                    showToast('⬆ Radar importado.', 'success');
+                } catch (e) {
+                    showToast('❌ JSON inválido.', 'error');
+                }
+            };
+            fr.readAsText(file);
         }
 
         function guardarYNotificar() {
@@ -1564,18 +2104,21 @@
         // FORMATOS DE COPIA
         // ============================================================
 
+        function contingenciasParaCopiar() {
+            return contingencias.filter(c => estadoEfectivo(c) !== 'normalizado');
+        }
+
         function generarDetallado() {
-            if (!contingencias.length) {
-                showToast('⚠️ No hay contingencias para copiar.', 'warning');
+            const base = contingenciasParaCopiar();
+            if (!base.length) {
+                showToast('⚠️ No hay contingencias activas para copiar.', 'warning');
                 return null;
             }
 
-            const conComuna = contingencias.filter(c =>
-                c.zona && !['Desconocida', 'Nacional', 'A-Nacional', 'Varias'].includes(c.zona)
-            );
+            const conComuna = base.filter(c => tipoEfectivo(c) === 'red' && c.zona);
             const comunasUnicas = [...new Set(conComuna.map(c => c.zona))].sort();
             const totalComunas = comunasUnicas.length;
-            const totalContingencias = contingencias.length;
+            const totalContingencias = base.length;
 
             let lines = [];
             lines.push('📌 *CONTINGENCIAS ACTIVAS* ✍');
@@ -1593,15 +2136,7 @@
             lines.push('**Detalle ordenado de forma descendente por fecha de apertura** 👇🏻');
             lines.push('');
 
-            const sorted = [...contingencias];
-            sorted.sort((a, b) => {
-                const da = parseFechaContingencia(a.inicio);
-                const db = parseFechaContingencia(b.inicio);
-                if (!da && !db) return 0;
-                if (!da) return 1;
-                if (!db) return -1;
-                return db - da;
-            });
+            const sorted = [...base].sort(cmpFechaDesc);
 
             sorted.forEach(c => {
                 const zona = c.zona || 'Nacional';
@@ -1630,61 +2165,36 @@
         }
 
         function generarBreve(criterio = 'alfabetico') {
-            if (!contingencias.length) {
-                showToast('⚠️ No hay contingencias para copiar.', 'warning');
+            const base = contingenciasParaCopiar();
+            if (!base.length) {
+                showToast('⚠️ No hay contingencias activas para copiar.', 'warning');
                 return null;
             }
 
-            const conComuna = contingencias.filter(c =>
-                c.zona && !['Desconocida', 'Nacional', 'A-Nacional', 'Varias'].includes(c.zona)
-            );
-            const sinComuna = contingencias.filter(c =>
-                !c.zona || ['Desconocida', 'Nacional', 'A-Nacional', 'Varias'].includes(c.zona)
-            );
+            const red = base.filter(c => tipoEfectivo(c) === 'red');
+            const resto = base.filter(c => tipoEfectivo(c) !== 'red');
 
-            // Ordenar comunas según criterio
-            let sortedConComuna;
-            if (criterio === 'fecha') {
-                // Orden descendente por fecha de inicio (más recientes primero)
-                sortedConComuna = [...conComuna].sort((a, b) => {
-                    const da = parseFechaContingencia(a.inicio);
-                    const db = parseFechaContingencia(b.inicio);
-                    if (!da && !db) return 0;
-                    if (!da) return 1;
-                    if (!db) return -1;
-                    return db - da;
-                });
-            } else {
-                // Ordenar comunas alfabéticamente
-                sortedConComuna = [...conComuna].sort((a, b) => (a.zona || '').localeCompare(b.zona || ''));
-            }
-
-            // Ordenar no-red / sistemas por fecha descendente
-            const sortedSinComuna = [...sinComuna].sort((a, b) => {
-                const da = parseFechaContingencia(a.inicio);
-                const db = parseFechaContingencia(b.inicio);
-                if (!da && !db) return 0;
-                if (!da) return 1;
-                if (!db) return -1;
-                return db - da;
-            });
+            const sortedRed = criterio === 'fecha'
+                ? [...red].sort(cmpFechaDesc)
+                : [...red].sort((a, b) => (a.zona || '').localeCompare(b.zona || ''));
+            const sortedResto = [...resto].sort(cmpFechaDesc);
 
             let lines = [];
             lines.push('📌*CONTINGENCIAS*📌');
             lines.push('');
 
-            // 1. Contingencias de red / comuna (formato breve estrictamente limpio: Comuna e ID)
-            sortedConComuna.forEach(c => {
-                lines.push(`📍 *${c.zona}* ${c.id}`);
+            // 1. Contingencias de red / comuna (formato breve: Comuna e ID)
+            sortedRed.forEach(c => {
+                lines.push(`📍 *${c.zona || 'Red'}* ${c.id}`);
             });
 
             // Salto de línea si existen contingencias de ambos tipos
-            if (sortedConComuna.length > 0 && sortedSinComuna.length > 0) {
+            if (sortedRed.length > 0 && sortedResto.length > 0) {
                 lines.push('');
             }
 
-            // 2. Contingencias que no son de red (sistemas / comerciales / nacional)
-            sortedSinComuna.forEach(c => {
+            // 2. Contingencias que no son de red (nacional / sistemas / otro)
+            sortedResto.forEach(c => {
                 const detalleLimpio = (c.detalle || '').replace(/\s+/g, ' ').replace(/[*]/g, '').replace(/\.+$/, '').trim();
                 const textoMostrar = detalleLimpio || c.zona || 'Nacional';
                 lines.push(`📍 *${textoMostrar}* ${c.id}`);
@@ -1753,6 +2263,25 @@
         btnCopyDet.addEventListener('click', copiarDetallado);
         btnCopyBreve.addEventListener('click', toggleDropdownBreve);
 
+        // Filtros / búsqueda / orden
+        searchRadar.addEventListener('input', () => { textoBusqueda = searchRadar.value.trim(); actualizarUI(); });
+        sortSelect.addEventListener('change', () => { sortBy = sortSelect.value; actualizarUI(); });
+        if (chkOcultarNorm) chkOcultarNorm.addEventListener('change', () => { ocultarNorm = chkOcultarNorm.checked; actualizarUI(); });
+
+        // Deshacer / Exportar / Importar
+        if (btnUndo) btnUndo.addEventListener('click', deshacer);
+        const btnExport = document.getElementById('btn-export');
+        const btnImport = document.getElementById('btn-import');
+        if (btnExport) btnExport.addEventListener('click', exportarRadar);
+        if (btnImport) btnImport.addEventListener('click', () => { if (fileImport) fileImport.click(); });
+        if (fileImport) fileImport.addEventListener('change', () => { if (fileImport.files[0]) importarRadar(fileImport.files[0]); fileImport.value = ''; });
+
+        // Acciones en lote
+        bulkbar.querySelectorAll('[data-bulk-tipo]').forEach(b => b.addEventListener('click', () => bulkMarcarTipo(b.dataset.bulkTipo)));
+        document.getElementById('bulk-norm').addEventListener('click', bulkNormalizar);
+        document.getElementById('bulk-del').addEventListener('click', bulkEliminar);
+        document.getElementById('bulk-clear').addEventListener('click', () => { seleccionados.clear(); actualizarUI(); });
+
         if (btnCopyBreveAZ) {
             btnCopyBreveAZ.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1793,6 +2322,7 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeDropdownBreve();
+                cerrarMenuTipo();
             }
             const modal = document.getElementById('modal-edit-contingencia');
             if (modal && modal.classList.contains('show')) {
@@ -1803,13 +2333,25 @@
                     guardarEdicionContingencia();
                 }
             }
+            const tag = (e.target && e.target.tagName) || '';
+            const escribiendo = tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable);
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z') && !escribiendo) {
+                e.preventDefault();
+                deshacer();
+            }
         });
 
         // ============================================================
         // INIT (IPC)
         // ============================================================
         ipcRenderer.on('init-contingencias', (e, data) => {
-            contingencias = Array.isArray(data) ? data : [];
+            contingencias = (Array.isArray(data) ? data : []).map(c => Object.assign({}, c));
+            aplicarOverrides();
+            actualizarUI();
+        });
+        ipcRenderer.on('init-contingencias-overrides', (e, data) => {
+            overrides = (data && typeof data === 'object') ? data : {};
+            aplicarOverrides();
             actualizarUI();
         });
 

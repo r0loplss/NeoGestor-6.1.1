@@ -57,7 +57,7 @@ let alertDataCache = null;
 const TOOLS_CONFIG = {
   'occ':           { file: HTML.occ,           w: 320, h: 650, resize: false, top: false },
   'enlaces':       { file: HTML.enlaces,       w: 320, h: 600, resize: true,  top: false },
-  'contingencias': { file: HTML.contingencias, w: 340, h: 500, resize: true,  top: true  },
+  'contingencias': { file: HTML.contingencias, w: 380, h: 640, resize: true,  top: true  },
   'trafico':       { file: HTML.trafico,       w: 580, h: 700, resize: true,  top: false },
   // NUEVAS HERRAMIENTAS
   'calculadora-dias': { file: HTML.calculadora, w: 380, h: 480, resize: true, top: false },
@@ -729,6 +729,7 @@ ipcMain.on('save-data', (e, patch) => saveData(patch));
 ipcMain.on('save-occ', (e, state) => saveData({ occState: state }));
 ipcMain.on('save-enlaces', (e, data) => saveData({ enlaces: data.enlaces, tags: data.tags }));
 ipcMain.on('save-contingencias', (e, data) => saveData({ contingencias: data }));
+ipcMain.on('save-contingencias-overrides', (e, data) => saveData({ contingenciasOverrides: data }));
 ipcMain.on('save-ciclos', (e, data) => saveData({ ciclosState: data }));
 ipcMain.on('save-calculadora-dias', (e, data) => saveData({ diasState: data }));
 ipcMain.on('save-trafico', (e, data) => saveData({ traficoState: data }));
@@ -1004,6 +1005,7 @@ function openTool(id) {
         win.webContents.send('init-turnos', d.turnosWeb || null);
       } else if (id === 'contingencias') {
         win.webContents.send('init-contingencias', d.contingencias || null);
+        win.webContents.send('init-contingencias-overrides', d.contingenciasOverrides || {});
       } else if (id === 'notas-vault') {
         win.webContents.send('init-vault', { notes: d.notes || [], favNotes: d.favNotes || [] });
       } else if (id === 'ciclos') {

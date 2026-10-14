@@ -3256,6 +3256,7 @@ ipcRenderer.on('request-close-confirm', () => {
 
             const match = appData.contingencias.find(c => {
                 if (!c.zona) return false;
+                if (c.estado === 'normalizado') return false;
                 const regex = new RegExp(`\\b${comuna}\\b`, 'i');
                 return regex.test(c.zona);
             });

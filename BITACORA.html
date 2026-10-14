@@ -133,6 +133,25 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.26</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Radar de Contingencias — mejora amplia (clasificación editable + control del usuario)</b>.</li>
+                    <li><b>Categoría (tipo) explícita y manual</b>: 🛰️ Red · 🏛️ Nacional · 🔌 Sistemas · ⚪ Otro. Se infiere al escanear (comuna ⇒ Red; sin comuna ⇒ Sistemas/Nacional según detalle) y el usuario puede <b>corregirla con un clic en el chip</b> de cada tarjeta, desde el <b>modal de edición</b>, o <b>en lote</b>. Marca visual <i>auto/manual</i> y <b>aviso ⚠️ cuando la clasificación automática es dudosa</b>.</li>
+                    <li><b>Persistencia de correcciones</b>: los overrides manuales (tipo/estado) se guardan por ID y <b>sobreviven al re-escaneo</b> (<code>contingenciasOverrides</code> en <code>gestor-data.json</code>, aditivo).</li>
+                    <li><b>Estado</b> por contingencia (🔴 Activo · 🟡 En curso · 🟢 Normalizado) — se marca sin borrar; el copiado <b>excluye normalizadas</b> y la alerta de la app principal también.</li>
+                    <li><b>Filtros por tipo con contadores</b>, <b>buscador</b> (ID/zona/detalle), <b>orden</b> (fecha/zona/tipo) y opción "ocultar normalizadas".</li>
+                    <li><b>Selección múltiple + acciones en lote</b> (marcar tipo, normalizar, eliminar) y <b>edición en línea</b> de zona/detalle (doble clic).</li>
+                    <li><b>Deshacer</b> (↶ / Ctrl+Z) para escaneos, limpieza, borrados y lotes; <b>Exportar/Importar</b> el radar a JSON.</li>
+                    <li><b>Modo de escaneo: Reemplazar vs Actualizar</b> (conserva lo que no venga en el reporte). El copiado breve/detallado ahora usa la categoría y agrega conteos.</li>
+                    <li><b>main.js</b>: IPC <code>save-contingencias-overrides</code> + envío <code>init-contingencias-overrides</code>; ventana del tool 380×640. La interfaz existente y el parseo actual quedan intactos.</li>
+                    <li><b>Validación</b>: <code>node --check</code> (main.js), chequeo de IDs/handlers y llaves CSS OK; tests 12/12; <b>smoke test en Electron</b> (parseo → red/sistemas/red; filtros; override persistente tras re-escanear; lote; copiado excluye normalizadas; modo Actualizar conserva).</li>
+                    <li><b>Release v6.1.26</b>: portable <code>GestorCasos-portable-6.1.26.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.25</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
