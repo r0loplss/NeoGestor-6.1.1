@@ -1086,7 +1086,7 @@
         // UNDO
         // ============================================================
         function pushUndo() {
-            undoStack.push(JSON.stringify(contingencias));
+            undoStack.push(JSON.stringify({ c: contingencias, o: overrides }));
             if (undoStack.length > 40) undoStack.shift();
             actualizarUndoUI();
         }
@@ -1095,12 +1095,17 @@
         }
         function deshacer() {
             if (!undoStack.length) { showToast('Nada para deshacer.', 'warning'); return; }
-            const prev = undoStack.pop();
-            try { contingencias = JSON.parse(prev); } catch (e) { return; }
+            let snap = null;
+            try { snap = JSON.parse(undoStack.pop()); } catch (e) { return; }
+            if (Array.isArray(snap)) { contingencias = snap; }
+            else if (snap && Array.isArray(snap.c)) {
+                contingencias = snap.c;
+                if (snap.o && typeof snap.o === 'object') overrides = snap.o;
+            }
             seleccionados.clear();
-            guardarYNotificar(); actualizarUI();
+            guardarOverrides(); guardarYNotificar(); actualizarUI();
             showToast('↶ Cambio deshecho.', 'success');
-            actualizarUndoUI();
+                actualizarUndoUI();
         }
 
         // ============================================================
@@ -1655,7 +1660,7 @@
                     if (byId[old.id]) {
                         const n = byId[old.id];
                         merged.push(Object.assign({}, n, {
-                            tipo: old.tipo || n.tipo,
+                            tipo: old.tipoManual ? (old.tipo || n.tipo) : n.tipo,
                             tipoManual: !!old.tipoManual,
                             estado: old.estado || 'activo'
                         }));
@@ -2011,6 +2016,7 @@
         function setTipo(id, tipo) {
             const c = contingencias.find(x => x.id === id);
             if (!c || !TIPOS[tipo]) return;
+            pushUndo();
             c.tipo = tipo; c.tipoManual = true;
             overrides[id] = Object.assign({}, overrides[id], { tipo, tipoManual: true });
             guardarOverrides(); guardarYNotificar(); actualizarUI();
@@ -2019,6 +2025,7 @@
         function setEstado(id, estado) {
             const c = contingencias.find(x => x.id === id);
             if (!c || !ESTADOS[estado]) return;
+            pushUndo();
             c.estado = estado;
             overrides[id] = Object.assign({}, overrides[id], { estado });
             guardarOverrides(); guardarYNotificar(); actualizarUI();
