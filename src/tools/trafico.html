@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <title>Tráfico Móvil PRO</title>
-    <!-- Librería SheetJS local para leer Excel offline -->
-    <script src="../assets/vendor/xlsx.full.min.js"></script>
+    <!-- Librería SheetJS local (Excel/XML). Se carga vía require para que quede en window.XLSX
+         (con nodeIntegration, el UMD la expone en module.exports y no en window, si no) -->
+    <script>
+    (function () {
+        try {
+            var _p = require('path').join(__dirname, '..', 'assets', 'vendor', 'xlsx.full.min.js');
+            window.XLSX = require(_p);
+        } catch (e) {
+            try { console.error('No se pudo cargar la librería XLSX:', e); } catch (e2) {}
+        }
+    })();
+    </script>
     <style>
         /* ============================================================
                ROOT – Tema oscuro consistente con la app
@@ -1017,7 +1027,7 @@
                     <div class="group-title">📂 Carga de datos</div>
                     <div class="control-row">
                         <label>📄 Excel</label>
-                        <input type="file" id="fileInputSimple" accept=".xlsx,.xls" />
+                        <input type="file" id="fileInputSimple" accept=".xlsx,.xls,.xlsm,.xlsb,.ods,.xml,.csv,.txt" />
                     </div>
                     <div class="control-row">
                         <label>📋 Pegar desde Excel / Siebel (TSV)</label>
@@ -1706,19 +1716,38 @@
         }
 
         function loadFromExcel(file) {
+            if (typeof XLSX === 'undefined' || !XLSX.read) {
+                showToast('❌ La librería de Excel (XLSX) no está disponible.', 'error');
+                return;
+            }
+            const name = (file.name || '').toLowerCase();
+            const esTexto = /\.(xml|csv|txt)$/.test(name);
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
+                    let workbook;
+                    if (esTexto) {
+                        // XML Spreadsheet 2003 / CSV / texto
+                        workbook = XLSX.read(e.target.result, { type: 'string' });
+                    } else {
+                        const data = new Uint8Array(e.target.result);
+                        workbook = XLSX.read(data, { type: 'array' });
+                    }
                     const sheet = workbook.Sheets[workbook.SheetNames[0]];
                     const json = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                    if (!json || !json.length) {
+                        showToast('⚠️ El archivo no contiene filas de datos.', 'warning');
+                        return;
+                    }
                     processData(json);
                 } catch (err) {
-                    showToast(`❌ Error al leer el archivo Excel: ${err.message}`, 'error');
+                    showToast(`❌ Error al leer el archivo: ${err.message}`, 'error');
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.onerror = function() {
+                showToast('❌ No se pudo leer el archivo.', 'error');
+            };
+            if (esTexto) reader.readAsText(file); else reader.readAsArrayBuffer(file);
         }
 
         function processPastedText(text) {

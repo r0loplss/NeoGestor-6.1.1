@@ -133,6 +133,19 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.30</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>Tráfico PRO — reparada la carga de Excel/XML</b>. <b>Causa:</b> con <code>nodeIntegration</code>, la librería SheetJS (UMD) se ejecutaba en <code>module.exports</code> y <b>no</b> en <code>window.XLSX</code> (el último quedaba como objeto vacío), así que <code>XLSX.read</code>/<code>XLSX.utils</code> eran <code>undefined</code> y fallaba al leer cualquier archivo (en dev y en portable).</li>
+                    <li><b>Fix:</b> la librería ahora se carga vía <code>require()</code> del vendor (<code>src/assets/vendor/xlsx.full.min.js</code>) y se asigna a <code>window.XLSX</code>, quedando disponible correctamente.</li>
+                    <li><b>Además:</b> se amplió el selector a <code>.xlsx .xls .xlsm .xlsb .ods .xml .csv .txt</code> y se leen XML/CSV como texto (<code>type:'string'</code>) con avisos si el archivo no trae filas. <b>No se modificó el parseo ni el resto del tool.</b></li>
+                    <li><b>Validación</b>: prueba en Electron (dev y asar) → <code>window.XLSX.utils</code> disponible y roundtrip de un <b>.xlsx</b> y de un <b>XML Spreadsheet 2003</b> OK; sintaxis de los <code>&lt;script&gt;</code> OK; tests del repo.</li>
+                    <li><b>Release v6.1.30</b>: portable <code>GestorCasos-portable-6.1.30.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.29</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
