@@ -163,6 +163,17 @@
     html[data-neo-theme="light"] .notes textarea { background: rgba(255,255,255,.6); }
     .notes textarea:focus { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
     .hint-mini { font-size: 10.5px; color: var(--txt-faint); }
+    .notes-tools { display: flex; gap: 8px; }
+    .notes-tools input { flex: 1; min-width: 0; background: var(--glass-strong); border: 1px solid var(--glass-border); border-radius: 10px; color: var(--txt); font-family: inherit; font-size: 12px; padding: 8px 10px; outline: none; }
+    .notes-tools input:focus { border-color: var(--accent); }
+    .btn-new { padding: 8px 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-soft); color: var(--txt); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .btn-new:hover { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+    .notes-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px; }
+    .n-card { cursor: pointer; position: relative; }
+    .n-card:hover { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+    .n-card .n-body { color: var(--txt-dim); font-size: 12px; margin-top: 4px; }
+    .n-card .n-del { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--txt-faint); cursor: pointer; font-size: 12px; }
+    .n-card .n-del:hover { color: #ff8080; }
 
     /* ============================================================
        AJUSTES
@@ -208,11 +219,16 @@
     <button class="reopen glass" id="reopen" title="Mostrar barra">☰</button>
 
     <aside class="notes glass" id="notesPanel">
-        <div class="notes-head"><span style="font-size:16px">🗒️</span><b>Mis Notas</b><button class="wc x" id="notesClose" title="Cerrar">✕</button></div>
-        <div class="note"><b>Recordatorio</b><br>Revisar el radar de contingencias cada 30 min y avisar a los agentes de las comunas afectadas.<div class="meta">Hoy · 09:12</div></div>
-        <div class="note"><b>Turnos</b><br>Cobertura de colaciones de 13:00 a 14:00 — coordinar con supervisión.<div class="meta">Hoy · 08:40</div></div>
-        <textarea placeholder="Nueva nota..."></textarea>
-        <div class="hint-mini">Demo — se conectará a tus notas reales.</div>
+        <div class="notes-head">
+            <span style="font-size:16px">🗒️</span><b>Mis Notas</b>
+            <span class="hint-mini" id="notesCount" style="margin-left:6px;"></span>
+            <button class="wc x" id="notesClose" title="Cerrar">✕</button>
+        </div>
+        <div class="notes-tools">
+            <input type="text" id="notesSearch" placeholder="Buscar nota..." />
+            <button class="btn-new" id="notesNew" title="Nueva nota">＋ Nueva</button>
+        </div>
+        <div class="notes-list" id="notesList"></div>
     </aside>
 
     <div class="settings glass" id="settingsPanel">
@@ -281,9 +297,43 @@
             bodyEl.classList.toggle('right', right);
         });
 
-        // Notas
+        // Notas (datos reales)
         document.getElementById('btnNotes').addEventListener('click', function () { notesPanel.classList.add('open'); });
         document.getElementById('notesClose').addEventListener('click', function () { notesPanel.classList.remove('open'); });
+
+        var notes = [], notesFiltro = '';
+        function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+        function renderNotas() {
+            var list = document.getElementById('notesList');
+            var countEl = document.getElementById('notesCount');
+            if (countEl) countEl.textContent = notes.length + '/10';
+            var q = notesFiltro.toLowerCase();
+            var vis = notes.filter(function (n) { return !q || (n.content || '').toLowerCase().indexOf(q) !== -1; });
+            if (!vis.length) {
+                list.innerHTML = '<div class="hint-mini" style="padding:6px 2px;">' + (notes.length ? 'Sin resultados.' : 'Sin notas. Pulsá ＋ Nueva.') + '</div>';
+                return;
+            }
+            list.innerHTML = '';
+            vis.forEach(function (n) {
+                var raw = (n.content || '').replace(/<[^>]+>/g, '').trim();
+                var title = (raw.split('\n')[0] || '').trim().slice(0, 30) || 'Nota';
+                var body = raw.replace(/\s+/g, ' ').trim().slice(0, 150);
+                var card = document.createElement('div');
+                card.className = 'note n-card';
+                card.innerHTML = '<b>' + esc(title) + '</b><div class="n-body">' + esc(body || 'Sin contenido') + '</div><button class="n-del" title="Eliminar">✕</button>';
+                card.addEventListener('click', function () { ipc.send('open-note', n.id); });
+                card.querySelector('.n-del').addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (confirm('¿Eliminar esta nota?')) ipc.send('note-delete', n.id);
+                });
+                list.appendChild(card);
+            });
+        }
+        ipc.on('notes-updated', function (e, d) { notes = d || []; renderNotas(); });
+        document.getElementById('notesSearch').addEventListener('input', function (e) { notesFiltro = e.target.value; renderNotas(); });
+        document.getElementById('notesNew').addEventListener('click', function () { ipc.send('note-create'); });
+        try { notes = ipc.sendSync('get-vault-notes') || []; } catch (e) {}
+        renderNotas();
 
         // Ajustes
         document.getElementById('btnSettings').addEventListener('click', function () { settingsPanel.classList.toggle('open'); });

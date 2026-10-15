@@ -34,12 +34,14 @@
 - Adoptan el tema cristal automáticamente (sin tocar su lógica).
 
 ## Notas
-- Drawer de cristal en el dock (diseño aprobado). *Pendiente:* conectarlo a las notas reales.
+- Drawer de cristal en el dock (diseño aprobado) **conectado a las notas REALES** del gestor
+  (mismo dato `notes: [{id, content}]`, máx 10). Lista, buscador, crear (＋ Nueva), eliminar y
+  abrir la nota (usa las ventanas de nota existentes, ya tematizadas).
+- Sincroniza en vivo con `notes-updated`.
 
 ## Fast
 - Botón **flotante** reestilizado (cristal, sigue el tono) y **reubicado junto a la barra**.
 - No se pierde su función (abre/cierra Fast; atajo Ctrl+Shift+F).
 
 ## Pendiente
-- Conectar el drawer de Notas a los datos reales.
 - Pulir detalles por herramienta (algunos textos/colores propios pueden necesitar ajuste fino).

@@ -732,7 +732,7 @@ function crearDockApoyo() {
     y: posOk ? pos.y : Math.round((wa.height - defH) / 2),
     frame: false,
     transparent: true,
-    resizable: true,
+    resizable: false,
     movable: true,
     hasShadow: false,
     alwaysOnTop: getAlwaysOnTopPreference(),
@@ -1419,6 +1419,7 @@ function openNote(id, isPreview = false) {
     webPreferences: { nodeIntegration: true, contextIsolation: false } 
   }); 
   win.loadFile(HTML.note); 
+  win.webContents.on('did-finish-load', () => aplicarSkin(win));
   win.on('ready-to-show', () => { 
     if (win && !win.isDestroyed()) { 
       const note = (loadData().notes || []).find(n => n.id === id); 
