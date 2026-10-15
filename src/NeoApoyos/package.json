@@ -1,0 +1,10 @@
+{
+  "name": "neoapoyos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NeoApoyos — interfaz de apoyo (máscara de interfaz)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  }
+}
