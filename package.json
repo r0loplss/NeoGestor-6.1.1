@@ -1,6 +1,6 @@
 {
   "name": "gestor-casos",
-  "version": "6.1.31",
+  "version": "6.1.32",
   "description": "Gestor de Casos Call Center v6",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test",
+    "preview:apoyos": "electron src/NeoApoyos/preview.js",
     "build": "electron-builder --win --x64",
     "build:portable": "electron-builder --win portable --x64"
   },
