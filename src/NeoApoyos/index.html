@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html lang="es" data-accent="cyan">
+<html lang="es" data-neo-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <title>NeoApoyos</title>
 <style>
     /* ============================================================
        NEOAPOYOS v0.1 — Barra lateral (dock)
-       Ventana transparente + click-through. Solo la barra y los
-       paneles capturan el mouse; el resto deja pasar los clics.
+       - Ancho FIJO 78px. Al pasar el mouse se ensancha SOLO el botón.
+       - Ventana transparente + click-through.
+       - Se puede mover (arrastrando) y anclar a izquierda o derecha.
        ============================================================ */
 
     :root {
-        --accent: #2fcbf1;
-        --accent-2: #6ea8ff;
-        --accent-soft: rgba(47, 203, 241, .18);
+        --neo-accent: #2fcbf1;
+        --accent: var(--neo-accent);
+        --accent-2: color-mix(in srgb, var(--neo-accent) 60%, #ffffff);
+        --accent-soft: color-mix(in srgb, var(--neo-accent) 20%, transparent);
 
-        --glass: linear-gradient(180deg, rgba(34,42,60,.70), rgba(18,24,36,.64));
-        --glass-strong: linear-gradient(180deg, rgba(52,62,84,.86), rgba(30,38,54,.80));
+        --glass: linear-gradient(180deg, rgba(34,42,60,.72), rgba(18,24,36,.66));
+        --glass-strong: linear-gradient(180deg, rgba(54,64,86,.88), rgba(30,38,54,.82));
         --glass-border: rgba(255,255,255,.14);
         --glass-hi: rgba(255,255,255,.34);
 
@@ -30,10 +32,15 @@
         --ease: cubic-bezier(.22, 1, .36, 1);
         --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
-    [data-accent="violet"]  { --accent:#a78bfa; --accent-2:#8b5cf6; --accent-soft:rgba(167,139,250,.20); }
-    [data-accent="emerald"] { --accent:#34d399; --accent-2:#10b981; --accent-soft:rgba(52,211,153,.20); }
-    [data-accent="amber"]   { --accent:#fbbf24; --accent-2:#f59e0b; --accent-soft:rgba(251,191,36,.20); }
-    [data-accent="rose"]    { --accent:#fb7185; --accent-2:#f43f5e; --accent-soft:rgba(251,113,133,.20); }
+    html[data-neo-theme="light"] {
+        --glass: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.58));
+        --glass-strong: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,255,255,.82));
+        --glass-border: rgba(20,30,50,.14);
+        --glass-hi: rgba(255,255,255,.7);
+        --txt: #16202e;
+        --txt-dim: #4a5568;
+        --txt-faint: #8a97ab;
+    }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; background: transparent; color: var(--txt); font-family: var(--font); -webkit-font-smoothing: antialiased; user-select: none; }
@@ -43,11 +50,11 @@
         -webkit-backdrop-filter: blur(20px) saturate(160%);
         backdrop-filter: blur(20px) saturate(160%);
         border: 1px solid var(--glass-border);
-        box-shadow: 0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 rgba(255,255,255,.05);
+        box-shadow: 0 18px 50px rgba(0,0,0,.40), inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 rgba(255,255,255,.05);
     }
 
     /* ============================================================
-       BARRA LATERAL
+       BARRA
        ============================================================ */
     .dock {
         position: fixed; left: 12px; top: 12px; bottom: 12px;
@@ -55,14 +62,16 @@
         border-radius: var(--radius);
         padding: 12px 10px;
         display: flex; flex-direction: column; gap: 12px;
-        overflow: visible;                 /* el flyout puede salir del ancho de la barra */
+        overflow: visible;
         z-index: 60;
-        transition: width .32s var(--ease), transform .4s var(--ease), opacity .3s;
+        -webkit-app-region: drag;                 /* toda la barra es arrastrable */
     }
+    body.right .dock { left: auto; right: 12px; }
     .dock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 22%); }
     body.collapsed .dock { display: none; }
 
-    .dock-brand { display: flex; align-items: center; gap: 10px; padding: 4px 2px 8px; -webkit-app-region: drag; }
+    .dock-brand { display: flex; align-items: center; gap: 10px; padding: 2px 2px 6px; }
+    body.right .dock-brand { flex-direction: row-reverse; }
     .brand-tile {
         width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center;
         border-radius: 12px; font-weight: 800; font-size: 18px; color: #04121a;
@@ -72,10 +81,10 @@
     .brand-text { display: flex; flex-direction: column; line-height: 1.15; white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-6px); transition: .3s var(--ease); }
     .brand-text b { font-size: 14px; letter-spacing: .2px; }
     .brand-text small { font-size: 10px; color: var(--txt-faint); text-transform: uppercase; letter-spacing: 1px; }
-    .dock.expanded .brand-text, .dock:hover .brand-text { opacity: 1; max-width: 190px; transform: none; }
+    .dock:hover .brand-text { opacity: 1; max-width: 190px; transform: none; }
 
-    .dock-tools { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; overflow-y: auto; overflow-x: hidden; padding: 2px; flex: 1; }
-    .dock-tools::-webkit-scrollbar { width: 0; }
+    .dock-tools { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; overflow: visible; padding: 2px; flex: 1; }
+    body.right .dock-tools { align-items: flex-end; }
 
     .tool {
         position: relative; width: calc(var(--dock-w) - 20px); height: 52px; flex: 0 0 auto;
@@ -84,58 +93,65 @@
         background: transparent; color: var(--txt-dim); cursor: pointer;
         font-family: inherit; font-size: 13px; text-align: left;
         transition: width .30s var(--ease), background .2s, border-color .2s, transform .2s var(--ease), color .2s;
-        z-index: 1;
+        z-index: 1; -webkit-app-region: no-drag;
     }
+    body.right .tool { flex-direction: row-reverse; }
     .tool .tile { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; font-size: 19px; border-radius: 11px; background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); transition: transform .25s var(--ease); }
     .tool .lbl { white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-8px); transition: .28s var(--ease); font-weight: 600; letter-spacing: .2px; }
+    body.right .tool .lbl { transform: translateX(8px); }
     .tool .lbl small { display: block; font-weight: 500; font-size: 10.5px; color: var(--txt-faint); }
 
-    /* Hover: SOLO el botón se ensancha (la barra NO) */
-    .dock:not(.expanded) .tool:hover {
+    /* Hover: SOLO el botón se ensancha (sale de la barra). La barra NO cambia. */
+    .tool:hover {
         width: 244px; background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt);
-        transform: translateX(2px); z-index: 70;
-        box-shadow: 0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi);
+        z-index: 70; box-shadow: 0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi);
     }
-    .dock:not(.expanded) .tool:hover .tile { transform: scale(1.06); }
-    .dock:not(.expanded) .tool:hover .lbl { opacity: 1; max-width: 180px; transform: none; margin-left: 12px; }
-
-    .dock.expanded .tool { width: 100%; }
-    .dock.expanded .tool .lbl { opacity: 1; max-width: 200px; transform: none; margin-left: 12px; }
-    .dock.expanded .tool:hover { background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt); }
+    .tool:hover .tile { transform: scale(1.06); }
+    .tool:hover .lbl { opacity: 1; max-width: 180px; transform: none; margin-left: 12px; }
+    body.right .tool:hover { transform: translateX(-2px); }
+    body.right .tool:hover .lbl { margin-left: 0; margin-right: 12px; }
+    body:not(.right) .tool:hover { transform: translateX(2px); }
 
     .tool.active { color: var(--txt); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
     .tool.active::before { content: ''; position: absolute; left: -10px; top: 50%; transform: translateY(-50%); width: 4px; height: 26px; border-radius: 4px; background: linear-gradient(var(--accent), var(--accent-2)); box-shadow: 0 0 14px var(--accent); }
+    body.right .tool.active::before { left: auto; right: -10px; }
     .tool.active .tile { background: linear-gradient(145deg, var(--accent), var(--accent-2)); color: #04121a; border-color: transparent; }
 
-    .dock-foot { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.08); }
+    .dock-foot { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding-top: 8px; border-top: 1px solid var(--glass-border); }
+    body.right .dock-foot { align-items: flex-end; }
     .dock-btn {
         position: relative; width: calc(var(--dock-w) - 20px); height: 44px;
         display: flex; align-items: center; padding: 0 8px;
         border: 1px solid transparent; border-radius: 12px; background: transparent;
         color: var(--txt-dim); cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600; text-align: left;
         transition: width .3s var(--ease), background .2s, color .2s, border-color .2s, transform .2s var(--ease);
+        -webkit-app-region: no-drag;
     }
+    body.right .dock-btn { flex-direction: row-reverse; }
     .dock-btn .ic { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; font-size: 16px; }
     .dock-btn .lbl { white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-8px); transition: .28s var(--ease); }
-    .dock:not(.expanded) .dock-btn:hover { width: 244px; background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt); z-index: 70; transform: translateX(2px); box-shadow: 0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi); }
-    .dock:not(.expanded) .dock-btn:hover .lbl { opacity: 1; max-width: 180px; transform: none; margin-left: 10px; }
-    .dock.expanded .dock-btn { width: 100%; }
-    .dock.expanded .dock-btn .lbl { opacity: 1; max-width: 200px; transform: none; margin-left: 10px; }
-    .dock.expanded .dock-btn:hover { background: var(--glass-strong); color: var(--txt); }
+    body.right .dock-btn .lbl { transform: translateX(8px); }
+    .dock-btn:hover { width: 244px; background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt); z-index: 70; box-shadow: 0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi); }
+    .dock-btn:hover .lbl { opacity: 1; max-width: 180px; transform: none; margin-left: 10px; }
+    body.right .dock-btn:hover .lbl { margin-left: 0; margin-right: 10px; }
+    body:not(.right) .dock-btn:hover { transform: translateX(2px); }
+    body.right .dock-btn:hover { transform: translateX(-2px); }
     .dock-btn.danger:hover { color: #ffd7d7; background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.35); }
 
-    .dock-grip { position: absolute; top: 50%; right: -4px; transform: translateY(-50%); width: 8px; height: 60px; border-radius: 6px; cursor: ew-resize; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.12), rgba(255,255,255,.05)); opacity: .35; transition: opacity .2s; }
-    .dock-grip::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 2px; height: 26px; border-radius: 2px; background: rgba(255,255,255,.5); }
-    .dock-grip:hover { opacity: .95; }
+    /* Mango para mover */
+    .dock-handle { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 26px; height: 16px; display: grid; place-items: center; color: var(--txt-faint); font-size: 10px; letter-spacing: 1px; opacity: .5; pointer-events: none; }
+    .dock:hover .dock-handle { opacity: .9; }
 
-    .reopen { position: fixed; left: 12px; top: 50%; transform: translateY(-50%); width: 44px; height: 52px; border-radius: 14px; z-index: 80; display: none; place-items: center; cursor: pointer; color: var(--txt); font-size: 18px; }
+    .reopen { position: fixed; left: 12px; top: 50%; transform: translateY(-50%); width: 44px; height: 52px; border-radius: 14px; z-index: 80; display: none; place-items: center; cursor: pointer; color: var(--txt); font-size: 18px; -webkit-app-region: no-drag; }
+    body.right .reopen { left: auto; right: 12px; }
     body.collapsed .reopen { display: grid; animation: popIn .3s var(--ease); }
     @keyframes popIn { from { opacity: 0; transform: translateY(-50%) scale(.85); } to { opacity: 1; transform: translateY(-50%) scale(1); } }
 
     /* ============================================================
-       PANEL DE NOTAS (cristal, a la derecha de la barra)
+       PANEL DE NOTAS
        ============================================================ */
     .notes { position: fixed; top: 12px; bottom: 12px; right: 12px; width: 340px; border-radius: var(--radius); padding: 16px; z-index: 90; display: flex; flex-direction: column; gap: 12px; transform: translateX(120%); opacity: 0; transition: transform .42s var(--ease), opacity .3s; }
+    body.right .notes { right: 100px; transform: translateX(120%); }
     .notes.open { transform: none; opacity: 1; }
     .notes-head { display: flex; align-items: center; gap: 10px; }
     .notes-head b { font-size: 14px; }
@@ -143,20 +159,25 @@
     .note { border-radius: 13px; padding: 12px 14px; font-size: 12.5px; color: var(--txt-dim); background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
     .note b { color: var(--txt); }
     .note .meta { font-size: 10px; color: var(--txt-faint); margin-top: 6px; letter-spacing: .4px; }
-    .notes textarea { width: 100%; min-height: 84px; resize: vertical; border-radius: 12px; padding: 10px 12px; background: rgba(0,0,0,.25); border: 1px solid var(--glass-border); color: var(--txt); font-family: inherit; font-size: 12.5px; outline: none; }
+    .notes textarea { width: 100%; min-height: 84px; resize: vertical; border-radius: 12px; padding: 10px 12px; background: rgba(0,0,0,.22); border: 1px solid var(--glass-border); color: var(--txt); font-family: inherit; font-size: 12.5px; outline: none; }
+    html[data-neo-theme="light"] .notes textarea { background: rgba(255,255,255,.6); }
     .notes textarea:focus { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
     .hint-mini { font-size: 10.5px; color: var(--txt-faint); }
 
     /* ============================================================
-       PANEL DE AJUSTES (tono / salir)
+       AJUSTES
        ============================================================ */
-    .settings { position: fixed; left: 108px; bottom: 12px; width: 300px; border-radius: 16px; padding: 14px; z-index: 95; display: none; flex-direction: column; gap: 12px; }
+    .settings { position: fixed; left: 108px; bottom: 12px; width: 312px; border-radius: 16px; padding: 14px; z-index: 95; display: none; flex-direction: column; gap: 12px; }
+    body.right .settings { left: auto; right: 108px; }
     .settings.open { display: flex; }
     .settings .row { display: flex; align-items: center; gap: 10px; }
-    .settings .row span { font-size: 11px; color: var(--txt-faint); letter-spacing: 1px; text-transform: uppercase; }
+    .settings .row .cap { font-size: 10.5px; color: var(--txt-faint); letter-spacing: 1px; text-transform: uppercase; min-width: 46px; }
+    .seg { display: inline-flex; border: 1px solid var(--glass-border); border-radius: 10px; overflow: hidden; }
+    .seg button { padding: 6px 12px; border: none; background: transparent; color: var(--txt-dim); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
+    .seg button.on { background: var(--accent); color: #04121a; }
     .swatch { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .18s; }
     .swatch:hover { transform: scale(1.12); }
-    .swatch.on { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.25); }
+    .swatch.on { border-color: var(--txt); box-shadow: 0 0 0 2px rgba(255,255,255,.25); }
     .sw-cyan { background: linear-gradient(145deg,#2fcbf1,#6ea8ff); }
     .sw-violet { background: linear-gradient(145deg,#a78bfa,#8b5cf6); }
     .sw-emerald { background: linear-gradient(145deg,#34d399,#10b981); }
@@ -164,15 +185,14 @@
     .sw-rose { background: linear-gradient(145deg,#fb7185,#f43f5e); }
     .btn-quit { margin-top: 2px; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.12); color: #ffd7d7; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600; }
     .btn-quit:hover { background: rgba(239,68,68,.22); }
-
     .wc { width: 30px; height: 26px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--glass); color: var(--txt-dim); cursor: pointer; font-size: 12px; }
     .wc:hover { color: var(--txt); background: var(--glass-strong); }
 </style>
 </head>
 <body>
 
-    <!-- ===================== BARRA LATERAL ===================== -->
-    <aside class="dock glass" id="dock" style="--dock-w:78px;">
+    <aside class="dock glass" id="dock">
+        <div class="dock-handle">⠿</div>
         <div class="dock-brand">
             <div class="brand-tile">N</div>
             <div class="brand-text"><b>NeoApoyos</b><small>Modo Apoyo · v0.1</small></div>
@@ -181,15 +201,12 @@
         <div class="dock-foot">
             <button class="dock-btn" id="btnNotes" title="Notas"><span class="ic">🗒️</span><span class="lbl">Mis Notas</span></button>
             <button class="dock-btn" id="btnSettings" title="Ajustes"><span class="ic">⚙️</span><span class="lbl">Ajustes</span></button>
-            <button class="dock-btn" id="btnPin" title="Fijar / expandir barra"><span class="ic">⇔</span><span class="lbl">Expandir barra</span></button>
             <button class="dock-btn danger" id="btnClose" title="Cerrar barra"><span class="ic">✕</span><span class="lbl">Cerrar barra</span></button>
         </div>
-        <div class="dock-grip" id="grip" title="Arrastrar para ensanchar / estrechar"></div>
     </aside>
 
     <button class="reopen glass" id="reopen" title="Mostrar barra">☰</button>
 
-    <!-- ===================== NOTAS ===================== -->
     <aside class="notes glass" id="notesPanel">
         <div class="notes-head"><span style="font-size:16px">🗒️</span><b>Mis Notas</b><button class="wc x" id="notesClose" title="Cerrar">✕</button></div>
         <div class="note"><b>Recordatorio</b><br>Revisar el radar de contingencias cada 30 min y avisar a los agentes de las comunas afectadas.<div class="meta">Hoy · 09:12</div></div>
@@ -198,15 +215,21 @@
         <div class="hint-mini">Demo — se conectará a tus notas reales.</div>
     </aside>
 
-    <!-- ===================== AJUSTES ===================== -->
     <div class="settings glass" id="settingsPanel">
         <div class="row">
-            <span>Tono</span>
-            <div class="swatch sw-cyan on" data-accent="cyan"></div>
-            <div class="swatch sw-violet" data-accent="violet"></div>
-            <div class="swatch sw-emerald" data-accent="emerald"></div>
-            <div class="swatch sw-amber" data-accent="amber"></div>
-            <div class="swatch sw-rose" data-accent="rose"></div>
+            <span class="cap">Tema</span>
+            <div class="seg" id="segTheme">
+                <button data-mode="light">☀️ Claro</button>
+                <button data-mode="dark" class="on">🌙 Nocturno</button>
+            </div>
+        </div>
+        <div class="row">
+            <span class="cap">Tono</span>
+            <div class="swatch sw-cyan on" data-accent="#2fcbf1"></div>
+            <div class="swatch sw-violet" data-accent="#a78bfa"></div>
+            <div class="swatch sw-emerald" data-accent="#34d399"></div>
+            <div class="swatch sw-amber" data-accent="#fbbf24"></div>
+            <div class="swatch sw-rose" data-accent="#fb7185"></div>
         </div>
         <button class="btn-quit" id="btnQuit">Salir de NeoApoyos</button>
     </div>
@@ -216,7 +239,6 @@
         'use strict';
         var ipc = require('electron').ipcRenderer;
 
-        // Herramientas (ids deben coincidir con TOOLS_CONFIG del programa)
         var TOOLS = [
             { id: 'contingencias', icon: '📡', name: 'Radar Contingencias', desc: 'Fallas masivas en tiempo real' },
             { id: 'trafico',       icon: '📶', name: 'Tráfico PRO',         desc: 'Analizador de consumos' },
@@ -248,51 +270,54 @@
             toolBtns[t.id] = b;
         });
 
-        // Resaltar herramientas abiertas (eventos del proceso principal)
         ['tool-opened', 'tool-restored', 'tool-focused'].forEach(function (ev) {
             ipc.on(ev, function (e, id) { if (toolBtns[id]) toolBtns[id].classList.add('active'); });
         });
         ipc.on('tool-closed', function (e, id) { if (toolBtns[id]) toolBtns[id].classList.remove('active'); });
 
-        // ---- Notas ----
+        // Lado (izquierda/derecha) según la posición de la ventana
+        ipc.on('apoyo-bounds', function (e, b) {
+            var right = (b.x + b.width / 2) > (b.screenW / 2);
+            bodyEl.classList.toggle('right', right);
+        });
+
+        // Notas
         document.getElementById('btnNotes').addEventListener('click', function () { notesPanel.classList.add('open'); });
         document.getElementById('notesClose').addEventListener('click', function () { notesPanel.classList.remove('open'); });
 
-        // ---- Ajustes ----
-        document.getElementById('btnSettings').addEventListener('click', function (e) { e.stopPropagation(); settingsPanel.classList.toggle('open'); });
+        // Ajustes
+        document.getElementById('btnSettings').addEventListener('click', function () { settingsPanel.classList.toggle('open'); });
         document.getElementById('btnQuit').addEventListener('click', function () { ipc.send('apoyo-quit'); });
+
+        var themeState = { mode: 'dark', accent: '#2fcbf1' };
+        function aplicarTemaLocal() {
+            document.documentElement.setAttribute('data-neo-theme', themeState.mode);
+            document.documentElement.style.setProperty('--neo-accent', themeState.accent);
+            var seg = document.querySelectorAll('#segTheme button');
+            for (var i = 0; i < seg.length; i++) seg[i].classList.toggle('on', seg[i].dataset.mode === themeState.mode);
+            var sw = document.querySelectorAll('.swatch');
+            for (var j = 0; j < sw.length; j++) sw[j].classList.toggle('on', sw[j].dataset.accent === themeState.accent);
+        }
+        ipc.on('neo-theme', function (e, t) { if (t) { themeState.mode = t.mode === 'light' ? 'light' : 'dark'; themeState.accent = t.accent || themeState.accent; aplicarTemaLocal(); } });
+        ipc.send('neo-theme-request');
+
+        document.getElementById('segTheme').addEventListener('click', function (e) {
+            var b = e.target.closest('button[data-mode]'); if (!b) return;
+            themeState.mode = b.dataset.mode; aplicarTemaLocal();
+            ipc.send('neo-theme-set', themeState);
+        });
         Array.prototype.forEach.call(document.querySelectorAll('.swatch'), function (s) {
             s.addEventListener('click', function () {
-                document.documentElement.setAttribute('data-accent', s.dataset.accent);
-                document.querySelectorAll('.swatch').forEach(function (x) { x.classList.remove('on'); });
-                s.classList.add('on');
+                themeState.accent = s.dataset.accent; aplicarTemaLocal();
+                ipc.send('neo-theme-set', themeState);
             });
         });
 
-        // ---- Expandir / estrechar la barra ----
-        var EXPANDED = 244, COMPACT = 78;
-        document.getElementById('btnPin').addEventListener('click', function () {
-            if (dock.classList.contains('expanded')) { dock.classList.remove('expanded'); setW(COMPACT); }
-            else { dock.classList.add('expanded'); setW(EXPANDED); }
-        });
-        function setW(w) { dock.style.setProperty('--dock-w', w + 'px'); }
-
-        // ---- Cerrar / reabrir la barra ----
+        // Cerrar / reabrir
         document.getElementById('btnClose').addEventListener('click', function () { bodyEl.classList.add('collapsed'); });
         reopen.addEventListener('click', function () { bodyEl.classList.remove('collapsed'); });
 
-        // ---- Agarradera ----
-        var grip = document.getElementById('grip'), dragging = false;
-        grip.addEventListener('mousedown', function (e) { dragging = true; e.preventDefault(); document.body.style.cursor = 'ew-resize'; });
-        document.addEventListener('mousemove', function (e) {
-            if (!dragging) return;
-            var w = Math.max(72, Math.min(300, e.clientX - 12));
-            setW(w);
-            if (w > 150) dock.classList.add('expanded'); else dock.classList.remove('expanded');
-        });
-        document.addEventListener('mouseup', function () { if (dragging) { dragging = false; document.body.style.cursor = ''; } });
-
-        // ---- Click-through: solo la barra y los paneles capturan el mouse ----
+        // Click-through: solo la barra y los paneles capturan el mouse
         function esInteractivo(x, y) {
             var el = document.elementFromPoint(x, y);
             if (!el) return false;

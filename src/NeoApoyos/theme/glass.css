@@ -1,0 +1,114 @@
+/* ============================================================
+   NEOAPOYOS — Skin "cristal líquido" para las herramientas
+   Se inyecta en cada ventana de herramienta (modo --apoyo).
+   Cambia el tema con html[data-neo-theme="dark|light"] y el tono
+   con la variable --neo-accent.
+   ============================================================ */
+
+:root { --neo-accent: #2fcbf1; }
+
+/* ---------- Variables: NOCTURNO ---------- */
+html[data-neo-theme="dark"],
+html[data-neo-theme="dark"] body {
+    --bg: #0b0f17 !important;
+    --surface: rgba(255,255,255,.055) !important;
+    --surface2: rgba(255,255,255,.085) !important;
+    --surface3: rgba(255,255,255,.12) !important;
+    --border: rgba(255,255,255,.10) !important;
+    --border2: rgba(255,255,255,.17) !important;
+    --text: #eaf1fb !important;
+    --muted: #a7b6cc !important;
+    --faint: #6b7a90 !important;
+    --primary: var(--neo-accent) !important;
+    --danger: #ef4444 !important;
+    --warning: #f59e0b !important;
+    --success: #22c55e !important;
+    color-scheme: dark;
+}
+
+/* ---------- Variables: LUZ ---------- */
+html[data-neo-theme="light"],
+html[data-neo-theme="light"] body {
+    --bg: #e9eef7 !important;
+    --surface: rgba(255,255,255,.58) !important;
+    --surface2: rgba(255,255,255,.74) !important;
+    --surface3: rgba(255,255,255,.92) !important;
+    --border: rgba(20,30,50,.10) !important;
+    --border2: rgba(20,30,50,.18) !important;
+    --text: #16202e !important;
+    --muted: #4a5568 !important;
+    --faint: #8a97ab !important;
+    --primary: var(--neo-accent) !important;
+    color-scheme: light;
+}
+
+/* ---------- Mapa de variables de otras herramientas ---------- */
+html[data-neo-theme] {
+    --bg-body: var(--bg) !important;
+    --bg-calc: var(--surface) !important;
+    --bg-recuadro: var(--surface2) !important;
+    --bg-hover: var(--surface3) !important;
+    --text-main: var(--text) !important;
+    --text-muted: var(--muted) !important;
+    --border-soft: var(--border) !important;
+    --accent-blue: var(--neo-accent) !important;
+    --accent-cyan: var(--neo-accent) !important;
+}
+
+/* ---------- Fondo ambiente + base ---------- */
+html[data-neo-theme] body {
+    background: var(--neo-ambient, #0b0f17) fixed !important;
+    color: var(--text) !important;
+}
+
+/* ---------- Header como cristal ---------- */
+html[data-neo-theme] #hdr {
+    background: color-mix(in srgb, var(--surface2) 85%, transparent) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+    backdrop-filter: blur(16px) saturate(160%) !important;
+    border-bottom: 1px solid var(--border2) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+/* ---------- Contenedores comunes con blur (cristal) ---------- */
+html[data-neo-theme] #main,
+html[data-neo-theme] #toolbar,
+html[data-neo-theme] .toolbar,
+html[data-neo-theme] .input-area,
+html[data-neo-theme] .controls-grid,
+html[data-neo-theme] .control-group,
+html[data-neo-theme] .calculator,
+html[data-neo-theme] .panel,
+html[data-neo-theme] .card,
+html[data-neo-theme] .recuadro,
+html[data-neo-theme] .modal-box,
+html[data-neo-theme] .modal,
+html[data-neo-theme] .c-card,
+html[data-neo-theme] .dropdown-menu,
+html[data-neo-theme] .editor-area,
+html[data-neo-theme] #importante {
+    -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+    backdrop-filter: blur(14px) saturate(150%) !important;
+}
+
+/* ---------- Botones/inputs: cristal ---------- */
+html[data-neo-theme] input,
+html[data-neo-theme] select,
+html[data-neo-theme] textarea {
+    background: var(--surface2) !important;
+    border: 1px solid var(--border2) !important;
+    color: var(--text) !important;
+}
+html[data-neo-theme] input:focus,
+html[data-neo-theme] select:focus,
+html[data-neo-theme] textarea:focus {
+    border-color: var(--neo-accent) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--neo-accent) 22%, transparent) !important;
+}
+
+/* ---------- Scrollbars ---------- */
+html[data-neo-theme] ::-webkit-scrollbar-thumb { background: var(--faint) !important; border-radius: 5px; }
+html[data-neo-theme] ::-webkit-scrollbar-thumb:hover { background: var(--muted) !important; }
+
+/* ---------- Selección de texto ---------- */
+html[data-neo-theme] ::selection { background: color-mix(in srgb, var(--neo-accent) 45%, transparent); }

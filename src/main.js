@@ -52,6 +52,27 @@ const MODO_APOYO = process.argv.includes('--apoyo') || process.env.NEOAPOYOS ===
 const HTML_DOCK = path.join(SRC, 'NeoApoyos', 'index.html');
 const DOCK_APOYO_W = 460;   // ancho de ventana (barra 78px + espacio para flyout y notas)
 
+// --- Tema "cristal líquido" (skin inyectado en las herramientas) ---
+const GLASS_DIR = path.join(SRC, 'NeoApoyos', 'theme');
+let _glassCss = null, _glassJs = null, _apoyoTheme = null;
+function getGlassCss() { if (_glassCss == null) { try { _glassCss = fs.readFileSync(path.join(GLASS_DIR, 'glass.css'), 'utf8'); } catch (e) { _glassCss = ''; } } return _glassCss; }
+function getGlassJs()  { if (_glassJs == null)  { try { _glassJs  = fs.readFileSync(path.join(GLASS_DIR, 'glass.js'),  'utf8'); } catch (e) { _glassJs = ''; } } return _glassJs; }
+function getApoyoTheme() {
+  if (!_apoyoTheme) { try { const d = loadData(); _apoyoTheme = d.apoyoTheme || { mode: 'dark', accent: '#2fcbf1' }; } catch (e) { _apoyoTheme = { mode: 'dark', accent: '#2fcbf1' }; } }
+  return _apoyoTheme;
+}
+function aplicarSkin(win) {
+  if (!MODO_APOYO || !win || win.isDestroyed()) return;
+  try { const css = getGlassCss(); if (css) win.webContents.insertCSS(css); } catch (e) {}
+  try { const js = getGlassJs(); if (js) win.webContents.executeJavaScript(js); } catch (e) {}
+  try { win.webContents.send('neo-theme', getApoyoTheme()); } catch (e) {}
+}
+function broadcastApoyoTheme() {
+  const t = getApoyoTheme();
+  try { if (mainWin && !mainWin.isDestroyed()) mainWin.webContents.send('neo-theme', t); } catch (e) {}
+  try { toolWins.forEach((w) => { if (w && !w.isDestroyed()) { try { w.webContents.send('neo-theme', t); } catch (e) {} } }); } catch (e) {}
+}
+
 let mainWin = null;
 let alertaWin = null;
 
@@ -489,6 +510,7 @@ function createFastBtn() {
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   });
   fastBtnWin.loadFile(HTML.fastBtn);
+  fastBtnWin.webContents.on('did-finish-load', () => aplicarSkin(fastBtnWin));
   refreshFastBtnVisibility();
   fastBtnWin.on('ready-to-show', () => {
     if (fastBtnWin && !fastBtnWin.isDestroyed()) {
@@ -505,6 +527,18 @@ function positionFastBtn() {
   if (!mainWin || mainWin.isDestroyed()) return;
   const mb = mainWin.getBounds();
   const wa = screen.getDisplayMatching(mb).workArea;
+
+  // Modo apoyo: el botón de Fast va pegado a la barra (no al borde de la ventana ancha)
+  if (MODO_APOYO) {
+    const derecha = (mb.x + mb.width / 2) > (wa.x + wa.width / 2);
+    const barX = derecha ? (mb.x + mb.width - 12 - 78) : (mb.x + 12 + 78);
+    let fx = derecha ? (barX - FAST_GAP - FAST_BTN_W) : (barX + FAST_GAP);
+    fx = Math.round(Math.max(wa.x + 4, Math.min(wa.x + wa.width - FAST_BTN_W - 4, fx)));
+    const fy = Math.round(Math.max(wa.y + 8, Math.min(wa.y + wa.height - FAST_BTN_H - 8, mb.y + mb.height - FAST_BTN_H - 92)));
+    fastBtnWin.setBounds({ x: fx, y: fy, width: FAST_BTN_W, height: FAST_BTN_H });
+    return;
+  }
+
   const spaceRight = (wa.x + wa.width) - (mb.x + mb.width);
   const spaceLeft = mb.x - wa.x;
 
@@ -675,6 +709,12 @@ ipcMain.on('apoyo-ignore-mouse', (e, ignore) => {
   try { mainWin.setIgnoreMouseEvents(!!ignore, { forward: true }); } catch (err) {}
 });
 ipcMain.on('apoyo-quit', () => { try { isQuitting = true; app.quit(); } catch (e) {} });
+ipcMain.on('neo-theme-request', (e) => { try { e.sender.send('neo-theme', getApoyoTheme()); } catch (err) {} });
+ipcMain.on('neo-theme-set', (e, t) => {
+  _apoyoTheme = { mode: (t && t.mode) === 'light' ? 'light' : 'dark', accent: (t && t.accent) || '#2fcbf1' };
+  saveData({ apoyoTheme: _apoyoTheme });
+  broadcastApoyoTheme();
+});
 
 function crearDockApoyo() {
   const wa = screen.getPrimaryDisplay().workAreaSize;
@@ -702,15 +742,34 @@ function crearDockApoyo() {
   mainWin.loadFile(HTML_DOCK);
   // Click-through por defecto: el renderer lo desactiva cuando el mouse está sobre la barra o un panel
   try { mainWin.setIgnoreMouseEvents(true, { forward: true }); } catch (e) {}
-  mainWin.on('ready-to-show', () => { if (mainWin && !mainWin.isDestroyed()) mainWin.show(); });
-
   const saveDock = () => {
     if (!mainWin || mainWin.isDestroyed()) return;
     const b = mainWin.getBounds();
     savePos({ dockApoyo: { x: b.x, y: b.y, width: b.width, height: b.height } });
   };
-  mainWin.on('move', () => { saveDock(); repositionFastBtn(); });
-  mainWin.on('resize', saveDock);
+  const enviarLadoApoyo = () => {
+    if (!mainWin || mainWin.isDestroyed()) return;
+    const b = mainWin.getBounds();
+    const wa = screen.getDisplayMatching(b).workArea;
+    try { mainWin.webContents.send('apoyo-bounds', { x: b.x, width: b.width, screenW: wa.x + wa.width }); } catch (e) {}
+  };
+  mainWin.on('ready-to-show', () => { if (mainWin && !mainWin.isDestroyed()) { mainWin.show(); enviarLadoApoyo(); } });
+
+  let snapping = false;
+  mainWin.on('move', () => {
+    if (!mainWin || mainWin.isDestroyed()) return;
+    if (!snapping) {
+      const b = mainWin.getBounds();
+      const wa = screen.getDisplayMatching(b).workArea;
+      const derecha = (b.x + b.width / 2) > (wa.x + wa.width / 2);
+      let nx = b.x;
+      if (!derecha && (b.x - wa.x) < 26) nx = wa.x;
+      else if (derecha && ((wa.x + wa.width) - (b.x + b.width)) < 26) nx = wa.x + wa.width - b.width;
+      if (nx !== b.x) { snapping = true; mainWin.setBounds({ x: nx, y: b.y, width: b.width, height: b.height }); snapping = false; }
+    }
+    saveDock(); enviarLadoApoyo(); repositionFastBtn();
+  });
+  mainWin.on('resize', () => { saveDock(); enviarLadoApoyo(); });
   mainWin.on('closed', () => { mainWin = null; });
 
   // El botón flotante de Fast NO se pierde en modo apoyo
@@ -1045,6 +1104,9 @@ function openTool(id) {
   });
 
   win.loadFile(conf.file);
+
+  // NeoApoyos: inyecta el skin "cristal líquido" en la herramienta
+  win.webContents.on('did-finish-load', () => aplicarSkin(win));
 
   win.on('ready-to-show', () => {
     if (win && !win.isDestroyed()) {
