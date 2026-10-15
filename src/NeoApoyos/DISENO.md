@@ -2,11 +2,16 @@
 
 > Documento de decisiones para la interfaz de Apoyo. Se irá completando a medida que avancemos.
 
-## Arquitectura (a confirmar)
-- NeoApoyos será un **modo del mismo programa** (flag `--apoyo`) que **reutiliza `src/main.js`**.
+## Estado
+- **Versión:** NeoApoyos **v0.1** (numeración propia; el motor del gestor sigue en 6.1.x).
+- **Fase 0 (hecha):** modo `--apoyo` + dock real que abre las herramientas.
+
+## Arquitectura (decidida)
+- NeoApoyos es un **modo del mismo programa** (`--apoyo`) que **reutiliza `src/main.js`**.
 - **Mismo `userData`** (`%APPDATA%\gestor-casos`) → mismo `gestor-data.json` / `gestor-pos.json`.
   El contenido del usuario **no se pierde ni se duplica**.
-- `src/NeoApoyos/package.json` → `"start": "electron ..\\.. --apoyo"` (se corre con `npm start`).
+- `src/NeoApoyos/package.json` → `"start": "electron ../.. --apoyo"` (se corre con `npm start`).
+- En modo apoyo la **ventana principal** carga `src/NeoApoyos/index.html` (el dock), no la UI de agente.
 
 ## Barra lateral (dock)
 - Ancho base: **78px** (fijo).

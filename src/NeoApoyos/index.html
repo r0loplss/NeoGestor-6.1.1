@@ -2,12 +2,12 @@
 <html lang="es" data-accent="cyan">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NeoApoyos · Máscara de interfaz</title>
+<title>NeoApoyos</title>
 <style>
     /* ============================================================
-       NEOAPOYOS — MÁSCARA DE INTERFAZ (solo UI, sin lógica real)
-       Estilo: "cristal líquido" (glassmorphism) sobre fondo ambiente.
+       NEOAPOYOS v0.1 — Barra lateral (dock)
+       Ventana transparente + click-through. Solo la barra y los
+       paneles capturan el mouse; el resto deja pasar los clics.
        ============================================================ */
 
     :root {
@@ -15,13 +15,10 @@
         --accent-2: #6ea8ff;
         --accent-soft: rgba(47, 203, 241, .18);
 
-        --bg: #070b12;
-
-        /* Cristal de la barra */
-        --glass: linear-gradient(180deg, rgba(255,255,255,.105), rgba(255,255,255,.045));
-        --glass-strong: linear-gradient(180deg, rgba(255,255,255,.17), rgba(255,255,255,.075));
+        --glass: linear-gradient(180deg, rgba(34,42,60,.70), rgba(18,24,36,.64));
+        --glass-strong: linear-gradient(180deg, rgba(52,62,84,.86), rgba(30,38,54,.80));
         --glass-border: rgba(255,255,255,.14);
-        --glass-hi: rgba(255,255,255,.40);
+        --glass-hi: rgba(255,255,255,.34);
 
         --txt: #eaf1fb;
         --txt-dim: #a7b6cc;
@@ -29,255 +26,134 @@
 
         --radius: 20px;
         --radius-sm: 13px;
-
         --dock-w: 78px;
         --ease: cubic-bezier(.22, 1, .36, 1);
         --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
-
     [data-accent="violet"]  { --accent:#a78bfa; --accent-2:#8b5cf6; --accent-soft:rgba(167,139,250,.20); }
     [data-accent="emerald"] { --accent:#34d399; --accent-2:#10b981; --accent-soft:rgba(52,211,153,.20); }
     [data-accent="amber"]   { --accent:#fbbf24; --accent-2:#f59e0b; --accent-soft:rgba(251,191,36,.20); }
     [data-accent="rose"]    { --accent:#fb7185; --accent-2:#f43f5e; --accent-soft:rgba(251,113,133,.20); }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-        height: 100%;
-        overflow: hidden;
-        background: var(--bg);
-        color: var(--txt);
-        font-family: var(--font);
-        -webkit-font-smoothing: antialiased;
-    }
-
-    /* ---------- Fondo ambiente (aurora líquida) ---------- */
-    .ambient { position: fixed; inset: 0; overflow: hidden; z-index: 0; }
-    .ambient::after { /* velo oscuro para dar profundidad */
-        content: ''; position: absolute; inset: 0;
-        background: radial-gradient(120% 90% at 50% 0%, rgba(6,10,18,.15), rgba(5,8,14,.72) 70%);
-    }
-    .blob {
-        position: absolute; border-radius: 50%;
-        filter: blur(80px); opacity: .55; mix-blend-mode: screen;
-        will-change: transform;
-    }
-    .b1 { width: 46vw; height: 46vw; left: -6vw; top: -8vw; background: radial-gradient(circle at 30% 30%, var(--accent), transparent 65%); animation: drift1 26s ease-in-out infinite; }
-    .b2 { width: 40vw; height: 40vw; right: -8vw; top: 10vh; background: radial-gradient(circle at 60% 40%, #8b5cf6, transparent 65%); animation: drift2 32s ease-in-out infinite; }
-    .b3 { width: 44vw; height: 44vw; left: 20vw; bottom: -14vw; background: radial-gradient(circle at 50% 50%, #14b8a6, transparent 66%); animation: drift3 38s ease-in-out infinite; }
-    .b4 { width: 30vw; height: 30vw; right: 14vw; bottom: -10vw; background: radial-gradient(circle at 50% 50%, #3b82f6, transparent 66%); opacity: .4; animation: drift1 30s ease-in-out infinite reverse; }
-    @keyframes drift1 { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(6vw,4vh,0) scale(1.12)} }
-    @keyframes drift2 { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(-5vw,6vh,0) scale(1.08)} }
-    @keyframes drift3 { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(4vw,-5vh,0) scale(1.14)} }
-
-    /* ---------- Estructura ---------- */
-    .app { position: relative; z-index: 1; display: flex; height: 100vh; padding: 14px; gap: 14px; }
+    html, body { height: 100%; overflow: hidden; background: transparent; color: var(--txt); font-family: var(--font); -webkit-font-smoothing: antialiased; user-select: none; }
 
     .glass {
         background: var(--glass);
-        -webkit-backdrop-filter: blur(22px) saturate(165%);
-        backdrop-filter: blur(22px) saturate(165%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        backdrop-filter: blur(20px) saturate(160%);
         border: 1px solid var(--glass-border);
-        box-shadow: 0 18px 50px rgba(0,0,0,.42), inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 rgba(255,255,255,.05);
+        box-shadow: 0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi), inset 0 -1px 0 rgba(255,255,255,.05);
     }
 
     /* ============================================================
-       BARRA LATERAL (DOCK)
+       BARRA LATERAL
        ============================================================ */
     .dock {
-        position: relative;
-        flex: 0 0 auto;
+        position: fixed; left: 12px; top: 12px; bottom: 12px;
         width: var(--dock-w);
         border-radius: var(--radius);
         padding: 12px 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        overflow: visible;                 /* permite el "flyout" al pasar el mouse */
+        display: flex; flex-direction: column; gap: 12px;
+        overflow: visible;                 /* el flyout puede salir del ancho de la barra */
         z-index: 60;
-        transition: width .34s var(--ease), transform .4s var(--ease), opacity .3s;
+        transition: width .32s var(--ease), transform .4s var(--ease), opacity .3s;
     }
-    .dock::before { /* brillo superior tipo cristal */
-        content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-        background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 22%);
-    }
-    .app.closed .dock { display: none; }
+    .dock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 22%); }
+    body.collapsed .dock { display: none; }
 
-    /* Marca */
     .dock-brand { display: flex; align-items: center; gap: 10px; padding: 4px 2px 8px; -webkit-app-region: drag; }
     .brand-tile {
-        width: 40px; height: 40px; flex: 0 0 auto;
-        display: grid; place-items: center;
+        width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center;
         border-radius: 12px; font-weight: 800; font-size: 18px; color: #04121a;
         background: linear-gradient(145deg, var(--accent), var(--accent-2));
         box-shadow: 0 6px 18px var(--accent-soft), inset 0 1px 0 rgba(255,255,255,.6);
     }
-    .brand-text { display: flex; flex-direction: column; line-height: 1.15; white-space: nowrap; overflow: hidden;
-        opacity: 0; max-width: 0; transform: translateX(-6px); transition: .3s var(--ease); }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.15; white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-6px); transition: .3s var(--ease); }
     .brand-text b { font-size: 14px; letter-spacing: .2px; }
-    .brand-text small { font-size: 10.5px; color: var(--txt-faint); text-transform: uppercase; letter-spacing: 1px; }
+    .brand-text small { font-size: 10px; color: var(--txt-faint); text-transform: uppercase; letter-spacing: 1px; }
     .dock.expanded .brand-text, .dock:hover .brand-text { opacity: 1; max-width: 190px; transform: none; }
 
-    /* Herramientas */
     .dock-tools { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; overflow-y: auto; overflow-x: hidden; padding: 2px; flex: 1; }
     .dock-tools::-webkit-scrollbar { width: 0; }
 
     .tool {
-        position: relative;
-        width: calc(var(--dock-w) - 20px);
-        height: 52px;
-        flex: 0 0 auto;
-        display: flex; align-items: center; gap: 0;
-        padding: 0 8px;
-        border: 1px solid transparent;
-        border-radius: var(--radius-sm);
-        background: transparent;
-        color: var(--txt-dim);
-        cursor: pointer;
-        font-family: inherit; font-size: 13px;
-        text-align: left;
+        position: relative; width: calc(var(--dock-w) - 20px); height: 52px; flex: 0 0 auto;
+        display: flex; align-items: center; padding: 0 8px;
+        border: 1px solid transparent; border-radius: var(--radius-sm);
+        background: transparent; color: var(--txt-dim); cursor: pointer;
+        font-family: inherit; font-size: 13px; text-align: left;
         transition: width .30s var(--ease), background .2s, border-color .2s, transform .2s var(--ease), color .2s;
         z-index: 1;
     }
-    .tool .tile {
-        width: 36px; height: 36px; flex: 0 0 auto;
-        display: grid; place-items: center; font-size: 19px;
-        border-radius: 11px;
-        background: var(--glass-strong);
-        border: 1px solid var(--glass-border);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
-        transition: transform .25s var(--ease), box-shadow .25s;
-    }
-    .tool .lbl { white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-8px);
-        transition: .28s var(--ease); font-weight: 600; letter-spacing: .2px; }
-    .tool .lbl small { display: block; font-weight: 500; font-size: 10.5px; color: var(--txt-faint); letter-spacing: .2px; }
+    .tool .tile { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; font-size: 19px; border-radius: 11px; background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); transition: transform .25s var(--ease); }
+    .tool .lbl { white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-8px); transition: .28s var(--ease); font-weight: 600; letter-spacing: .2px; }
+    .tool .lbl small { display: block; font-weight: 500; font-size: 10.5px; color: var(--txt-faint); }
 
-    /* Hover (modo compacto): se ensancha el botón y aparece el nombre */
+    /* Hover: SOLO el botón se ensancha (la barra NO) */
     .dock:not(.expanded) .tool:hover {
-        width: 244px;
-        background: var(--glass-strong);
-        border-color: var(--glass-border);
-        color: var(--txt);
-        transform: translateX(2px);
-        z-index: 70;
-        box-shadow: 0 14px 34px rgba(0,0,0,.42), inset 0 1px 0 var(--glass-hi);
+        width: 244px; background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt);
+        transform: translateX(2px); z-index: 70;
+        box-shadow: 0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi);
     }
-    .dock:not(.expanded) .tool:hover .tile { transform: scale(1.06); box-shadow: 0 6px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.3); }
+    .dock:not(.expanded) .tool:hover .tile { transform: scale(1.06); }
     .dock:not(.expanded) .tool:hover .lbl { opacity: 1; max-width: 180px; transform: none; margin-left: 12px; }
 
-    /* Modo expandido: etiquetas siempre visibles */
     .dock.expanded .tool { width: 100%; }
     .dock.expanded .tool .lbl { opacity: 1; max-width: 200px; transform: none; margin-left: 12px; }
     .dock.expanded .tool:hover { background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt); }
 
-    /* Herramienta activa */
     .tool.active { color: var(--txt); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
-    .tool.active::before {
-        content: ''; position: absolute; left: -10px; top: 50%; transform: translateY(-50%);
-        width: 4px; height: 26px; border-radius: 4px; background: linear-gradient(var(--accent), var(--accent-2));
-        box-shadow: 0 0 14px var(--accent);
-    }
+    .tool.active::before { content: ''; position: absolute; left: -10px; top: 50%; transform: translateY(-50%); width: 4px; height: 26px; border-radius: 4px; background: linear-gradient(var(--accent), var(--accent-2)); box-shadow: 0 0 14px var(--accent); }
     .tool.active .tile { background: linear-gradient(145deg, var(--accent), var(--accent-2)); color: #04121a; border-color: transparent; }
 
-    /* Pie del dock */
     .dock-foot { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.08); }
     .dock-btn {
-        position: relative;
-        width: calc(var(--dock-w) - 20px); height: 44px;
-        display: flex; align-items: center; gap: 0; padding: 0 8px;
-        border: 1px solid transparent; border-radius: 12px;
-        background: transparent; color: var(--txt-dim); cursor: pointer;
-        font-family: inherit; font-size: 12.5px; font-weight: 600; text-align: left;
+        position: relative; width: calc(var(--dock-w) - 20px); height: 44px;
+        display: flex; align-items: center; padding: 0 8px;
+        border: 1px solid transparent; border-radius: 12px; background: transparent;
+        color: var(--txt-dim); cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600; text-align: left;
         transition: width .3s var(--ease), background .2s, color .2s, border-color .2s, transform .2s var(--ease);
     }
     .dock-btn .ic { width: 30px; height: 30px; flex: 0 0 auto; display: grid; place-items: center; font-size: 16px; }
     .dock-btn .lbl { white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-8px); transition: .28s var(--ease); }
-    .dock:not(.expanded) .dock-btn:hover { width: 244px; background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt); z-index: 70; transform: translateX(2px); box-shadow: 0 14px 34px rgba(0,0,0,.42), inset 0 1px 0 var(--glass-hi); }
+    .dock:not(.expanded) .dock-btn:hover { width: 244px; background: var(--glass-strong); border-color: var(--glass-border); color: var(--txt); z-index: 70; transform: translateX(2px); box-shadow: 0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi); }
     .dock:not(.expanded) .dock-btn:hover .lbl { opacity: 1; max-width: 180px; transform: none; margin-left: 10px; }
     .dock.expanded .dock-btn { width: 100%; }
     .dock.expanded .dock-btn .lbl { opacity: 1; max-width: 200px; transform: none; margin-left: 10px; }
     .dock.expanded .dock-btn:hover { background: var(--glass-strong); color: var(--txt); }
     .dock-btn.danger:hover { color: #ffd7d7; background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.35); }
 
-    /* Agarradera para ensanchar/estrechar */
-    .dock-grip {
-        position: absolute; top: 50%; right: -4px; transform: translateY(-50%);
-        width: 8px; height: 60px; border-radius: 6px; cursor: ew-resize;
-        background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.12), rgba(255,255,255,.05));
-        opacity: .35; transition: opacity .2s, background .2s;
-    }
+    .dock-grip { position: absolute; top: 50%; right: -4px; transform: translateY(-50%); width: 8px; height: 60px; border-radius: 6px; cursor: ew-resize; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.12), rgba(255,255,255,.05)); opacity: .35; transition: opacity .2s; }
     .dock-grip::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 2px; height: 26px; border-radius: 2px; background: rgba(255,255,255,.5); }
     .dock-grip:hover { opacity: .95; }
 
-    /* Botón para reabrir (cuando la barra está cerrada) */
-    .reopen {
-        position: fixed; left: 12px; top: 50%; transform: translateY(-50%);
-        width: 44px; height: 52px; border-radius: 14px; z-index: 80;
-        display: none; place-items: center; cursor: pointer; color: var(--txt);
-        font-size: 18px;
-    }
-    .app.closed .reopen { display: grid; animation: popIn .3s var(--ease); }
+    .reopen { position: fixed; left: 12px; top: 50%; transform: translateY(-50%); width: 44px; height: 52px; border-radius: 14px; z-index: 80; display: none; place-items: center; cursor: pointer; color: var(--txt); font-size: 18px; }
+    body.collapsed .reopen { display: grid; animation: popIn .3s var(--ease); }
     @keyframes popIn { from { opacity: 0; transform: translateY(-50%) scale(.85); } to { opacity: 1; transform: translateY(-50%) scale(1); } }
 
     /* ============================================================
-       ÁREA DE CONTENIDO (stage)
+       PANEL DE NOTAS (cristal, a la derecha de la barra)
        ============================================================ */
-    .stage { position: relative; flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 12px; z-index: 10; }
-
-    .stage-top { display: flex; align-items: center; gap: 10px; padding: 2px 6px; -webkit-app-region: drag; }
-    .crumbs { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--txt-dim); }
-    .crumbs .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
-    .crumbs b { color: var(--txt); font-weight: 700; letter-spacing: .3px; }
-    .win-controls { margin-left: auto; display: flex; gap: 8px; -webkit-app-region: no-drag; }
-    .wc { width: 34px; height: 28px; border-radius: 9px; border: 1px solid var(--glass-border); background: var(--glass); color: var(--txt-dim); cursor: pointer; font-size: 12px; transition: .18s; }
-    .wc:hover { color: var(--txt); background: var(--glass-strong); }
-    .wc.close:hover { color: #fff; background: rgba(239,68,68,.55); border-color: rgba(239,68,68,.6); }
-
-    .stage-window { flex: 1 1 auto; min-height: 0; border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
-    .sw-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .sw-icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; background: linear-gradient(145deg, var(--accent), var(--accent-2)); color: #04121a; box-shadow: 0 6px 18px var(--accent-soft); }
-    .sw-title b { font-size: 15px; letter-spacing: .2px; }
-    .sw-title small { display: block; font-size: 11.5px; color: var(--txt-faint); margin-top: 1px; }
-    .sw-spacer { flex: 1; }
-    .pill { font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; }
-
-    .sw-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 18px; }
-    .placeholder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
-    .ph { height: 120px; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; position: relative; overflow: hidden; animation: rise .5s var(--ease) both; }
-    .ph::before { content: ''; position: absolute; inset: 0; background: linear-gradient(120deg, transparent, rgba(255,255,255,.08), transparent); transform: translateX(-100%); animation: sheen 4.5s ease-in-out infinite; }
-    .ph .bar { height: 8px; border-radius: 6px; background: rgba(255,255,255,.16); }
-    .ph .bar.w1 { width: 62%; } .ph .bar.w2 { width: 40%; background: rgba(255,255,255,.09); }
-    .ph .tag { position: absolute; top: 12px; left: 14px; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--txt-faint); }
-    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    @keyframes sheen { 0%,100% { transform: translateX(-100%); } 55% { transform: translateX(100%); } }
-
-    /* ============================================================
-       PANEL DE NOTAS (cristal, desliza desde la derecha)
-       ============================================================ */
-    .notes {
-        position: fixed; top: 14px; right: 14px; bottom: 14px; width: min(340px, 88vw);
-        border-radius: var(--radius); padding: 16px; z-index: 90;
-        display: flex; flex-direction: column; gap: 12px;
-        transform: translateX(120%); opacity: 0; transition: transform .42s var(--ease), opacity .3s;
-    }
+    .notes { position: fixed; top: 12px; bottom: 12px; right: 12px; width: 340px; border-radius: var(--radius); padding: 16px; z-index: 90; display: flex; flex-direction: column; gap: 12px; transform: translateX(120%); opacity: 0; transition: transform .42s var(--ease), opacity .3s; }
     .notes.open { transform: none; opacity: 1; }
     .notes-head { display: flex; align-items: center; gap: 10px; }
     .notes-head b { font-size: 14px; }
     .notes-head .x { margin-left: auto; }
     .note { border-radius: 13px; padding: 12px 14px; font-size: 12.5px; color: var(--txt-dim); background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
-    .note b { color: var(--txt); font-size: 12.5px; }
+    .note b { color: var(--txt); }
     .note .meta { font-size: 10px; color: var(--txt-faint); margin-top: 6px; letter-spacing: .4px; }
-    .notes textarea {
-        width: 100%; min-height: 90px; resize: vertical; border-radius: 12px; padding: 10px 12px;
-        background: rgba(0,0,0,.22); border: 1px solid var(--glass-border); color: var(--txt); font-family: inherit; font-size: 12.5px; outline: none;
-    }
+    .notes textarea { width: 100%; min-height: 84px; resize: vertical; border-radius: 12px; padding: 10px 12px; background: rgba(0,0,0,.25); border: 1px solid var(--glass-border); color: var(--txt); font-family: inherit; font-size: 12.5px; outline: none; }
     .notes textarea:focus { border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+    .hint-mini { font-size: 10.5px; color: var(--txt-faint); }
 
     /* ============================================================
-       SELECTOR DE TONO (para evaluar paletas)
+       PANEL DE AJUSTES (tono / salir)
        ============================================================ */
-    .theme-dock { position: fixed; bottom: 16px; right: 16px; z-index: 95; display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 999px; }
-    .theme-dock span { font-size: 10.5px; color: var(--txt-faint); letter-spacing: 1px; text-transform: uppercase; }
+    .settings { position: fixed; left: 108px; bottom: 12px; width: 300px; border-radius: 16px; padding: 14px; z-index: 95; display: none; flex-direction: column; gap: 12px; }
+    .settings.open { display: flex; }
+    .settings .row { display: flex; align-items: center; gap: 10px; }
+    .settings .row span { font-size: 11px; color: var(--txt-faint); letter-spacing: 1px; text-transform: uppercase; }
     .swatch { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .18s; }
     .swatch:hover { transform: scale(1.12); }
     .swatch.on { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.25); }
@@ -286,99 +162,61 @@
     .sw-emerald { background: linear-gradient(145deg,#34d399,#10b981); }
     .sw-amber { background: linear-gradient(145deg,#fbbf24,#f59e0b); }
     .sw-rose { background: linear-gradient(145deg,#fb7185,#f43f5e); }
+    .btn-quit { margin-top: 2px; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.12); color: #ffd7d7; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600; }
+    .btn-quit:hover { background: rgba(239,68,68,.22); }
 
-    .hint { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 95; font-size: 11px; color: var(--txt-faint); background: rgba(0,0,0,.28); border: 1px solid var(--glass-border); padding: 6px 14px; border-radius: 999px; backdrop-filter: blur(10px); }
-    .app.closed .hint { left: calc(50% + 0px); }
+    .wc { width: 30px; height: 26px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--glass); color: var(--txt-dim); cursor: pointer; font-size: 12px; }
+    .wc:hover { color: var(--txt); background: var(--glass-strong); }
 </style>
 </head>
 <body>
 
-    <!-- Fondo ambiente -->
-    <div class="ambient" aria-hidden="true">
-        <span class="blob b1"></span>
-        <span class="blob b2"></span>
-        <span class="blob b3"></span>
-        <span class="blob b4"></span>
-    </div>
-
-    <div class="app" id="app">
-
-        <!-- ===================== BARRA LATERAL ===================== -->
-        <aside class="dock glass" id="dock" style="--dock-w:78px;">
-            <div class="dock-brand">
-                <div class="brand-tile">N</div>
-                <div class="brand-text"><b>NeoApoyos</b><small>Modo Apoyo</small></div>
-            </div>
-
-            <nav class="dock-tools" id="tools"></nav>
-
-            <div class="dock-foot">
-                <button class="dock-btn" id="btnNotes" title="Notas"><span class="ic">🗒️</span><span class="lbl">Mis Notas</span></button>
-                <button class="dock-btn" id="btnPin" title="Fijar / expandir barra"><span class="ic">⇔</span><span class="lbl">Expandir barra</span></button>
-                <button class="dock-btn danger" id="btnClose" title="Cerrar barra"><span class="ic">✕</span><span class="lbl">Cerrar barra</span></button>
-            </div>
-
-            <div class="dock-grip" id="grip" title="Arrastrar para ensanchar / estrechar"></div>
-        </aside>
-
-        <!-- Reabrir barra -->
-        <button class="reopen glass" id="reopen" title="Mostrar barra">☰</button>
-
-        <!-- ===================== CONTENIDO ===================== -->
-        <main class="stage">
-            <div class="stage-top">
-                <div class="crumbs"><span class="dot"></span> NeoApoyos <span style="opacity:.4">/</span> <b id="crumbTool">Inicio</b></div>
-                <div class="win-controls">
-                    <button class="wc" title="Minimizar">—</button>
-                    <button class="wc close" title="Cerrar">✕</button>
-                </div>
-            </div>
-
-            <section class="stage-window glass" id="stageWindow">
-                <header class="sw-head">
-                    <div class="sw-icon" id="swIcon">◐</div>
-                    <div class="sw-title">
-                        <b id="swName">Panel de Apoyo</b>
-                        <small id="swDesc">Elegí una herramienta del panel lateral para previsualizarla</small>
-                    </div>
-                    <div class="sw-spacer"></div>
-                    <span class="pill">Máscara</span>
-                </header>
-                <div class="sw-body">
-                    <div class="placeholder-grid" id="phGrid"></div>
-                </div>
-            </section>
-        </main>
-
-        <!-- ===================== NOTAS ===================== -->
-        <aside class="notes glass" id="notesPanel">
-            <div class="notes-head">
-                <span style="font-size:16px">🗒️</span><b>Mis Notas</b>
-                <button class="wc x" id="notesClose" title="Cerrar">✕</button>
-            </div>
-            <div class="note"><b>Recordatorio</b><br>Revisar el radar de contingencias cada 30 min y avisar a los agentes de las comunas afectadas.<div class="meta">Hoy · 09:12</div></div>
-            <div class="note"><b>Turnos</b><br>Cobertura de colaciones de 13:00 a 14:00 — coordinar con supervisión.<div class="meta">Hoy · 08:40</div></div>
-            <textarea placeholder="Nueva nota... (esto es solo una máscara)"></textarea>
-        </aside>
-
-        <!-- ===================== TONOS ===================== -->
-        <div class="theme-dock glass" id="themeDock">
-            <span>Tono</span>
-            <div class="swatch sw-cyan on" data-accent="cyan" title="Cian"></div>
-            <div class="swatch sw-violet" data-accent="violet" title="Violeta"></div>
-            <div class="swatch sw-emerald" data-accent="emerald" title="Esmeralda"></div>
-            <div class="swatch sw-amber" data-accent="amber" title="Ámbar"></div>
-            <div class="swatch sw-rose" data-accent="rose" title="Rosa"></div>
+    <!-- ===================== BARRA LATERAL ===================== -->
+    <aside class="dock glass" id="dock" style="--dock-w:78px;">
+        <div class="dock-brand">
+            <div class="brand-tile">N</div>
+            <div class="brand-text"><b>NeoApoyos</b><small>Modo Apoyo · v0.1</small></div>
         </div>
+        <nav class="dock-tools" id="tools"></nav>
+        <div class="dock-foot">
+            <button class="dock-btn" id="btnNotes" title="Notas"><span class="ic">🗒️</span><span class="lbl">Mis Notas</span></button>
+            <button class="dock-btn" id="btnSettings" title="Ajustes"><span class="ic">⚙️</span><span class="lbl">Ajustes</span></button>
+            <button class="dock-btn" id="btnPin" title="Fijar / expandir barra"><span class="ic">⇔</span><span class="lbl">Expandir barra</span></button>
+            <button class="dock-btn danger" id="btnClose" title="Cerrar barra"><span class="ic">✕</span><span class="lbl">Cerrar barra</span></button>
+        </div>
+        <div class="dock-grip" id="grip" title="Arrastrar para ensanchar / estrechar"></div>
+    </aside>
 
-        <div class="hint">Máscara de interfaz · pasá el mouse por los íconos · arrastrá el borde de la barra para ensanchar</div>
+    <button class="reopen glass" id="reopen" title="Mostrar barra">☰</button>
+
+    <!-- ===================== NOTAS ===================== -->
+    <aside class="notes glass" id="notesPanel">
+        <div class="notes-head"><span style="font-size:16px">🗒️</span><b>Mis Notas</b><button class="wc x" id="notesClose" title="Cerrar">✕</button></div>
+        <div class="note"><b>Recordatorio</b><br>Revisar el radar de contingencias cada 30 min y avisar a los agentes de las comunas afectadas.<div class="meta">Hoy · 09:12</div></div>
+        <div class="note"><b>Turnos</b><br>Cobertura de colaciones de 13:00 a 14:00 — coordinar con supervisión.<div class="meta">Hoy · 08:40</div></div>
+        <textarea placeholder="Nueva nota..."></textarea>
+        <div class="hint-mini">Demo — se conectará a tus notas reales.</div>
+    </aside>
+
+    <!-- ===================== AJUSTES ===================== -->
+    <div class="settings glass" id="settingsPanel">
+        <div class="row">
+            <span>Tono</span>
+            <div class="swatch sw-cyan on" data-accent="cyan"></div>
+            <div class="swatch sw-violet" data-accent="violet"></div>
+            <div class="swatch sw-emerald" data-accent="emerald"></div>
+            <div class="swatch sw-amber" data-accent="amber"></div>
+            <div class="swatch sw-rose" data-accent="rose"></div>
+        </div>
+        <button class="btn-quit" id="btnQuit">Salir de NeoApoyos</button>
     </div>
 
     <script>
     (function () {
         'use strict';
+        var ipc = require('electron').ipcRenderer;
 
-        // Herramientas (mismas del NeoGestor, orden pensado para el rol de Apoyo)
+        // Herramientas (ids deben coincidir con TOOLS_CONFIG del programa)
         var TOOLS = [
             { id: 'contingencias', icon: '📡', name: 'Radar Contingencias', desc: 'Fallas masivas en tiempo real' },
             { id: 'trafico',       icon: '📶', name: 'Tráfico PRO',         desc: 'Analizador de consumos' },
@@ -391,95 +229,38 @@
             { id: 'fast',          icon: '⚡', name: 'Fast',                desc: 'Tarjetas y apuntes rápidos' }
         ];
 
-        var app = document.getElementById('app');
         var dock = document.getElementById('dock');
         var toolsNav = document.getElementById('tools');
         var notesPanel = document.getElementById('notesPanel');
-        var swName = document.getElementById('swName');
-        var swDesc = document.getElementById('swDesc');
-        var swIcon = document.getElementById('swIcon');
-        var crumbTool = document.getElementById('crumbTool');
-        var phGrid = document.getElementById('phGrid');
+        var settingsPanel = document.getElementById('settingsPanel');
+        var reopen = document.getElementById('reopen');
+        var bodyEl = document.body;
+        var toolBtns = {};
 
-        // Render de herramientas
-        TOOLS.forEach(function (t, idx) {
+        TOOLS.forEach(function (t) {
             var b = document.createElement('button');
             b.className = 'tool';
             b.dataset.tool = t.id;
-            b.style.animationDelay = (idx * 30) + 'ms';
             b.innerHTML = '<span class="tile">' + t.icon + '</span>' +
                           '<span class="lbl">' + t.name + '<small>' + t.desc + '</small></span>';
-            b.addEventListener('click', function () { activar(t, b); });
+            b.addEventListener('click', function () { ipc.send('toggle-tool', t.id); });
             toolsNav.appendChild(b);
+            toolBtns[t.id] = b;
         });
 
-        // Grid de placeholders (para ver el cristal sobre el contenido)
-        var tags = ['Panel', 'Tabla', 'Resumen', 'Actividad', 'Filtros', 'Detalle'];
-        for (var i = 0; i < 6; i++) {
-            var ph = document.createElement('div');
-            ph.className = 'ph glass';
-            ph.style.animationDelay = (i * 60) + 'ms';
-            ph.innerHTML = '<span class="tag">' + tags[i] + '</span><div class="bar w1"></div><div class="bar w2"></div>';
-            phGrid.appendChild(ph);
-        }
-
-        function activar(t, btn) {
-            Array.prototype.forEach.call(toolsNav.children, function (c) { c.classList.remove('active'); });
-            btn.classList.add('active');
-            swName.textContent = t.name;
-            swDesc.textContent = t.desc;
-            swIcon.textContent = t.icon;
-            crumbTool.textContent = t.name;
-            var win = document.getElementById('stageWindow');
-            win.style.animation = 'none';
-            void win.offsetWidth;
-            win.style.animation = 'rise .35s cubic-bezier(.22,1,.36,1)';
-        }
+        // Resaltar herramientas abiertas (eventos del proceso principal)
+        ['tool-opened', 'tool-restored', 'tool-focused'].forEach(function (ev) {
+            ipc.on(ev, function (e, id) { if (toolBtns[id]) toolBtns[id].classList.add('active'); });
+        });
+        ipc.on('tool-closed', function (e, id) { if (toolBtns[id]) toolBtns[id].classList.remove('active'); });
 
         // ---- Notas ----
         document.getElementById('btnNotes').addEventListener('click', function () { notesPanel.classList.add('open'); });
         document.getElementById('notesClose').addEventListener('click', function () { notesPanel.classList.remove('open'); });
 
-        // ---- Fijar / expandir ----
-        var EXPANDED = 244, COMPACT = 78;
-        document.getElementById('btnPin').addEventListener('click', function () {
-            if (dock.classList.contains('expanded')) {
-                dock.classList.remove('expanded');
-                setDockWidth(COMPACT);
-            } else {
-                dock.classList.add('expanded');
-                setDockWidth(EXPANDED);
-            }
-        });
-        function setDockWidth(w) { dock.style.setProperty('--dock-w', w + 'px'); }
-
-        // ---- Cerrar / reabrir ----
-        document.getElementById('btnClose').addEventListener('click', function () { app.classList.add('closed'); });
-        document.getElementById('reopen').addEventListener('click', function () { app.classList.remove('closed'); });
-
-        // ---- Agarradera: ensanchar / estrechar con el mouse ----
-        var grip = document.getElementById('grip');
-        var dragging = false;
-        grip.addEventListener('mousedown', function (e) {
-            dragging = true; e.preventDefault();
-            document.body.style.cursor = 'ew-resize';
-            document.body.style.userSelect = 'none';
-        });
-        document.addEventListener('mousemove', function (e) {
-            if (!dragging) return;
-            var w = Math.max(72, Math.min(300, e.clientX - 14));
-            setDockWidth(w);
-            if (w > 150) dock.classList.add('expanded');
-            else dock.classList.remove('expanded');
-        });
-        document.addEventListener('mouseup', function () {
-            if (!dragging) return;
-            dragging = false;
-            document.body.style.cursor = '';
-            document.body.style.userSelect = '';
-        });
-
-        // ---- Selector de tono ----
+        // ---- Ajustes ----
+        document.getElementById('btnSettings').addEventListener('click', function (e) { e.stopPropagation(); settingsPanel.classList.toggle('open'); });
+        document.getElementById('btnQuit').addEventListener('click', function () { ipc.send('apoyo-quit'); });
         Array.prototype.forEach.call(document.querySelectorAll('.swatch'), function (s) {
             s.addEventListener('click', function () {
                 document.documentElement.setAttribute('data-accent', s.dataset.accent);
@@ -487,6 +268,41 @@
                 s.classList.add('on');
             });
         });
+
+        // ---- Expandir / estrechar la barra ----
+        var EXPANDED = 244, COMPACT = 78;
+        document.getElementById('btnPin').addEventListener('click', function () {
+            if (dock.classList.contains('expanded')) { dock.classList.remove('expanded'); setW(COMPACT); }
+            else { dock.classList.add('expanded'); setW(EXPANDED); }
+        });
+        function setW(w) { dock.style.setProperty('--dock-w', w + 'px'); }
+
+        // ---- Cerrar / reabrir la barra ----
+        document.getElementById('btnClose').addEventListener('click', function () { bodyEl.classList.add('collapsed'); });
+        reopen.addEventListener('click', function () { bodyEl.classList.remove('collapsed'); });
+
+        // ---- Agarradera ----
+        var grip = document.getElementById('grip'), dragging = false;
+        grip.addEventListener('mousedown', function (e) { dragging = true; e.preventDefault(); document.body.style.cursor = 'ew-resize'; });
+        document.addEventListener('mousemove', function (e) {
+            if (!dragging) return;
+            var w = Math.max(72, Math.min(300, e.clientX - 12));
+            setW(w);
+            if (w > 150) dock.classList.add('expanded'); else dock.classList.remove('expanded');
+        });
+        document.addEventListener('mouseup', function () { if (dragging) { dragging = false; document.body.style.cursor = ''; } });
+
+        // ---- Click-through: solo la barra y los paneles capturan el mouse ----
+        function esInteractivo(x, y) {
+            var el = document.elementFromPoint(x, y);
+            if (!el) return false;
+            return !!(dock.contains(el) || notesPanel.contains(el) || settingsPanel.contains(el) || reopen.contains(el));
+        }
+        var lastIgnore = true;
+        function setIgnore(v) { if (v !== lastIgnore) { lastIgnore = v; try { ipc.send('apoyo-ignore-mouse', v); } catch (e) {} } }
+        document.addEventListener('mousemove', function (e) { setIgnore(!esInteractivo(e.clientX, e.clientY)); });
+        document.addEventListener('mouseleave', function () { setIgnore(true); });
+        window.addEventListener('blur', function () { setIgnore(true); });
     })();
     </script>
 </body>

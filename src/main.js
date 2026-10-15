@@ -42,6 +42,16 @@ const HTML = {
   tipificadorV2: path.join(TOOLS, 'tipificador-v2', 'index.html')
 };
 
+// ============================================================
+// MODO APOYO (NeoApoyos)
+// Se activa con  --apoyo  (o NEOAPOYOS=1). Reutiliza TODO el motor
+// (herramientas, ventanas, datos, IPC) y solo cambia la ventana
+// principal por la barra lateral (dock).
+// ============================================================
+const MODO_APOYO = process.argv.includes('--apoyo') || process.env.NEOAPOYOS === '1';
+const HTML_DOCK = path.join(SRC, 'NeoApoyos', 'index.html');
+const DOCK_APOYO_W = 460;   // ancho de ventana (barra 78px + espacio para flyout y notas)
+
 let mainWin = null;
 let alertaWin = null;
 
@@ -657,7 +667,59 @@ function saveMainBounds() {
   }, 250);
 }
 
+// ============================================================
+// DOCK DE APOYO (barra lateral de NeoApoyos)
+// ============================================================
+ipcMain.on('apoyo-ignore-mouse', (e, ignore) => {
+  if (!mainWin || mainWin.isDestroyed()) return;
+  try { mainWin.setIgnoreMouseEvents(!!ignore, { forward: true }); } catch (err) {}
+});
+ipcMain.on('apoyo-quit', () => { try { isQuitting = true; app.quit(); } catch (e) {} });
+
+function crearDockApoyo() {
+  const wa = screen.getPrimaryDisplay().workAreaSize;
+  const defH = Math.max(520, wa.height - 40);
+  const pos = getPos('dockApoyo', {});
+  const posOk = !!(pos && typeof pos.x === 'number' && typeof pos.y === 'number' &&
+    screen.getAllDisplays().some(d =>
+      pos.x >= d.bounds.x - 60 && pos.x < d.bounds.x + d.bounds.width - 60 &&
+      pos.y >= d.bounds.y - 30 && pos.y < d.bounds.y + d.bounds.height - 30));
+
+  mainWin = new BrowserWindow({
+    width: DOCK_APOYO_W,
+    height: (posOk && pos.height > 0) ? pos.height : defH,
+    x: posOk ? pos.x : 12,
+    y: posOk ? pos.y : Math.round((wa.height - defH) / 2),
+    frame: false,
+    transparent: true,
+    resizable: true,
+    movable: true,
+    hasShadow: false,
+    alwaysOnTop: getAlwaysOnTopPreference(),
+    backgroundColor: '#00000000',
+    webPreferences: { nodeIntegration: true, contextIsolation: false }
+  });
+  mainWin.loadFile(HTML_DOCK);
+  // Click-through por defecto: el renderer lo desactiva cuando el mouse está sobre la barra o un panel
+  try { mainWin.setIgnoreMouseEvents(true, { forward: true }); } catch (e) {}
+  mainWin.on('ready-to-show', () => { if (mainWin && !mainWin.isDestroyed()) mainWin.show(); });
+
+  const saveDock = () => {
+    if (!mainWin || mainWin.isDestroyed()) return;
+    const b = mainWin.getBounds();
+    savePos({ dockApoyo: { x: b.x, y: b.y, width: b.width, height: b.height } });
+  };
+  mainWin.on('move', () => { saveDock(); repositionFastBtn(); });
+  mainWin.on('resize', saveDock);
+  mainWin.on('closed', () => { mainWin = null; });
+
+  // El botón flotante de Fast NO se pierde en modo apoyo
+  createFastBtn();
+  try { globalShortcut.register('CommandOrControl+Shift+F', () => toggleFast()); } catch (e) {}
+}
+
 app.whenReady().then(() => {
+  if (MODO_APOYO) { crearDockApoyo(); return; }
   const pos = getPos('main', {});
   // Solo restaurar si la posición guardada sigue visible en algún monitor (evita ventana fuera de pantalla)
   const posOk = !!(pos && typeof pos.x === 'number' && typeof pos.y === 'number' &&

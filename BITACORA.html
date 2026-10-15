@@ -133,6 +133,19 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.35</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>NeoApoyos v0.1 — Fase 0</b>: modo <code>--apoyo</code> en <code>src/main.js</code> que <b>reutiliza todo el motor</b> (herramientas, ventanas con <b>tamaño guardado</b>, datos, IPC). Mismo <code>userData</code> → <b>el contenido no se pierde ni se duplica</b>.</li>
+                    <li>En modo apoyo, la <b>ventana principal es el dock</b> (barra lateral) que carga <code>src/NeoApoyos/index.html</code>: ventana <b>transparente + click-through</b>, botones que abren las <b>herramientas reales</b> (<code>toggle-tool</code>), <b>hover que ensancha solo el botón</b>, drawer de <b>Notas</b>, panel de <b>Ajustes</b> (tono + Salir), <b>expandir/cerrar/estrechar</b> y resaltado de herramientas abiertas.</li>
+                    <li>El <b>botón flotante de Fast</b> se mantiene en modo apoyo. <code>src/NeoApoyos/package.json</code> → <b>v0.1.0</b> con <code>npm start</code> = <code>electron ../.. --apoyo</code>. Se quitó <code>NeoApoyos/main.js</code> (ya no es app aparte; es un modo).</li>
+                    <li><b>Validación</b>: dock carga sin errores (9 herramientas; notas, ajustes, expandir, click‑through OK); la app arranca en modo apoyo.</li>
+                    <li><b>Release v6.1.35</b>: portable <code>GestorCasos-portable-6.1.35.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.34</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
