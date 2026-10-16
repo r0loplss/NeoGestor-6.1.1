@@ -50,7 +50,9 @@ const HTML = {
 // ============================================================
 const MODO_APOYO = process.argv.includes('--apoyo') || process.env.NEOAPOYOS === '1';
 const HTML_DOCK = path.join(SRC, 'NeoApoyos', 'index.html');
-const DOCK_APOYO_W = 460;   // ancho de ventana (barra 78px + espacio para flyout y notas)
+const DOCK_BAR_W = 96;      // ancho de ventana en reposo (barra 78px + márgenes)
+const DOCK_FLYOUT_W = 320;  // al hacer hover (para el flyout)
+const DOCK_PANEL_W = 452;   // con Notas/Ajustes abiertos
 
 // --- Tema "cristal líquido" (skin inyectado en las herramientas) ---
 const GLASS_DIR = path.join(SRC, 'NeoApoyos', 'theme');
@@ -60,6 +62,11 @@ function getGlassJs()  { if (_glassJs == null)  { try { _glassJs  = fs.readFileS
 function getApoyoTheme() {
   if (!_apoyoTheme) { try { const d = loadData(); _apoyoTheme = d.apoyoTheme || { mode: 'dark', accent: '#2fcbf1' }; } catch (e) { _apoyoTheme = { mode: 'dark', accent: '#2fcbf1' }; } }
   return _apoyoTheme;
+}
+let _apoyoUI = null;
+function getApoyoUI() {
+  if (!_apoyoUI) { try { const d = loadData(); _apoyoUI = d.apoyoUI || { ghost: false, autohide: false }; } catch (e) { _apoyoUI = { ghost: false, autohide: false }; } }
+  return _apoyoUI;
 }
 function aplicarSkin(win, overlay) {
   if (!MODO_APOYO || !win || win.isDestroyed()) return;
@@ -530,10 +537,11 @@ function positionFastBtn() {
 
   // Modo apoyo: el botón de Fast va pegado a la barra (no al borde de la ventana ancha)
   if (MODO_APOYO) {
-    const derecha = (mb.x + mb.width / 2) > (wa.x + wa.width / 2);
-    const barX = derecha ? (mb.x + mb.width - 12 - 78) : (mb.x + 12 + 78);
+    if (_dockHidden) { try { fastBtnWin.hide(); } catch (e) {} return; }
+    const derecha = _dockSide === 'right';
+    const barEdge = derecha ? (mb.x + mb.width - 87) : (mb.x + 87);
     const gap = 8;
-    let fx = derecha ? (barX - gap - FAST_BTN_W) : (barX + gap);
+    let fx = derecha ? (barEdge - gap - FAST_BTN_W) : (barEdge + gap);
     fx = Math.round(Math.max(wa.x + 4, Math.min(wa.x + wa.width - FAST_BTN_W - 4, fx)));
     const fy = Math.round(Math.max(wa.y + 8, Math.min(wa.y + wa.height - FAST_BTN_H - 8, mb.y + (mb.height - FAST_BTN_H) / 2)));
     fastBtnWin.setBounds({ x: fx, y: fy, width: FAST_BTN_W, height: FAST_BTN_H });
@@ -703,97 +711,145 @@ function saveMainBounds() {
 }
 
 // ============================================================
-// DOCK DE APOYO (barra lateral de NeoApoyos)
+// DOCK DE APOYO (barra lateral de NeoApoyos) — v2
+// Ventana de 78px SIN click-through, arrastre NATIVO, crecimiento
+// bajo demanda, snap bipolar, altura manual, ghost y auto-ocultar.
 // ============================================================
-ipcMain.on('apoyo-ignore-mouse', (e, ignore) => {
-  if (!mainWin || mainWin.isDestroyed()) return;
-  try { mainWin.setIgnoreMouseEvents(!!ignore, { forward: true }); } catch (err) {}
-});
+let _dockSide = 'left';       // 'left' | 'right'
+let _dockState = 'bar';       // 'bar' | 'flyout' | 'panel'
+let _dockBusy = false;        // true mientras movemos/animamos programáticamente
+let _dockHidden = false;
+let _dockPersistT = null;
+let _dockPoll = null;
+
 ipcMain.on('apoyo-quit', () => { try { isQuitting = true; app.quit(); } catch (e) {} });
 ipcMain.on('neo-theme-request', (e) => { try { e.sender.send('neo-theme', getApoyoTheme()); } catch (err) {} });
 ipcMain.on('neo-theme-set', (e, t) => {
-  _apoyoTheme = { mode: (t && t.mode) === 'light' ? 'light' : 'dark', accent: (t && t.accent) || '#2fcbf1' };
+  const m = (t && t.mode);
+  _apoyoTheme = { mode: (m === 'light' || m === 'auto') ? m : 'dark', accent: (t && t.accent) || '#2fcbf1' };
   saveData({ apoyoTheme: _apoyoTheme });
   broadcastApoyoTheme();
 });
+ipcMain.on('apoyo-config-request', (e) => { try { e.sender.send('apoyo-config', { theme: getApoyoTheme(), ui: getApoyoUI() }); } catch (err) {} });
+ipcMain.on('apoyo-ui-set', (e, u) => {
+  _apoyoUI = { ghost: !!(u && u.ghost), autohide: !!(u && u.autohide) };
+  saveData({ apoyoUI: _apoyoUI });
+  if (_apoyoUI.autohide) startDockPoll(); else { stopDockPoll(); if (_dockHidden) mostrarDock(); }
+});
 
-// ── Arrastre propio del dock (funciona aunque la ventana sea click-through) ──
-let _dockDrag = false, _dockSnap = false, _dockDragTimer = null;
-function snapDockApoyo() {
-  if (_dockSnap || !mainWin || mainWin.isDestroyed()) return;
+function dockWidthFor(state) { return state === 'panel' ? DOCK_PANEL_W : state === 'flyout' ? DOCK_FLYOUT_W : DOCK_BAR_W; }
+function dockWorkArea() { try { return screen.getDisplayMatching(mainWin.getBounds()).workArea; } catch (e) { return screen.getPrimaryDisplay().workArea; } }
+function dockXFor(side, width, wa) { return side === 'right' ? (wa.x + wa.width - width) : wa.x; }
+function persistDock() {
+  if (!mainWin || mainWin.isDestroyed()) return;
   const b = mainWin.getBounds();
-  const wa = screen.getDisplayMatching(b).workArea;
-  const derecha = (b.x + b.width / 2) > (wa.x + wa.width / 2);
-  let nx = b.x;
-  if (!derecha && (b.x - wa.x) < 26) nx = wa.x;
-  else if (derecha && ((wa.x + wa.width) - (b.x + b.width)) < 26) nx = wa.x + wa.width - b.width;
-  if (nx !== b.x) { _dockSnap = true; mainWin.setBounds({ x: nx, y: b.y, width: b.width, height: b.height }); _dockSnap = false; }
+  savePos({ dockApoyo: { y: b.y, height: b.height, side: _dockSide } });
 }
-ipcMain.on('apoyo-drag-start', (e, d) => {
+function enviarEstadoApoyo() {
+  if (!mainWin || mainWin.isDestroyed()) return;
+  try { mainWin.webContents.send('apoyo-estado', { side: _dockSide }); } catch (e) {}
+}
+function setDockWidth(state) {
+  if (!mainWin || mainWin.isDestroyed()) return;
+  _dockState = state;
+  const wa = dockWorkArea(), b = mainWin.getBounds();
+  const w = dockWidthFor(state);
+  const x = dockXFor(_dockSide, w, wa);
+  if (b.width === w && b.x === x) return;
+  _dockBusy = true;
+  mainWin.setBounds({ x, y: b.y, width: w, height: b.height });
+  _dockBusy = false;
+}
+function snapDockApoyo() {
+  if (!mainWin || mainWin.isDestroyed()) return;
+  const b = mainWin.getBounds();
+  const wa = dockWorkArea();
+  _dockSide = (b.x + b.width / 2) > (wa.x + wa.width / 2) ? 'right' : 'left';
+  setDockWidth(_dockState);
+}
+ipcMain.on('apoyo-set-width', (e, state) => { if (MODO_APOYO) setDockWidth(state); });
+ipcMain.on('apoyo-set-side', (e, side) => { _dockSide = side === 'right' ? 'right' : 'left'; setDockWidth(_dockState); persistDock(); enviarEstadoApoyo(); repositionFastBtn(); });
+ipcMain.on('apoyo-resize-h', (e, d) => {
   if (!MODO_APOYO || !mainWin || mainWin.isDestroyed()) return;
-  const ox = (d && d.ox) || 0, oy = (d && d.oy) || 0;
-  _dockDrag = true;
-  if (_dockDragTimer) clearInterval(_dockDragTimer);
-  _dockDragTimer = setInterval(() => {
-    if (!_dockDrag || !mainWin || mainWin.isDestroyed()) return;
+  const wa = dockWorkArea(), b = mainWin.getBounds();
+  let h = Math.round((d && d.h) || b.height);
+  h = Math.max(380, Math.min(wa.height - 20, h));
+  if (h === b.height) return;
+  _dockBusy = true;
+  mainWin.setBounds({ x: b.x, y: b.y, width: b.width, height: h });
+  _dockBusy = false;
+  clearTimeout(_dockPersistT); _dockPersistT = setTimeout(persistDock, 250);
+});
+
+// ---- Auto-ocultar (Modo Contenedor) ----
+function dockEdgeStrip() { const wa = dockWorkArea(); return _dockSide === 'right' ? { x0: wa.x + wa.width - 3, x1: wa.x + wa.width } : { x0: wa.x, x1: wa.x + 3 }; }
+function animarDock(destX, dur, cb) {
+  if (!mainWin || mainWin.isDestroyed()) { if (cb) cb(); return; }
+  const b = mainWin.getBounds();
+  const x0 = b.x, delta = destX - x0, t0 = Date.now();
+  _dockBusy = true;
+  (function step() {
+    if (!mainWin || mainWin.isDestroyed()) { _dockBusy = false; if (cb) cb(); return; }
+    const t = Math.min(1, (Date.now() - t0) / dur);
+    const e = 1 - Math.pow(1 - t, 3);
+    mainWin.setPosition(Math.round(x0 + delta * e), b.y);
+    if (t < 1) setTimeout(step, 16);
+    else { _dockBusy = false; if (cb) cb(); }
+  })();
+}
+function ocultarDock() {
+  if (!mainWin || mainWin.isDestroyed() || _dockHidden) return;
+  const wa = dockWorkArea(), b = mainWin.getBounds();
+  const destX = _dockSide === 'right' ? (wa.x + wa.width - 3) : (wa.x - b.width + 3);
+  _dockHidden = true;
+  animarDock(destX, 160);
+}
+function mostrarDock() {
+  if (!mainWin || mainWin.isDestroyed() || !_dockHidden) return;
+  const wa = dockWorkArea(), b = mainWin.getBounds();
+  _dockHidden = false;
+  animarDock(dockXFor(_dockSide, b.width, wa), 180);
+}
+function startDockPoll() {
+  if (_dockPoll) return;
+  _dockPoll = setInterval(() => {
+    if (!mainWin || mainWin.isDestroyed() || !_dockHidden) return;
     const p = screen.getCursorScreenPoint();
-    mainWin.setPosition(Math.round(p.x - ox), Math.round(p.y - oy));
-  }, 16);
-});
-ipcMain.on('apoyo-drag-end', () => {
-  _dockDrag = false;
-  if (_dockDragTimer) { clearInterval(_dockDragTimer); _dockDragTimer = null; }
-  snapDockApoyo();
-});
+    const s = dockEdgeStrip();
+    if (p.x >= s.x0 && p.x <= s.x1) mostrarDock();
+  }, 120);
+}
+function stopDockPoll() { if (_dockPoll) { clearInterval(_dockPoll); _dockPoll = null; } }
+ipcMain.on('apoyo-hide', () => { if (getApoyoUI().autohide) ocultarDock(); });
 
 function crearDockApoyo() {
-  const wa = screen.getPrimaryDisplay().workAreaSize;
-  const defH = Math.max(520, wa.height - 40);
-  const pos = getPos('dockApoyo', {});
-  const posOk = !!(pos && typeof pos.x === 'number' && typeof pos.y === 'number' &&
-    screen.getAllDisplays().some(d =>
-      pos.x >= d.bounds.x - 60 && pos.x < d.bounds.x + d.bounds.width - 60 &&
-      pos.y >= d.bounds.y - 30 && pos.y < d.bounds.y + d.bounds.height - 30));
+  const wa = screen.getPrimaryDisplay().workArea;
+  const saved = loadPos().dockApoyo || {};
+  _dockSide = saved.side === 'right' ? 'right' : 'left';
+  let h = (typeof saved.height === 'number' && saved.height > 0) ? saved.height : (wa.height - 40);
+  h = Math.max(380, Math.min(wa.height - 20, h));
+  let y = (typeof saved.y === 'number') ? saved.y : Math.round(wa.y + (wa.height - h) / 2);
+  y = Math.max(wa.y, Math.min(wa.y + wa.height - h, y));
+  const x = dockXFor(_dockSide, DOCK_BAR_W, wa);
 
   mainWin = new BrowserWindow({
-    width: DOCK_APOYO_W,
-    height: (posOk && pos.height > 0) ? pos.height : defH,
-    x: posOk ? pos.x : 12,
-    y: posOk ? pos.y : Math.round((wa.height - defH) / 2),
-    frame: false,
-    transparent: true,
-    resizable: false,
-    movable: true,
-    hasShadow: false,
-    alwaysOnTop: getAlwaysOnTopPreference(),
-    backgroundColor: '#00000000',
+    width: DOCK_BAR_W, height: h, x, y,
+    frame: false, transparent: true, resizable: false, movable: true, hasShadow: false,
+    alwaysOnTop: getAlwaysOnTopPreference(), backgroundColor: '#00000000',
     webPreferences: { nodeIntegration: true, contextIsolation: false }
   });
   mainWin.loadFile(HTML_DOCK);
-  // Click-through por defecto: el renderer lo desactiva cuando el mouse está sobre la barra o un panel
-  try { mainWin.setIgnoreMouseEvents(true, { forward: true }); } catch (e) {}
-  const saveDock = () => {
-    if (!mainWin || mainWin.isDestroyed()) return;
-    const b = mainWin.getBounds();
-    savePos({ dockApoyo: { x: b.x, y: b.y, width: b.width, height: b.height } });
-  };
-  const enviarLadoApoyo = () => {
-    if (!mainWin || mainWin.isDestroyed()) return;
-    const b = mainWin.getBounds();
-    const wa = screen.getDisplayMatching(b).workArea;
-    try { mainWin.webContents.send('apoyo-bounds', { x: b.x, width: b.width, screenW: wa.x + wa.width }); } catch (e) {}
-  };
-  mainWin.on('ready-to-show', () => { if (mainWin && !mainWin.isDestroyed()) { mainWin.show(); enviarLadoApoyo(); } });
+  mainWin.on('ready-to-show', () => { if (mainWin && !mainWin.isDestroyed()) { mainWin.show(); enviarEstadoApoyo(); } });
 
+  let moveT = null;
   mainWin.on('move', () => {
-    if (!mainWin || mainWin.isDestroyed()) return;
-    if (!_dockDrag) snapDockApoyo();
-    saveDock(); enviarLadoApoyo(); repositionFastBtn();
+    if (!mainWin || mainWin.isDestroyed() || _dockBusy) return;
+    clearTimeout(moveT);
+    moveT = setTimeout(() => { snapDockApoyo(); persistDock(); enviarEstadoApoyo(); repositionFastBtn(); }, 150);
   });
-  mainWin.on('resize', () => { saveDock(); enviarLadoApoyo(); });
-  mainWin.on('closed', () => { mainWin = null; });
+  mainWin.on('closed', () => { stopDockPoll(); mainWin = null; });
 
-  // El botón flotante de Fast NO se pierde en modo apoyo
+  if (getApoyoUI().autohide) startDockPoll();
   createFastBtn();
   try { globalShortcut.register('CommandOrControl+Shift+F', () => toggleFast()); } catch (e) {}
 }

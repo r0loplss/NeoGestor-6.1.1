@@ -70,26 +70,20 @@ html[data-neo-theme] #hdr {
     box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
 }
 
-/* ---------- Contenedores comunes con blur (cristal) ---------- */
+/* ---------- Contenedores principales con blur (rendimiento: solo estos) ---------- */
 html[data-neo-theme] #main,
 html[data-neo-theme] #toolbar,
 html[data-neo-theme] .toolbar,
-html[data-neo-theme] .input-area,
-html[data-neo-theme] .controls-grid,
-html[data-neo-theme] .control-group,
 html[data-neo-theme] .calculator,
-html[data-neo-theme] .panel,
-html[data-neo-theme] .card,
-html[data-neo-theme] .recuadro,
 html[data-neo-theme] .modal-box,
 html[data-neo-theme] .modal,
-html[data-neo-theme] .c-card,
-html[data-neo-theme] .dropdown-menu,
-html[data-neo-theme] .editor-area,
-html[data-neo-theme] #importante {
+html[data-neo-theme] .controls-grid {
     -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
     backdrop-filter: blur(14px) saturate(150%) !important;
 }
+
+/* ---------- Ocultar el toggle de tema propio de las herramientas (lo maneja NeoApoyos) ---------- */
+html[data-neo-theme] #btnTema { display: none !important; }
 
 /* ---------- Botones/inputs: cristal ---------- */
 html[data-neo-theme] input,

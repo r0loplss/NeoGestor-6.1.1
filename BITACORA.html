@@ -133,6 +133,22 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.39</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>NeoApoyos v0.2 — re-arquitectura del dock (todos los puntos decididos)</b>.</li>
+                    <li><b>Ventana inteligente</b>: pasó de 460px transparente con click-through (ventana fantasma + drag por <code>setInterval</code>) a una ventana de <b>78px sin click-through</b>, con <b>arrastre NATIVO</b> y <b>crecimiento bajo demanda</b> (96 / 320 / 452px). Se eliminó el <code>setInterval</code>.</li>
+                    <li><b>Docking bipolar</b> (imán al lado más cercano) + toggle <b>Izquierda/Derecha</b>; <b>altura manual</b> (tirador inferior, min 380 / max wa-20, ancho bloqueado, persistida) + <b>scroll</b> en las herramientas; <b>ghost mode</b> (~18% al estar inactiva); <b>Modo Contenedor</b> (auto-ocultar al borde con franja de 3px y poll de baja frecuencia).</li>
+                    <li><b>Sin logo "N"</b> (+48px) y <b>flyout</b> en píldora (position: fixed → no lo recorta el scroll) que sale de la barra.</li>
+                    <li><b>Fast</b>: solidario a la barra (lado/altura) y se repliega con ella.</li>
+                    <li><b>Tema/tono</b>: paleta curada (<b>cian/azul/índigo/violeta/turquesa</b>), opción <b>Auto (sistema)</b>, <b>preview</b> y <b>reset</b>; se oculta el toggle de tema propio de las tools; <code>backdrop-filter</code> <b>solo</b> en contenedores principales. Fix <code>note-limit-reached</code> → toast.</li>
+                    <li><b>Validación</b>: dock OK (9 tools, lado derecho, tema claro, flyout, notas reales, ajustes, IPC de ancho/altura/lado); la app abre en modo apoyo sin errores; tests del repo OK.</li>
+                    <li><b>Release v6.1.39</b>: portable <code>GestorCasos-portable-6.1.39.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.38</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

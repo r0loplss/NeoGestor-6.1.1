@@ -1,47 +1,33 @@
 # NeoApoyos — Notas de diseño
 
-> Documento de decisiones para la interfaz de Apoyo.
+> Interfaz de Apoyo. Modo `--apoyo` del NeoGestor (mismo motor y datos).
 
 ## Estado
-- **Versión:** NeoApoyos **v0.1** (numeración propia; el motor del gestor sigue en 6.1.x).
-- **Fase 0 (hecha):** modo `--apoyo` + dock lateral que abre las herramientas.
-- **Tema cristal + luz/nocturno (hecho):** skin inyectado en TODAS las herramientas.
-- **Fast (hecho):** botón flotante reestilizado (cristal) y reubicado junto a la barra.
+- **Versión:** NeoApoyos **v0.2** (numeración propia; el motor del gestor sigue en 6.1.x).
+- Motor: `--apoyo` reutiliza `src/main.js` (herramientas, ventanas con tamaño guardado, datos, IPC).
+- **Mismo `userData`** (`%APPDATA%\gestor-casos`) → el contenido **no se pierde ni se duplica**.
 
-## Arquitectura
-- NeoApoyos es un **modo del mismo programa** (`--apoyo`) que **reutiliza `src/main.js`**.
-- **Mismo `userData`** (`%APPDATA%\gestor-casos`) → mismo `gestor-data.json` / `gestor-pos.json`.
-  El contenido del usuario **no se pierde ni se duplica**.
-- `src/NeoApoyos/package.json` → `"start": "electron ../.. --apoyo"` (se corre con `npm start`).
+## Arquitectura de ventana (v0.2)
+- **Ventana de 78px, SIN click-through** (antes: 460px transparente con click-through → "ventana fantasma").
+- **Arrastre NATIVO** (`-webkit-app-region: drag`): se eliminó el drag por `setInterval(16ms)`.
+- **Crecimiento bajo demanda** (`setSize`): reposo 96px · hover/flyout 320px · Notas/Ajustes 452px.
+- **Snap bipolar**: al soltar se imanta al lado más cercano (izquierda/derecha) + toggle en Ajustes.
+- **Altura manual** (tirador inferior, sin loops) con `min 380 / max workArea-20`, ancho bloqueado, persistida en `gestor-pos.json`.
+- **Ghost mode**: opacidad ~18% tras 1.5s inactiva.
+- **Modo Contenedor (auto-ocultar)**: se repliega al borde (franja de 3px); reingreso con poll de baja frecuencia (~120ms) solo cuando está oculto.
+- **Fast**: botón flotante (44×44, cristal, sigue el tono) contiguo a la barra; se repliega con ella.
 
-## Barra lateral (dock)
-- Ancho **FIJO de 78px**. No se expande la barra.
-- **Hover:** se ensancha **únicamente el botón** (flyout con ícono + nombre) y **sale de la barra**;
-  al quitar el mouse, se contrae. La barra **no** cambia de ancho.
-- **Movible:** se arrastra desde la barra y se **ancla a la izquierda o derecha** de la pantalla
-  (el flyout y los paneles se reflejan según el lado).
-- Controles del pie: **Notas**, **Ajustes**, **Cerrar barra** (colapsa a un handle).
-- **Click-through:** solo la barra y los paneles capturan el mouse.
-
-## Tema "cristal líquido" (skin)
-- Archivos: `src/NeoApoyos/theme/glass.css` + `glass.js` (se **inyectan** en cada herramienta).
-- Cambia **modo luz/nocturno** y **tono** en **todas** las herramientas (el tono = `--primary`).
-- Se controla desde **Ajustes** del dock; se guarda en `gestor-data.json` (`apoyoTheme`) y se
-  propaga a las ventanas abiertas.
-
-## Herramientas
-- Se abren como **ventanas** (igual que en el programa), con **tamaño y posición recordados**.
-- Adoptan el tema cristal automáticamente (sin tocar su lógica).
+## Tema "cristal líquido"
+- Skin inyectado (`src/NeoApoyos/theme/glass.css` + `glass.js`) en cada herramienta.
+- **Tono** (acento): paleta curada **cian · azul · índigo · violeta · turquesa** (se quitaron verde/ámbar/rosa por choque semántico).
+- **Tema**: **Claro · Auto (sistema) · Nocturno** + **preview** + **reset**.
+- Se oculta el toggle de tema propio de las tools (lo maneja NeoApoyos).
+- `backdrop-filter` **solo** en contenedores principales (rendimiento).
+- **Modo luz**: best-effort (algunas tools tienen colores hardcodeados; se pulirán por iteración).
 
 ## Notas
-- Drawer de cristal en el dock (diseño aprobado) **conectado a las notas REALES** del gestor
-  (mismo dato `notes: [{id, content}]`, máx 10). Lista, buscador, crear (＋ Nueva), eliminar y
-  abrir la nota (usa las ventanas de nota existentes, ya tematizadas).
-- Sincroniza en vivo con `notes-updated`.
-
-## Fast
-- Botón **flotante** reestilizado (cristal, sigue el tono) y **reubicado junto a la barra**.
-- No se pierde su función (abre/cierra Fast; atajo Ctrl+Shift+F).
+- Drawer conectado a las **notas reales** (`notes`, máx 10); toast en `note-limit-reached`.
 
 ## Pendiente
-- Pulir detalles por herramienta (algunos textos/colores propios pueden necesitar ajuste fino).
+- Modo luz fino por herramienta (las pesadas: fast, ciclos).
+- Afinar opacidad del cristal y detalles por tool.
