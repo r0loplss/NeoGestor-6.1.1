@@ -724,7 +724,7 @@ let _dockHidden = false;
 let _dockPersistT = null;
 let _dockPoll = null;
 
-ipcMain.on('apoyo-quit', () => { try { isQuitting = true; app.quit(); } catch (e) {} });
+ipcMain.on('apoyo-quit', () => { try { persistDock(); flushSavePos(); isQuitting = true; app.quit(); } catch (e) {} });
 ipcMain.on('neo-theme-request', (e) => { try { e.sender.send('neo-theme', getApoyoTheme()); } catch (err) {} });
 ipcMain.on('neo-theme-set', (e, t) => {
   const m = (t && t.mode);
@@ -751,7 +751,7 @@ function persistDock() {
 }
 function enviarEstadoApoyo() {
   if (!mainWin || mainWin.isDestroyed()) return;
-  try { mainWin.webContents.send('apoyo-estado', { side: _dockSide }); } catch (e) {}
+  try { mainWin.webContents.send('apoyo-estado', { side: _dockSide, hidden: _dockHidden }); } catch (e) {}
 }
 function setDockWidth(state) {
   if (!mainWin || mainWin.isDestroyed()) return;
@@ -759,16 +759,24 @@ function setDockWidth(state) {
   const wa = dockWorkArea(), b = mainWin.getBounds();
   const w = dockWidthFor(state);
   const x = dockXFor(_dockSide, w, wa);
-  if (b.width === w && b.x === x) return;
-  _dockBusy = true;
-  mainWin.setBounds({ x, y: b.y, width: w, height: b.height });
-  _dockBusy = false;
+  if (b.width !== w || b.x !== x) {
+    _dockBusy = true;
+    mainWin.setBounds({ x, y: b.y, width: w, height: b.height });
+    _dockBusy = false;
+  }
+  // Fast no debe tapar los paneles abiertos
+  if (state === 'panel') { if (fastBtnWin && !fastBtnWin.isDestroyed()) { try { fastBtnWin.hide(); } catch (e) {} } }
+  else { repositionFastBtn(); refreshFastBtnVisibility(); }
 }
 function snapDockApoyo() {
   if (!mainWin || mainWin.isDestroyed()) return;
   const b = mainWin.getBounds();
   const wa = dockWorkArea();
   _dockSide = (b.x + b.width / 2) > (wa.x + wa.width / 2) ? 'right' : 'left';
+  // No dejar que la barra desborde el borde inferior del monitor
+  const h = Math.max(380, Math.min(wa.height - 20, b.height));
+  const y = Math.max(wa.y, Math.min(wa.y + wa.height - h, b.y));
+  if (h !== b.height || y !== b.y) { _dockBusy = true; mainWin.setBounds({ x: b.x, y, width: b.width, height: h }); _dockBusy = false; }
   setDockWidth(_dockState);
 }
 ipcMain.on('apoyo-set-width', (e, state) => { if (MODO_APOYO) setDockWidth(state); });
@@ -777,7 +785,8 @@ ipcMain.on('apoyo-resize-h', (e, d) => {
   if (!MODO_APOYO || !mainWin || mainWin.isDestroyed()) return;
   const wa = dockWorkArea(), b = mainWin.getBounds();
   let h = Math.round((d && d.h) || b.height);
-  h = Math.max(380, Math.min(wa.height - 20, h));
+  const maxH = Math.min(wa.height - 20, (wa.y + wa.height) - b.y);
+  h = Math.max(380, Math.min(maxH, h));
   if (h === b.height) return;
   _dockBusy = true;
   mainWin.setBounds({ x: b.x, y: b.y, width: b.width, height: h });
@@ -829,6 +838,7 @@ function ocultarDock() {
   const wa = dockWorkArea(), b = mainWin.getBounds();
   const destX = _dockSide === 'right' ? (wa.x + wa.width - 3) : (wa.x - b.width + 3);
   _dockHidden = true;
+  enviarEstadoApoyo();
   syncDockPoll();
   animarDock(destX, 160, () => repositionFastBtn());
 }
@@ -836,6 +846,7 @@ function mostrarDock() {
   if (!mainWin || mainWin.isDestroyed() || !_dockHidden) return;
   const wa = dockWorkArea(), b = mainWin.getBounds();
   _dockHidden = false;
+  enviarEstadoApoyo();
   syncDockPoll();
   animarDock(dockXFor(_dockSide, b.width, wa), 180, () => { repositionFastBtn(); refreshFastBtnVisibility(); });
 }
@@ -891,6 +902,29 @@ function mostrarFlyoutApoyo(d) {
 function ocultarFlyoutApoyo() { if (flyoutWin && !flyoutWin.isDestroyed()) { try { flyoutWin.hide(); } catch (e) {} } }
 ipcMain.on('apoyo-flyout', (e, d) => { if (d && d.show) mostrarFlyoutApoyo(d); else ocultarFlyoutApoyo(); });
 ipcMain.on('apoyo-hide', () => { ocultarDock(); });
+ipcMain.on('apoyo-fast-opacity', (e, o) => { if (fastBtnWin && !fastBtnWin.isDestroyed()) { try { fastBtnWin.setOpacity(Math.max(0, Math.min(1, Number(o)))); } catch (err) {} } });
+
+function reencuadrarDock() {
+  if (!MODO_APOYO || !mainWin || mainWin.isDestroyed()) return;
+  const b = mainWin.getBounds();
+  let dentro = false;
+  try {
+    dentro = screen.getAllDisplays().some(function (d) {
+      return b.x < d.bounds.x + d.bounds.width && (b.x + b.width) > d.bounds.x &&
+             b.y < d.bounds.y + d.bounds.height && (b.y + b.height) > d.bounds.y;
+    });
+  } catch (e) {}
+  if (dentro) { snapDockApoyo(); return; }
+  // Quedó fuera de todo monitor: reanclar al principal
+  const wa = screen.getPrimaryDisplay().workArea;
+  const h = Math.max(380, Math.min(wa.height - 20, b.height));
+  _dockBusy = true;
+  mainWin.setBounds({ x: dockXFor(_dockSide, DOCK_BAR_W, wa), y: Math.round(wa.y + (wa.height - h) / 2), width: DOCK_BAR_W, height: h });
+  _dockBusy = false;
+  persistDock();
+  enviarEstadoApoyo();
+  repositionFastBtn();
+}
 
 function crearDockApoyo() {
   const saved = loadPos().dockApoyo || {};
@@ -935,6 +969,7 @@ function crearDockApoyo() {
   if (getApoyoUI().autohide) startDockPoll();
   createFastBtn();
   crearFlyoutWin();   // pre-crear el flyout (evita la píldora vacía en el primer hover)
+  try { screen.on('display-removed', reencuadrarDock); screen.on('display-metrics-changed', reencuadrarDock); } catch (e) {}
   try { globalShortcut.register('CommandOrControl+Shift+F', () => toggleFast()); } catch (e) {}
 }
 

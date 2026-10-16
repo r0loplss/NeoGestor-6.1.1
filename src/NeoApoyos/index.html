@@ -49,8 +49,10 @@
 
     /* Filamento de borde (queda visible cuando el dock se oculta) */
     .edge { position: fixed; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, transparent, var(--accent), transparent); opacity: .55; z-index: 40; }
-    body:not(.right) .edge { left: 0; }
-    body.right .edge { right: 0; }
+    body:not(.right):not(.hidden) .edge { left: 0; right: auto; }
+    body:not(.right).hidden .edge { right: 0; left: auto; }
+    body.right:not(.hidden) .edge { right: 0; left: auto; }
+    body.right.hidden .edge { left: 0; right: auto; }
 
     /* ============================================================
        BARRA
@@ -70,13 +72,15 @@
 
     .dock-crown { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
     .dock-grip { height: 30px; flex: 1; display: flex; align-items: center; justify-content: center; color: var(--txt-faint); }
-    .dock-crown .dock-btn { width: 30px; height: 30px; border-radius: 10px; font-size: 13px; }
+    .dock-crown .dock-btn { width: 30px; height: 30px; border-radius: 10px; font-size: 13px; -webkit-app-region: no-drag; }
     .dock-grip span { width: 28px; height: 4px; border-radius: 4px; background: currentColor; opacity: .35; transition: opacity .15s; }
     .dock:hover .dock-grip span { opacity: .8; }
 
     .dock-tools { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 7px; align-items: flex-start; overflow-y: auto; overflow-x: hidden; padding: 2px; -webkit-app-region: no-drag; }
     body.right .dock-tools { align-items: flex-end; }
-    .dock-tools::-webkit-scrollbar { width: 0; }
+    .dock-tools::-webkit-scrollbar { width: 4px; }
+    .dock-tools::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 4px; }
+    .dock-tools::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.32); }
 
     .tool {
         position: relative; width: 100%; height: 50px; flex: 0 0 auto;
@@ -126,8 +130,8 @@
     /* ============================================================
        NOTAS
        ============================================================ */
-    .notes { position: fixed; top: 9px; bottom: 9px; right: 9px; width: 340px; border-radius: var(--radius); padding: 16px; z-index: 90; display: flex; flex-direction: column; gap: 12px; opacity: 0; pointer-events: none; transition: transform .42s var(--ease), opacity .28s; }
-    body.right .notes { right: auto; left: 9px; }
+    .notes { position: fixed; top: 9px; bottom: 9px; left: 95px; right: auto; width: 340px; border-radius: var(--radius); padding: 16px; z-index: 90; display: flex; flex-direction: column; gap: 12px; opacity: 0; pointer-events: none; transition: transform .42s var(--ease), opacity .28s; }
+    body.right .notes { left: auto; right: 95px; }
     body:not(.right) .notes:not(.open) { transform: translateX(-100%); }
     body.right .notes:not(.open) { transform: translateX(100%); }
     .notes.open { opacity: 1; pointer-events: auto; }
@@ -152,12 +156,12 @@
     /* ============================================================
        AJUSTES
        ============================================================ */
-    .settings { position: fixed; left: 95px; bottom: 9px; width: 340px; border-radius: 16px; padding: 14px; z-index: 95; display: none; flex-direction: column; gap: 12px; }
+    .settings { position: fixed; left: 95px; bottom: 9px; width: 340px; border-radius: 16px; padding: 14px; z-index: 95; display: flex; flex-direction: column; gap: 12px; opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity .26s var(--ease), transform .26s var(--ease), visibility .26s; }
     body.right .settings { left: auto; right: 95px; }
     .settings-head { display: flex; align-items: center; gap: 8px; }
     .settings-head b { font-size: 13px; letter-spacing: .3px; }
     .settings-head .x { margin-left: auto; }
-    .settings.open { display: flex; }
+    .settings.open { opacity: 1; visibility: visible; transform: none; }
     .settings .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .settings .cap { font-size: 10.5px; color: var(--txt-faint); letter-spacing: 1px; text-transform: uppercase; min-width: 52px; }
     .seg { display: inline-flex; border: 1px solid var(--glass-border); border-radius: 10px; overflow: hidden; }
@@ -279,7 +283,7 @@
             b.className = 'tool';
             b.dataset.tool = t.id;
             b.innerHTML = '<span class="tile">' + t.icon + '</span>';
-            b.addEventListener('click', function () { ipc.send('toggle-tool', t.id); });
+            b.addEventListener('click', function () { ipc.send('toggle-tool', t.id); cerrarPaneles(); });
             b.addEventListener('mouseenter', function () { mostrarFlyout(b, t); });
             b.addEventListener('mouseleave', ocultarFlyout);
             toolsNav.appendChild(b);
@@ -301,21 +305,22 @@
         var panelState = false;
         function setWidth(state) { try { ipc.send('apoyo-set-width', state); } catch (e) {} }
         function panelesAbiertos() { return notesPanel.classList.contains('open') || settingsPanel.classList.contains('open'); }
-        dock.addEventListener('mouseenter', function () { dock.classList.remove('ghost'); });
+        dock.addEventListener('mouseenter', function () { setGhost(false); });
         dock.addEventListener('mouseleave', function () { ocultarFlyout(); scheduleGhostOrHide(); });
 
         // ---- Ghost / Auto-ocultar ----
         var ui = { ghost: false, autohide: false };
         var ghostT = null, hideT = null;
+        function setGhost(on) { dock.classList.toggle('ghost', !!on); try { ipc.send('apoyo-fast-opacity', on ? 0.18 : 1); } catch (e) {} }
         function scheduleGhostOrHide() {
             clearTimeout(ghostT); clearTimeout(hideT);
             if (panelesAbiertos()) return;
             if (ui.autohide) { hideT = setTimeout(function () { try { ipc.send('apoyo-hide'); } catch (e) {} }, 400); return; }
-            if (ui.ghost) { ghostT = setTimeout(function () { if (!panelesAbiertos()) dock.classList.add('ghost'); }, 1500); }
+            if (ui.ghost) { ghostT = setTimeout(function () { if (!panelesAbiertos()) setGhost(true); }, 1500); }
         }
-        dock.addEventListener('mouseenter', function () { clearTimeout(ghostT); clearTimeout(hideT); dock.classList.remove('ghost'); });
+        dock.addEventListener('mouseenter', function () { clearTimeout(ghostT); clearTimeout(hideT); setGhost(false); });
         [notesPanel, settingsPanel].forEach(function (p) {
-            p.addEventListener('mouseenter', function () { clearTimeout(ghostT); clearTimeout(hideT); dock.classList.remove('ghost'); });
+            p.addEventListener('mouseenter', function () { clearTimeout(ghostT); clearTimeout(hideT); setGhost(false); });
             p.addEventListener('mouseleave', scheduleGhostOrHide);
         });
 
@@ -357,14 +362,28 @@
             setTimeout(function () { t.remove(); }, 2600);
         }
 
-        // ---- Paneles ----
-        function abrirNotas() { notesPanel.classList.add('open'); setWidth('panel'); }
-        function cerrarNotas() { notesPanel.classList.remove('open'); if (!settingsPanel.classList.contains('open')) setWidth('bar'); }
-        document.getElementById('btnNotes').addEventListener('click', function () { abrirNotas(); });
-        document.getElementById('notesClose').addEventListener('click', cerrarNotas);
-        function toggleAjustes() { settingsPanel.classList.toggle('open'); setWidth(settingsPanel.classList.contains('open') ? 'panel' : 'bar'); }
-        document.getElementById('btnSettings').addEventListener('click', toggleAjustes);
-        document.getElementById('settingsClose').addEventListener('click', function () { settingsPanel.classList.remove('open'); if (!notesPanel.classList.contains('open')) setWidth('bar'); });
+        // ---- Paneles (mutuamente excluyentes) ----
+        function abrirPanel(which) {
+            var esNotas = (which === 'notes');
+            notesPanel.classList.toggle('open', esNotas);
+            settingsPanel.classList.toggle('open', !esNotas);
+            setWidth('panel');
+            ocultarFlyout();
+        }
+        function cerrarPaneles() {
+            notesPanel.classList.remove('open');
+            settingsPanel.classList.remove('open');
+            setTimeout(function () { if (!panelesAbiertos()) setWidth('bar'); }, 430);
+        }
+        document.getElementById('btnNotes').addEventListener('click', function () {
+            if (notesPanel.classList.contains('open')) cerrarPaneles(); else abrirPanel('notes');
+        });
+        document.getElementById('notesClose').addEventListener('click', cerrarPaneles);
+        document.getElementById('btnSettings').addEventListener('click', function () {
+            if (settingsPanel.classList.contains('open')) cerrarPaneles(); else abrirPanel('settings');
+        });
+        document.getElementById('settingsClose').addEventListener('click', cerrarPaneles);
+        window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && panelesAbiertos()) cerrarPaneles(); });
         // Al hacer scroll en la lista, la píldora del flyout se oculta (evita desfase)
         toolsNav.addEventListener('scroll', ocultarFlyout, { passive: true });
         toolsNav.addEventListener('wheel', ocultarFlyout, { passive: true });
@@ -379,7 +398,8 @@
             document.querySelectorAll('.swatch').forEach(function (s) { s.classList.toggle('on', s.dataset.accent === theme.accent); });
         }
         ipc.on('neo-theme', function (e, t) { if (t) { theme.mode = t.mode || 'dark'; theme.accent = t.accent || theme.accent; aplicarTema(); } });
-        ipc.on('apoyo-estado', function (e, s) { bodyEl.classList.toggle('right', !!(s && s.side === 'right')); document.querySelectorAll('#segSide button').forEach(function (b) { b.classList.toggle('on', b.dataset.side === (s && s.side)); }); });
+        ipc.on('apoyo-estado', function (e, s) { bodyEl.classList.toggle('right', !!(s && s.side === 'right')); bodyEl.classList.toggle('hidden', !!(s && s.hidden)); document.querySelectorAll('#segSide button').forEach(function (b) { b.classList.toggle('on', b.dataset.side === (s && s.side)); }); });
+        ipc.on('fast-docked-state', function (e, d) { if (toolBtns['fast']) toolBtns['fast'].classList.toggle('active', !!(d && d.visible)); });
         ipc.on('apoyo-config', function (e, cfg) {
             if (!cfg) return;
             if (cfg.theme) { theme.mode = cfg.theme.mode || 'dark'; theme.accent = cfg.theme.accent || theme.accent; }
@@ -400,7 +420,7 @@
         document.getElementById('btnExit').addEventListener('click', function () { ipc.send('apoyo-quit'); });
         document.getElementById('btnHide').addEventListener('click', function () { try { ipc.send('apoyo-hide'); } catch (e) {} });
         // Ghost al perder foco (clic en otra ventana/monitor)
-        window.addEventListener('blur', function () { if (ui.ghost && !ui.autohide && !panelesAbiertos()) { clearTimeout(ghostT); ghostT = setTimeout(function () { if (!panelesAbiertos()) dock.classList.add('ghost'); }, 1000); } });
+        window.addEventListener('blur', function () { if (ui.ghost && !ui.autohide && !panelesAbiertos()) { clearTimeout(ghostT); ghostT = setTimeout(function () { if (!panelesAbiertos()) setGhost(true); }, 1000); } });
         // reintenta el matchMedia cuando cambia el sistema (modo auto)
         try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { if (theme.mode === 'auto') aplicarTema(); }); } catch (e) {}
 

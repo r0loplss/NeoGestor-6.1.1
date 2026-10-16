@@ -49,3 +49,16 @@
 - **Scroll de la lista** oculta el flyout (evita desfase vertical).
 - **✕ de cierre** movida a la **corona superior** (separada del pie) para evitar clics accidentales.
 - **Ajustes** ahora se abre **al lado de la barra** (no tapa el dock) y tiene su propia **✕**.
+
+## Auditoría v0.2.3 (correcciones aplicadas)
+- **✕ de la corona** con `-webkit-app-region: no-drag` (recibe el clic; ya no se interpreta como arrastre).
+- **Fast** se **oculta** mientras hay un panel abierto (Notas/Ajustes) y reaparece al cerrarlo.
+- **Notas y Ajustes mutuamente excluyentes** y ambos **toggle**; se cierran con **Esc** o al elegir una herramienta.
+- **Filamento `.edge`** ahora queda visible al auto-ocultarse (se invierte el anclaje según `hidden`).
+- **Altura** acotada contra el borde inferior (`b.y + h <= wa.y + wa.height`) en resize y snap.
+- **Desconexión de pantallas**: se escucha `display-removed`/`display-metrics-changed` y se reancla si la ventana queda fuera.
+- **Salida limpia**: `apoyo-quit` persiste posición/altura y hace `flushSavePos()` antes de salir.
+- **Alineación/animación**: Notas y Ajustes alineados a 95px y ambos con transición; el dock no se encoge hasta terminar la animación de cierre.
+- **Estado de Fast** sincronizado (`fast-docked-state` → botón activo).
+- **Ghost** también atenúa el botón de Fast (opacidad solidaria).
+- **Scrollbar** fina en la lista de herramientas (indica que hay scroll).
