@@ -68,7 +68,9 @@
     .dock.ghost { opacity: .18; }
     .dock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 20%); }
 
-    .dock-grip { height: 16px; display: flex; align-items: center; justify-content: center; color: var(--txt-faint); flex: 0 0 auto; }
+    .dock-crown { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+    .dock-grip { height: 30px; flex: 1; display: flex; align-items: center; justify-content: center; color: var(--txt-faint); }
+    .dock-crown .dock-btn { width: 30px; height: 30px; border-radius: 10px; font-size: 13px; }
     .dock-grip span { width: 28px; height: 4px; border-radius: 4px; background: currentColor; opacity: .35; transition: opacity .15s; }
     .dock:hover .dock-grip span { opacity: .8; }
 
@@ -150,8 +152,11 @@
     /* ============================================================
        AJUSTES
        ============================================================ */
-    .settings { position: fixed; left: 9px; bottom: 9px; width: 340px; border-radius: 16px; padding: 14px; z-index: 95; display: none; flex-direction: column; gap: 12px; }
-    body.right .settings { left: auto; right: 9px; }
+    .settings { position: fixed; left: 95px; bottom: 9px; width: 340px; border-radius: 16px; padding: 14px; z-index: 95; display: none; flex-direction: column; gap: 12px; }
+    body.right .settings { left: auto; right: 95px; }
+    .settings-head { display: flex; align-items: center; gap: 8px; }
+    .settings-head b { font-size: 13px; letter-spacing: .3px; }
+    .settings-head .x { margin-left: auto; }
     .settings.open { display: flex; }
     .settings .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .settings .cap { font-size: 10.5px; color: var(--txt-faint); letter-spacing: 1px; text-transform: uppercase; min-width: 52px; }
@@ -185,13 +190,15 @@
     <div class="edge" id="edge"></div>
 
     <aside class="dock glass" id="dock">
-        <div class="dock-grip" title="Arrastrar para mover (se ancla a izquierda/derecha)"><span></span></div>
+        <div class="dock-crown">
+            <div class="dock-grip" title="Arrastrar para mover (se ancla a izquierda/derecha)"><span></span></div>
+            <button class="dock-btn danger dock-x" id="btnExit" title="Cerrar NeoApoyos">✕</button>
+        </div>
         <nav class="dock-tools" id="tools"></nav>
         <div class="dock-foot">
             <button class="dock-btn" id="btnNotes" title="Mis Notas">🗒️</button>
             <button class="dock-btn" id="btnSettings" title="Ajustes">⚙️</button>
             <button class="dock-btn" id="btnHide" title="Ocultar al borde">⤺</button>
-            <button class="dock-btn danger" id="btnExit" title="Cerrar NeoApoyos">✕</button>
         </div>
         <div class="dock-resize" id="resizeH" title="Arrastrar para ajustar la altura"><span></span></div>
     </aside>
@@ -206,6 +213,7 @@
     </aside>
 
     <div class="settings glass" id="settingsPanel">
+        <div class="settings-head"><b>⚙️ Ajustes</b><button class="wc x" id="settingsClose" title="Cerrar">✕</button></div>
         <div class="row">
             <span class="cap">Tema</span>
             <div class="seg" id="segTheme">
@@ -354,7 +362,12 @@
         function cerrarNotas() { notesPanel.classList.remove('open'); if (!settingsPanel.classList.contains('open')) setWidth('bar'); }
         document.getElementById('btnNotes').addEventListener('click', function () { abrirNotas(); });
         document.getElementById('notesClose').addEventListener('click', cerrarNotas);
-        document.getElementById('btnSettings').addEventListener('click', function () { settingsPanel.classList.toggle('open'); setWidth(settingsPanel.classList.contains('open') ? 'panel' : 'bar'); });
+        function toggleAjustes() { settingsPanel.classList.toggle('open'); setWidth(settingsPanel.classList.contains('open') ? 'panel' : 'bar'); }
+        document.getElementById('btnSettings').addEventListener('click', toggleAjustes);
+        document.getElementById('settingsClose').addEventListener('click', function () { settingsPanel.classList.remove('open'); if (!notesPanel.classList.contains('open')) setWidth('bar'); });
+        // Al hacer scroll en la lista, la píldora del flyout se oculta (evita desfase)
+        toolsNav.addEventListener('scroll', ocultarFlyout, { passive: true });
+        toolsNav.addEventListener('wheel', ocultarFlyout, { passive: true });
 
         // ---- Tema / tono / opciones ----
         var theme = { mode: 'dark', accent: '#2fcbf1' };

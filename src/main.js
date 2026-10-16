@@ -77,6 +77,8 @@ function aplicarSkin(win, overlay) {
 function broadcastApoyoTheme() {
   const t = getApoyoTheme();
   try { if (mainWin && !mainWin.isDestroyed()) mainWin.webContents.send('neo-theme', t); } catch (e) {}
+  try { if (fastBtnWin && !fastBtnWin.isDestroyed()) fastBtnWin.webContents.send('neo-theme', t); } catch (e) {}
+  try { if (flyoutWin && !flyoutWin.isDestroyed()) flyoutWin.webContents.send('neo-theme', t); } catch (e) {}
   try { toolWins.forEach((w) => { if (w && !w.isDestroyed()) { try { w.webContents.send('neo-theme', t); } catch (e) {} } }); } catch (e) {}
 }
 
@@ -734,7 +736,7 @@ ipcMain.on('apoyo-config-request', (e) => { try { e.sender.send('apoyo-config', 
 ipcMain.on('apoyo-ui-set', (e, u) => {
   _apoyoUI = { ghost: !!(u && u.ghost), autohide: !!(u && u.autohide) };
   saveData({ apoyoUI: _apoyoUI });
-  if (_apoyoUI.autohide) startDockPoll(); else { stopDockPoll(); if (_dockHidden) mostrarDock(); }
+  if (!_apoyoUI.autohide && _dockHidden) mostrarDock(); else syncDockPoll();
 });
 
 function dockWidthFor(state) { return state === 'panel' ? DOCK_PANEL_W : state === 'flyout' ? DOCK_FLYOUT_W : DOCK_BAR_W; }
@@ -817,18 +819,25 @@ function animarDock(destX, dur, cb) {
     else { _dockBusy = false; if (cb) cb(); }
   })();
 }
+function syncDockPoll() {
+  const should = _dockHidden || getApoyoUI().autohide;
+  if (should) startDockPoll(); else stopDockPoll();
+}
 function ocultarDock() {
   if (!mainWin || mainWin.isDestroyed() || _dockHidden) return;
+  if (!dockEdgeStrip()) return;   // borde compartido sin sensor: no ocultar (evita deadlock)
   const wa = dockWorkArea(), b = mainWin.getBounds();
   const destX = _dockSide === 'right' ? (wa.x + wa.width - 3) : (wa.x - b.width + 3);
   _dockHidden = true;
-  animarDock(destX, 160);
+  syncDockPoll();
+  animarDock(destX, 160, () => repositionFastBtn());
 }
 function mostrarDock() {
   if (!mainWin || mainWin.isDestroyed() || !_dockHidden) return;
   const wa = dockWorkArea(), b = mainWin.getBounds();
   _dockHidden = false;
-  animarDock(dockXFor(_dockSide, b.width, wa), 180);
+  syncDockPoll();
+  animarDock(dockXFor(_dockSide, b.width, wa), 180, () => { repositionFastBtn(); refreshFastBtnVisibility(); });
 }
 function startDockPoll() {
   if (_dockPoll) return;
@@ -852,6 +861,8 @@ function crearFlyoutWin() {
     alwaysOnTop: true, show: false, skipTaskbar: true, focusable: false, hasShadow: false,
     backgroundColor: '#00000000', webPreferences: { nodeIntegration: true, contextIsolation: false }
   });
+  flyoutWin.__ready = false;
+  flyoutWin.webContents.on('dom-ready', () => { if (flyoutWin && !flyoutWin.isDestroyed()) flyoutWin.__ready = true; });
   flyoutWin.loadFile(path.join(SRC, 'NeoApoyos', 'flyout.html'));
   flyoutWin.webContents.on('did-finish-load', () => aplicarSkin(flyoutWin, true));
   flyoutWin.on('closed', () => { flyoutWin = null; });
@@ -868,12 +879,18 @@ function mostrarFlyoutApoyo(d) {
   let fy = Math.round((d && typeof d.sy === 'number') ? d.sy : (mb.y + mb.height / 2 - FLYOUT_H / 2));
   fy = Math.round(Math.max(wa.y + 4, Math.min(wa.y + wa.height - FLYOUT_H - 4, fy)));
   w.setBounds({ x: fx, y: fy, width: FLYOUT_W, height: FLYOUT_H });
-  try { w.webContents.send('flyout-data', { icon: d.icon, name: d.name, desc: d.desc }); } catch (e) {}
-  try { w.showInactive(); } catch (e) {}
+  const enviar = () => {
+    if (!w || w.isDestroyed()) return;
+    try { w.webContents.send('flyout-data', { icon: d.icon, name: d.name, desc: d.desc }); } catch (e) {}
+    try { w.showInactive(); } catch (e) {}
+  };
+  // Evita la píldora vacía en el primer hover (espera a que el DOM esté listo)
+  if (w.__ready) enviar();
+  else w.webContents.once('dom-ready', enviar);
 }
 function ocultarFlyoutApoyo() { if (flyoutWin && !flyoutWin.isDestroyed()) { try { flyoutWin.hide(); } catch (e) {} } }
 ipcMain.on('apoyo-flyout', (e, d) => { if (d && d.show) mostrarFlyoutApoyo(d); else ocultarFlyoutApoyo(); });
-ipcMain.on('apoyo-hide', () => { if (getApoyoUI().autohide) ocultarDock(); });
+ipcMain.on('apoyo-hide', () => { ocultarDock(); });
 
 function crearDockApoyo() {
   const saved = loadPos().dockApoyo || {};
@@ -917,6 +934,7 @@ function crearDockApoyo() {
 
   if (getApoyoUI().autohide) startDockPoll();
   createFastBtn();
+  crearFlyoutWin();   // pre-crear el flyout (evita la píldora vacía en el primer hover)
   try { globalShortcut.register('CommandOrControl+Shift+F', () => toggleFast()); } catch (e) {}
 }
 

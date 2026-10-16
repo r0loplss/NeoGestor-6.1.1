@@ -39,3 +39,13 @@
 - **Flyout en ventana overlay separada** (`flyout.html`): el dock **ya no se redimensiona al pasar el mouse** (menos carga DWM); solo crece al abrir Notas/Ajustes.
 - **Snap solo al soltar**: se usa el evento nativo `WM_EXITSIZEMOVE` (no hay imán a mitad del arrastre).
 - **Ghost** también al perder **foco** (clic en otra ventana), no solo al salir el mouse.
+
+## Auditoría v0.2.2 (correcciones aplicadas)
+- **Deadlock de auto-ocultar**: `ocultarDock()` no oculta si el borde **no tiene sensor** (monitor contiguo); y el **poll de borde corre siempre que esté oculto** (manual o auto) → nunca queda sepultada.
+- **Fast** reaparece: al terminar la animación de entrada se reposiciona y muestra.
+- **Flyout sin píldora vacía**: se **pre-crea** al abrir el dock y se envían los datos en `dom-ready`.
+- **Tema/tono** se propaga también a **Fast** y al **flyout**.
+- **⤺ (Ocultar)** funciona siempre (acción manual), no solo con auto-ocultar activo.
+- **Scroll de la lista** oculta el flyout (evita desfase vertical).
+- **✕ de cierre** movida a la **corona superior** (separada del pie) para evitar clics accidentales.
+- **Ajustes** ahora se abre **al lado de la barra** (no tapa el dock) y tiene su propia **✕**.

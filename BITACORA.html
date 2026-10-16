@@ -133,6 +133,24 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.41</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>NeoApoyos — correcciones de la 2ª auditoría (v0.2.2)</b>.</li>
+                    <li><b>Deadlock de auto-ocultar</b>: <code>ocultarDock()</code> no oculta si el borde no tiene sensor (monitor contiguo), y el <b>poll de borde corre siempre que esté oculto</b> (manual o auto) → la barra nunca queda irrecuperable.</li>
+                    <li><b>Fast reaparece</b>: al terminar la animación de entrada se reposiciona y se muestra (antes quedaba oculto).</li>
+                    <li><b>Flyout sin píldora vacía</b>: se <b>pre-crea</b> al abrir el dock y los datos se envían en <code>dom-ready</code>.</li>
+                    <li><b>Tema/tono</b> se propaga también al <b>botón Fast</b> y al <b>flyout</b>.</li>
+                    <li><b>⤺ (Ocultar)</b> funciona siempre (acción manual), no solo con auto-ocultar activo.</li>
+                    <li><b>Scroll</b> de la lista oculta el flyout (sin desfase vertical).</li>
+                    <li><b>✕ de cierre</b> movida a la <b>corona superior</b> (separada del pie) para evitar clics accidentales; y <b>Ajustes</b> ahora se abre <b>al lado de la barra</b> (no tapa el dock) y tiene su propia <b>✕</b>.</li>
+                    <li><b>Validación</b>: dock OK (✕, flyout por IPC, notas, paneles, lado); app abre sin errores; tests del repo OK.</li>
+                    <li><b>Release v6.1.41</b>: portable <code>GestorCasos-portable-6.1.41.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.40</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
