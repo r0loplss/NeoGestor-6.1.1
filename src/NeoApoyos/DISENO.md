@@ -31,3 +31,11 @@
 ## Pendiente
 - Modo luz fino por herramienta (las pesadas: fast, ciclos).
 - Afinar opacidad del cristal y detalles por tool.
+
+## Auditoría v0.2.1 (correcciones aplicadas)
+- **✕ de cierre** restaurado en el pie (cierra la app).
+- **Multi-monitor**: se persiste `displayId` y el dock reabre en el monitor donde estaba.
+- **Sensor de borde** valida **X e Y** y **no dispara** si hay un monitor contiguo en ese lado.
+- **Flyout en ventana overlay separada** (`flyout.html`): el dock **ya no se redimensiona al pasar el mouse** (menos carga DWM); solo crece al abrir Notas/Ajustes.
+- **Snap solo al soltar**: se usa el evento nativo `WM_EXITSIZEMOVE` (no hay imán a mitad del arrastre).
+- **Ghost** también al perder **foco** (clic en otra ventana), no solo al salir el mouse.

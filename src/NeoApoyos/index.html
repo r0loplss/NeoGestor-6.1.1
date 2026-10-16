@@ -191,11 +191,10 @@
             <button class="dock-btn" id="btnNotes" title="Mis Notas">🗒️</button>
             <button class="dock-btn" id="btnSettings" title="Ajustes">⚙️</button>
             <button class="dock-btn" id="btnHide" title="Ocultar al borde">⤺</button>
+            <button class="dock-btn danger" id="btnExit" title="Cerrar NeoApoyos">✕</button>
         </div>
         <div class="dock-resize" id="resizeH" title="Arrastrar para ajustar la altura"><span></span></div>
     </aside>
-
-    <div id="flyout"><span class="f-icon"></span><span class="f-name"></span><span class="f-desc"></span></div>
 
     <aside class="notes glass" id="notesPanel">
         <div class="notes-head"><span style="font-size:16px">🗒️</span><b>Mis Notas</b><span class="hint-mini" id="notesCount"></span><button class="wc x" id="notesClose" title="Cerrar">✕</button></div>
@@ -263,7 +262,6 @@
         var toolsNav = document.getElementById('tools');
         var notesPanel = document.getElementById('notesPanel');
         var settingsPanel = document.getElementById('settingsPanel');
-        var flyout = document.getElementById('flyout');
         var bodyEl = document.body;
         var toolBtns = {};
 
@@ -284,27 +282,19 @@
         });
         ipc.on('tool-closed', function (e, id) { if (toolBtns[id]) toolBtns[id].classList.remove('active'); });
 
-        // ---- Flyout (píldora fija, no la recorta el scroll) ----
+        // ---- Flyout (ventana overlay separada; no redimensiona el dock) ----
         function mostrarFlyout(btn, t) {
             var r = btn.getBoundingClientRect();
-            flyout.querySelector('.f-icon').textContent = t.icon;
-            flyout.querySelector('.f-name').textContent = t.name;
-            flyout.querySelector('.f-desc').textContent = t.desc;
-            flyout.style.height = r.height + 'px';
-            flyout.style.top = r.top + 'px';
-            if (bodyEl.classList.contains('right')) { flyout.style.left = 'auto'; flyout.style.right = (window.innerWidth - r.left) + 'px'; }
-            else { flyout.style.right = 'auto'; flyout.style.left = r.right + 'px'; }
-            flyout.classList.add('show');
-            setWidth('flyout');
+            try { ipc.send('apoyo-flyout', { show: true, icon: t.icon, name: t.name, desc: t.desc, sy: Math.round(r.top + window.screenY) }); } catch (e) {}
         }
-        function ocultarFlyout() { flyout.classList.remove('show'); if (!panelesAbiertos()) setWidth('bar'); }
+        function ocultarFlyout() { try { ipc.send('apoyo-flyout', { show: false }); } catch (e) {} }
 
         // ---- Estados de ancho de la ventana ----
         var panelState = false;
         function setWidth(state) { try { ipc.send('apoyo-set-width', state); } catch (e) {} }
         function panelesAbiertos() { return notesPanel.classList.contains('open') || settingsPanel.classList.contains('open'); }
-        dock.addEventListener('mouseenter', function () { dock.classList.remove('ghost'); if (!panelesAbiertos()) setWidth('flyout'); });
-        dock.addEventListener('mouseleave', function () { if (!panelesAbiertos()) setWidth('bar'); scheduleGhostOrHide(); });
+        dock.addEventListener('mouseenter', function () { dock.classList.remove('ghost'); });
+        dock.addEventListener('mouseleave', function () { ocultarFlyout(); scheduleGhostOrHide(); });
 
         // ---- Ghost / Auto-ocultar ----
         var ui = { ghost: false, autohide: false };
@@ -394,7 +384,10 @@
         document.getElementById('segSide').addEventListener('click', function (e) { var b = e.target.closest('button[data-side]'); if (!b) return; ipc.send('apoyo-set-side', b.dataset.side); });
         document.getElementById('btnReset').addEventListener('click', function () { theme = { mode: 'dark', accent: '#2fcbf1' }; aplicarTema(); ipc.send('neo-theme-set', theme); });
         document.getElementById('btnQuit').addEventListener('click', function () { ipc.send('apoyo-quit'); });
+        document.getElementById('btnExit').addEventListener('click', function () { ipc.send('apoyo-quit'); });
         document.getElementById('btnHide').addEventListener('click', function () { try { ipc.send('apoyo-hide'); } catch (e) {} });
+        // Ghost al perder foco (clic en otra ventana/monitor)
+        window.addEventListener('blur', function () { if (ui.ghost && !ui.autohide && !panelesAbiertos()) { clearTimeout(ghostT); ghostT = setTimeout(function () { if (!panelesAbiertos()) dock.classList.add('ghost'); }, 1000); } });
         // reintenta el matchMedia cuando cambia el sistema (modo auto)
         try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { if (theme.mode === 'auto') aplicarTema(); }); } catch (e) {}
 

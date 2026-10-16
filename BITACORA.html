@@ -133,6 +133,23 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.40</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>NeoApoyos — correcciones de la auditoría (v0.2.1)</b>.</li>
+                    <li><b>✕ de cierre</b> restaurado en el pie del dock (cierra la app).</li>
+                    <li><b>Multi-monitor</b>: se persiste el <code>displayId</code> y el dock reabre en el monitor donde estaba (antes saltaba al principal).</li>
+                    <li><b>Sensor de borde</b>: ahora valida <b>X e Y</b> y <b>no dispara</b> si hay un monitor contiguo en ese lado (evita abrir la barra al cruzar de pantalla).</li>
+                    <li><b>Flyout en ventana overlay separada</b> (<code>flyout.html</code>): el dock <b>ya no se redimensiona en cada hover</b> (menos carga de DWM); solo crece al abrir Notas/Ajustes.</li>
+                    <li><b>Snap solo al soltar</b>: se usa el evento nativo <code>WM_EXITSIZEMOVE</code> (se elimina el imán a mitad del arrastre).</li>
+                    <li><b>Ghost</b> también al perder <b>foco</b> (clic en otra ventana), no solo al salir el mouse.</li>
+                    <li><b>Validación</b>: dock OK (✕, flyout por IPC, notas reales, paneles, lado); app abre sin errores; tests del repo OK.</li>
+                    <li><b>Release v6.1.40</b>: portable <code>GestorCasos-portable-6.1.40.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.39</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
