@@ -780,7 +780,7 @@ function snapDockApoyo() {
   setDockWidth(_dockState);
 }
 ipcMain.on('apoyo-set-width', (e, state) => { if (MODO_APOYO) setDockWidth(state); });
-ipcMain.on('apoyo-set-side', (e, side) => { _dockSide = side === 'right' ? 'right' : 'left'; setDockWidth(_dockState); persistDock(); enviarEstadoApoyo(); repositionFastBtn(); });
+ipcMain.on('apoyo-set-side', (e, side) => { _dockSide = side === 'right' ? 'right' : 'left'; setDockWidth(_dockState); persistDock(); enviarEstadoApoyo(); repositionFastBtn(); if (_panelAbierto) { const w = _panelAbierto === 'notas' ? notasWin : ajustesWin; if (w && !w.isDestroyed()) posPanel(w); } });
 ipcMain.on('apoyo-resize-h', (e, d) => {
   if (!MODO_APOYO || !mainWin || mainWin.isDestroyed()) return;
   const wa = dockWorkArea(), b = mainWin.getBounds();
@@ -904,6 +904,60 @@ ipcMain.on('apoyo-flyout', (e, d) => { if (d && d.show) mostrarFlyoutApoyo(d); e
 ipcMain.on('apoyo-hide', () => { ocultarDock(); });
 ipcMain.on('apoyo-fast-opacity', (e, o) => { if (fastBtnWin && !fastBtnWin.isDestroyed()) { try { fastBtnWin.setOpacity(Math.max(0, Math.min(1, Number(o)))); } catch (err) {} } });
 
+// ── Paneles (Notas / Ajustes) como ventanas propias (el dock nunca se redimensiona) ──
+const HTML_NOTAS = path.join(SRC, 'NeoApoyos', 'notas.html');
+const HTML_AJUSTES = path.join(SRC, 'NeoApoyos', 'ajustes.html');
+let notasWin = null, ajustesWin = null, _panelAbierto = null;
+const PANEL_W = 352;
+
+function crearPanelWin(which) {
+  const file = which === 'notas' ? HTML_NOTAS : HTML_AJUSTES;
+  let w = which === 'notas' ? notasWin : ajustesWin;
+  if (w && !w.isDestroyed()) return w;
+  w = new BrowserWindow({
+    width: PANEL_W, height: 600, frame: false, transparent: true, resizable: false, movable: false,
+    alwaysOnTop: true, show: false, skipTaskbar: true, focusable: true, hasShadow: false,
+    backgroundColor: '#00000000', webPreferences: { nodeIntegration: true, contextIsolation: false }
+  });
+  w.loadFile(file);
+  w.webContents.on('did-finish-load', () => aplicarSkin(w, true));
+  w.on('closed', () => { if (which === 'notas') notasWin = null; else ajustesWin = null; });
+  if (which === 'notas') notasWin = w; else ajustesWin = w;
+  return w;
+}
+function posPanel(win) {
+  if (!win || win.isDestroyed() || !mainWin || mainWin.isDestroyed()) return;
+  const mb = mainWin.getBounds();
+  const wa = dockWorkArea();
+  const PH = Math.max(380, wa.height - 20);
+  const barEdge = _dockSide === 'right' ? (mb.x + mb.width - 87) : (mb.x + 87);
+  let x = _dockSide === 'right' ? (barEdge - 8 - PANEL_W) : (barEdge + 8);
+  x = Math.round(Math.max(wa.x + 6, Math.min(wa.x + wa.width - PANEL_W - 6, x)));
+  win.setBounds({ x, y: Math.round(wa.y + 10), width: PANEL_W, height: PH });
+}
+function mostrarPanel(which) {
+  if (which !== 'notas' && which !== 'ajustes') { ocultarPaneles(); return; }
+  _panelAbierto = which;
+  const otro = which === 'notas' ? ajustesWin : notasWin;
+  if (otro && !otro.isDestroyed()) otro.hide();
+  const w = crearPanelWin(which);
+  if (!w || w.isDestroyed() || !mainWin || mainWin.isDestroyed()) return;
+  posPanel(w);
+  try { w.webContents.send('neo-theme', getApoyoTheme()); } catch (e) {}
+  try { w.webContents.send('apoyo-estado', { side: _dockSide }); } catch (e) {}
+  try { w.showInactive(); } catch (e) {}
+  if (fastBtnWin && !fastBtnWin.isDestroyed()) { try { fastBtnWin.hide(); } catch (e) {} }
+  try { mainWin.webContents.send('apoyo-panel-state', { which: which }); } catch (e) {}
+}
+function ocultarPaneles() {
+  _panelAbierto = null;
+  if (notasWin && !notasWin.isDestroyed()) notasWin.hide();
+  if (ajustesWin && !ajustesWin.isDestroyed()) ajustesWin.hide();
+  repositionFastBtn(); refreshFastBtnVisibility();
+  if (mainWin && !mainWin.isDestroyed()) { try { mainWin.webContents.send('apoyo-panel-state', { which: null }); } catch (e) {} }
+}
+ipcMain.on('apoyo-panel', (e, d) => { const which = d && d.which; if (which) mostrarPanel(which); else ocultarPaneles(); });
+
 function reencuadrarDock() {
   if (!MODO_APOYO || !mainWin || mainWin.isDestroyed()) return;
   const b = mainWin.getBounds();
@@ -963,8 +1017,15 @@ function crearDockApoyo() {
   mainWin.on('move', () => {
     if (!mainWin || mainWin.isDestroyed() || _dockBusy) return;
     repositionFastBtn();
+    if (_panelAbierto) { const w = _panelAbierto === 'notas' ? notasWin : ajustesWin; if (w && !w.isDestroyed()) posPanel(w); }
   });
-  mainWin.on('closed', () => { stopDockPoll(); if (flyoutWin && !flyoutWin.isDestroyed()) flyoutWin.close(); mainWin = null; });
+  mainWin.on('closed', () => {
+    stopDockPoll();
+    if (flyoutWin && !flyoutWin.isDestroyed()) flyoutWin.close();
+    if (notasWin && !notasWin.isDestroyed()) notasWin.close();
+    if (ajustesWin && !ajustesWin.isDestroyed()) ajustesWin.close();
+    mainWin = null;
+  });
 
   if (getApoyoUI().autohide) startDockPoll();
   createFastBtn();

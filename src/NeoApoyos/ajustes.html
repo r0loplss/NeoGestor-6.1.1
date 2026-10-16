@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" data-neo-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<title>Ajustes</title>
+<style>
+    :root {
+        --neo-accent: #2fcbf1;
+        --accent: var(--neo-accent);
+        --accent-2: color-mix(in srgb, var(--neo-accent) 60%, #ffffff);
+        --accent-soft: color-mix(in srgb, var(--neo-accent) 20%, transparent);
+        --glass: linear-gradient(180deg, rgba(34,42,60,.78), rgba(18,24,36,.72));
+        --glass-strong: linear-gradient(180deg, rgba(54,64,86,.92), rgba(30,38,54,.86));
+        --glass-border: rgba(255,255,255,.14);
+        --glass-hi: rgba(255,255,255,.34);
+        --txt: #eaf1fb; --txt-dim: #a7b6cc; --txt-faint: #6b7a90;
+        --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+    html[data-neo-theme="light"] {
+        --glass: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.68));
+        --glass-strong: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
+        --glass-border: rgba(20,30,50,.14); --glass-hi: rgba(255,255,255,.7);
+        --txt: #16202e; --txt-dim: #4a5568; --txt-faint: #8a97ab;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: transparent; color: var(--txt); font-family: 'Segoe UI', system-ui, sans-serif; -webkit-font-smoothing: antialiased; user-select: none; }
+    .panel {
+        position: absolute; inset: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px; border-radius: 18px;
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 var(--glass-hi);
+        -webkit-app-region: drag;
+    }
+    .head { display: flex; align-items: center; gap: 8px; -webkit-app-region: no-drag; }
+    .head b { font-size: 13px; letter-spacing: .3px; }
+    .head .x { margin-left: auto; }
+    .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; -webkit-app-region: no-drag; }
+    .cap { font-size: 10.5px; color: var(--txt-faint); letter-spacing: 1px; text-transform: uppercase; min-width: 52px; }
+    .seg { display: inline-flex; border: 1px solid var(--glass-border); border-radius: 10px; overflow: hidden; }
+    .seg button { padding: 6px 11px; border: none; background: transparent; color: var(--txt-dim); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
+    .seg button.on { background: var(--accent); color: #04121a; }
+    .swatch { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .18s; }
+    .swatch:hover { transform: scale(1.12); }
+    .swatch.on { border-color: var(--txt); box-shadow: 0 0 0 2px rgba(255,255,255,.25); }
+    .sw-cyan { background: linear-gradient(145deg,#2fcbf1,#6ea8ff); }
+    .sw-blue { background: linear-gradient(145deg,#3b82f6,#2563eb); }
+    .sw-indigo { background: linear-gradient(145deg,#818cf8,#6366f1); }
+    .sw-violet { background: linear-gradient(145deg,#a78bfa,#8b5cf6); }
+    .sw-teal { background: linear-gradient(145deg,#2dd4bf,#14b8a6); }
+    .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--txt-dim); cursor: pointer; }
+    .chk input { accent-color: var(--accent); }
+    .preview { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--glass-strong); border: 1px solid var(--glass-border); }
+    .preview .pv-chip { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(145deg, var(--accent), var(--accent-2)); }
+    .preview .pv-btn { padding: 5px 12px; border-radius: 8px; background: var(--accent); color: #04121a; font-size: 12px; font-weight: 700; }
+    .hint-mini { font-size: 10.5px; color: var(--txt-faint); }
+    .actions { display: flex; gap: 8px; margin-top: auto; -webkit-app-region: no-drag; }
+    .btn-soft { flex: 1; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--glass-border); background: transparent; color: var(--txt-dim); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
+    .btn-soft:hover { background: var(--glass-strong); color: var(--txt); }
+    .btn-quit { flex: 1; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.12); color: #ffd7d7; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
+    .btn-quit:hover { background: rgba(239,68,68,.22); }
+    .wc { width: 30px; height: 26px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--glass); color: var(--txt-dim); cursor: pointer; font-size: 12px; }
+    .wc:hover { color: var(--txt); background: var(--glass-strong); }
+</style>
+</head>
+<body>
+<div class="panel">
+    <div class="head"><span style="font-size:16px">⚙️</span><b>Ajustes</b><button class="wc x" id="close" title="Cerrar">✕</button></div>
+    <div class="row"><span class="cap">Tema</span>
+        <div class="seg" id="segTheme">
+            <button data-mode="light">☀️ Claro</button>
+            <button data-mode="auto">🖥️ Auto</button>
+            <button data-mode="dark" class="on">🌙 Nocturno</button>
+        </div>
+    </div>
+    <div class="row"><span class="cap">Tono</span>
+        <div class="swatch sw-cyan on" data-accent="#2fcbf1" title="Cian"></div>
+        <div class="swatch sw-blue" data-accent="#3b82f6" title="Azul"></div>
+        <div class="swatch sw-indigo" data-accent="#818cf8" title="Índigo"></div>
+        <div class="swatch sw-violet" data-accent="#a78bfa" title="Violeta"></div>
+        <div class="swatch sw-teal" data-accent="#2dd4bf" title="Turquesa"></div>
+    </div>
+    <div class="preview"><span class="pv-chip"></span><span class="pv-btn">Acento</span><span class="hint-mini">así se verá en las herramientas</span></div>
+    <div class="row"><span class="cap">Barra</span>
+        <label class="chk"><input type="checkbox" id="chkGhost"> Atenuar al estar inactiva</label>
+        <label class="chk"><input type="checkbox" id="chkAuto"> Auto-ocultar al borde</label>
+    </div>
+    <div class="row"><span class="cap">Lado</span>
+        <div class="seg" id="segSide">
+            <button data-side="left" class="on">⬅️ Izquierda</button>
+            <button data-side="right">Derecha ➡️</button>
+        </div>
+    </div>
+    <div class="actions">
+        <button class="btn-soft" id="reset">↺ Restablecer</button>
+        <button class="btn-quit" id="quit">Salir</button>
+    </div>
+</div>
+<script>
+(function () {
+    'use strict';
+    var ipc = require('electron').ipcRenderer;
+    var theme = { mode: 'dark', accent: '#2fcbf1' };
+    var ui = { ghost: false, autohide: false };
+    var mq = null; try { mq = window.matchMedia('(prefers-color-scheme: dark)'); } catch (e) {}
+    function resolver(m) { if (m === 'auto') return (mq && mq.matches) ? 'dark' : 'light'; return m === 'light' ? 'light' : 'dark'; }
+    function aplicar() {
+        document.documentElement.setAttribute('data-neo-theme', resolver(theme.mode));
+        document.documentElement.style.setProperty('--neo-accent', theme.accent);
+        document.querySelectorAll('#segTheme button').forEach(function (b) { b.classList.toggle('on', b.dataset.mode === theme.mode); });
+        document.querySelectorAll('.swatch').forEach(function (s) { s.classList.toggle('on', s.dataset.accent === theme.accent); });
+    }
+    ipc.on('neo-theme', function (e, t) { if (t) { theme.mode = t.mode || 'dark'; theme.accent = t.accent || theme.accent; aplicar(); } });
+    ipc.on('apoyo-estado', function (e, s) { document.querySelectorAll('#segSide button').forEach(function (b) { b.classList.toggle('on', b.dataset.side === (s && s.side)); }); });
+    ipc.on('apoyo-config', function (e, cfg) {
+        if (!cfg) return;
+        if (cfg.theme) { theme.mode = cfg.theme.mode || 'dark'; theme.accent = cfg.theme.accent || theme.accent; }
+        if (cfg.ui) { ui.ghost = !!cfg.ui.ghost; ui.autohide = !!cfg.ui.autohide; }
+        document.getElementById('chkGhost').checked = ui.ghost;
+        document.getElementById('chkAuto').checked = ui.autohide;
+        aplicar();
+    });
+    ipc.send('apoyo-config-request');
+    document.getElementById('segTheme').addEventListener('click', function (e) { var b = e.target.closest('button[data-mode]'); if (!b) return; theme.mode = b.dataset.mode; aplicar(); ipc.send('neo-theme-set', theme); });
+    document.querySelectorAll('.swatch').forEach(function (s) { s.addEventListener('click', function () { theme.accent = s.dataset.accent; aplicar(); ipc.send('neo-theme-set', theme); }); });
+    document.getElementById('chkGhost').addEventListener('change', function (e) { ui.ghost = e.target.checked; ipc.send('apoyo-ui-set', ui); });
+    document.getElementById('chkAuto').addEventListener('change', function (e) { ui.autohide = e.target.checked; ipc.send('apoyo-ui-set', ui); });
+    document.getElementById('segSide').addEventListener('click', function (e) { var b = e.target.closest('button[data-side]'); if (!b) return; ipc.send('apoyo-set-side', b.dataset.side); });
+    document.getElementById('reset').addEventListener('click', function () { theme = { mode: 'dark', accent: '#2fcbf1' }; aplicar(); ipc.send('neo-theme-set', theme); });
+    document.getElementById('quit').addEventListener('click', function () { ipc.send('apoyo-quit'); });
+    document.getElementById('close').addEventListener('click', function () { ipc.send('apoyo-panel', { which: null }); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') ipc.send('apoyo-panel', { which: null }); });
+    try { if (mq) mq.addEventListener('change', function () { if (theme.mode === 'auto') aplicar(); }); } catch (e) {}
+})();
+</script>
+</body>
+</html>

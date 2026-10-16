@@ -133,6 +133,20 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.43</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>NeoApoyos — sin parpadeo al abrir Notas/Ajustes (v0.2.4)</b>.</li>
+                    <li><b>Causa:</b> al abrir un panel se <b>redimensionaba la ventana transparente</b> del dock (96→452px) → flash de DWM; y el panel estaba posicionado <b>relativo a la ventana</b>, que cambiaba de ancho de golpe → "movimiento extraño".</li>
+                    <li><b>Solución:</b> Notas y Ajustes ahora son <b>ventanas propias</b> (<code>notas.html</code> / <code>ajustes.html</code>), como el flyout. El <b>dock ya no se redimensiona nunca</b> (78px fijo) → sin flash ni saltos.</li>
+                    <li>Los paneles se posicionan <b>junto a la barra</b> (según el lado), son <b>excluyentes</b> entre sí y se cierran con <b>Esc</b> o su <b>✕</b>. <b>Fast</b> se oculta mientras hay un panel abierto.</li>
+                    <li><b>Ghost</b>: ahora también <b>atenúa el botón de Fast</b> (opacidad solidaria con la barra).</li>
+                    <li><b>Release v6.1.43</b>: portable <code>GestorCasos-portable-6.1.43.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.42</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>

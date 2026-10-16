@@ -62,3 +62,9 @@
 - **Estado de Fast** sincronizado (`fast-docked-state` → botón activo).
 - **Ghost** también atenúa el botón de Fast (opacidad solidaria).
 - **Scrollbar** fina en la lista de herramientas (indica que hay scroll).
+
+## Auditoría v0.2.4 (correcciones aplicadas)
+- **Sin parpadeo al abrir paneles**: Notas y Ajustes pasaron a **ventanas propias** (`notas.html` / `ajustes.html`). El dock **ya no se redimensiona nunca** (siempre 78px) → se elimina el flash de DWM y el "movimiento extraño" de los paneles.
+- Las ventanas de panel se posicionan **junto a la barra** (según el lado), se ocultan entre sí (excluyentes) y se cierran con **Esc** o su **✕**.
+- **Fast** se oculta mientras hay un panel abierto.
+- **Ghost** ahora también **atenúa el botón de Fast** (opacidad solidaria).
