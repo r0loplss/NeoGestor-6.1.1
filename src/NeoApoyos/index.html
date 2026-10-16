@@ -64,7 +64,6 @@
         display: flex; flex-direction: column; gap: 12px;
         overflow: visible;
         z-index: 60;
-        -webkit-app-region: drag;                 /* toda la barra es arrastrable */
     }
     body.right .dock { left: auto; right: 12px; }
     .dock::before { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,.10), transparent 22%); }
@@ -81,7 +80,7 @@
     .brand-text { display: flex; flex-direction: column; line-height: 1.15; white-space: nowrap; overflow: hidden; opacity: 0; max-width: 0; transform: translateX(-6px); transition: .3s var(--ease); }
     .brand-text b { font-size: 14px; letter-spacing: .2px; }
     .brand-text small { font-size: 10px; color: var(--txt-faint); text-transform: uppercase; letter-spacing: 1px; }
-    .dock:hover .brand-text { opacity: 1; max-width: 190px; transform: none; }
+    .dock-brand:hover .brand-text { opacity: 1; max-width: 190px; transform: none; }
 
     .dock-tools { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; overflow: visible; padding: 2px; flex: 1; }
     body.right .dock-tools { align-items: flex-end; }
@@ -138,9 +137,10 @@
     body.right .dock-btn:hover { transform: translateX(-2px); }
     .dock-btn.danger:hover { color: #ffd7d7; background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.35); }
 
-    /* Mango para mover */
-    .dock-handle { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 26px; height: 16px; display: grid; place-items: center; color: var(--txt-faint); font-size: 10px; letter-spacing: 1px; opacity: .5; pointer-events: none; }
-    .dock:hover .dock-handle { opacity: .9; }
+    .dock-grip { width: 100%; height: 18px; display: flex; align-items: center; justify-content: center; cursor: grab; color: var(--txt-faint); flex: 0 0 auto; }
+    .dock-grip:active { cursor: grabbing; }
+    .dock-grip span { width: 30px; height: 4px; border-radius: 4px; background: currentColor; opacity: .3; transition: opacity .15s; }
+    .dock:hover .dock-grip span { opacity: .7; }
 
     .reopen { position: fixed; left: 12px; top: 50%; transform: translateY(-50%); width: 44px; height: 52px; border-radius: 14px; z-index: 80; display: none; place-items: center; cursor: pointer; color: var(--txt); font-size: 18px; -webkit-app-region: no-drag; }
     body.right .reopen { left: auto; right: 12px; }
@@ -150,9 +150,11 @@
     /* ============================================================
        PANEL DE NOTAS
        ============================================================ */
-    .notes { position: fixed; top: 12px; bottom: 12px; right: 12px; width: 340px; border-radius: var(--radius); padding: 16px; z-index: 90; display: flex; flex-direction: column; gap: 12px; transform: translateX(120%); opacity: 0; transition: transform .42s var(--ease), opacity .3s; }
-    body.right .notes { right: 100px; transform: translateX(120%); }
-    .notes.open { transform: none; opacity: 1; }
+    .notes { position: fixed; top: 12px; bottom: 12px; right: 12px; width: 340px; border-radius: var(--radius); padding: 16px; z-index: 90; display: flex; flex-direction: column; gap: 12px; opacity: 0; pointer-events: none; transition: transform .42s var(--ease), opacity .28s; }
+    body.right .notes { right: 100px; }
+    body:not(.right) .notes:not(.open) { transform: translateX(-100%); }
+    body.right .notes:not(.open) { transform: translateX(100%); }
+    .notes.open { opacity: 1; pointer-events: auto; }
     .notes-head { display: flex; align-items: center; gap: 10px; }
     .notes-head b { font-size: 14px; }
     .notes-head .x { margin-left: auto; }
@@ -203,7 +205,7 @@
 <body>
 
     <aside class="dock glass" id="dock">
-        <div class="dock-handle">⠿</div>
+        <div class="dock-grip" title="Arrastrar para mover la barra (izquierda/derecha)"><span></span></div>
         <div class="dock-brand">
             <div class="brand-tile">N</div>
             <div class="brand-text"><b>NeoApoyos</b><small>Modo Apoyo · v0.1</small></div>
@@ -367,7 +369,28 @@
         document.getElementById('btnClose').addEventListener('click', function () { bodyEl.classList.add('collapsed'); });
         reopen.addEventListener('click', function () { bodyEl.classList.remove('collapsed'); });
 
-        // Click-through: solo la barra y los paneles capturan el mouse
+        // ---- Arrastre propio de la barra (funciona aunque la ventana sea click-through) ----
+        var dragging = false;
+        dock.addEventListener('pointerdown', function (e) {
+            if (e.button !== 0) return;
+            var t = e.target;
+            if (t.closest && t.closest('button, input, textarea, select, .swatch, .seg')) return;
+            e.preventDefault();
+            try { dock.setPointerCapture(e.pointerId); } catch (err) {}
+            dragging = true;
+            setIgnore(false);
+            try { ipc.send('apoyo-drag-start', { ox: e.clientX, oy: e.clientY }); } catch (err) {}
+        });
+        function finDrag(e) {
+            if (!dragging) return;
+            dragging = false;
+            try { if (e && e.pointerId != null) dock.releasePointerCapture(e.pointerId); } catch (err) {}
+            try { ipc.send('apoyo-drag-end'); } catch (err) {}
+        }
+        dock.addEventListener('pointerup', finDrag);
+        dock.addEventListener('pointercancel', finDrag);
+
+        // ---- Click-through: solo la barra y los paneles capturan el mouse ----
         function esInteractivo(x, y) {
             var el = document.elementFromPoint(x, y);
             if (!el) return false;
@@ -375,9 +398,9 @@
         }
         var lastIgnore = true;
         function setIgnore(v) { if (v !== lastIgnore) { lastIgnore = v; try { ipc.send('apoyo-ignore-mouse', v); } catch (e) {} } }
-        document.addEventListener('mousemove', function (e) { setIgnore(!esInteractivo(e.clientX, e.clientY)); });
-        document.addEventListener('mouseleave', function () { setIgnore(true); });
-        window.addEventListener('blur', function () { setIgnore(true); });
+        document.addEventListener('mousemove', function (e) { if (dragging) return; setIgnore(!esInteractivo(e.clientX, e.clientY)); });
+        document.addEventListener('mouseleave', function () { if (!dragging) setIgnore(true); });
+        window.addEventListener('blur', function () { if (!dragging) setIgnore(true); });
     })();
     </script>
 </body>

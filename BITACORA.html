@@ -133,6 +133,20 @@
     <div id="lista">
 
         <section class="entry">
+            <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.38</span><span class="agente oc">Open Code</span></div>
+            <div class="desc">
+                <ul>
+                    <li><b>NeoApoyos — barra movible, Fast en cristal y drawer de Notas lógico</b>.</li>
+                    <li><b>Barra movible de verdad</b>: el arrastre por <code>-webkit-app-region</code> no funciona en ventana <i>click-through</i>; se implementó <b>arrastre propio por IPC</b> (el proceso principal sigue el cursor con <code>getCursorScreenPoint()</code>) + <b>grip visible</b> arriba de la barra y <b>snap</b> a izquierda/derecha. Se quitó el handle que quedaba oculto tras la marca.</li>
+                    <li><b>Botón flotante de Fast</b>: se dejó de inyectar el fondo ambiente en ventanas <i>overlay</i> (antes le ponía un rectángulo degradado), se <b>rediseñó en cristal</b> (cuadrado 44×44 en NeoApoyos, sigue el tono) y se <b>reubicó centrado junto a la barra</b>. Mantiene su función y el atajo.</li>
+                    <li><b>Drawer de Notas</b>: ahora <b>sale desde la barra hacia afuera</b> (según el lado) y ya no queda encima de la barra; al estar cerrado no bloquea los clics.</li>
+                    <li><b>Validación</b>: dock OK (click‑through, 9 tools, notas 20→360 sin solapar la barra, tema claro); Fast OK (fondo transparente, 44×44, tono).</li>
+                    <li><b>Release v6.1.38</b>: portable <code>GestorCasos-portable-6.1.38.exe</code> como asset.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="entry">
             <div class="enc"><span class="fecha">09 oct 2026</span><span class="ver">v6.1.37</span><span class="agente oc">Open Code</span></div>
             <div class="desc">
                 <ul>
